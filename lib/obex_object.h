@@ -87,6 +87,7 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 				guint flags);
 gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 				obex_headerdata_t *hv, guint32 *hv_size);
+gint obex_object_reparseheaders(obex_t *self, obex_object_t *object);
 gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd);
 gint obex_object_setrsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
 gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal);

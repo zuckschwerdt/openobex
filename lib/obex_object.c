@@ -572,8 +572,6 @@ gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
  */
 gint obex_object_reparseheaders(obex_t *self, obex_object_t *object)
 {
-	guint32 *bq4;
-	struct obex_header_element *h;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 

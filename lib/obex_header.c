@@ -28,6 +28,8 @@
  *     
  ********************************************************************/
 
+#include <string.h>
+
 #include "config.h"
 
 #include "obex_main.h"

@@ -4,6 +4,7 @@
 	  o OBEX_SetUserCallBack - change callback after OBEX_init()
 	  o OBEX_ObjectReParseHeaders - Parse headers more than one time
 	  o Some documentation fixes.
+	* Fixed some minor warnings
 
 2000-12-06  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
