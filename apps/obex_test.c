@@ -195,9 +195,9 @@ int main (int argc, char *argv[])
 		else
 			printf("OBEX on %s!\n", port);
 
-		custfunc.userdata = cobex_open(port, r320);
+		custfunc.customdata = cobex_open(port, r320);
 
-		if(custfunc.userdata == NULL) {
+		if(custfunc.customdata == NULL) {
 			printf("cobex_open() failed\n");
 			return -1;
 		}
@@ -372,7 +372,7 @@ int main (int argc, char *argv[])
 	}
 #ifndef _WIN32
 	if(cobex)
-		cobex_close(custfunc.userdata);
+		cobex_close(custfunc.customdata);
 #endif
 
 	return 0;
