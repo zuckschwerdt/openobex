@@ -1,25 +1,21 @@
+dnl
+dnl  $Id$
+dnl
+dnl Process this file with autoconf to produce a configure script.
+dnl
+
 AC_INIT(src/ircp.c)
-AM_INIT_AUTOMAKE(ircp, 0.1)
+
+AM_INIT_AUTOMAKE(ircp, 0.3)
 AM_CONFIG_HEADER(config.h)
 
 AM_MAINTAINER_MODE
 
-AC_ISC_POSIX
 AC_PROG_CC
-AC_PROG_CXX
+AC_PROG_INSTALL
 AC_PROG_RANLIB
-AC_HEADER_STDC
-AC_ARG_PROGRAM
 
 AM_PATH_GLIB(1.2.0)
-AM_PATH_OPENOBEX(0.9.8)
+AM_PATH_OPENOBEX(1.0.0)
 
-AC_SUBST(CFLAGS)
-AC_SUBST(CPPFLAGS)
-AC_SUBST(LDFLAGS)
-
-CFLAGS="$CFLAGS -Wall"
-
-AC_OUTPUT([
-Makefile 
-src/Makefile])
+AC_OUTPUT([Makefile src/Makefile])

@@ -1,11 +1,8 @@
-INCLUDES = \
-	@GLIB_CFLAGS@ \
-	@OPENOBEX_CFLAGS@
+#
+#  $Id$
+#
 
-LDADD = \
-	@GLIB_LIBS@ \
-	@OPENOBEX_LIBS@ \
-	libircp.a
+noinst_LIBRARIES = libircp.a
 
 libircp_a_SOURCES = \
 		ircp_client.c ircp_client.h \
@@ -14,8 +11,12 @@ libircp_a_SOURCES = \
 		dirtraverse.c dirtraverse.h \
 		debug.h ircp.h
 
-noinst_LIBRARIES = libircp.a
+
+bin_PROGRAMS = ircp 
 
 ircp_SOURCES = ircp.c
 
-bin_PROGRAMS = ircp 
+
+LDADD = @GLIB_LIBS@ @OPENOBEX_LIBS@ libircp.a
+
+INCLUDES = @GLIB_CFLAGS@ @OPENOBEX_CFLAGS@

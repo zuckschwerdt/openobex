@@ -1,3 +1,9 @@
+2002-10-16  Marcel Holtmann  <marcel@holtmann.org>
+
+	* Cleanup of autoconf/automake stuff.
+	* Fixes for the new API.
+	* Bump version number to 0.3
+
 2000-12-05  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Server is now streaming body!
