@@ -69,6 +69,8 @@ int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max);
 int OBEX_GetFD(obex_t *self);
 
 int OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans);
+void OBEX_SetCustomData(obex_t *self, void * data);
+void * OBEX_GetCustomData(obex_t *self);
 
 int    OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addlen);
 int    OBEX_TransportDisconnect(obex_t *self);

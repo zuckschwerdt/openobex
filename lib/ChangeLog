@@ -1,3 +1,7 @@
+2002-11-15  Marcel Holtmann  <marcel@holtmann.org>
+
+	* Add OBEX_SetCustomData() and OBEX_GetCustomData()
+
 2002-11-05  Marcel Holtmann  <marcel@holtmann.org>
 
 	* Replace OBEX_GetResponseMessage() with OBEX_ResponseToString()

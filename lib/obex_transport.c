@@ -58,7 +58,7 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 	
 	if(self->trans.type == OBEX_TRANS_CUSTOM) {
 		if(self->ctrans.handleinput)
-			ret = self->ctrans.handleinput(self, self->ctrans.userdata, timeout);
+			ret = self->ctrans.handleinput(self, self->ctrans.customdata, timeout);
 		else {
 			DEBUG(4, __FUNCTION__ "() No handleinput-callback exist!\n");
 			ret = -1;
@@ -190,7 +190,7 @@ int obex_transport_connect_request(obex_t *self)
 	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom connect\n");
 		if(self->ctrans.connect)
-			ret = self->ctrans.connect(self, self->ctrans.userdata);
+			ret = self->ctrans.connect(self, self->ctrans.customdata);
 		else
 			DEBUG(4, __FUNCTION__ "(), No connect-callback exist!\n");
 		DEBUG(4, __FUNCTION__ "ret=%d\n", ret);
@@ -237,7 +237,7 @@ void obex_transport_disconnect_request(obex_t *self)
 	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom disconnect\n");
 		if(self->ctrans.disconnect)
-			self->ctrans.disconnect(self, self->ctrans.userdata);
+			self->ctrans.disconnect(self, self->ctrans.customdata);
 		else
 			DEBUG(4, __FUNCTION__ "(), No disconnect-callback exist!\n");
 		break;
@@ -279,7 +279,7 @@ int obex_transport_listen(obex_t *self)
 	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom listen\n");
 		if(self->ctrans.listen)
-			ret = self->ctrans.listen(self, self->ctrans.userdata);
+			ret = self->ctrans.listen(self, self->ctrans.customdata);
 		else
 			DEBUG(4, __FUNCTION__ "(), No listen-callback exist!\n");
 		break;
@@ -392,7 +392,7 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom write\n");
 		if(self->ctrans.write)
-			actual = self->ctrans.write(self, self->ctrans.userdata, msg->data, msg->len);
+			actual = self->ctrans.write(self, self->ctrans.customdata, msg->data, msg->len);
 		else
 			DEBUG(4, __FUNCTION__ "(), No write-callback exist!\n");
 		break;

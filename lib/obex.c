@@ -847,6 +847,38 @@ char* OBEX_GetResponseMessage(obex_t *self, int rsp)
 /* ---------------------------------------------------------------- */
 
 /**
+ * OBEX_SetCustomData - Set customdata of an OBEX handle
+ * @self: OBEX handle
+ * @data: Custom Transport data
+ *
+ * Note : this call is *reserved* to the Custom Transport and should not
+ * be use by the user/client. It allow to update the Custom Transport data
+ * originally set via OBEX_RegisterCTransport().
+ * The Custom Transport data (or instance handle) is used to store data
+ * relative to the specific instance (i.e. connection), such as file
+ * descriptors, offsets and others, so that the Custom Transport can manage
+ * multiple connections transparently (i.e. without a lookup table).
+ * - Jean II
+ */
+void OBEX_SetCustomData(obex_t *self, void * data)
+{
+	obex_return_if_fail(self != NULL);
+	self->ctrans.customdata = data;
+}
+
+/**
+ * OBEX_GetCustomData - Read the customdata from an OBEX handle
+ * @self: OBEX handle
+ *
+ * Returns Custom Transport data
+ */
+void * OBEX_GetCustomData(obex_t *self)
+{
+	obex_return_val_if_fail(self != NULL, 0);
+	return self->ctrans.customdata;
+}
+
+/**
  * InOBEX_ServerRegister - Start listening for incoming connections
  * @self: OBEX handle
  *
