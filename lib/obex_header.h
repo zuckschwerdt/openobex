@@ -51,8 +51,8 @@
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_common_hdr {
-	guint8  opcode;
-	guint16 len;
+	uint8_t  opcode;
+	uint16_t len;
 } PACKED;
 
 
@@ -63,9 +63,9 @@ typedef struct obex_common_hdr obex_common_hdr_t;
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_connect_hdr {
-	guint8  version;
-	guint8  flags;
-	guint16 mtu;
+	uint8_t  version;
+	uint8_t  flags;
+	uint16_t mtu;
 } PACKED;
 typedef struct obex_connect_hdr obex_connect_hdr_t;
 
@@ -73,49 +73,49 @@ typedef struct obex_connect_hdr obex_connect_hdr_t;
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_uint_hdr {
-	guint8  hi;
-	guint32 hv;
+	uint8_t  hi;
+	uint32_t hv;
 } PACKED;
 
 #ifdef _WIN32
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_ubyte_hdr {
-	guint8 hi;
-	guint8 hv;
+	uint8_t hi;
+	uint8_t hv;
 } PACKED;
 
 #ifdef _WIN32
 #pragma pack(1)
 #endif /* _WIN32 */
 struct obex_unicode_hdr {
-	guint8  hi;
-	guint16 hl;
-	guint8  hv[0];
+	uint8_t  hi;
+	uint16_t hl;
+	uint8_t  hv[0];
 } PACKED;
 
 #define obex_byte_stream_hdr obex_unicode_hdr
 
 typedef struct {
-	guint8 identifier;    /* Header ID */
-	gint  length;         /* Total lenght of header */
+	uint8_t identifier;    /* Header ID */
+	int  length;         /* Total lenght of header */
 
-	gint  val_size;       /* Size of value */
+	int  val_size;       /* Size of value */
 	union {
-		gint   integer;
+		int   integer;
 		char   *string;
-		guint8 *oct_seq;
+		uint8_t *oct_seq;
 	} t;
 } obex_header_t;
 
-gint insert_uint_header(GNetBuf *msg, guint8 identifier, guint32 value);
-gint insert_ubyte_header(GNetBuf *msg, guint8 identifier, guint8 value);
-gint insert_unicode_header(GNetBuf *msg, guint8 opcode, const guint8 *text,
-				gint size);
+int insert_uint_header(GNetBuf *msg, uint8_t identifier, uint32_t value);
+int insert_ubyte_header(GNetBuf *msg, uint8_t identifier, uint8_t value);
+int insert_unicode_header(GNetBuf *msg, uint8_t opcode, const uint8_t *text,
+				int size);
 
-gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode, 
-			const guint8 *stream, gint size);
+int insert_byte_stream_header(GNetBuf *msg, uint8_t opcode, 
+			const uint8_t *stream, int size);
 
-gint obex_extract_header(GNetBuf *msg, obex_header_t *header);
+int obex_extract_header(GNetBuf *msg, obex_header_t *header);
 
 #endif

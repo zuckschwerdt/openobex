@@ -30,6 +30,6 @@ libopenobex_la_LDFLAGS = \
 	-export-symbols $(top_srcdir)/src/obex.sym
 
 
-INCLUDES = -I$(top_srcdir)/src @GLIB_CFLAGS@
+INCLUDES = -I$(top_srcdir)/src
 
 EXTRA_DIST = obex.sym obex.def makefile.msc win32compat.c windeps.dep

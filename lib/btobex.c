@@ -97,31 +97,31 @@ void btobex_prepare_listen(obex_t *self, bdaddr_t *src, int channel)
  *    Listen for incoming connections.
  *
  */
-gint btobex_listen(obex_t *self)
+int btobex_listen(obex_t *self)
 {
 #ifndef _WIN32
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
 	self->serverfd = obex_create_socket(self, AF_BLUETOOTH);
 	if(self->serverfd < 0) {
-		DEBUG(0, G_GNUC_FUNCTION "() Error creating socket\n");
+		DEBUG(0, __FUNCTION__ "() Error creating socket\n");
 		return -1;
 	}
 	
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.rfcomm, 
 		 sizeof(struct sockaddr_rc)))
 	{
-		DEBUG(0, G_GNUC_FUNCTION "() Error doing bind\n");
+		DEBUG(0, __FUNCTION__ "() Error doing bind\n");
 		goto out_freesock;
 	}
 
 
 	if (listen(self->serverfd, 1)) {
-		DEBUG(0, G_GNUC_FUNCTION "() Error doing listen\n");
+		DEBUG(0, __FUNCTION__ "() Error doing listen\n");
 		goto out_freesock;
 	}
 
-	DEBUG(4, G_GNUC_FUNCTION "() We are now listening for connections\n");
+	DEBUG(4, __FUNCTION__ "() We are now listening for connections\n");
 	return 1;
 
 out_freesock:
@@ -139,7 +139,7 @@ out_freesock:
  * Note : don't close the server socket here, so apps may want to continue
  * using it...
  */
-gint btobex_accept(obex_t *self)
+int btobex_accept(obex_t *self)
 {
 #ifndef _WIN32
 	int addrlen = sizeof(struct sockaddr_rc);
@@ -165,14 +165,14 @@ gint btobex_accept(obex_t *self)
  *    Open the RFCOMM connection
  *
  */
-gint btobex_connect_request(obex_t *self)
+int btobex_connect_request(obex_t *self)
 {
 	int ret;
 #ifndef _WIN32
 	int mtu = 0;
 	//int len = sizeof(int);
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	if(self->fd < 0)	{
 		self->fd = obex_create_socket(self, AF_BLUETOOTH);
@@ -184,21 +184,21 @@ gint btobex_connect_request(obex_t *self)
 		   sizeof(struct sockaddr_rc));
 
 	if (ret < 0) {
-		DEBUG(4, G_GNUC_FUNCTION "(), ret=%d\n", ret);
+		DEBUG(4, __FUNCTION__ "(), ret=%d\n", ret);
 		goto out_freesock;
 	}
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.rfcomm,
 		      sizeof(struct sockaddr_rc));
 	if (ret < 0) {
-		DEBUG(4, G_GNUC_FUNCTION "(), ret=%d\n", ret);
+		DEBUG(4, __FUNCTION__ "(), ret=%d\n", ret);
 		goto out_freesock;
 	}
 
 	mtu = 512;
 	self->trans.mtu = mtu;
 
-	DEBUG(2, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
+	DEBUG(2, __FUNCTION__ "(), transport mtu=%d\n", mtu);
 
 	return 1;
 
@@ -215,11 +215,11 @@ out_freesock:
  *    Shutdown the RFCOMM link
  *
  */
-gint btobex_disconnect_request(obex_t *self)
+int btobex_disconnect_request(obex_t *self)
 {
-	gint ret;
+	int ret;
 #ifndef _WIN32
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
@@ -236,11 +236,11 @@ gint btobex_disconnect_request(obex_t *self)
  * Used when we start handling a incomming request, or when the
  * client just want to quit...
  */
-gint btobex_disconnect_server(obex_t *self)
+int btobex_disconnect_server(obex_t *self)
 {
-	gint ret;
+	int ret;
 #ifndef _WIN32
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 	ret = obex_delete_socket(self, self->serverfd);
 	self->serverfd = -1;
 #endif /* _WIN32 */

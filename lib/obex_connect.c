@@ -46,11 +46,11 @@
  *    Add the data needed to send/reply to a connect
  *
  */
-gint obex_insert_connectframe(obex_t *self, obex_object_t *object)
+int obex_insert_connectframe(obex_t *self, obex_object_t *object)
 {
 	obex_connect_hdr_t *conn_hdr;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	object->tx_nonhdr_data = g_netbuf_new(4);
 	if(!object->tx_nonhdr_data) 
@@ -69,18 +69,18 @@ gint obex_insert_connectframe(obex_t *self, obex_object_t *object)
  *    Parse a Connect
  *
  */
-gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
+int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 {
 	obex_connect_hdr_t *conn_hdr;
 	obex_common_hdr_t *common_hdr;
 		
-	guint8 version;
-	gint flags;
-	guint16 mtu;  /* Maximum send data unit */
-	guint8 opcode;
-	guint16 length;
+	uint8_t version;
+	int flags;
+	uint16_t mtu;  /* Maximum send data unit */
+	uint8_t opcode;
+	uint16_t length;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	/* Remember opcode and size for later */
 	common_hdr = (obex_common_hdr_t *) msg->data;
@@ -91,7 +91,7 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 	if( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) && (opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
 		return 1;
 
-	DEBUG(4, G_GNUC_FUNCTION "() Len: %d\n", msg->len);
+	DEBUG(4, __FUNCTION__ "() Len: %d\n", msg->len);
 	if(msg->len >= 7) {
 		/* Get what we need */
 		conn_hdr = (obex_connect_hdr_t *) ((msg->data) + 3);
@@ -99,7 +99,7 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 		flags   = conn_hdr->flags;
 		mtu     = ntohs(conn_hdr->mtu);
 
-		DEBUG(1, G_GNUC_FUNCTION "version=%02x\n", version);
+		DEBUG(1, __FUNCTION__ "version=%02x\n", version);
 
 		/* Limit to some reasonable value (usually OBEX_DEFAULT_MTU) */
 		if(mtu < self->mtu_tx_max)
@@ -107,9 +107,9 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 		else
 			self->mtu_tx = self->mtu_tx_max;
 
-		DEBUG(1, G_GNUC_FUNCTION "() requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
+		DEBUG(1, __FUNCTION__ "() requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
 		return 1;
 	}
-	DEBUG(1, G_GNUC_FUNCTION "() Malformed connect-header received\n");
+	DEBUG(1, __FUNCTION__ "() Malformed connect-header received\n");
 	return -1;
 }

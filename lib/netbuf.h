@@ -37,35 +37,43 @@
 #ifndef G_NETBUF_H
 #define G_NETBUF_H
 
-#include <glib.h>
+#include <stdint.h>
+
+typedef struct _slist_t{
+	void		*data;
+	struct _slist_t	*next;
+} slist_t;
 
 typedef struct _GNetBuf GNetBuf;
 
 struct _GNetBuf {
-	guint8 *data;   /* Pointer to the actual data */
-	guint8 *head;   /* Pointer to start of buffer */
-	guint8 *tail;   /* Pointer to end of data */
-	guint8 *end;    /* Pointer to end of buffer */
-	guint len;      /* Length of data */
-	guint truesize; /* Real size of the buffer */
+	uint8_t *data;   /* Pointer to the actual data */
+	uint8_t *head;   /* Pointer to start of buffer */
+	uint8_t *tail;   /* Pointer to end of data */
+	uint8_t *end;    /* Pointer to end of buffer */
+	unsigned int len;      /* Length of data */
+	unsigned int truesize; /* Real size of the buffer */
 };
 
-GNetBuf *g_netbuf_new(guint len);
-GNetBuf *g_netbuf_realloc(GNetBuf *buf, guint len);
+GNetBuf *g_netbuf_new(unsigned int len);
+GNetBuf *g_netbuf_realloc(GNetBuf *buf, unsigned int len);
 void     g_netbuf_free(GNetBuf *msg);
 GNetBuf *g_netbuf_recycle(GNetBuf *msg);
-gint8   *g_netbuf_put(GNetBuf *msg, guint len);
-gint8   *g_netbuf_put_data(GNetBuf *msg, gint8 *data, guint len);
-gint8   *g_netbuf_push(GNetBuf *msg, guint len);
-gint8   *g_netbuf_pull(GNetBuf *msg, guint len);
-void     g_netbuf_reserve(GNetBuf *msg, guint len);
+uint8_t   *g_netbuf_put(GNetBuf *msg, unsigned int len);
+uint8_t   *g_netbuf_put_data(GNetBuf *msg, uint8_t *data, unsigned int len);
+uint8_t   *g_netbuf_push(GNetBuf *msg, unsigned int len);
+uint8_t   *g_netbuf_pull(GNetBuf *msg, unsigned int len);
+void     g_netbuf_reserve(GNetBuf *msg, unsigned int len);
 int      g_netbuf_headroom(GNetBuf *msg);
 int      g_netbuf_tailroom(GNetBuf *msg);
-void     g_netbuf_set_size(GNetBuf *msg, guint len);
+void     g_netbuf_set_size(GNetBuf *msg, unsigned int len);
 void     g_netbuf_print(const char *fname, GNetBuf *msg);
 
-static inline guint8 *g_netbuf_get_data(GNetBuf *msg) { return msg->data; }
-static inline guint8 g_netbuf_get_len(GNetBuf *msg) { return msg->len; }
+static inline uint8_t *g_netbuf_get_data(GNetBuf *msg) { return msg->data; }
+static inline uint8_t g_netbuf_get_len(GNetBuf *msg) { return msg->len; }
+
+slist_t *slist_append(slist_t *list, void *data);
+slist_t *slist_remove(slist_t *list, void *data);
 
 #endif
 

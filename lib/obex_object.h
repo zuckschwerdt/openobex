@@ -40,59 +40,59 @@ reallocated every OBEX_OBJECT_ALLOCATIONTRESHOLD bytes */
 
 struct obex_header_element {
 	GNetBuf *buf;
-	guint8 hi;
-	guint length;
-	guint offset;
-	gboolean body_touched;
-	gboolean stream;
+	uint8_t hi;
+	unsigned int length;
+	unsigned int offset;
+	int body_touched;
+	int stream;
 };
 
 typedef struct {
         time_t time;
 
-	GSList *tx_headerq;		/* List of headers to transmit*/
-	GSList *rx_headerq;		/* List of received headers */
-	GSList *rx_headerq_rm;		/* List of recieved header already read by the app */
+	slist_t *tx_headerq;		/* List of headers to transmit*/
+	slist_t *rx_headerq;		/* List of received headers */
+	slist_t *rx_headerq_rm;		/* List of recieved header already read by the app */
 	GNetBuf *rx_body;		/* The rx body header need some extra help */
 	GNetBuf *tx_nonhdr_data;	/* Data before of headers (like CONNECT and SETPATH) */
 	GNetBuf *rx_nonhdr_data;	/* -||- */
 
-	guint8 cmd;			/* The command of this object */
+	uint8_t cmd;			/* The command of this object */
 					
 					/* The opcode fields are used as
 					   command when sending and response
 					   when recieving */
 
-	guint8 opcode;			/* Opcode for normal packets */
-	guint8 lastopcode;		/* Opcode for last packet */
-	guint headeroffset;		/* Where to start parsing headers */
+	uint8_t opcode;			/* Opcode for normal packets */
+	uint8_t lastopcode;		/* Opcode for last packet */
+	unsigned int headeroffset;		/* Where to start parsing headers */
 
-	gint hinted_body_len;		/* Hinted body-length or 0 */
-	gint totallen;			/* Size of all headers */
-        gboolean abort;			/* Request shall be aborted */
+	int hinted_body_len;		/* Hinted body-length or 0 */
+	int totallen;			/* Size of all headers */
+        int abort;			/* Request shall be aborted */
 	
-	const guint8 *s_buf;		/* Pointer to streaming data */
-	guint s_len;			/* Length of stream-data */
-        guint s_offset;			/* Current offset in buf */
-        gboolean s_stop;		/* End of stream */
-        gboolean s_srv;			/* Deliver body as stream when server */
+	const uint8_t *s_buf;		/* Pointer to streaming data */
+	unsigned int s_len;			/* Length of stream-data */
+        unsigned int s_offset;			/* Current offset in buf */
+        int s_stop;		/* End of stream */
+        int s_srv;			/* Deliver body as stream when server */
 
 } obex_object_t;
 
 
 obex_object_t *obex_object_new(void);
-gint obex_object_delete(obex_object_t *object);
-gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
-				obex_headerdata_t hv, guint32 hv_size,
-				guint flags);
-gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
-				obex_headerdata_t *hv, guint32 *hv_size);
-gint obex_object_reparseheaders(obex_t *self, obex_object_t *object);
-gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd);
-gint obex_object_setrsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
-gint obex_object_send(obex_t *self, obex_object_t *object,
-		      gint allowfinalcmd, gint forcefinalbit);
-gint obex_object_receive(obex_t *self, GNetBuf *msg);
-gint obex_object_readstream(obex_t *self, obex_object_t *object, const guint8 **buf);
+int obex_object_delete(obex_object_t *object);
+int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
+				obex_headerdata_t hv, uint32_t hv_size,
+				unsigned int flags);
+int obex_object_getnextheader(obex_t *self, obex_object_t *object, uint8_t *hi,
+				obex_headerdata_t *hv, uint32_t *hv_size);
+int obex_object_reparseheaders(obex_t *self, obex_object_t *object);
+int obex_object_setcmd(obex_object_t *object, uint8_t cmd, uint8_t lastcmd);
+int obex_object_setrsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp);
+int obex_object_send(obex_t *self, obex_object_t *object,
+		      int allowfinalcmd, int forcefinalbit);
+int obex_object_receive(obex_t *self, GNetBuf *msg);
+int obex_object_readstream(obex_t *self, obex_object_t *object, const uint8_t **buf);
 
 #endif

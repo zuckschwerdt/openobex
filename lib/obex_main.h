@@ -42,6 +42,19 @@
 /* Forward decl */
 typedef struct obex obex_t;
 
+#ifdef TRUE
+#undef TRUE
+#endif
+#ifdef FALSE
+#undef FALSE
+#endif
+
+#define	TRUE		1
+#define FALSE		0
+
+#define obex_return_if_fail(test)	do { if (!(test)) return; } while(0);
+#define obex_return_val_if_fail(test, val)	do { if (!(test)) return val; } while(0);
+		
 #include "obex_const.h"
 #include "obex_object.h"
 #include "obex_transport.h"
@@ -68,7 +81,7 @@ extern int obex_debug;
 #    ifdef OBEX_SYSLOG
 #    define DEBUG(n, args...) if (obex_debug >= (n)) syslog(LOG_DEBUG, "OpenObex: " args)
 #    else
-#    define DEBUG(n, args...) if (obex_debug >= (n)) g_print(args)
+#    define DEBUG(n, args...) if (obex_debug >= (n)) fprintf(stderr, args)
 #    endif	/* OBEX_SYSLOG */
 #  else
 #  define DEBUG(n, args, ...)
@@ -91,7 +104,7 @@ void DUMPBUFFERS(n, label, msg);
 #define OBEX_VERSION		0x11      /* Version 1.1 */
 
 // Note that this one is also defined in obex.h
-typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 
 #define MODE_SRV	0x80
 #define MODE_CLI	0x00
@@ -105,17 +118,17 @@ enum
 };
 
 struct obex {
-	guint16 mtu_tx;			/* Maximum OBEX TX packet size */
-        guint16 mtu_rx;			/* Maximum OBEX RX packet size */
-	guint16 mtu_tx_max;		/* Maximum TX we can accept */
+	uint16_t mtu_tx;			/* Maximum OBEX TX packet size */
+        uint16_t mtu_rx;			/* Maximum OBEX RX packet size */
+	uint16_t mtu_tx_max;		/* Maximum TX we can accept */
 
-	gint fd;			/* Socket descriptor */
-	gint serverfd;
-        guint state;
+	int fd;			/* Socket descriptor */
+	int serverfd;
+        unsigned int state;
 	
-	gboolean keepserver;		/* Keep server alive */
-	gboolean filterhint;		/* Filter devices based on hint bits */
-	gboolean filterias;		/* Filter devices based on IAS entry */
+	int keepserver;		/* Keep server alive */
+	int filterhint;		/* Filter devices based on hint bits */
+	int filterias;		/* Filter devices based on IAS entry */
 
 	GNetBuf *tx_msg;		/* Reusable transmit message */
 	GNetBuf *rx_msg;		/* Reusable receive message */
@@ -125,20 +138,20 @@ struct obex {
 
 	obex_transport_t trans;		/* Transport being used */
 	obex_ctrans_t ctrans;
-	gpointer userdata;		/* For user */
+	void * userdata;		/* For user */
 };
 
 
-gint obex_create_socket(obex_t *self, gint domain);
-gint obex_delete_socket(obex_t *self, gint fd);
+int obex_create_socket(obex_t *self, int domain);
+int obex_delete_socket(obex_t *self, int fd);
 
-void obex_deliver_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean del);
-gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen);
+void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del);
+int obex_data_indication(obex_t *self, uint8_t *buf, int buflen);
 
-void obex_response_request(obex_t *self, guint8 opcode);
-gint obex_data_request(obex_t *self, GNetBuf *msg, gint opcode);
-gint obex_cancelrequest(obex_t *self, gboolean nice);
+void obex_response_request(obex_t *self, uint8_t opcode);
+int obex_data_request(obex_t *self, GNetBuf *msg, int opcode);
+int obex_cancelrequest(obex_t *self, int nice);
 
-GString *obex_get_response_message(obex_t *self, gint rsp);
+char *obex_get_response_message(obex_t *self, int rsp);
 
 #endif

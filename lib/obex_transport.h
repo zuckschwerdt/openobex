@@ -57,23 +57,23 @@ typedef union {
 } saddr_t;
 
 typedef struct obex_transport {
-	gint	type;
-     	gboolean connected;	/* Link connection state */
-     	guint	mtu;		/* Tx MTU of the link */
+	int	type;
+     	int connected;	/* Link connection state */
+     	unsigned int	mtu;		/* Tx MTU of the link */
 	saddr_t	self;		/* Source address */
 	saddr_t	peer;		/* Destination address */
 
 } obex_transport_t;
 
-gint obex_transport_accept(obex_t *self);
+int obex_transport_accept(obex_t *self);
 
-gint obex_transport_handle_input(obex_t *self, gint timeout);
-gint obex_transport_connect_request(obex_t *self);
+int obex_transport_handle_input(obex_t *self, int timeout);
+int obex_transport_connect_request(obex_t *self);
 void obex_transport_disconnect_request(obex_t *self);
-gint obex_transport_listen(obex_t *self);
+int obex_transport_listen(obex_t *self);
 void obex_transport_disconnect_server(obex_t *self);
-gint obex_transport_write(obex_t *self, GNetBuf *msg);
-gint obex_transport_read(obex_t *self, gint count, guint8 *buf, gint buflen);
+int obex_transport_write(obex_t *self, GNetBuf *msg);
+int obex_transport_read(obex_t *self, int count, uint8_t *buf, int buflen);
 
 
 #endif OBEX_TRANSPORT_H

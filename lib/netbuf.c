@@ -38,8 +38,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <glib.h>
-
 #ifdef OBEX_SYSLOG
 #include <syslog.h>
 #endif
@@ -68,19 +66,19 @@ GNetBuf *g_netbuf_recycle(GNetBuf *msg)
  *    Allocate new network buffer
  *
  */
-GNetBuf *g_netbuf_new(guint len)
+GNetBuf *g_netbuf_new(unsigned int len)
 {
 	GNetBuf *msg;
-	gint8 *buf;
+	uint8_t *buf;
 	
-	msg = g_malloc(sizeof(GNetBuf));
+	msg = malloc(sizeof(GNetBuf));
 	if (msg == NULL)
 		return NULL;
 	memset(msg, 0, sizeof(GNetBuf));
 	
-	buf = g_malloc(len);
+	buf = malloc(len);
 	if (buf == NULL) {
-		g_free(msg);
+		free(msg);
 		return NULL;
 	}
 	
@@ -99,15 +97,15 @@ GNetBuf *g_netbuf_new(guint len)
  *    Change the true size of the message
  *
  */
-GNetBuf *g_netbuf_realloc(GNetBuf *msg, guint len)
+GNetBuf *g_netbuf_realloc(GNetBuf *msg, unsigned int len)
 {
-	gint8 *buf;
+	uint8_t *buf;
 
-/* 	g_print("msg->head=%p\n", msg->head); */
-/* 	g_print("msg->data=%p\n", msg->data); */
-/* 	g_print("msg->tail=%p\n", msg->tail); */
-/* 	g_print("msg->len=%d\n", msg->len); */
-/* 	g_print("msg->truesize=%d\n\n", msg->truesize); */
+/* 	DEBUG(4, "msg->head=%p\n", msg->head); */
+/* 	DEBUG(4, "msg->data=%p\n", msg->data); */
+/* 	DEBUG(4, "msg->tail=%p\n", msg->tail); */
+/* 	DEBUG(4, "msg->len=%d\n", msg->len); */
+/* 	DEBUG(4, "msg->truesize=%d\n\n", msg->truesize); */
 
 	buf = realloc(msg->head, len);
 	if (buf == NULL)
@@ -119,11 +117,11 @@ GNetBuf *g_netbuf_realloc(GNetBuf *msg, guint len)
 	msg->head = buf;
 	msg->end = msg->head + len;
 
-/* 	g_print("msg->head=%p\n", msg->head); */
-/* 	g_print("msg->data=%p\n", msg->data); */
-/* 	g_print("msg->tail=%p\n", msg->tail); */
-/* 	g_print("msg->len=%d\n", msg->len); */
-/* 	g_print("msg->truesize=%d\n", msg->truesize); */
+/* 	DEBUG(4, "msg->head=%p\n", msg->head); */
+/* 	DEBUG(4, "msg->data=%p\n", msg->data); */
+/* 	DEBUG(4, "msg->tail=%p\n", msg->tail); */
+/* 	DEBUG(4, "msg->len=%d\n", msg->len); */
+/* 	DEBUG(4, "msg->truesize=%d\n", msg->truesize); */
 
 	return msg;
 }
@@ -139,8 +137,8 @@ void g_netbuf_free(GNetBuf *msg)
 	if (!msg)
 		return;
 	if (msg->head)
-		g_free(msg->head);
-	g_free(msg);
+		free(msg->head);
+	free(msg);
 }
 
 /*
@@ -149,15 +147,15 @@ void g_netbuf_free(GNetBuf *msg)
  *    Make space for more data into message
  *
  */
-gint8 *g_netbuf_put(GNetBuf *msg, guint len)
+uint8_t *g_netbuf_put(GNetBuf *msg, unsigned int len)
 {
-        gint8 *tmp = msg->tail;
+        uint8_t *tmp = msg->tail;
         
 	msg->tail += len;
         msg->len += len;
 	
         if (msg->tail > msg->end) {
-		g_print(G_GNUC_FUNCTION "(), put over, trying to realloc ...!\n");
+		//DEBUG(4, __FUNCTION__ "(), put over, trying to realloc ...!\n");
 		
 		msg = g_netbuf_realloc(msg, msg->truesize+len);
 		if (!msg)
@@ -168,9 +166,9 @@ gint8 *g_netbuf_put(GNetBuf *msg, guint len)
         return tmp;
 }
 
-gint8 *g_netbuf_put_data(GNetBuf *msg, gint8 *data, guint len)
+uint8_t *g_netbuf_put_data(GNetBuf *msg, uint8_t *data, unsigned int len)
 {
-	gint8 *tmp;
+	uint8_t *tmp;
 
 	/* Make room for more data */
 	tmp = g_netbuf_put(msg, len);
@@ -187,17 +185,17 @@ gint8 *g_netbuf_put_data(GNetBuf *msg, gint8 *data, guint len)
  *    Insert new header in front of data
  *
  */
-gint8 *g_netbuf_push(GNetBuf *msg, guint len)
+uint8_t *g_netbuf_push(GNetBuf *msg, unsigned int len)
 {
 	if ((msg->data - len) < msg->head) {
-		g_print(G_GNUC_FUNCTION "(), pushed under, trying to realloc!\n");
+		//DEBUG(4, __FUNCTION__ "(), pushed under, trying to realloc!\n");
 
 		msg = g_netbuf_realloc(msg, msg->truesize+len);
 		if (!msg)
 			return NULL;
 		
 		/* Move data with offset len */
-		g_memmove(msg->data+len, msg->data, msg->len);
+		memmove(msg->data+len, msg->data, msg->len);
 		msg->data = msg->data+len;
 		msg->tail = msg->tail+len;
 	}
@@ -214,9 +212,9 @@ gint8 *g_netbuf_push(GNetBuf *msg, guint len)
  *    
  *
  */
-gint8 *g_netbuf_prepend_hdr(GNetBuf *msg, gint8 *hdr, guint len)
+uint8_t *g_netbuf_prepend_hdr(GNetBuf *msg, uint8_t *hdr, unsigned int len)
 {
-	gint8 *tmp;
+	uint8_t *tmp;
 	
 	/* Make room for header */
 	tmp = g_netbuf_push(msg, len);
@@ -233,7 +231,7 @@ gint8 *g_netbuf_prepend_hdr(GNetBuf *msg, gint8 *hdr, guint len)
  *    Remove header or data in front of the message
  *
  */
-gint8 *g_netbuf_pull(GNetBuf *msg, guint len)
+uint8_t *g_netbuf_pull(GNetBuf *msg, unsigned int len)
 {
 	if (len > msg->len)
                 return NULL;
@@ -248,7 +246,7 @@ gint8 *g_netbuf_pull(GNetBuf *msg, guint len)
  *    Reserve space in front of message for headers or data
  *
  */
-void g_netbuf_reserve(GNetBuf *msg, guint len)
+void g_netbuf_reserve(GNetBuf *msg, unsigned int len)
 {
         msg->data+=len;
         msg->tail+=len;
@@ -260,7 +258,7 @@ void g_netbuf_reserve(GNetBuf *msg, guint len)
  *    Returns the number of bytes available for inserting headers or data
  *    in front of the message.
  */
-gint g_netbuf_headroom(GNetBuf *msg)
+int g_netbuf_headroom(GNetBuf *msg)
 {
 	return msg->data - msg->head;
 }
@@ -271,7 +269,7 @@ gint g_netbuf_headroom(GNetBuf *msg)
  *    Returns the number of bytes available for inserting more data into the
  *    message
  */
-gint g_netbuf_tailroom(GNetBuf *msg)
+int g_netbuf_tailroom(GNetBuf *msg)
 {
 	return msg->end - msg->tail;
 }
@@ -282,7 +280,7 @@ gint g_netbuf_tailroom(GNetBuf *msg)
  *    Set the length of the message
  *
  */
-void g_netbuf_trim(GNetBuf *msg, guint len)
+void g_netbuf_trim(GNetBuf *msg, unsigned int len)
 {
 	if (msg->len > len) {
 		msg->len = len;
@@ -303,10 +301,49 @@ void g_netbuf_print(const char *label, GNetBuf *msg)
 #ifdef OBEX_SYSLOG
 			syslog(LOG_DEBUG, "OpenObex: %s: %s\n", label, buf);
 #else
-			g_print("%s: %s\n", label, buf);
+			fprintf(stderr, "%s: %s\n", label, buf);
 #endif
 		}
 	}
+}
+
+
+/* slist_t */
+
+slist_t *slist_append(slist_t *list, void *data)
+{
+	slist_t	*entry, *prev;
+
+	entry = (slist_t*)malloc(sizeof(slist_t));
+	if (!entry)
+		return NULL;
+	entry->data = data;
+	entry->next = NULL;
+	
+	if (!list)
+		return entry;
+	
+	for (prev = list; prev->next; prev = prev->next) ;
+	
+	prev->next = entry;
+	return list;
+}
+
+slist_t *slist_remove(slist_t *list, void *data)
+{
+	slist_t	*entry, *prev;
+
+	for (prev = NULL, entry = list; entry; prev = entry, entry = entry->next) {
+		if (entry->data == data) {
+			if (prev)
+				prev->next = entry->next;
+			else
+				list = entry->next;
+			free(entry);
+			break;
+		}
+	}
+	return list;
 }
 
 

@@ -32,10 +32,10 @@
 
 void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
 void btobex_prepare_listen(obex_t *self, bdaddr_t *src, int channel);
-gint btobex_listen(obex_t *self);
-gint btobex_connect_request(obex_t *self);
-gint btobex_disconnect_request(obex_t *self);
-gint btobex_accept(obex_t *self);
-gint btobex_disconnect_server(obex_t *self);
+int btobex_listen(obex_t *self);
+int btobex_connect_request(obex_t *self);
+int btobex_disconnect_request(obex_t *self);
+int btobex_accept(obex_t *self);
+int btobex_disconnect_server(obex_t *self);
 
 #endif

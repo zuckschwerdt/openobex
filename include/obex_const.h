@@ -30,21 +30,21 @@
 #ifndef OBEX_CONST_H
 #define OBEX_CONST_H
 
-#include <glib.h>
+#include <stdint.h>
 
 typedef union {
-	guint32 bq4;
-	guint8 bq1;
-	const guint8 *bs;
+	uint32_t bq4;
+	uint8_t bq1;
+	const uint8_t *bs;
 } obex_headerdata_t;
 
 typedef struct {
-	gint (*connect)(obex_t *handle, gpointer userdata);
-	gint (*disconnect)(obex_t *handle, gpointer userdata);
-	gint (*listen)(obex_t *handle, gpointer userdata);
-	gint (*write)(obex_t *handle, gpointer userdata, guint8 *buf, gint buflen);
-	gint (*handleinput)(obex_t *handle, gpointer userdata, gint timeout);
-	gpointer userdata;
+	int (*connect)(obex_t *handle, void * userdata);
+	int (*disconnect)(obex_t *handle, void * userdata);
+	int (*listen)(obex_t *handle, void * userdata);
+	int (*write)(obex_t *handle, void * userdata, uint8_t *buf, int buflen);
+	int (*handleinput)(obex_t *handle, void * userdata, int timeout);
+	void * userdata;
 } obex_ctrans_t;
 
 #define	OBEX_CLIENT		0

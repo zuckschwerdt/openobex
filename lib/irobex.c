@@ -127,20 +127,20 @@ void irobex_prepare_listen(obex_t *self, const char *service)
  *    Listen for incoming connections.
  *
  */
-gint irobex_listen(obex_t *self)
+int irobex_listen(obex_t *self)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
 	self->serverfd = obex_create_socket(self, AF_IRDA);
 	if(self->serverfd < 0) {
-		DEBUG(0, G_GNUC_FUNCTION "() Error creating socket\n");
+		DEBUG(0, __FUNCTION__ "() Error creating socket\n");
 		return -1;
 	}
 	
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.irda, 
 		 sizeof(struct sockaddr_irda)))
 	{
-		DEBUG(0, G_GNUC_FUNCTION "() Error doing bind\n");
+		DEBUG(0, __FUNCTION__ "() Error doing bind\n");
 		goto out_freesock;
 	}
 
@@ -167,11 +167,11 @@ gint irobex_listen(obex_t *self)
 #endif /* _WIN32 */
 
 	if (listen(self->serverfd, 1)) {
-		DEBUG(0, G_GNUC_FUNCTION "() Error doing listen\n");
+		DEBUG(0, __FUNCTION__ "() Error doing listen\n");
 		goto out_freesock;
 	}
 
-	DEBUG(4, G_GNUC_FUNCTION "() We are now listening for connections\n");
+	DEBUG(4, __FUNCTION__ "() We are now listening for connections\n");
 	return 1;
 
 out_freesock:
@@ -188,7 +188,7 @@ out_freesock:
  * Note : don't close the server socket here, so apps may want to continue
  * using it...
  */
-gint irobex_accept(obex_t *self)
+int irobex_accept(obex_t *self)
 {
 	int addrlen = sizeof(struct sockaddr_irda);
 	int mtu;
@@ -210,7 +210,7 @@ gint irobex_accept(obex_t *self)
 		return -1;
 	}
 	self->trans.mtu = mtu;
-	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
+	DEBUG(3, __FUNCTION__ "(), transport mtu=%d\n", mtu);
 #else
 	self->trans.mtu = OBEX_DEFAULT_MTU;
 #endif /* _WIN32 */
@@ -231,7 +231,7 @@ gint irobex_accept(obex_t *self)
  * is done "the right way", so that it's safe and we don't leak memory...
  * Jean II
  */
-static gint irobex_discover_devices(obex_t *self)
+static int irobex_discover_devices(obex_t *self)
 {
 	struct irda_device_list *	list;
 	unsigned char		buf[DISC_BUF_LEN];
@@ -332,7 +332,7 @@ static gint irobex_discover_devices(obex_t *self)
 #endif /* _WIN32 */
 
 	if(ret <  0)
-		DEBUG(1, G_GNUC_FUNCTION "(), didn't find any OBEX devices!\n");
+		DEBUG(1, __FUNCTION__ "(), didn't find any OBEX devices!\n");
 	return(ret);
 }
 
@@ -342,13 +342,13 @@ static gint irobex_discover_devices(obex_t *self)
  *    Open the TTP connection
  *
  */
-gint irobex_connect_request(obex_t *self)
+int irobex_connect_request(obex_t *self)
 {
 	int mtu = 0;
 	int len = sizeof(int);
 	int ret;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	if(self->fd < 0)	{
 		self->fd = obex_create_socket(self, AF_IRDA);
@@ -362,7 +362,7 @@ gint irobex_connect_request(obex_t *self)
 		/* Nope. Go find one... */
 		ret = irobex_discover_devices(self);
 		if (ret < 0)	{
-			DEBUG(1, G_GNUC_FUNCTION "() No devices in range\n");
+			DEBUG(1, __FUNCTION__ "() No devices in range\n");
 			goto out_freesock;
 		}
 	}
@@ -370,7 +370,7 @@ gint irobex_connect_request(obex_t *self)
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.irda,
 		      sizeof(struct sockaddr_irda));
 	if (ret < 0) {
-		DEBUG(4, G_GNUC_FUNCTION "(), ret=%d\n", ret);
+		DEBUG(4, __FUNCTION__ "(), ret=%d\n", ret);
 		goto out_freesock;
 	}
 
@@ -386,7 +386,7 @@ gint irobex_connect_request(obex_t *self)
 #endif
 	self->trans.mtu = mtu;
 
-	DEBUG(2, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
+	DEBUG(2, __FUNCTION__ "(), transport mtu=%d\n", mtu);
 	
 	return 1;
 
@@ -402,10 +402,10 @@ out_freesock:
  *    Shutdown the IrTTP link
  *
  */
-gint irobex_disconnect_request(obex_t *self)
+int irobex_disconnect_request(obex_t *self)
 {
-	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int ret;
+	DEBUG(4, __FUNCTION__ "()\n");
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
@@ -421,10 +421,10 @@ gint irobex_disconnect_request(obex_t *self)
  * Used when we start handling a incomming request, or when the
  * client just want to quit...
  */
-gint irobex_disconnect_server(obex_t *self)
+int irobex_disconnect_server(obex_t *self)
 {
-	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int ret;
+	DEBUG(4, __FUNCTION__ "()\n");
 	ret = obex_delete_socket(self, self->serverfd);
 	self->serverfd = -1;
 	return ret;	

@@ -26,6 +26,7 @@
 #define IRDA_H
 
 #include <sys/types.h>
+#include <stdint.h>
 
 /* Hint bit positions for first hint byte */
 #define HINT_PNP         0x01
@@ -110,21 +111,21 @@ enum {
 
 struct sockaddr_irda {
 	sa_family_t	sir_family;   /* AF_IRDA */
-	u_int8_t	sir_lsap_sel; /* LSAP selector */
-	u_int32_t	sir_addr;     /* Device address */
+	uint8_t	sir_lsap_sel; /* LSAP selector */
+	uint32_t	sir_addr;     /* Device address */
 	char		sir_name[25]; /* Usually <service>:IrDA:TinyTP */
 };
 
 struct irda_device_info {
-	u_int32_t	saddr;    /* Address of local interface */
-	u_int32_t	daddr;    /* Address of remote device */
+	uint32_t	saddr;    /* Address of local interface */
+	uint32_t	daddr;    /* Address of remote device */
 	char		info[22]; /* Description */
-	u_int8_t	charset;  /* Charset used for description */
-	u_int8_t	hints[2]; /* Hint bits */
+	uint8_t	charset;  /* Charset used for description */
+	uint8_t	hints[2]; /* Hint bits */
 };
 
 struct irda_device_list {
-       u_int32_t len;
+       uint32_t len;
        struct irda_device_info dev[1];
 };
 
@@ -136,15 +137,15 @@ struct irda_ias_set {
 		unsigned int irda_attrib_int;
 		struct {
 			unsigned short len;
-			u_int8_t octet_seq[IAS_MAX_OCTET_STRING];
+			uint8_t octet_seq[IAS_MAX_OCTET_STRING];
 		} irda_attrib_octet_seq;
 		struct {
-			u_int8_t len;
-			u_int8_t charset;
-			u_int8_t string[IAS_MAX_STRING];
+			uint8_t len;
+			uint8_t charset;
+			uint8_t string[IAS_MAX_STRING];
 		} irda_attrib_string;
 	} attribute;
-	u_int32_t       daddr;    /* Address of device (for IAS query only) */
+	uint32_t       daddr;    /* Address of device (for IAS query only) */
 };
 
 /* Some private IOCTL's (max 16) */
@@ -164,19 +165,19 @@ struct irda_ias_set {
 
 /* IrDA quality of service information (must not exceed 16 bytes) */
 struct if_irda_qos {
-	u_int32_t baudrate;
-	u_int16_t data_size;
-	u_int16_t window_size;
-	u_int16_t min_turn_time;
-	u_int16_t max_turn_time;
-	u_int8_t  add_bofs;
-	u_int8_t  link_disc;
+	uint32_t baudrate;
+	uint16_t data_size;
+	uint16_t window_size;
+	uint16_t min_turn_time;
+	uint16_t max_turn_time;
+	uint8_t  add_bofs;
+	uint8_t  link_disc;
 };
 
 /* For setting RTS and DTR lines of a dongle */
 struct if_irda_line {
-	u_int8_t dtr;
-	u_int8_t rts;
+	uint8_t dtr;
+	uint8_t rts;
 };
 
 /* IrDA interface configuration (data part must not exceed 16 bytes) */

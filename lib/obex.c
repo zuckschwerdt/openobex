@@ -79,7 +79,7 @@ typedef char *bdaddr_t;
  *
  * Returns an OBEX handle or %NULL on error.
  */
-obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
+obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 {
 	obex_t *self;
 
@@ -90,21 +90,22 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	obex_dump = OBEX_DUMP;
 #endif
 
-	g_return_val_if_fail(eventcb != NULL, NULL);
+	obex_return_val_if_fail(eventcb != NULL, NULL);
 
 #ifdef _WIN32
 	{
 		WSADATA WSAData;
 	  	if (WSAStartup (MAKEWORD(2,0), &WSAData) != 0) {
-			g_message("WSAStartup failed\n");
+			DEBUG(4, "WSAStartup failed\n");
 			return NULL;
 		}
 	}
 #endif
 
-	self = g_new0(obex_t, 1);
+	self = malloc(sizeof(obex_t));
 	if (self == NULL)
 		return NULL;
+	memset(self, 0, sizeof(obex_t));
 
 	self->eventcb = eventcb;
 
@@ -149,7 +150,7 @@ out_err:
 		g_netbuf_free(self->tx_msg);
 	if (self->rx_msg != NULL)
 		g_netbuf_free(self->rx_msg);
-	g_free(self);
+	free(self);
 	return NULL;
 }
 
@@ -162,10 +163,10 @@ out_err:
  * Call this function directly after OBEX_Init if you are using
  * a custom transport.
  */
-gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
+int OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
 {
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(ctrans != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(ctrans != NULL, -1);
 
 	memcpy(&self->ctrans, ctrans, sizeof(obex_ctrans_t));
 	return 1;
@@ -179,7 +180,7 @@ gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
  */
 void OBEX_Cleanup(obex_t *self)
 {
-	g_return_if_fail(self != NULL);
+	obex_return_if_fail(self != NULL);
 	
 	obex_transport_disconnect_request(self);
 	obex_transport_disconnect_server(self);
@@ -190,7 +191,7 @@ void OBEX_Cleanup(obex_t *self)
 	if (self->rx_msg)
 		g_netbuf_free(self->rx_msg);
 	
-	g_free(self);
+	free(self);
 }
 
 
@@ -199,9 +200,9 @@ void OBEX_Cleanup(obex_t *self)
  * @self: OBEX handle
  * @data: It's all up to you!
  */
-void OBEX_SetUserData(obex_t *self, gpointer data)
+void OBEX_SetUserData(obex_t *self, void * data)
 {
-	g_return_if_fail(self != NULL);
+	obex_return_if_fail(self != NULL);
 	self->userdata=data;
 }
 
@@ -211,9 +212,9 @@ void OBEX_SetUserData(obex_t *self, gpointer data)
  *
  * Returns userdata
  */
-gpointer OBEX_GetUserData(obex_t *self)
+void * OBEX_GetUserData(obex_t *self)
 {
-	g_return_val_if_fail(self != NULL, 0);
+	obex_return_val_if_fail(self != NULL, 0);
 	return self->userdata;
 }
 
@@ -223,9 +224,9 @@ gpointer OBEX_GetUserData(obex_t *self)
  * @eventcb: Function pointer to your new event callback.
  * @data: Pointer to the new user data to pass to the new callback (optional)
  */
-void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data)
+void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, void * data)
 {
-	g_return_if_fail(self != NULL);
+	obex_return_if_fail(self != NULL);
 	/* The callback can't be NULL */
 	if(eventcb != NULL) {
 		self->eventcb = eventcb;
@@ -248,11 +249,11 @@ void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data)
  *
  * Returns -1 on error.
  */
-gint OBEX_SetTransportMTU(obex_t *self, guint16 mtu_rx, guint16 mtu_tx_max)
+int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
 {
-	g_return_val_if_fail(self != NULL, -EFAULT);
+	obex_return_val_if_fail(self != NULL, -EFAULT);
 	if (self->object)	{
-		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		DEBUG(1, __FUNCTION__ "() We are busy.\n");
 		return -EBUSY;
 	}
 	if((mtu_rx < OBEX_MINIMUM_MTU) || (mtu_rx > OBEX_MAXIMUM_MTU))
@@ -288,12 +289,12 @@ gint OBEX_SetTransportMTU(obex_t *self, guint16 mtu_rx, guint16 mtu_tx_max)
  *
  * Returns -1 on error.
  */
-gint OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
+int OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(saddr != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(saddr != NULL, -1);
 
 	memcpy(&self->trans.self, saddr, addrlen);
 
@@ -320,13 +321,13 @@ gint OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
  *
  * Returns the client instance or %NULL for error.
  */
-obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
+obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
 {
 	obex_t *self;
 
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(server != NULL, NULL);
+	obex_return_val_if_fail(server != NULL, NULL);
 
 	/* We can accept only if both the server and the connection socket
 	 * are active */
@@ -338,9 +339,10 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
 		return(NULL);
 
 	/* Allocate new instance */
-	self =  g_new0(obex_t, 1);
+	self =  malloc(sizeof(obex_t));
 	if (self == NULL)
 		return(NULL);
+	memset(self, 0, sizeof(obex_t));
 
 	/* Set callback and callback data as needed */
 	if(eventcb != NULL)
@@ -387,7 +389,7 @@ out_err:
 		g_netbuf_free(self->tx_msg);
 	if (self->rx_msg != NULL)
 		g_netbuf_free(self->rx_msg);
-	g_free(self);
+	free(self);
 	return NULL;
 }
 
@@ -406,10 +408,10 @@ out_err:
  * Like select() this function returns -1 on error, 0 on timeout or
  * positive on success.
  */
-gint OBEX_HandleInput(obex_t *self, gint timeout)
+int OBEX_HandleInput(obex_t *self, int timeout)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	g_return_val_if_fail(self != NULL, -1);
+	DEBUG(4, __FUNCTION__ "()\n");
+	obex_return_val_if_fail(self != NULL, -1);
 	return obex_transport_handle_input(self, timeout);
 }
 
@@ -420,12 +422,12 @@ gint OBEX_HandleInput(obex_t *self, gint timeout)
  * @inputbuf: Pointer to custom data
  * @actual: Length of buffer
  */
-gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
+int OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(inputbuf != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(inputbuf != NULL, -1);
 
 	return obex_data_indication(self, inputbuf, actual);
 }
@@ -439,12 +441,12 @@ gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
  *
  * Returns -1 on error.
  */
-gint OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
+int OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(saddr != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(saddr != NULL, -1);
 
 	memcpy(&self->trans.peer, saddr, addrlen);
 
@@ -456,11 +458,11 @@ gint OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
  * OBEX_TransportDisconnect - Disconnect transport
  * @self: OBEX handle
  */
-gint OBEX_TransportDisconnect(obex_t *self)
+int OBEX_TransportDisconnect(obex_t *self)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 	obex_transport_disconnect_request(self);
 	return 0;
 }
@@ -483,9 +485,9 @@ gint OBEX_TransportDisconnect(obex_t *self)
  * This mean that after receiving an incomming connection, you need to
  * call this function again.
  */
-gint OBEX_GetFD(obex_t *self)
+int OBEX_GetFD(obex_t *self)
 {
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 	if(self->fd == -1)
 		return self->serverfd;
 	return self->fd;
@@ -498,17 +500,17 @@ gint OBEX_GetFD(obex_t *self)
  *
  * Returns negative on error.
  */
-gint OBEX_Request(obex_t *self, obex_object_t *object)
+int OBEX_Request(obex_t *self, obex_object_t *object)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	if (self->object)	{
-		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		DEBUG(1, __FUNCTION__ "() We are busy.\n");
 		return -EBUSY;
 	}
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 
 	self->object = object;
         self->state = STATE_START | MODE_CLI;
@@ -525,9 +527,9 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
  *
  *
  */
-gint OBEX_CancelRequest(obex_t *self, gboolean nice)
+int OBEX_CancelRequest(obex_t *self, int nice)
 {
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 	return obex_cancelrequest(self, nice);
 }
 
@@ -539,7 +541,7 @@ gint OBEX_CancelRequest(obex_t *self, gboolean nice)
  *
  * Returns a pointer to a new OBEX Object or %NULL on error.
  */
-obex_object_t *OBEX_ObjectNew(obex_t *self, guint8 cmd)
+obex_object_t *OBEX_ObjectNew(obex_t *self, uint8_t cmd)
 {
 	obex_object_t *object;
 
@@ -547,7 +549,7 @@ obex_object_t *OBEX_ObjectNew(obex_t *self, guint8 cmd)
 	if(object == NULL)
 		return NULL;
 
-	obex_object_setcmd(object, cmd, (guint8) (cmd | OBEX_FINAL));
+	obex_object_setcmd(object, cmd, (uint8_t) (cmd | OBEX_FINAL));
 	/* Need some special woodoo magic on connect-frame */
 	if(cmd == OBEX_CMD_CONNECT)	{
 		if(obex_insert_connectframe(self, object) < 0)	{
@@ -567,9 +569,9 @@ obex_object_t *OBEX_ObjectNew(obex_t *self, guint8 cmd)
  * Note that as soon as you have passed an object to the lib using
  * OBEX_Request(), you shall not delete it yourself.
  */
-gint OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
+int OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
 {
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_delete(object);
 }
 
@@ -603,11 +605,11 @@ gint OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
  *
  * The headers will be sent in the order you add them.
  */
-gint OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi,
-				obex_headerdata_t hv, guint32 hv_size,
-				guint flags)
+int OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, uint8_t hi,
+				obex_headerdata_t hv, uint32_t hv_size,
+				unsigned int flags)
 {
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_addheader(self, object, hi, hv, hv_size, flags);
 }
 
@@ -626,12 +628,12 @@ gint OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi,
  *
  * You will get the headers in the received order.
  */
-gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
+int OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, uint8_t *hi,
 					obex_headerdata_t *hv,
-					guint32 *hv_size)
+					uint32_t *hv_size)
 {
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_getnextheader(self, object, hi, hv, hv_size);
 }
 
@@ -648,10 +650,10 @@ gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
  * Returns 1 on success
  * Returns 0 if failed due previous parsing not completed.
  */
-gint OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object)
+int OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object)
 {
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_reparseheaders(self, object);
 }
 
@@ -673,10 +675,10 @@ gint OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object)
  *
  * Returns the number of bytes in buffer, or 0 for end-of-stream.
  */
-gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **buf)
+int OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const uint8_t **buf)
 {
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_readstream(self, object, buf);
 }
 
@@ -690,9 +692,9 @@ gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **b
  *
  * Returns -1 on error.
  */
-gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 rsp, guint8 lastrsp)
+int OBEX_ObjectSetRsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp)
 {
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_setrsp(object, rsp, lastrsp);
 }
 
@@ -703,9 +705,9 @@ gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 rsp, guint8 lastrsp)
  *
  * Returns the size of the buffer or -1 for error.
  */
-gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer)
+int OBEX_ObjectGetNonHdrData(obex_object_t *object, uint8_t **buffer)
 {
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	if(!object->rx_nonhdr_data)
 		return 0;
 
@@ -722,12 +724,12 @@ gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer)
  * Some commands (notably SetPath) send data before headers. Use this
  * function to set this data.
  */
-gint OBEX_ObjectSetNonHdrData(obex_object_t *object, const guint8 *buffer, guint len)
+int OBEX_ObjectSetNonHdrData(obex_object_t *object, const uint8_t *buffer, unsigned int len)
 {
 	//TODO: Check that we actually can send len bytes without violating MTU
 
-	g_return_val_if_fail(object != NULL, -1);
-	g_return_val_if_fail(buffer != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(buffer != NULL, -1);
 
 	if(object->tx_nonhdr_data)
 		return -1;
@@ -736,7 +738,7 @@ gint OBEX_ObjectSetNonHdrData(obex_object_t *object, const guint8 *buffer, guint
 	if(object->tx_nonhdr_data == NULL)
 		return -1;
 
-	g_netbuf_put_data(object->tx_nonhdr_data, (guint8 *)buffer, len);
+	g_netbuf_put_data(object->tx_nonhdr_data, (uint8_t *)buffer, len);
 	return 1;
 }
 
@@ -749,9 +751,9 @@ gint OBEX_ObjectSetNonHdrData(obex_object_t *object, const guint8 *buffer, guint
  * command has data before the headers comes. You do NOT need to use this
  * function on Connect and SetPath, they are handled automatically.
  */
-gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
+int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset)
 {
-	g_return_val_if_fail(object != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
 	object->headeroffset = offset;
 	return 1;
 }
@@ -764,17 +766,17 @@ gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
  *
  * Buffers may overlap. Returns -1 on error.
  */
-gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
+int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
 {
-	gint n;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int n;
+	DEBUG(4, __FUNCTION__ "()\n");
 		
-	g_return_val_if_fail(uc != NULL, -1);
-	g_return_val_if_fail(c != NULL, -1);
+	obex_return_val_if_fail(uc != NULL, -1);
+	obex_return_val_if_fail(c != NULL, -1);
 
 	// Make sure buffer is big enough!
 	for(n = 0; uc[n*2+1] != 0; n++);
-	g_return_val_if_fail(n < size, -1);
+	obex_return_val_if_fail(n < size, -1);
 
 	for(n = 0; uc[n*2+1] != 0; n++)
 		c[n] = uc[n*2+1];
@@ -791,16 +793,16 @@ gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
  *
  * Buffers may overlap. Returns -1 on error.
  */
-gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size)
+int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
 {
-	gint len, n;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int len, n;
+	DEBUG(4, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(uc != NULL, -1);
-	g_return_val_if_fail(c != NULL, -1);
+	obex_return_val_if_fail(uc != NULL, -1);
+	obex_return_val_if_fail(c != NULL, -1);
 
 	len = n = strlen(c);
-	g_return_val_if_fail( (n*2 < size), -1);
+	obex_return_val_if_fail( (n*2 < size), -1);
 
 	uc[n*2+1] = 0;
 	uc[n*2] = 0;
@@ -818,13 +820,13 @@ gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size)
  * @self: OBEX handle
  * @rsp: Response code.
  *
- * The returned GString shall be freed by you. Returns %NULL on error.
+ * The returned char shall be freed by you. Returns %NULL on error.
  */
-GString* OBEX_GetResponseMessage(obex_t *self, gint rsp)
+char* OBEX_GetResponseMessage(obex_t *self, int rsp)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, NULL);
+	obex_return_val_if_fail(self != NULL, NULL);
 	return obex_get_response_message(self, rsp);
 }
 
@@ -838,11 +840,11 @@ GString* OBEX_GetResponseMessage(obex_t *self, gint rsp)
  *
  * Returns -1 on error.
  */
-gint InOBEX_ServerRegister(obex_t *self)
+int InOBEX_ServerRegister(obex_t *self)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 
 	inobex_prepare_listen(self);
 	return obex_transport_listen(self);
@@ -857,17 +859,17 @@ gint InOBEX_ServerRegister(obex_t *self)
  * Note : I would like feedback on this API to know which input
  * parameter make most sense. Thanks...
  */
-gint InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
+int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-     	DEBUG(4, G_GNUC_FUNCTION "()\n");
+     	DEBUG(4, __FUNCTION__ "()\n");
 
 	if (self->object)	{
-		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		DEBUG(1, __FUNCTION__ "() We are busy.\n");
 		return -EBUSY;
 	}
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(saddr != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(saddr != NULL, -1);
 
 	inobex_prepare_connect(self, saddr, addrlen);
 	return obex_transport_connect_request(self);
@@ -882,12 +884,12 @@ gint InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
  *
  * Returns -1 on error.
  */
-gint IrOBEX_ServerRegister(obex_t *self, const char *service)
+int IrOBEX_ServerRegister(obex_t *self, const char *service)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(service != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(service != NULL, -1);
 
 #ifdef HAVE_IRDA
 	irobex_prepare_listen(self, service);
@@ -904,16 +906,16 @@ gint IrOBEX_ServerRegister(obex_t *self, const char *service)
  *
  * An easier connect function to use for IrDA (IrOBEX) only.
  */
-gint IrOBEX_TransportConnect(obex_t *self, const char *service)
+int IrOBEX_TransportConnect(obex_t *self, const char *service)
 {
-     	DEBUG(4, G_GNUC_FUNCTION "()\n");
+     	DEBUG(4, __FUNCTION__ "()\n");
 
 	if (self->object)	{
-		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		DEBUG(1, __FUNCTION__ "() We are busy.\n");
 		return -EBUSY;
 	}
 
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 
 #ifdef HAVE_IRDA
 	irobex_prepare_connect(self, service);
@@ -933,11 +935,11 @@ gint IrOBEX_TransportConnect(obex_t *self, const char *service)
  *
  * Returns -1 on error.
  */
-gint BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel)
+int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(3, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 
 #ifdef HAVE_BLUETOOTH
 	if(src == NULL)
@@ -956,17 +958,17 @@ gint BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel)
  *
  *  An easier connect function to use for Bluetooth (Bluetooth OBEX) only. 
  */
-gint BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel)
+int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	if (self->object)	{
-		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		DEBUG(1, __FUNCTION__ "() We are busy.\n");
 		return -EBUSY;
 	}
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(dst != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(dst != NULL, -1);
 
 #ifdef HAVE_BLUETOOTH
 	if(src == NULL)

@@ -46,14 +46,14 @@
  *    Handle server-operations
  *
  */
-gint obex_server(obex_t *self, GNetBuf *msg, gint final)
+int obex_server(obex_t *self, GNetBuf *msg, int final)
 {
 	obex_common_hdr_t *request;
-	gint cmd, ret;
-	guint len;
+	int cmd, ret;
+	unsigned int len;
 
 	
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	request = (obex_common_hdr_t *) msg->data;
 	cmd = request->opcode & ~OBEX_FINAL;
@@ -63,11 +63,11 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 	{
 	case STATE_IDLE:
 		/* Nothing has been recieved yet, so this is probably a new request */
-		DEBUG(4, G_GNUC_FUNCTION "() STATE_IDLE\n");
+		DEBUG(4, __FUNCTION__ "() STATE_IDLE\n");
 		
 		if(self->object) {
 			/* What shall we do here? I don't know!*/
-			DEBUG(0, G_GNUC_FUNCTION "() Got a new server-request while already having one!\n");
+			DEBUG(0, __FUNCTION__ "() Got a new server-request while already having one!\n");
 			obex_response_request(self, OBEX_RSP_INTERNAL_SERVER_ERROR);
 			return -1;
 		}
@@ -75,7 +75,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		self->object = obex_object_new();
 
 		if(self->object == NULL) {
-			DEBUG(1, G_GNUC_FUNCTION "() Allocation of object failed!\n");
+			DEBUG(1, __FUNCTION__ "() Allocation of object failed!\n");
 			obex_response_request(self, OBEX_RSP_INTERNAL_SERVER_ERROR);
 			return -1;
 		}
@@ -90,7 +90,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		/* Some commands needs special treatment (data outside headers) */
 		switch(cmd)	{
 		case OBEX_CMD_CONNECT:
-			DEBUG(4, G_GNUC_FUNCTION "() Got CMD_CONNECT\n");
+			DEBUG(4, __FUNCTION__ "() Got CMD_CONNECT\n");
 			/* Connect needs some extra special treatment */
 			if(obex_parse_connect_header(self, msg) < 0) {
 				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
@@ -108,12 +108,12 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		// no break! Fallthrough */
 	
 	case STATE_REC:
-		DEBUG(4, G_GNUC_FUNCTION "() STATE_REC\n");
+		DEBUG(4, __FUNCTION__ "() STATE_REC\n");
 		/* In progress of receiving a request */
 		
 		/* Abort? */
 		if(cmd == OBEX_CMD_ABORT) {
-			DEBUG(1, G_GNUC_FUNCTION "() Got OBEX_ABORT request!\n");
+			DEBUG(1, __FUNCTION__ "() Got OBEX_ABORT request!\n");
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			obex_response_request(self, OBEX_RSP_SUCCESS);
 			/* This is not an Obex error, it is just that the peer
@@ -149,7 +149,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			break; /* Stay in this state if not final */
 		}
 		else {
-			DEBUG(4, G_GNUC_FUNCTION "() We got a request!\n");
+			DEBUG(4, __FUNCTION__ "() We got a request!\n");
 			/* More connect-magic woodoo stuff */
 			if(cmd == OBEX_CMD_CONNECT)
 				obex_insert_connectframe(self, self->object);
@@ -165,11 +165,11 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 	
 	case STATE_SEND:
 		/* Send back response */
-		DEBUG(4, G_GNUC_FUNCTION "() STATE_SEND\n");
+		DEBUG(4, __FUNCTION__ "() STATE_SEND\n");
 		
 		/* Abort? */
 		if(cmd == OBEX_CMD_ABORT) {
-			DEBUG(1, G_GNUC_FUNCTION "() Got OBEX_ABORT request!\n");
+			DEBUG(1, __FUNCTION__ "() Got OBEX_ABORT request!\n");
 			obex_response_request(self, OBEX_RSP_SUCCESS);
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			/* This is not an Obex error, it is just that the peer
@@ -178,7 +178,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		}
 		
 		if(len > 3) {
-			DEBUG(1, G_GNUC_FUNCTION "() STATE_SEND Didn't expect data from peer (%d)\n", len);
+			DEBUG(1, __FUNCTION__ "() STATE_SEND Didn't expect data from peer (%d)\n", len);
 			DUMPBUFFER(4, "unexpected data", msg);
 			/* At this point, we are in the middle of sending
 			 * our response to the client, and it is still
@@ -233,7 +233,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		else {
 			/* Response sent! */
 			if(cmd == OBEX_CMD_DISCONNECT)	{
-				DEBUG(2, G_GNUC_FUNCTION "() CMD_DISCONNECT done. Resetting MTU!\n");
+				DEBUG(2, __FUNCTION__ "() CMD_DISCONNECT done. Resetting MTU!\n");
 				self->mtu_tx = OBEX_MINIMUM_MTU;
 			}
 			obex_deliver_event(self, OBEX_EV_REQDONE, cmd, 0, TRUE);
@@ -242,7 +242,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		break;
 	
 	default:
-		DEBUG(0, G_GNUC_FUNCTION "() Unknown state\n");
+		DEBUG(0, __FUNCTION__ "() Unknown state\n");
 		obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 		obex_deliver_event(self, OBEX_EV_PARSEERR, cmd, 0, TRUE);
 		return -1;

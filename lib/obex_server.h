@@ -30,6 +30,6 @@
 #ifndef OBEX_SERVER_H
 #define OBEX_SERVER_H
 
-gint obex_server(obex_t *self, GNetBuf *msg, gint final);
+int obex_server(obex_t *self, GNetBuf *msg, int final);
 
 #endif

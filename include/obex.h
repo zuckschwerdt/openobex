@@ -30,7 +30,8 @@
 #ifndef OBEX_H
 #define OBEX_H
 
-#include <glib.h>
+#include <stdint.h>
+
 #ifndef _WIN32
 #include <sys/socket.h>
 #endif
@@ -46,7 +47,7 @@
 // unnecessary stuff.
 typedef void* obex_t;
 typedef void* obex_object_t;
-typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 // This is to workaround compilation without Bluetooth support. - Jean II
 #ifndef BDADDR_ANY
 typedef char* bdaddr_t;
@@ -57,63 +58,63 @@ typedef char* bdaddr_t;
 /*
  *  OBEX API
  */
-obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags);
+obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags);
 void    OBEX_Cleanup(obex_t *self);
-void OBEX_SetUserData(obex_t *self, gpointer data);
-gpointer OBEX_GetUserData(obex_t *self);
-void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data);
-gint OBEX_SetTransportMTU(obex_t *self, guint16 mtu_rx, guint16 mtu_tx_max);
-gint OBEX_GetFD(obex_t *self);
+void OBEX_SetUserData(obex_t *self, void * data);
+void * OBEX_GetUserData(obex_t *self);
+void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, void * data);
+int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max);
+int OBEX_GetFD(obex_t *self);
 
-gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans);
+int OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans);
 
-gint    OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addlen);
-gint    OBEX_TransportDisconnect(obex_t *self);
-gint    OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual);
-gint    OBEX_HandleInput(obex_t *self, gint timeout);
+int    OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addlen);
+int    OBEX_TransportDisconnect(obex_t *self);
+int    OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual);
+int    OBEX_HandleInput(obex_t *self, int timeout);
 
-gint    OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen);
-obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data);
-gint    OBEX_Request(obex_t *self, obex_object_t *object);
-gint    OBEX_CancelRequest(obex_t *self, gboolean nice);
+int    OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen);
+obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data);
+int    OBEX_Request(obex_t *self, obex_object_t *object);
+int    OBEX_CancelRequest(obex_t *self, int nice);
 
-obex_object_t	*OBEX_ObjectNew(obex_t *self, guint8 cmd);
-gint		OBEX_ObjectDelete(obex_t *self, obex_object_t *object);
+obex_object_t	*OBEX_ObjectNew(obex_t *self, uint8_t cmd);
+int		OBEX_ObjectDelete(obex_t *self, obex_object_t *object);
 
-gint		OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi, 
-			obex_headerdata_t hv, guint32 hv_size, guint flags);
-gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
+int		OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, uint8_t hi, 
+			obex_headerdata_t hv, uint32_t hv_size, unsigned int flags);
+int OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, uint8_t *hi,
 					obex_headerdata_t *hv,
-					guint32 *hv_size);
-gint OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object);
-gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
+					uint32_t *hv_size);
+int OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object);
+int OBEX_ObjectSetRsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp);
 
-gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer);
-gint OBEX_ObjectSetNonHdrData(obex_object_t *object, const guint8 *buffer, guint len);
-gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset);
-gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **buf);
+int OBEX_ObjectGetNonHdrData(obex_object_t *object, uint8_t **buffer);
+int OBEX_ObjectSetNonHdrData(obex_object_t *object, const uint8_t *buffer, unsigned int len);
+int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset);
+int OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const uint8_t **buf);
 
-gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size);
-gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size);
+int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size);
+int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size);
 
-GString* OBEX_GetResponseMessage(obex_t *self, gint rsp);
+char* OBEX_GetResponseMessage(obex_t *self, int rsp);
 
 /*
  * InOBEX API (TCP/IP)
  */
- gint InOBEX_ServerRegister(obex_t *self);
- gint InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen);
+ int InOBEX_ServerRegister(obex_t *self);
+ int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen);
 
 /*
  * IrOBEX API 
  */
- gint IrOBEX_ServerRegister(obex_t *self, const char *service);
- gint IrOBEX_TransportConnect(obex_t *self, const char *service);
+ int IrOBEX_ServerRegister(obex_t *self, const char *service);
+ int IrOBEX_TransportConnect(obex_t *self, const char *service);
 
 /*
  * Bluetooth OBEX API
  */
- gint BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel);
- gint BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
+ int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel);
+ int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
 
 #endif

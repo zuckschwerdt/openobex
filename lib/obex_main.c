@@ -43,6 +43,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <stdio.h>
 
 #ifdef HAVE_BLUETOOTH
 #include <bluetooth/bluetooth.h>
@@ -69,10 +70,10 @@ int obex_dump;
  *    Create socket if needed.
  *
  */
-gint obex_create_socket(obex_t *self, gint domain)
+int obex_create_socket(obex_t *self, int domain)
 {
-	gint fd, proto;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int fd, proto;
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	proto = 0;
 
@@ -91,11 +92,11 @@ gint obex_create_socket(obex_t *self, gint domain)
  *    Close socket if opened.
  *
  */
-gint obex_delete_socket(obex_t *self, gint fd)
+int obex_delete_socket(obex_t *self, int fd)
 {
-	gint ret;
+	int ret;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	if(fd < 0)
 		return fd;
@@ -115,66 +116,66 @@ gint obex_delete_socket(obex_t *self, gint fd)
  *    Return a GSting of an OBEX-response
  *
  */
-GString *obex_get_response_message(obex_t *self, gint rsp)
+char *obex_get_response_message(obex_t *self, int rsp)
 {
-	GString *string;
+	char *string;
 
-	g_return_val_if_fail(self != NULL, NULL);
+	obex_return_val_if_fail(self != NULL, NULL);
 
 	switch (rsp) {
 	case OBEX_RSP_CONTINUE:
-		string = g_string_new("Continue");
+		string = strdup("Continue");
 		break;
 	case OBEX_RSP_SWITCH_PRO:
-		string = g_string_new("Switching protocols");
+		string = strdup("Switching protocols");
 		break;
 	case OBEX_RSP_SUCCESS:
-		string = g_string_new("OK, Success");
+		string = strdup("OK, Success");
 		break;
 	case OBEX_RSP_CREATED:
-		string = g_string_new("Created");
+		string = strdup("Created");
 		break;
 	case OBEX_RSP_ACCEPTED:
-		string = g_string_new("Accepted");
+		string = strdup("Accepted");
 		break;	
 	case OBEX_RSP_NO_CONTENT:
-		string = g_string_new("No Content");
+		string = strdup("No Content");
 		break;
 	case OBEX_RSP_BAD_REQUEST:
-		string = g_string_new("Bad Request");
+		string = strdup("Bad Request");
 		break;
 	case OBEX_RSP_UNAUTHORIZED:
-		string = g_string_new("Unautorized");
+		string = strdup("Unautorized");
 		break;
 	case OBEX_RSP_PAYMENT_REQUIRED:
-		string = g_string_new("Payment required");
+		string = strdup("Payment required");
 		break;
 	case OBEX_RSP_FORBIDDEN:
-		string = g_string_new("Forbidden");
+		string = strdup("Forbidden");
 		break;
 	case OBEX_RSP_NOT_FOUND:
-		string = g_string_new("Not found");
+		string = strdup("Not found");
 		break;
 	case OBEX_RSP_METHOD_NOT_ALLOWED:
-		string = g_string_new("Method not allowed");
+		string = strdup("Method not allowed");
 		break;
 	case OBEX_RSP_CONFLICT:
-		string = g_string_new("Conflict");
+		string = strdup("Conflict");
 		break;
 	case OBEX_RSP_INTERNAL_SERVER_ERROR:
-		string = g_string_new("Internal server error");
+		string = strdup("Internal server error");
 		break;
 	case OBEX_RSP_NOT_IMPLEMENTED:
-		string = g_string_new("Not implemented!");
+		string = strdup("Not implemented!");
 		break;
 	case OBEX_RSP_DATABASE_FULL:
-		string = g_string_new("Database full");
+		string = strdup("Database full");
 		break;
 	case OBEX_RSP_DATABASE_LOCKED:
-		string = g_string_new("Database locked");
+		string = strdup("Database locked");
 		break;
 	default:
-		string = g_string_new("Unknown response");
+		string = strdup("Unknown response");
 		break;
 	}
 	return string;
@@ -186,7 +187,7 @@ GString *obex_get_response_message(obex_t *self, gint rsp)
  *    Deliver an event to app.
  *
  */
-void obex_deliver_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean del)
+void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del)
 {
 	if(self->state & MODE_SRV)
 		self->eventcb(self, self->object, OBEX_SERVER, event, cmd, rsp);
@@ -205,11 +206,11 @@ void obex_deliver_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean d
  *    Send a response to peer device
  *
  */
-void obex_response_request(obex_t *self, guint8 opcode)
+void obex_response_request(obex_t *self, uint8_t opcode)
 {
 	GNetBuf *msg;
 
-	g_return_if_fail(self != NULL);
+	obex_return_if_fail(self != NULL);
 
 	msg = g_netbuf_recycle(self->tx_msg);
 	g_netbuf_reserve(msg, sizeof(obex_common_hdr_t));
@@ -223,22 +224,22 @@ void obex_response_request(obex_t *self, guint8 opcode)
  *    Send response or command code along with optional headers/data.
  *
  */
-gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
+int obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
 {
 	obex_common_hdr_t *hdr;
 	int actual = 0;
 
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(msg != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(msg != NULL, -1);
 
 	/* Insert common header */
 	hdr = (obex_common_hdr_t *) g_netbuf_push(msg, sizeof(obex_common_hdr_t));
 
 	hdr->opcode = opcode;
-	hdr->len = htons((guint16)msg->len);
+	hdr->len = htons((uint16_t)msg->len);
 
 	DUMPBUFFER(1, "Tx", msg);
-	DEBUG(1, G_GNUC_FUNCTION "(), len = %d bytes\n", msg->len);
+	DEBUG(1, __FUNCTION__ "(), len = %d bytes\n", msg->len);
 
 	actual = obex_transport_write(self, msg);
 	return actual;
@@ -250,18 +251,18 @@ gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
  *    Read/Feed some input from device and find out which packet it is
  *
  */
-gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
+int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 {
 	obex_common_hdr_t *hdr;
 	GNetBuf *msg;
-	gint final;
-	gint actual = 0;
-	guint size;
-	gint ret;
+	int final;
+	int actual = 0;
+	unsigned int size;
+	int ret;
 	
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
-	g_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, -1);
 
 	msg = self->rx_msg;
 	
@@ -269,7 +270,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	if(msg->len < 3)  {
 		actual = obex_transport_read(self, 3 - (msg->len), buf, buflen);
 		
-		DEBUG(4, G_GNUC_FUNCTION "() Got %d bytes\n", actual);
+		DEBUG(4, __FUNCTION__ "() Got %d bytes\n", actual);
 
 		/* Check if we are still connected */
 		if (actual <= 0)	{
@@ -287,7 +288,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 		size = ntohs(hdr->len);
 
 		actual = 0;
-		if(msg->len != (gint) ntohs(hdr->len)) {
+		if(msg->len != (int) ntohs(hdr->len)) {
 
 			actual = obex_transport_read(self, size - msg->len, buf,
 				buflen);
@@ -301,14 +302,14 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	}
         else {
 		/* Wait until we have at least 3 bytes data */
-		DEBUG(3, G_GNUC_FUNCTION "() Need at least 3 bytes got only %d!\n", msg->len);
+		DEBUG(3, __FUNCTION__ "() Need at least 3 bytes got only %d!\n", msg->len);
 		return actual;
         }
 
 
 	/* New data has been inserted at the end of message */
 	g_netbuf_put(msg, actual);
-	DEBUG(1, G_GNUC_FUNCTION "() Got %d bytes msg len=%d\n", actual, msg->len);
+	DEBUG(1, __FUNCTION__ "() Got %d bytes msg len=%d\n", actual, msg->len);
 
 	/*
 	 * Make sure that the buffer we have, actually has the specified
@@ -318,7 +319,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 
 	/* Make sure we have a whole packet */
 	if (size > msg->len) {
-		DEBUG(3, G_GNUC_FUNCTION "() Need more data, size=%d, len=%d!\n",
+		DEBUG(3, __FUNCTION__ "() Need more data, size=%d, len=%d!\n",
 		      size, msg->len);
 
 		/* I'll be back! */
@@ -352,7 +353,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
  *    Cancel an ongoing request
  *
  */
-gint obex_cancelrequest(obex_t *self, gboolean nice)
+int obex_cancelrequest(obex_t *self, int nice)
 {
 	/* If we have no ongoing request do nothing */
 	if(self->object == NULL)
@@ -372,7 +373,7 @@ gint obex_cancelrequest(obex_t *self, gboolean nice)
 	}
 	
 	/* Do a "nice" abort */
-	g_message("Nice abort not implemented yet!!\n");
+	DEBUG(4, "Nice abort not implemented yet!!\n");
 	self->object->abort = TRUE;
 	return 0;
 }

@@ -52,7 +52,7 @@
  *    Used when working in synchronous mode.
  *
  */
-gint obex_transport_handle_input(obex_t *self, gint timeout)
+int obex_transport_handle_input(obex_t *self, int timeout)
 {
 	int ret;
 	
@@ -60,7 +60,7 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 		if(self->ctrans.handleinput)
 			ret = self->ctrans.handleinput(self, self->ctrans.userdata, timeout);
 		else {
-			g_message(G_GNUC_FUNCTION "() No handleinput-callback exist!\n");
+			DEBUG(4, __FUNCTION__ "() No handleinput-callback exist!\n");
 			ret = -1;
 		}
 	}
@@ -69,12 +69,12 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 		fd_set fdset;
 		int highestfd = 0;
 	
-		DEBUG(4, G_GNUC_FUNCTION "()\n");
-		g_return_val_if_fail(self != NULL, -1);
+		DEBUG(4, __FUNCTION__ "()\n");
+		obex_return_val_if_fail(self != NULL, -1);
 
 		/* Check of we have any fd's to do select on. */
 		if(self->fd < 0 && self->serverfd < 0) {
-			DEBUG(0, G_GNUC_FUNCTION "() No valid socket is open\n");
+			DEBUG(0, __FUNCTION__ "() No valid socket is open\n");
 			return -1;
 		}
 
@@ -101,12 +101,12 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 			return ret;
 	
 		if( (self->fd >= 0) && FD_ISSET(self->fd, &fdset)) {
-			DEBUG(4, G_GNUC_FUNCTION "() Data available on client socket\n");
+			DEBUG(4, __FUNCTION__ "() Data available on client socket\n");
 			ret = obex_data_indication(self, NULL, 0);
 		}
 
 		else if( (self->serverfd >= 0) && FD_ISSET(self->serverfd, &fdset)) {
-			DEBUG(4, G_GNUC_FUNCTION "() Data available on server socket\n");
+			DEBUG(4, __FUNCTION__ "() Data available on server socket\n");
 			/* Accept : create the connected socket */
 			ret = obex_transport_accept(self);
 
@@ -132,11 +132,11 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
  *    Accept an incoming connection.
  *
  */
-gint obex_transport_accept(obex_t *self)
+int obex_transport_accept(obex_t *self)
 {
-	gint ret = -1;
+	int ret = -1;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	switch (self->trans.type) {
 #ifdef HAVE_IRDA
@@ -154,7 +154,7 @@ gint obex_transport_accept(obex_t *self)
 #endif /*HAVE_BLUETOOTH*/
 
 	default:
-		g_message(G_GNUC_FUNCTION "(), domain not implemented!\n");
+		DEBUG(4, __FUNCTION__ "(), domain not implemented!\n");
 		break;
 	}
 	return ret;
@@ -167,9 +167,9 @@ gint obex_transport_accept(obex_t *self)
  *    Try to connect transport
  *
  */
-gint obex_transport_connect_request(obex_t *self)
+int obex_transport_connect_request(obex_t *self)
 {
-	gint ret = -1;
+	int ret = -1;
 
 
 	if(self->trans.connected)
@@ -185,12 +185,12 @@ gint obex_transport_connect_request(obex_t *self)
 		ret = inobex_connect_request(self);
 		break;
 	case OBEX_TRANS_CUST:
-		DEBUG(4, G_GNUC_FUNCTION "() Custom connect\n");
+		DEBUG(4, __FUNCTION__ "() Custom connect\n");
 		if(self->ctrans.connect)
 			ret = self->ctrans.connect(self, self->ctrans.userdata);
 		else
-			g_message(G_GNUC_FUNCTION "(), No connect-callback exist!\n");
-		DEBUG(4, G_GNUC_FUNCTION "ret=%d\n", ret);
+			DEBUG(4, __FUNCTION__ "(), No connect-callback exist!\n");
+		DEBUG(4, __FUNCTION__ "ret=%d\n", ret);
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -199,7 +199,7 @@ gint obex_transport_connect_request(obex_t *self)
 #endif /*HAVE_BLUETOOTH*/
 
 	default:
-		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
+		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
 		break;
 	}
 	if (ret >= 0)
@@ -227,11 +227,11 @@ void obex_transport_disconnect_request(obex_t *self)
 		inobex_disconnect_request(self);
 		break;	
 	case OBEX_TRANS_CUST:
-		DEBUG(4, G_GNUC_FUNCTION "() Custom disconnect\n");
+		DEBUG(4, __FUNCTION__ "() Custom disconnect\n");
 		if(self->ctrans.disconnect)
 			self->ctrans.disconnect(self, self->ctrans.userdata);
 		else
-			g_message(G_GNUC_FUNCTION "(), No disconnect-callback exist!\n");
+			DEBUG(4, __FUNCTION__ "(), No disconnect-callback exist!\n");
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -239,7 +239,7 @@ void obex_transport_disconnect_request(obex_t *self)
 		break;
 #endif /*HAVE_BLUETOOTH*/
 	default:
-		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
+		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
 		break;
 	}
 	self->trans.connected = FALSE;
@@ -251,7 +251,7 @@ void obex_transport_disconnect_request(obex_t *self)
  *    Prepare for incomming connections
  *
  */
-gint obex_transport_listen(obex_t *self)
+int obex_transport_listen(obex_t *self)
 {
 	int ret = -1;
 
@@ -265,11 +265,11 @@ gint obex_transport_listen(obex_t *self)
 		ret = inobex_listen(self);
 		break;
 	case OBEX_TRANS_CUST:
-		DEBUG(4, G_GNUC_FUNCTION "() Custom listen\n");
+		DEBUG(4, __FUNCTION__ "() Custom listen\n");
 		if(self->ctrans.listen)
 			ret = self->ctrans.listen(self, self->ctrans.userdata);
 		else
-			g_message(G_GNUC_FUNCTION "(), No listen-callback exist!\n");
+			DEBUG(4, __FUNCTION__ "(), No listen-callback exist!\n");
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -277,7 +277,7 @@ gint obex_transport_listen(obex_t *self)
 		break;
 #endif /*HAVE_BLUETOOTH*/
 	default:
-		g_message(G_GNUC_FUNCTION "() Transport %d not implemented!\n",
+		DEBUG(4, __FUNCTION__ "() Transport %d not implemented!\n",
 			  self->trans.type);
 		break;
 	}
@@ -306,7 +306,7 @@ void obex_transport_disconnect_server(obex_t *self)
 		inobex_disconnect_server(self);
 		break;	
 	case OBEX_TRANS_CUST:
-		DEBUG(4, G_GNUC_FUNCTION "() Custom disconnect\n");
+		DEBUG(4, __FUNCTION__ "() Custom disconnect\n");
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -314,7 +314,7 @@ void obex_transport_disconnect_server(obex_t *self)
 		break;
 #endif /*HAVE_BLUETOOTH*/
 	default:
-		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
+		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
 		break;
 	}
 }
@@ -325,12 +325,12 @@ void obex_transport_disconnect_server(obex_t *self)
  *    Do the writing
  *
  */
-gint obex_transport_write(obex_t *self, GNetBuf *msg)
+int obex_transport_write(obex_t *self, GNetBuf *msg)
 {
-	gint actual = -1;
-	gint size;
+	int actual = -1;
+	int size;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	switch(self->trans.type)	{
 #ifdef HAVE_IRDA
@@ -346,7 +346,7 @@ gint obex_transport_write(obex_t *self, GNetBuf *msg)
 				size = self->trans.mtu;
 			else
 				size = msg->len;
-			DEBUG(1, G_GNUC_FUNCTION "(), sending %d bytes\n", size);
+			DEBUG(1, __FUNCTION__ "(), sending %d bytes\n", size);
 
 			actual = send(self->fd, msg->data, size, 0);
 
@@ -359,14 +359,14 @@ gint obex_transport_write(obex_t *self, GNetBuf *msg)
 		}
 		break;
 	case OBEX_TRANS_CUST:
-		DEBUG(4, G_GNUC_FUNCTION "() Custom write\n");
+		DEBUG(4, __FUNCTION__ "() Custom write\n");
 		if(self->ctrans.write)
 			actual = self->ctrans.write(self, self->ctrans.userdata, msg->data, msg->len);
 		else
-			g_message(G_GNUC_FUNCTION "(), No write-callback exist!\n");
+			DEBUG(4, __FUNCTION__ "(), No write-callback exist!\n");
 		break;
 	default:
-		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
+		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
 		break;
 	}	
 	return actual;
@@ -378,12 +378,12 @@ gint obex_transport_write(obex_t *self, GNetBuf *msg)
  *    Do the reading
  *
  */
-gint obex_transport_read(obex_t *self, gint max, guint8 *buf, gint buflen)
+int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 {
-	gint actual = -1;
+	int actual = -1;
 	GNetBuf *msg = self->rx_msg;
 
-	DEBUG(4, G_GNUC_FUNCTION "() Request to read max %d bytes\n", max);
+	DEBUG(4, __FUNCTION__ "() Request to read max %d bytes\n", max);
 
 	switch(self->trans.type)	{
 #ifdef HAVE_IRDA
@@ -406,7 +406,7 @@ gint obex_transport_read(obex_t *self, gint max, guint8 *buf, gint buflen)
 		}
 		break;
 	default:
-		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
+		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
 		break;
 	}	
 	return actual;

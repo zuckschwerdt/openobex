@@ -44,12 +44,12 @@
  *    Handle client operations
  *
  */
-gint obex_client(obex_t *self, GNetBuf *msg, gint final)
+int obex_client(obex_t *self, GNetBuf *msg, int final)
 {
 	obex_common_hdr_t *response = NULL;
-	gint rsp = OBEX_RSP_BAD_REQUEST, ret;
+	int rsp = OBEX_RSP_BAD_REQUEST, ret;
 	
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, __FUNCTION__ "()\n");
 
 	/* If this is a response we have some data in msg */
 	if(msg) {
@@ -61,12 +61,12 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	{
 	case STATE_SEND:
 		/* In progress of sending request */
-		DEBUG(4, G_GNUC_FUNCTION "() STATE_SEND\n");
+		DEBUG(4, __FUNCTION__ "() STATE_SEND\n");
 		
 		/* Any errors from peer? Win2k will send RSP_SUCCESS after
 		   every fragment sent so we have to accept that too.*/
 		if(rsp != OBEX_RSP_SUCCESS && rsp != OBEX_RSP_CONTINUE) {
-			DEBUG(0, G_GNUC_FUNCTION "() STATE_SEND. request not accepted.\n");
+			DEBUG(0, __FUNCTION__ "() STATE_SEND. request not accepted.\n");
 			obex_deliver_event(self, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
 			/* This is not an Obex error, it is just that the peer
 			 * doesn't accept the request, so return 0 - Jean II */
@@ -74,7 +74,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		}
 				
 		if(ntohs(response->len) > 3) {
-			DEBUG(1, G_GNUC_FUNCTION "() STATE_SEND. Didn't excpect data from peer (%d)\n", ntohs(response->len));
+			DEBUG(1, __FUNCTION__ "() STATE_SEND. Didn't excpect data from peer (%d)\n", ntohs(response->len));
 			DUMPBUFFER(4, "unexpected data", msg);
 			/* At this point, we are in the middle of sending
 			 * our request to the server, and it is already
@@ -111,7 +111,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	
 	case STATE_START:
 		/* Nothing has been sent yet */
-		DEBUG(4, G_GNUC_FUNCTION "() STATE_START\n");
+		DEBUG(4, __FUNCTION__ "() STATE_START\n");
 		
 		ret = obex_object_send(self, self->object, TRUE, FALSE);
 		if(ret < 0) {
@@ -133,11 +133,11 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 			
 	case STATE_REC:
 		/* Receiving answer of request */
-		DEBUG(4, G_GNUC_FUNCTION "() STATE_REC\n");
+		DEBUG(4, __FUNCTION__ "() STATE_REC\n");
 		
 		/* Response of a CMD_CONNECT needs some special treatment.*/
 		if(self->object->opcode == OBEX_CMD_CONNECT)	{
-			DEBUG(2, G_GNUC_FUNCTION "() We expect a connect-rsp\n");
+			DEBUG(2, __FUNCTION__ "() We expect a connect-rsp\n");
 			if(obex_parse_connect_header(self, msg) < 0)	{
 				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				self->state = MODE_SRV | STATE_IDLE;
@@ -148,7 +148,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 
 		/* So does CMD_DISCONNECT */
 		if(self->object->opcode == OBEX_CMD_DISCONNECT)	{
-			DEBUG(2, G_GNUC_FUNCTION "() CMD_DISCONNECT done. Resetting MTU!\n");
+			DEBUG(2, __FUNCTION__ "() CMD_DISCONNECT done. Resetting MTU!\n");
 			self->mtu_tx = OBEX_MINIMUM_MTU;
 		}
 
@@ -161,7 +161,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	
 		/* Are we done yet? */
 		if(rsp == OBEX_RSP_CONTINUE) {
-			DEBUG(3, G_GNUC_FUNCTION "() Continue...\n");
+			DEBUG(3, __FUNCTION__ "() Continue...\n");
 			if(obex_object_send(self, self->object, TRUE, FALSE) < 0)
 				obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
 			else
@@ -169,14 +169,14 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		}
 		else	{
 			/* Notify app that client-operation is done! */
-			DEBUG(3, G_GNUC_FUNCTION "() Done! Rsp=%02x!\n", rsp);
+			DEBUG(3, __FUNCTION__ "() Done! Rsp=%02x!\n", rsp);
 			obex_deliver_event(self, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
 			self->state = MODE_SRV | STATE_IDLE;
 		}
 		break;
        	
        	default:
-		DEBUG(0, G_GNUC_FUNCTION "() Unknown state\n");		
+		DEBUG(0, __FUNCTION__ "() Unknown state\n");		
 		obex_deliver_event(self, OBEX_EV_PARSEERR, rsp, 0, TRUE);
 		return -1;
 	}

@@ -31,7 +31,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <glib.h>
+#include <stdint.h>
 
 #include "obex_main.h"
 
@@ -45,7 +45,7 @@ void DEBUG(unsigned int n, const char *format, void *a1, void *a2, void *a3, voi
 		void *a5, void *a6, void *a7, void *a8, void *a9, void *a10)
 {
 	if(n <= obex_debug)
-		g_print(format, a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+		fprintf(stderr, format, a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
 }
 #else
 void DEBUG(int n, const char *format, ...){};

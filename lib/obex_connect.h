@@ -32,8 +32,8 @@
 
 #include "obex_main.h"
 
-gint obex_insert_connectframe(obex_t *self, obex_object_t *object);
-gint obex_parse_connect_header(obex_t *self, GNetBuf *msg);
+int obex_insert_connectframe(obex_t *self, obex_object_t *object);
+int obex_parse_connect_header(obex_t *self, GNetBuf *msg);
 
 #endif
 
