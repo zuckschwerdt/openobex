@@ -87,12 +87,20 @@ gint visit_all_files(gchar *name, visit_cb cb, gpointer userdata)
 	}
 
 	if(S_ISREG(statbuf.st_mode)) {
+		/* A single file. Just visit it, then we are done. */
 		ret = cb(VISIT_FILE, name, "", userdata);
 	}
 	else if(S_ISDIR(statbuf.st_mode)) {
+		/* A directory! Enter it */
 		path = g_string_assign(path, name);
-		ret = cb(VISIT_GOING_DEEPER, name, "", userdata);
-		if( ret < 0)
+		
+		/* Don't notify app if going "down" to "." */
+		if(strcmp(name, ".") == 0)
+			ret = 1;
+		else
+			ret = cb(VISIT_GOING_DEEPER, name, "", userdata);
+
+		if(ret < 0)
 			goto out;
 		ret = visit_dir(path, cb, userdata);
 		if(ret < 0)
@@ -102,6 +110,7 @@ gint visit_all_files(gchar *name, visit_cb cb, gpointer userdata)
 			goto out;
 	}
 	else {
+		/* Not file, not dir, don't know what to do */
 		ret = -1;
 	}
 
