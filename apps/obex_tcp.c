@@ -50,6 +50,9 @@
 #include "obex_put_common.h"
 #include "obex_io.h"
 
+#define TRUE  1
+#define FALSE 0
+
 obex_t *handle = NULL;
 volatile int finished = FALSE;
 
@@ -59,7 +62,7 @@ volatile int finished = FALSE;
  *    
  *
  */
-gint get_peer_addr(char *name, struct sockaddr_in *peer) 
+int get_peer_addr(char *name, struct sockaddr_in *peer) 
 {
 	struct hostent *host;
 	u_long inaddr;
@@ -71,7 +74,7 @@ gint get_peer_addr(char *name, struct sockaddr_in *peer)
 	}
 	else {
 		if ((host = gethostbyname(name)) == NULL) {
-			g_error( "Bad host name: ");
+			printf( "Bad host name: ");
 			exit(-1);
                 }
 		memcpy((char *) &peer->sin_addr, host->h_addr,

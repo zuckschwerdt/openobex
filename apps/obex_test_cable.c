@@ -37,11 +37,14 @@
 #include <unistd.h>
 #include <termios.h>
 
-#include <glib.h>
 #include <openobex/obex.h>
+
 #include "obex_test_cable.h"
 
-static void cobex_cleanup(struct cobex_context *gt, gboolean force);
+#define TRUE  1
+#define FALSE 0
+
+static void cobex_cleanup(struct cobex_context *gt, int force);
 
 /*#define TTBT "AT*TTBT=0001EC4AF6E7\r"*/
 
@@ -50,11 +53,11 @@ static void cobex_cleanup(struct cobex_context *gt, gboolean force);
 // To read a line without sending anything set cmd as NULL
 // (this function should be rewritten!)
 //
-gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint rspbuflen, gint timeout)
+int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbuflen, int timeout)
 {
 	fd_set ttyset;
 	struct timeval tv;
-	gint fd;
+	int fd;
 	
 	char *answer = NULL;
 	char *answer_end = NULL;
@@ -74,7 +77,7 @@ gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint r
 
 	if(cmd != NULL) {
 		// Write command
-		gint cmdlen;
+		int cmdlen;
 		
 		cmdlen = strlen(cmd);
 		CDEBUG("Sending command %s\n", cmd);
@@ -148,7 +151,7 @@ gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint r
 //
 // Open serial port and if we are using an r320, set it in OBEX-mode.
 //
-static gint cobex_init(struct cobex_context *gt)
+static int cobex_init(struct cobex_context *gt)
 {
 	char rspbuf[200];
 
@@ -212,7 +215,7 @@ err:
 //
 // Close down. If force is TRUE. Try to break out of OBEX-mode.
 //
-static void cobex_cleanup(struct cobex_context *gt, gboolean force)
+static void cobex_cleanup(struct cobex_context *gt, int force)
 {
 	if(force)	{
 		// Send a break to get out of OBEX-mode
@@ -227,14 +230,15 @@ static void cobex_cleanup(struct cobex_context *gt, gboolean force)
 //
 // Open up cable OBEX
 //
-struct cobex_context * cobex_open(const gchar *port, gboolean r320)
+struct cobex_context * cobex_open(const char *port, int r320)
 {
 	struct cobex_context *gt;
 	
 	CDEBUG("\n");
-	gt = g_new0(struct cobex_context, 1);
+	gt = malloc(sizeof(struct cobex_context));
 	if (gt == NULL)
 		return NULL;
+	memset(gt, 0, sizeof(struct cobex_context));
 	
 	gt->ttyfd = -1;
 	gt->portname = port;
@@ -247,14 +251,14 @@ struct cobex_context * cobex_open(const gchar *port, gboolean r320)
 //
 void cobex_close(struct cobex_context *gt)
 {
-	g_free(gt);
+	free(gt);
 }
 	
 
 //
 // Do transport connect or listen
 //
-gint cobex_connect(obex_t *handle, gpointer userdata)
+int cobex_connect(obex_t *handle, void * userdata)
 {
 	struct cobex_context *gt;
 
@@ -275,9 +279,9 @@ gint cobex_connect(obex_t *handle, gpointer userdata)
 //
 // Do transport disconnect
 //
-gint cobex_disconnect(obex_t *handle, gpointer userdata)
+int cobex_disconnect(obex_t *handle, void * userdata)
 {
-	gchar rspbuf[20];
+	char rspbuf[20];
 	struct cobex_context *gt;
 
 	CDEBUG("\n");
@@ -287,16 +291,16 @@ gint cobex_disconnect(obex_t *handle, gpointer userdata)
 	if(gt->r320) {
 		CDEBUG("R320!!!\n");
 		if(cobex_do_at_cmd(gt, NULL, rspbuf, sizeof(rspbuf), 1) < 0)
-			g_print("Comm-error waiting for OK after disconnect\n");
+			printf("Comm-error waiting for OK after disconnect\n");
 		else if(strcasecmp(rspbuf, "OK") != 0)
-			g_print("Excpected OK after OBEX diconnect got %s\n", rspbuf);
+			printf("Excpected OK after OBEX diconnect got %s\n", rspbuf);
 	
 #ifdef TTBT
 		sleep(2);
 		if(cobex_do_at_cmd(gt, "---", rspbuf, sizeof(rspbuf), 5) < 0)
-			g_print("Comm-error Sending ---\n");
+			printf("Comm-error Sending ---\n");
 		else if(strcasecmp(rspbuf, "DISCONNECT") != 0)
-			 g_print("Error waiting for DISCONNECT (%s)\n", rspbuf);
+			 printf("Error waiting for DISCONNECT (%s)\n", rspbuf);
 		sleep(2);
 #endif
 
@@ -309,10 +313,10 @@ gint cobex_disconnect(obex_t *handle, gpointer userdata)
 //
 //  Called when data needs to be written
 //
-gint cobex_write(obex_t *handle, gpointer userdata, guint8 *buffer, gint length)
+int cobex_write(obex_t *handle, void * userdata, uint8_t *buffer, int length)
 {
 	struct cobex_context *gt;
-	gint actual;
+	int actual;
 
 	CDEBUG("\n");
 	gt = userdata;
@@ -324,13 +328,13 @@ gint cobex_write(obex_t *handle, gpointer userdata, guint8 *buffer, gint length)
 //
 // Called when more data is needed.
 //
-gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout)
+int cobex_handle_input(obex_t *handle, void * userdata, int timeout)
 {
-	gint actual;
+	int actual;
 	struct cobex_context *gt;
 	struct timeval time;
 	fd_set fdset;
-        gint ret;
+        int ret;
 	
 	CDEBUG("\n");
 
@@ -363,13 +367,13 @@ gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout)
 	{
 		int i = 0;
 		for(i=0;i<actual;i++) {
-			g_print("[%0X",gt->inputbuf[i]);
+			printf("[%0X",gt->inputbuf[i]);
 			if(gt->inputbuf[i] >= 32) {
-				g_print(",%c",gt->inputbuf[i]);
+				printf(",%c",gt->inputbuf[i]);
 			}
-			g_print("]");
+			printf("]");
 		}
-		g_print("\n");
+		printf("\n");
 	}
 #endif
 	OBEX_CustomDataFeed(handle, gt->inputbuf, actual);

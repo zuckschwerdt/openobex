@@ -24,8 +24,8 @@ irxfer_SOURCES = irxfer.c
 irobex_palm3_SOURCES = irobex_palm3.c
 
 
-LDADD = @GLIB_LIBS@ @OPENOBEX_LIBS@ libmisc.a
+LDADD = @OPENOBEX_LIBS@ libmisc.a
 
-INCLUDES = @GLIB_CFLAGS@ @OPENOBEX_CFLAGS@
+INCLUDES = @OPENOBEX_CFLAGS@
 
 EXTRA_DIST = makefile.msc

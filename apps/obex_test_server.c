@@ -37,52 +37,55 @@
 #include "obex_test.h"
 #include "obex_test_server.h"
 
+#define TRUE  1
+#define FALSE 0
+
 //
 //
 //
 void put_server(obex_t *handle, obex_object_t *object)
 {
 	obex_headerdata_t hv;
-	guint8 hi;
-	gint hlen;
+	uint8_t hi;
+	int hlen;
 
-	const guint8 *body = NULL;
-	gint body_len = 0;
-	gchar *name = NULL;
-	gchar *namebuf = NULL;
+	const uint8_t *body = NULL;
+	int body_len = 0;
+	char *name = NULL;
+	char *namebuf = NULL;
 
-	g_print(G_GNUC_FUNCTION "()\n");
+	printf(__FUNCTION__ "()\n");
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_BODY:
-			g_print(G_GNUC_FUNCTION "() Found body\n");
+			printf(__FUNCTION__ "() Found body\n");
 			body = hv.bs;
 			body_len = hlen;
 			break;
 		case OBEX_HDR_NAME:
-			g_print(G_GNUC_FUNCTION "() Found name\n");
-			if( (namebuf = g_malloc(hlen / 2)))	{
+			printf(__FUNCTION__ "() Found name\n");
+			if( (namebuf = malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
 				name = namebuf;
 			}
 			break;
 		
 		default:
-			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
+			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
 		}
 	}
 	if(!body)	{
-		g_print("Got a PUT without a body\n");
+		printf("Got a PUT without a body\n");
 		return;
 	}
 	if(!name)	{
 		name = "OBEX_PUT_Unknown_object";
-		g_print("Got a PUT without a name. Setting name to %s\n", name);
+		printf("Got a PUT without a name. Setting name to %s\n", name);
 
 	}
 	safe_save_file(name, body, body_len);
-	g_free(namebuf);
+	free(namebuf);
 }
 
 //
@@ -90,43 +93,43 @@ void put_server(obex_t *handle, obex_object_t *object)
 //
 void get_server(obex_t *handle, obex_object_t *object)
 {
-	guint8 *buf;
+	uint8_t *buf;
 
 	obex_headerdata_t hv;
-	guint8 hi;
-	gint hlen;
-	gint file_size;
+	uint8_t hi;
+	int hlen;
+	int file_size;
 
-	gchar *name = NULL;
-	gchar *namebuf = NULL;
+	char *name = NULL;
+	char *namebuf = NULL;
 
-	g_print(G_GNUC_FUNCTION "()\n");
+	printf(__FUNCTION__ "()\n");
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_NAME:
-			g_print(G_GNUC_FUNCTION "() Found name\n");
-			if( (namebuf = g_malloc(hlen / 2)))	{
+			printf(__FUNCTION__ "() Found name\n");
+			if( (namebuf = malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
 				name = namebuf;
 			}
 			break;
 		
 		default:
-			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
+			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
 		}
 	}
 
 	if(!name)	{
-		g_print(G_GNUC_FUNCTION "() Got a GET without a name-header!\n");
+		printf(__FUNCTION__ "() Got a GET without a name-header!\n");
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_FOUND, OBEX_RSP_NOT_FOUND);
 		return;
 	}
-	g_print(G_GNUC_FUNCTION "() Got a request for %s\n", name);
+	printf(__FUNCTION__ "() Got a request for %s\n", name);
 
 	buf = easy_readfile(name, &file_size);
 	if(buf == NULL) {
-		g_print("Can't find file %s\n", name);
+		printf("Can't find file %s\n", name);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_FOUND, OBEX_RSP_NOT_FOUND);
 		return;
 	}
@@ -135,8 +138,8 @@ void get_server(obex_t *handle, obex_object_t *object)
 	hv.bs = buf;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, hv, file_size, 0);
 	hv.bq4 = file_size;
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hv, sizeof(guint32), 0);
-	g_free(buf);
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hv, sizeof(uint32_t), 0);
+	free(buf);
 	return;
 }
 
@@ -146,12 +149,12 @@ void get_server(obex_t *handle, obex_object_t *object)
 void connect_server(obex_t *handle, obex_object_t *object)
 {
 	obex_headerdata_t hv;
-	guint8 hi;
-	gint hlen;
+	uint8_t hi;
+	int hlen;
 
-	const guint8 *who = NULL;
-	gint who_len = 0;
-	g_print(G_GNUC_FUNCTION "()\n");
+	const uint8_t *who = NULL;
+	int who_len = 0;
+	printf(__FUNCTION__ "()\n");
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_WHO)	{
@@ -159,12 +162,12 @@ void connect_server(obex_t *handle, obex_object_t *object)
 			who_len = hlen;
 		}
 		else	{
-			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
+			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
 		}
 	}
 	if (who_len == 6)	{
 		if(strncmp("Linux", who, 6) == 0)	{
-			g_print("Weeeha. I'm talking to the coolest OS ever!\n");
+			printf("Weeeha. I'm talking to the coolest OS ever!\n");
 		}
 	}
 	OBEX_ObjectSetRsp(object, OBEX_RSP_SUCCESS, OBEX_RSP_SUCCESS);
@@ -173,14 +176,14 @@ void connect_server(obex_t *handle, obex_object_t *object)
 //
 //
 //
-void server_request(obex_t *handle, obex_object_t *object, gint event, gint cmd)
+void server_request(obex_t *handle, obex_object_t *object, int event, int cmd)
 {
 	switch(cmd)	{
 	case OBEX_CMD_CONNECT:
 		connect_server(handle, object);
 		break;
 	case OBEX_CMD_DISCONNECT:
-		g_print("We got a disconnect-request\n");
+		printf("We got a disconnect-request\n");
 		OBEX_ObjectSetRsp(object, OBEX_RSP_SUCCESS, OBEX_RSP_SUCCESS);
 		break;
 	case OBEX_CMD_GET:
@@ -192,11 +195,11 @@ void server_request(obex_t *handle, obex_object_t *object, gint event, gint cmd)
 		put_server(handle, object);
 		break;
 	case OBEX_CMD_SETPATH:
-		g_print("Got a SETPATH request\n");
+		printf("Got a SETPATH request\n");
 		OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 		break;
 	default:
-		g_print(G_GNUC_FUNCTION "() Denied %02x request\n", cmd);
+		printf(__FUNCTION__ "() Denied %02x request\n", cmd);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
 		break;
 	}
@@ -206,22 +209,22 @@ void server_request(obex_t *handle, obex_object_t *object, gint event, gint cmd)
 //
 //
 //
-void server_done(obex_t *handle, obex_object_t *object, gint obex_cmd, gint obex_rsp)
+void server_done(obex_t *handle, obex_object_t *object, int obex_cmd, int obex_rsp)
 {
 	struct context *gt;
 	gt = OBEX_GetUserData(handle);
 
-	g_print("Server request finished!\n");
+	printf("Server request finished!\n");
 
 	switch (obex_cmd) {
 	case OBEX_CMD_DISCONNECT:
-		g_print("Disconnect done!\n");
+		printf("Disconnect done!\n");
 		OBEX_TransportDisconnect(handle);
 		gt->serverdone = TRUE;
 		break;
 
 	default:
-		g_print(G_GNUC_FUNCTION "() Command (%02x) has now finished\n", obex_cmd);
+		printf(__FUNCTION__ "() Command (%02x) has now finished\n", obex_cmd);
 		break;
 	}
 }
@@ -237,7 +240,7 @@ void server_do(obex_t *handle)
 	gt->serverdone = FALSE;
 	while(!gt->serverdone) {
 		if(OBEX_HandleInput(handle, 1) < 0) {
-			g_print("Error while doing OBEX_HandleInput()\n");
+			printf("Error while doing OBEX_HandleInput()\n");
 			break;
 		}
 	}

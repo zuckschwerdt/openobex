@@ -41,7 +41,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include <glib.h>
+
 #include <openobex/obex.h>
 
 #include "obex_io.h"
@@ -52,18 +52,18 @@ int obex_protocol_type = OBEX_PROTOCOL_GENERIC;
 //
 // Get the filesize in a "portable" way
 //
-gint get_filesize(const char *filename)
+int get_filesize(const char *filename)
 {
 #ifdef _WIN32
 	HANDLE fh;
-	gint size;
+	int size;
 	fh = CreateFile(filename, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if(fh == INVALID_HANDLE_VALUE) {
-		g_print("Cannot open %s\n", filename);
+		printf("Cannot open %s\n", filename);
 		return -1;	
 	}
 	size = GetFileSize(fh, NULL);
-	g_print("fize size was %d\n", size);
+	printf("fize size was %d\n", size);
 	CloseHandle(fh);
 	return size;
 
@@ -71,7 +71,7 @@ gint get_filesize(const char *filename)
 	struct stat stats;
 	/*  Need to know the file length */
 	stat(filename, &stats);
-	return (gint) stats.st_size;
+	return (int) stats.st_size;
 #endif
 }
 
@@ -79,14 +79,14 @@ gint get_filesize(const char *filename)
 //
 // Read a file and alloc a buffer for it
 //
-guint8* easy_readfile(const char *filename, int *file_size)
+uint8_t* easy_readfile(const char *filename, int *file_size)
 {
 	int actual;
 	int fd;
-	guint8 *buf;
+	uint8_t *buf;
 
 	*file_size = get_filesize(filename);
-	g_print("name=%s, size=%d\n", filename, *file_size);
+	printf("name=%s, size=%d\n", filename, *file_size);
 
 #ifdef _WIN32
 	fd = open(filename, O_RDONLY | O_BINARY, 0);
@@ -98,7 +98,7 @@ guint8* easy_readfile(const char *filename, int *file_size)
 		return NULL;
 	}
 	
-	if(! (buf = g_malloc(*file_size)) )	{
+	if(! (buf = malloc(*file_size)) )	{
 		return NULL;
 	}
 
@@ -107,7 +107,7 @@ guint8* easy_readfile(const char *filename, int *file_size)
 
 #ifdef _WIN32
 	if(actual != *file_size) {
-		g_free(buf);
+		free(buf);
 		buf = NULL;
 	}
 #else
@@ -123,13 +123,13 @@ guint8* easy_readfile(const char *filename, int *file_size)
 obex_object_t *build_object_from_file(obex_t *handle, const char *filename)
 {
 	obex_headerdata_t hdd;
-	guint8 unicode_buf[200];
-	gint namebuf_len;
+	uint8_t unicode_buf[200];
+	int namebuf_len;
  	obex_object_t *object;
-	guint32 creator_id;
+	uint32_t creator_id;
 	int file_size;
 	char *name = NULL;
-	guint8 *buf;
+	uint8_t *buf;
 
 
 	buf = easy_readfile(filename, &file_size);
@@ -168,27 +168,27 @@ obex_object_t *build_object_from_file(obex_t *handle, const char *filename)
 
 	hdd.bq4 = file_size;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH,
-				hdd, sizeof(guint32), 0);
+				hdd, sizeof(uint32_t), 0);
 
 #if 0
 	/* Optional header for win95 irxfer, allows date to be set on file */
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_TIME2,
-				(obex_headerdata_t) (guint32) stats.st_mtime,
-				sizeof(guint32), 0);
+				(obex_headerdata_t) (uint32_t) stats.st_mtime,
+				sizeof(uint32_t), 0);
 #endif
 	if (obex_protocol_type != 1) {
 		/* Optional header for Palm Pilot */
 		/* win95 irxfer does not seem to like this one */
 		hdd.bq4 = creator_id;
 		OBEX_ObjectAddHeader(handle, object, HEADER_CREATOR_ID,
-					hdd, sizeof(guint32), 0);
+					hdd, sizeof(uint32_t), 0);
 	}
 
 	hdd.bs = buf;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY,
 				hdd, file_size, 0);
 
-	g_free(buf);
+	free(buf);
 	return object;
 }
 
@@ -199,15 +199,15 @@ obex_object_t *build_object_from_file(obex_t *handle, const char *filename)
  *    First remove path and add "/tmp/". Then save.
  *
  */
-gint safe_save_file(gchar *name, const guint8 *buf, gint len)
+int safe_save_file(char *name, const uint8_t *buf, int len)
 {
-	gchar *s = NULL;
-	gchar filename[255] = {0,};
-	gint fd;
-	gint actual;
+	char *s = NULL;
+	char filename[255] = {0,};
+	int fd;
+	int actual;
 
 
-	g_print("Filename = %s\n", name);
+	printf("Filename = %s\n", name);
 
 #ifndef _WIN32
 	sprintf( filename, "/tmp/");
@@ -233,7 +233,7 @@ gint safe_save_file(gchar *name, const guint8 *buf, gint len)
 	actual = write(fd, buf, len);
 	close(fd);
 
-	g_print( "Wrote %s (%d bytes)\n", filename, actual);
+	printf( "Wrote %s (%d bytes)\n", filename, actual);
 
 	return actual;
 }

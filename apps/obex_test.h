@@ -8,9 +8,9 @@
 
 struct context
 {
-	gboolean serverdone;
-	gboolean clientdone;
-	gchar *get_name;	/* Name of last get-request */
+	int serverdone;
+	int clientdone;
+	char *get_name;	/* Name of last get-request */
 };
 
 #endif

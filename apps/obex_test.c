@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <openobex/obex.h>
-#include <glib.h>
+
 #include <string.h>
 
 #if _WIN32
@@ -48,20 +48,23 @@
 #include "obex_test_cable.h"
 #endif
 
+#define TRUE  1
+#define FALSE 0
+
 #define IR_SERVICE "OBEX"
 
 //
 // Called by the obex-layer when some event occurs.
 //
-void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp)
+void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp)
 {
 	switch (event)	{
 	case OBEX_EV_PROGRESS:
-		g_print("Made some progress...\n");
+		printf("Made some progress...\n");
 		break;
 
 	case OBEX_EV_ABORT:
-		g_print("Request aborted!\n");
+		printf("Request aborted!\n");
 		break;
 
 	case OBEX_EV_REQDONE:
@@ -83,7 +86,7 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 
 	case OBEX_EV_LINKERR:
 		OBEX_TransportDisconnect(handle);
-		g_print("Link broken!\n");
+		printf("Link broken!\n");
 		break;
 
 	case OBEX_EV_STREAMEMPTY:
@@ -91,7 +94,7 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 		break;
 
 	default:
-		g_print("Unknown event %02x!\n", event);
+		printf("Unknown event %02x!\n", event);
 		break;
 	}
 }
@@ -102,7 +105,7 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
  *    
  *
  */
-gint get_peer_addr(char *name, struct sockaddr_in *peer) 
+int get_peer_addr(char *name, struct sockaddr_in *peer) 
 {
 	struct hostent *host;
 	u_long inaddr;
@@ -114,7 +117,7 @@ gint get_peer_addr(char *name, struct sockaddr_in *peer)
 	}
 	else {
 		if ((host = gethostbyname(name)) == NULL) {
-			g_error( "Bad host name: ");
+			printf( "Bad host name: ");
 			exit(-1);
                 }
 		memcpy((char *) &peer->sin_addr, host->h_addr,
@@ -126,7 +129,7 @@ gint get_peer_addr(char *name, struct sockaddr_in *peer)
 //
 //
 //
-gint inet_connect(obex_t *handle)
+int inet_connect(obex_t *handle)
 {
 	struct sockaddr_in peer;
 
@@ -142,14 +145,14 @@ int main (int argc, char *argv[])
 {
 	char cmd[10];
 	int end = 0;
-	gboolean cobex = FALSE, tcpobex = FALSE, btobex = FALSE, r320 = FALSE;
+	int cobex = FALSE, tcpobex = FALSE, btobex = FALSE, r320 = FALSE;
 	obex_t *handle;
 
 	struct context global_context = {0,};
 
 #ifndef _WIN32
 
-	gchar *port;
+	char *port;
 	obex_ctrans_t custfunc;
 
 	if( (argc == 2 || argc ==3) && (strcmp(argv[1], "-s") == 0 ) )
@@ -174,14 +177,14 @@ int main (int argc, char *argv[])
 			port = "/dev/ttyS0";
 
 		if(r320)
-			g_print("OBEX to R320 on %s!\n", port);
+			printf("OBEX to R320 on %s!\n", port);
 		else
-			g_print("OBEX on %s!\n", port);
+			printf("OBEX on %s!\n", port);
 
 		custfunc.userdata = cobex_open(port, r320);
 
 		if(custfunc.userdata == NULL) {
-			g_print("cobex_open() failed\n");
+			printf("cobex_open() failed\n");
 			return -1;
 		}
 
@@ -197,15 +200,15 @@ int main (int argc, char *argv[])
 		custfunc.listen = cobex_connect;	// Listen and connect is 100% same on cable
 
 		if(OBEX_RegisterCTransport(handle, &custfunc) < 0)	{
-			g_print("Custom transport callback-registration failed\n");
+			printf("Custom transport callback-registration failed\n");
 		}
 #else
-		g_message("Not implemented in Win32 yet.\n");
+		printf("Not implemented in Win32 yet.\n");
 #endif	// _WIN32
 	}
 
 	else if(tcpobex) {
-		g_print("Using TCP transport\n");
+		printf("Using TCP transport\n");
 		if(! (handle = OBEX_Init(OBEX_TRANS_INET, obex_event, 0)))	{
 			perror( "OBEX_Init failed");
 			exit(0);
@@ -213,14 +216,14 @@ int main (int argc, char *argv[])
 	}
 	else if(btobex) {
 #ifndef _WIN32
-		g_print("Using Bluetooth RFCOMM transport\n");
-		g_message("Not implemented yet.\n");
+		printf("Using Bluetooth RFCOMM transport\n");
+		printf("Not implemented yet.\n");
 #else
-		g_message("Not implemented in Win32 yet.\n");
+		printf("Not implemented in Win32 yet.\n");
 #endif	// _WIN32
 	}
 	else	{
-		g_print("Using IrDA transport\n");
+		printf("Using IrDA transport\n");
 		if(! (handle = OBEX_Init(OBEX_TRANS_IRDA, obex_event, 0)))	{
 			perror( "OBEX_Init failed");
 			exit(0);
@@ -229,7 +232,7 @@ int main (int argc, char *argv[])
 
 	OBEX_SetUserData(handle, &global_context);
 	
-	g_print( "OBEX Interactive test client/server.\n");
+	printf( "OBEX Interactive test client/server.\n");
 
 	while (!end) {
 		printf("> ");
@@ -254,19 +257,19 @@ int main (int argc, char *argv[])
 				/* First connect transport */
 				if(tcpobex) {
 					if(inet_connect(handle)) {
-						g_print("Transport connect error! (TCP)\n");
+						printf("Transport connect error! (TCP)\n");
 						break;
 					}
 				}
 				if(cobex) {
 					if(OBEX_TransportConnect(handle, (void*) 1, 0) < 0) {
-						g_print("Transport connect error! (Serial)\n");
+						printf("Transport connect error! (Serial)\n");
 						break;
 					}
 				}
 				else {
 					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0)	{
-						g_print("Transport connect error! (IrDA)\n");
+						printf("Transport connect error! (IrDA)\n");
 						break;
 					}
 				}
@@ -280,19 +283,19 @@ int main (int argc, char *argv[])
 				/* First register server */
 				if(tcpobex) {
 					if(InOBEX_ServerRegister(handle)) {
-						g_print("Server register error! (TCP)\n");
+						printf("Server register error! (TCP)\n");
 						break;
 					}
 				}
 				if(cobex) {
 					if(OBEX_ServerRegister(handle, (void*) 1, 0) < 0) {
-						g_print("Server register error! (Serial)\n");
+						printf("Server register error! (Serial)\n");
 						break;
 					}
 				}
 				else {
 					if(IrOBEX_ServerRegister(handle, IR_SERVICE) < 0)	{
-						g_print("Server register error! (IrDA)\n");
+						printf("Server register error! (IrDA)\n");
 						break;
 					}
 				}

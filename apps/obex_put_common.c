@@ -35,6 +35,9 @@
 #include "obex_put_common.h"
 #include "obex_io.h"
 
+#define TRUE  1
+#define FALSE 0
+
 extern obex_t *handle;
 extern volatile int finished;
 
@@ -49,13 +52,13 @@ volatile int last_rsp = OBEX_RSP_BAD_REQUEST;
 void put_done(obex_object_t *object)
 {
 	obex_headerdata_t hv;
-	guint8 hi;
-	gint hlen;
+	uint8_t hi;
+	int hlen;
 
-	const guint8 *body = NULL;
-	gint body_len = 0;
-	gchar *name = NULL;
-	gchar *namebuf = NULL;
+	const uint8_t *body = NULL;
+	int body_len = 0;
+	char *name = NULL;
+	char *namebuf = NULL;
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
@@ -64,35 +67,35 @@ void put_done(obex_object_t *object)
 			body_len = hlen;
 			break;
 		case OBEX_HDR_NAME:
-			if( (namebuf = g_malloc(hlen / 2)))	{
+			if( (namebuf = malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
 				name = namebuf;
 			}
 			break;
 
 		case OBEX_HDR_LENGTH:
-			g_print("HEADER_LENGTH = %d\n", hv.bq4);
+			printf("HEADER_LENGTH = %d\n", hv.bq4);
 			break;
 
 		case HEADER_CREATOR_ID:
-			g_print("CREATORID = %#x\n", hv.bq4);
+			printf("CREATORID = %#x\n", hv.bq4);
 			break;
 		
 		default:
-			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
+			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
 		}
 	}
 	if(!body)	{
-		g_print("Got a PUT without a body\n");
+		printf("Got a PUT without a body\n");
 		return;
 	}
 	if(!name)	{
-		g_print("Got a PUT without a name. Setting name to %s\n", name);
+		printf("Got a PUT without a name. Setting name to %s\n", name);
 		name = "OBEX_PUT_Unknown_object";
 
 	}
 	safe_save_file(name, body, body_len);
-	g_free(namebuf);
+	free(namebuf);
 }
 
 
@@ -102,11 +105,11 @@ void put_done(obex_object_t *object)
  * Called when a request is about to come or has come.
  *
  */
-void server_request(obex_object_t *object, gint event, gint cmd)
+void server_request(obex_object_t *object, int event, int cmd)
 {
 	switch(cmd)	{
 	case OBEX_CMD_SETPATH:
-		g_print("Received SETPATH command\n");
+		printf("Received SETPATH command\n");
 		OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 		break;
 	case OBEX_CMD_PUT:
@@ -120,7 +123,7 @@ void server_request(obex_object_t *object, gint event, gint cmd)
 		OBEX_ObjectSetRsp(object, OBEX_RSP_SUCCESS, OBEX_RSP_SUCCESS);
 		break;
 	default:
-		g_print(G_GNUC_FUNCTION "() Denied %02x request\n", cmd);
+		printf(__FUNCTION__ "() Denied %02x request\n", cmd);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
 		break;
 	}
@@ -133,7 +136,7 @@ void server_request(obex_object_t *object, gint event, gint cmd)
  * Called when a server-operation has finished
  *
  */
-void server_done(obex_object_t *object, gint obex_cmd)
+void server_done(obex_object_t *object, int obex_cmd)
 {
 	/* Quit if DISCONNECT has finished */
 	if(obex_cmd == OBEX_CMD_DISCONNECT)
@@ -147,7 +150,7 @@ void server_done(obex_object_t *object, gint obex_cmd)
  * Called when a client-operation has finished
  *
  */
-void client_done(obex_object_t *object, gint obex_cmd, gint obex_rsp)
+void client_done(obex_object_t *object, int obex_cmd, int obex_rsp)
 {
 	last_rsp = obex_rsp;
 	finished = TRUE;
@@ -159,14 +162,14 @@ void client_done(obex_object_t *object, gint obex_cmd, gint obex_rsp)
  *    Called by the obex-layer when some event occurs.
  *
  */
-void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp)
+void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp)
 {
 	switch (event)	{
 	case OBEX_EV_PROGRESS:
-		g_print(".");
+		printf(".");
 		break;
 	case OBEX_EV_REQDONE:
-		g_print("\n");
+		printf("\n");
 		/* Comes when a command has finished. */
 		if(mode == OBEX_CLIENT)
 			client_done(object, obex_cmd, obex_rsp);
@@ -191,11 +194,11 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 		server_request(object, event, obex_cmd);
 		break;
 	case OBEX_EV_LINKERR:
-		g_print("Link broken (this does not have to be an error)!\n");
+		printf("Link broken (this does not have to be an error)!\n");
 		finished = 1;
 		break;
 	default:
-		g_print("Unknown event!\n");
+		printf("Unknown event!\n");
 		break;
 	}
 }
@@ -212,7 +215,7 @@ int wait_for_rsp()
 	int ret;
 
 	while(!finished) {
-		//g_print("wait_for_rsp()\n");
+		//printf("wait_for_rsp()\n");
 		ret = OBEX_HandleInput(handle, 10);
 		if (ret < 0)
 			return ret;
@@ -226,9 +229,9 @@ int wait_for_rsp()
  *    Execute an OBEX-request synchronously.
  *
  */
-int do_sync_request(obex_t *handle, obex_object_t *object, gint async)
+int do_sync_request(obex_t *handle, obex_object_t *object, int async)
 {
-	gint ret;
+	int ret;
 	OBEX_Request(handle, object);
 	ret = wait_for_rsp();
 	finished = FALSE;

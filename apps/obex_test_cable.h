@@ -33,12 +33,12 @@
 
 #define CABLE_DEBUG 1
 
-#include <glib.h>
+
 #include <termios.h>
 #include <openobex/obex.h>
 
 #ifdef CABLE_DEBUG
-#define CDEBUG(args...) g_print(G_GNUC_FUNCTION "() " args)
+#define CDEBUG(args...) printf(__FUNCTION__ "() " args)
 #else
 #define CDEBUG(args...)
 #endif
@@ -49,18 +49,18 @@ struct cobex_context
 	int ttyfd;
 	char inputbuf[500];
 	struct termios oldtio, newtio;
-	gboolean r320;
+	int r320;
 };
 
 /* User function */
-struct cobex_context *cobex_open(const gchar *port, gboolean r320);
+struct cobex_context *cobex_open(const char *port, int r320);
 void cobex_close(struct cobex_context *gt);
-gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint rspbuflen, gint timeout);
+int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbuflen, int timeout);
 
 /* Callbacks */
-gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout);
-gint cobex_write(obex_t *self, gpointer userdata, guint8 *buffer, gint length);
-gint cobex_connect(obex_t *handle, gpointer userdata);
-gint cobex_disconnect(obex_t *handle, gpointer userdata);
+int cobex_handle_input(obex_t *handle, void * userdata, int timeout);
+int cobex_write(obex_t *self, void * userdata, uint8_t *buffer, int length);
+int cobex_connect(obex_t *handle, void * userdata);
+int cobex_disconnect(obex_t *handle, void * userdata);
 
 #endif

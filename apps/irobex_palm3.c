@@ -45,6 +45,9 @@
 #include "obex_put_common.h"
 #include "obex_io.h"
 
+#define TRUE  1
+#define FALSE 0
+
 obex_t *handle = NULL;
 volatile int finished = FALSE;
 extern int last_rsp;

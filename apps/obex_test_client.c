@@ -31,16 +31,19 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <openobex/obex.h>
-#include <glib.h>
+
 
 #include "obex_io.h"
 #include "obex_test_client.h"
 #include "obex_test.h"
 
+#define TRUE  1
+#define FALSE 0
+
 #define OBEX_STREAM_CHUNK       4096
 
 
-guint8 buffer[OBEX_STREAM_CHUNK];
+uint8_t buffer[OBEX_STREAM_CHUNK];
 
 int fileDesc;
 
@@ -51,20 +54,20 @@ int fileDesc;
 void syncwait(obex_t *handle)
 {
 	struct context *gt;
-	gint ret;
+	int ret;
 	
 	gt = OBEX_GetUserData(handle);
 
 	while(!gt->clientdone) {
-		//g_print("syncwait()\n");
+		//printf("syncwait()\n");
 		ret = OBEX_HandleInput(handle, 10);
 		if(ret < 0) {
-			g_print("Error while doing OBEX_HandleInput()\n");
+			printf("Error while doing OBEX_HandleInput()\n");
 			break;
 		}
 		if(ret == 0) {
 			/* If running cable. We get no link-errors, so cancel on timeout */
-			g_print("Timeout waiting for data. Aborting\n");
+			printf("Timeout waiting for data. Aborting\n");
 			OBEX_CancelRequest(handle, FALSE);
 			break;
 		}
@@ -76,7 +79,7 @@ void syncwait(obex_t *handle)
 //
 //
 //
-void client_done(obex_t *handle, obex_object_t *object, gint obex_cmd, gint obex_rsp)
+void client_done(obex_t *handle, obex_object_t *object, int obex_cmd, int obex_rsp)
 {
 	struct context *gt;
 	gt = OBEX_GetUserData(handle);
@@ -110,14 +113,14 @@ void connect_client(obex_t *handle)
 	obex_headerdata_t hd;
 
 	if(! (object = OBEX_ObjectNew(handle, OBEX_CMD_CONNECT)))	{
-		g_print("Error\n");
+		printf("Error\n");
 		return;
 	}
 
 	hd.bs = "Linux";
 	if(OBEX_ObjectAddHeader(handle, object, OBEX_HDR_WHO, hd, 6,
 				OBEX_FL_FIT_ONE_PACKET) < 0)	{
-		g_print("Error adding header\n");
+		printf("Error adding header\n");
 		OBEX_ObjectDelete(handle, object);
 		return;
 	}
@@ -128,18 +131,18 @@ void connect_client(obex_t *handle)
 //
 //
 //
-void connect_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
+void connect_client_done(obex_t *handle, obex_object_t *object, int obex_rsp)
 {
-	guint8 *nonhdrdata;
+	uint8_t *nonhdrdata;
 
 	if(obex_rsp == OBEX_RSP_SUCCESS) {
-		g_print("Connect OK!\n");
+		printf("Connect OK!\n");
 		if(OBEX_ObjectGetNonHdrData(object, &nonhdrdata) == 4) {
-			g_print("Version: 0x%02x. Flags: 0x%02x\n", nonhdrdata[0], nonhdrdata[1]);
+			printf("Version: 0x%02x. Flags: 0x%02x\n", nonhdrdata[0], nonhdrdata[1]);
 		}
 	}	
 	else {
-		g_print("Connect failed 0x%02x!\n", obex_rsp);
+		printf("Connect failed 0x%02x!\n", obex_rsp);
 	}
 }
 
@@ -152,7 +155,7 @@ void disconnect_client(obex_t *handle)
 	obex_object_t *object;
 
 	if(! (object = OBEX_ObjectNew(handle, OBEX_CMD_DISCONNECT)))	{
-		g_print("Error\n");
+		printf("Error\n");
 		return;
 	}
 
@@ -163,19 +166,19 @@ void disconnect_client(obex_t *handle)
 //
 //
 //
-void disconnect_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
+void disconnect_client_done(obex_t *handle, obex_object_t *object, int obex_rsp)
 {
-	g_print("Disconnect done!\n");
+	printf("Disconnect done!\n");
 	OBEX_TransportDisconnect(handle);
 }
 
 
-gint fillstream(obex_t *handle, obex_object_t *object)
+int fillstream(obex_t *handle, obex_object_t *object)
 {
-	gint                    actual;
+	int                    actual;
 	obex_headerdata_t       hv;
 
-	g_print("Filling stream!\n");
+	printf("Filling stream!\n");
 
 	actual = read(fileDesc, buffer, OBEX_STREAM_CHUNK);
 	if(actual > 0) {
@@ -208,17 +211,17 @@ void push_client(obex_t *handle)
 {
 	obex_object_t *object;
 
-	gchar fname[200];
-	guint uname_size;
+	char fname[200];
+	unsigned int uname_size;
 	char *bfname;
-	gchar *uname;
+	char *uname;
 
 	obex_headerdata_t hd;
 	
-	guint8 *buf;
+	uint8_t *buf;
 	int file_size;
 
-	g_print("PUSH filename> ");
+	printf("PUSH filename> ");
 	scanf("%s", fname);
 	bfname = basename(fname);
 
@@ -228,31 +231,31 @@ void push_client(obex_t *handle)
 	fileDesc = open(fname, O_RDONLY, 0);
 
 	if (fileDesc < 0) {
-		g_free(buf);
+		free(buf);
 		free(bfname);
 		return;
 	}
 
-	g_print("Going to send %s(%s), %d bytes\n",fname,bfname, file_size);
+	printf("Going to send %s(%s), %d bytes\n",fname,bfname, file_size);
 
 	/* Build object */
 	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
 	
 	uname_size = (strlen(bfname)+1)<<1;
-	uname = g_malloc(uname_size);
+	uname = malloc(uname_size);
 	OBEX_CharToUnicode(uname, bfname, uname_size);
 
 	hd.bs = uname;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd, uname_size, 0);
 
 	hd.bq4 = file_size;
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hd, sizeof(guint32), 0);
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hd, sizeof(uint32_t), 0);
 
 	hd.bs = NULL;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, hd, 0, OBEX_FL_STREAM_START);
 
-	g_free(buf);
-	g_free(uname);
+	free(buf);
+	free(uname);
 	free(bfname);
 
  	OBEX_Request(handle, object);
@@ -266,22 +269,22 @@ void put_client(obex_t *handle)
 {
 	obex_object_t *object;
 
-	gchar lname[200];
-	gchar rname[200];
-	guint rname_size;
+	char lname[200];
+	char rname[200];
+	unsigned int rname_size;
 	obex_headerdata_t hd;
 	
-	guint8 *buf;
+	uint8_t *buf;
 	int file_size;
 
-	g_print("PUT file (local, remote)> ");
+	printf("PUT file (local, remote)> ");
 	scanf("%s %s", lname, rname);
 
 	buf = easy_readfile(lname, &file_size);
 	if(buf == NULL)
 		return;
 
-	g_print("Going to send %d bytes\n", file_size);
+	printf("Going to send %d bytes\n", file_size);
 
 	/* Build object */
 	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
@@ -296,7 +299,7 @@ void put_client(obex_t *handle)
 	hd.bs = buf;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, hd, file_size, 0);
 
-	g_free(buf);
+	free(buf);
 
  	OBEX_Request(handle, object);
 	syncwait(handle);
@@ -306,13 +309,13 @@ void put_client(obex_t *handle)
 //
 //
 //
-void put_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
+void put_client_done(obex_t *handle, obex_object_t *object, int obex_rsp)
 {
 	if(obex_rsp == OBEX_RSP_SUCCESS) {
-		g_print("PUT successful!\n");
+		printf("PUT successful!\n");
 	}	
 	else {
-		g_print("PUT failed 0x%02x!\n", obex_rsp);
+		printf("PUT failed 0x%02x!\n", obex_rsp);
 	}
 }
 
@@ -322,16 +325,16 @@ void put_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
 void get_client(obex_t *handle, struct context *gt)
 {
 	obex_object_t *object;
-	gchar rname[200];
-	gchar req_name[200];
-	gint rname_size;
+	char rname[200];
+	char req_name[200];
+	int rname_size;
 	obex_headerdata_t hd;
 
 	printf("GET File> ");
 	scanf("%s", req_name);
 
 	if(! (object = OBEX_ObjectNew(handle, OBEX_CMD_GET)))	{
-		g_print("Error\n");
+		printf("Error\n");
 		return;
 	}
 
@@ -346,44 +349,44 @@ void get_client(obex_t *handle, struct context *gt)
 	gt->get_name = req_name;
 	OBEX_Request(handle, object);
 	syncwait(handle);
-	g_print("Leaving PUT\n");
+	printf("Leaving PUT\n");
 }
 
 //
 //
 //
-void get_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp, gchar *name)
+void get_client_done(obex_t *handle, obex_object_t *object, int obex_rsp, char *name)
 {
 	obex_headerdata_t hv;
-	guint8 hi;
-	gint hlen;
+	uint8_t hi;
+	int hlen;
 
-	const guint8 *body = NULL;
-	gint body_len = 0;
+	const uint8_t *body = NULL;
+	int body_len = 0;
 
 	if(obex_rsp != OBEX_RSP_SUCCESS) {
-		g_print("GET failed 0x%02x!\n", obex_rsp);
+		printf("GET failed 0x%02x!\n", obex_rsp);
 		return;
 	}
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_BODY)	{
-		g_print(G_GNUC_FUNCTION "() Found body\n");
+		printf(__FUNCTION__ "() Found body\n");
 			body = hv.bs;
 			body_len = hlen;
 			break;
 		}
 		else	{
-			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
+			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
 		}
 	}
 
 
 	if(!body) {
-		g_print("No body found in answer!\n");
+		printf("No body found in answer!\n");
 		return;
 	}	
-	g_print("GET successful!\n");
+	printf("GET successful!\n");
 	safe_save_file(name, body, body_len);
 }
 	
@@ -396,14 +399,14 @@ void setpath_client(obex_t *handle)
 	char setpath_data[2] = {0,0};
 	obex_object_t *object;
 	char path[200];
-	gint path_size;
+	int path_size;
 	obex_headerdata_t hd;
 
 	printf("SETPATH> ");
 	scanf("%s", path);
 
 	if(! (object = OBEX_ObjectNew(handle, OBEX_CMD_SETPATH)))	{
-		g_print("Error\n");
+		printf("Error\n");
 		return;
 	}
 
@@ -421,13 +424,13 @@ void setpath_client(obex_t *handle)
 //
 //
 //
-void setpath_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
+void setpath_client_done(obex_t *handle, obex_object_t *object, int obex_rsp)
 {
 	if(obex_rsp == OBEX_RSP_SUCCESS) {
-		g_print("SETPATH successful!\n");
+		printf("SETPATH successful!\n");
 	}	
 	else {
-		g_print("SETPATH failed 0x%02x!\n", obex_rsp);
+		printf("SETPATH failed 0x%02x!\n", obex_rsp);
 	}
 }
 	

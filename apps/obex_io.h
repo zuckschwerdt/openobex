@@ -10,10 +10,10 @@
 #define DATE_BOOK      0x64617465 /* "date" *.vcs */
 #define PILOT_RESOURCE 0x6c6e6368 /* "Inch" *.prc */
 
-gint get_filesize(const char *filename);
+int get_filesize(const char *filename);
 obex_object_t *build_object_from_file(obex_t *handle, const char *filename);
-gint safe_save_file(gchar *name, const guint8 *buf, gint len);
-guint8* easy_readfile(const char *filename, int *file_size);
+int safe_save_file(char *name, const uint8_t *buf, int len);
+uint8_t* easy_readfile(const char *filename, int *file_size);
 
 /* hack to distinguish between different obex protocols */
 extern int obex_protocol_type;

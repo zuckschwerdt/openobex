@@ -1,5 +1,6 @@
 2002-10-28  Marcel Holtmann  <marcel@holtmann.org>
 
+	* Remove GLib dependencies.
 	* Remove default prefix statement.
 
 2002-10-25  Marcel Holtmann  <marcel@holtmann.org>
