@@ -295,7 +295,7 @@ int OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
 	DEBUG(3, __FUNCTION__ "()\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
-	obex_return_val_if_fail(saddr != NULL, -1);
+	obex_return_val_if_fail((addrlen == 0) || (saddr != NULL), -1);
 
 	memcpy(&self->trans.self, saddr, addrlen);
 
@@ -448,7 +448,7 @@ int OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 	DEBUG(4, __FUNCTION__ "()\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
-	obex_return_val_if_fail(saddr != NULL, -1);
+	obex_return_val_if_fail((addrlen == 0) || (saddr != NULL), -1);
 
 	memcpy(&self->trans.peer, saddr, addrlen);
 
