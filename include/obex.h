@@ -53,6 +53,7 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags);
 void    OBEX_Cleanup(obex_t *self);
 void OBEX_SetUserData(obex_t *self, gpointer data);
 gpointer OBEX_GetUserData(obex_t *self);
+gint OBEX_GetFD(obex_t *self);
 
 gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans);
 
@@ -62,6 +63,7 @@ gint    OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual);
 gint    OBEX_HandleInput(obex_t *self, gint timeout);
 
 gint    OBEX_ServerRegister(obex_t *self, const char *service);
+obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data);
 gint    OBEX_Request(obex_t *self, obex_object_t *object);
 gint    OBEX_CancelRequest(obex_t *self);
 

@@ -97,6 +97,9 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	if(flags & OBEX_FL_ASYNC) {
 		self->async = 1;
 	}
+	self->keepserver = (flags & OBEX_FL_KEEPSERVER) ? TRUE : FALSE;
+	self->filterhint = (flags & OBEX_FL_FILTERHINT) ? TRUE : FALSE;
+	self->filterias  = (flags & OBEX_FL_FILTERIAS ) ? TRUE : FALSE;
 	self->fd = -1;
 	self->serverfd = -1;
 
@@ -152,7 +155,8 @@ void OBEX_Cleanup(obex_t *self)
 	g_return_if_fail(self != NULL);
 	
 	obex_transport_disconnect_request(self);
-	
+	obex_transport_disconnect_server(self);
+
 	if (self->tx_msg)
 		g_netbuf_free(self->tx_msg);
 	
@@ -201,6 +205,80 @@ gint OBEX_ServerRegister(obex_t *self, const char *service)
 	g_return_val_if_fail(service != NULL, -1);
 
 	return obex_transport_listen(self, service);
+}
+
+
+/*
+ * Function OBEX_ServerAccept (self, eventcb, data)
+ *
+ *    Accept an Obex connection
+ *
+ * Create a new Obex instance to handle the incomming connection.
+ * The old instance will continue to listen for new conenctions.
+ */
+obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
+{
+	obex_t *self;
+
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
+
+	g_return_val_if_fail(server != NULL, NULL);
+
+	/* We can accept only if both the server and the connection socket
+	 * are active */
+	if((server->fd <= 0) || (server->serverfd <= 0))
+		return(NULL);
+
+	/* If we have started receiving something, it's too late... */
+	if(server->object != NULL)
+		return(NULL);
+
+	/* Allocate new instance */
+	self = (obex_t*) g_malloc(sizeof(obex_t));
+	if (!self) {
+		/* perror(G_GNUC_FUNCTION "()"); */
+		return(NULL);
+	}
+	memset(self, 0, sizeof(obex_t));
+
+	/* Set callback and callback data as needed */
+	if(eventcb != NULL)
+		self->eventcb = eventcb;
+	else
+		self->eventcb = server->eventcb;
+	if(data != NULL)
+		self->userdata = data;
+	else
+		self->userdata = server->userdata;
+
+	self->async = server->async;
+	self->keepserver = server->keepserver;
+
+	/* Copy transport data */
+	memcpy(&self->trans, &server->trans, sizeof(obex_transport_t));
+	memcpy(&self->ctrans, &server->ctrans, sizeof(obex_ctrans_t));
+
+	self->mtu_rx = server->mtu_rx;
+	self->mtu_tx = server->mtu_tx;
+
+	/* Allocate message buffers */
+	self->rx_msg = g_netbuf_new(self->mtu_rx);
+	if (self->rx_msg == NULL)
+		return NULL;
+
+	self->tx_msg = g_netbuf_new(self->mtu_tx);
+	if (self->tx_msg == NULL) {
+		g_netbuf_free(self->rx_msg);
+		return NULL;
+	}
+
+	/* Now, that's the interesting bit !
+	 * We split the sockets apart, one for each instance */
+	self->fd = server->fd;
+	self->serverfd = -1;
+	server->fd = -1;
+
+	return self;
 }
 
 

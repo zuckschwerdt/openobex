@@ -35,5 +35,6 @@ gint inobex_listen(obex_t *self, const char *service);
 gint inobex_accept(obex_t *self);
 gint inobex_connect_request(obex_t *self);
 gint inobex_disconnect_request(obex_t *self);
+gint inobex_disconnect_server(obex_t *self);
 
 #endif

@@ -93,6 +93,9 @@ struct obex {
 	gint serverfd;
 
 	gboolean async;
+	gboolean keepserver;		/* Keep server alive */
+	gboolean filterhint;		/* Filter devices based on hint bits */
+	gboolean filterias;		/* Filter devices based on IAS entry */
 
 	GNetBuf *tx_msg;		/* Reusable transmit message */
 	GNetBuf *rx_msg;		/* Reusable receive message */

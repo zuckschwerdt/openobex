@@ -38,9 +38,12 @@
 #include <irda_wrap.h>
 
 #else /* _WIN32 */
+/* Linux case */
 
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>		/* perror */
+#include <errno.h>		/* errno and EADDRNOTAVAIL */
 #include <netinet/in.h>
 #include <sys/socket.h>
 
@@ -108,6 +111,28 @@ gint irobex_listen(obex_t *self, const char *service)
 		goto out_freesock;
 	}
 
+#ifndef _WIN32
+	/* Ask the IrDA stack to advertise the Obex hint bit - Jean II */
+	/* Under Linux, it's a regular socket option */
+	{
+		unsigned char	hints[4];	/* Hint be we advertise */
+
+		/* We want to advertise the OBEX hint bit */
+		hints[0] = HINT_EXTENSION;
+		hints[1] = HINT_OBEX;
+
+		/* Tell the stack about it */
+		if (setsockopt(self->serverfd, SOL_IRLMP, IRLMP_HINTS_SET,
+			       hints, sizeof(hints))) {
+			perror("setsockopt:");
+			return(-1);
+		}
+	}
+#else /* _WIN32 */
+	/* Ask the IrDA stack to advertise the Obex hint bit */
+	/* Under Windows, it's a complicated story */
+#endif /* _WIN32 */
+
 	if (listen(self->serverfd, 1)) {
 		DEBUG(0, G_GNUC_FUNCTION "() Error doing listen\n");
 		goto out_freesock;
@@ -127,6 +152,8 @@ out_freesock:
  *
  *    Accept an incoming connection.
  *
+ * Note : don't close the server socket here, so apps may want to continue
+ * using it...
  */
 gint irobex_accept(obex_t *self)
 {
@@ -137,10 +164,6 @@ gint irobex_accept(obex_t *self)
 	// First accept the connection and get the new client socket.
 	self->fd = accept(self->serverfd, (struct sockaddr *) &self->trans.peer.irda,
  			  &addrlen);
-
-	// Now close the serversocket.
-	obex_delete_socket(self, self->serverfd);
-	self->serverfd = -1;
 
 	if (self->fd < 0) {
 		return -1;
@@ -169,6 +192,127 @@ gint irobex_accept(obex_t *self)
 	return 0;
 }
 	
+/* Memory allocation for discovery */
+#define DISC_BUF_LEN	sizeof(struct irda_device_list) + \
+			sizeof(struct irda_device_info) * (MAX_DEVICES)
+/*
+ * Function echo_discover_devices (self)
+ *
+ *    Try to discover some remote device(s) that we can connect to
+ *
+ * Note : we optionally can do a first filtering on the Obex hint bit,
+ * and then we can verify that the device does have the requested service...
+ * Note : in this function, the memory allocation for the discovery log
+ * is done "the right way", so that it's safe and we don't leak memory...
+ * Jean II
+ */
+static gint irobex_discover_devices(obex_t *self)
+{
+	struct irda_device_list *	list;
+	unsigned char		buf[DISC_BUF_LEN];
+	int ret = -1;
+	int err;
+	int len;
+	int i;
+
+#ifndef _WIN32
+	/* Hint bit filtering. Linux case */
+	if(self->filterhint) {
+		unsigned char	hints[4];	/* Hint be we filter on */
+
+		/* We want only devices that advertise OBEX hint */
+		hints[0] = HINT_EXTENSION;
+		hints[1] = HINT_OBEX;
+
+		/* Set the filter used for performing discovery */
+		if (setsockopt(self->fd, SOL_IRLMP, IRLMP_HINT_MASK_SET,
+			       hints, sizeof(hints))) {
+			perror("setsockopt:");
+			return(-1);
+		}
+	}
+#endif /* _WIN32 */
+
+	/* Set the list to point to the correct place */
+	list = (struct irda_device_list *) buf;
+	len = DISC_BUF_LEN;
+
+	/* Perform a discovery and get device list */
+	if (getsockopt(self->fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
+		DEBUG(1, "Didn't find any devices!\n");
+		return(-1);
+	}
+
+	/* Did we got any ? (in some rare cases, this test is true) */
+	if (list->len <= 0) {
+		DEBUG(1, "Didn't find any devices!\n");
+		return(-1);
+	}
+
+#ifndef _WIN32
+	/* List all Obex devices : Linux case */
+	DEBUG(1, "Discovered %d devices :\n", list->len);
+	for(i = 0; i < list->len; i++) {
+		DEBUG(1, "  [%d] name:  %s, daddr: 0x%08x",
+		      i + 1, list->dev[i].info, list->dev[i].daddr);
+		//fflush(stdout);
+
+		/* Do we want to filter devices based on IAS ? */
+		if(self->filterias) {
+			struct irda_ias_set ias_query;
+			/* Ask if the requested service exist on this device */
+			len = sizeof(ias_query);
+			ias_query.daddr = list->dev[i].daddr;
+			strcpy(ias_query.irda_class_name,
+			       self->trans.peer.irda.sir_name);
+			strcpy(ias_query.irda_attrib_name,
+			       "IrDA:TinyTP:LsapSel");
+			err = getsockopt(self->fd, SOL_IRLMP, IRLMP_IAS_QUERY,
+					 &ias_query, &len);
+			/* Check if we failed */
+			if(err != 0) {
+				if(errno != EADDRNOTAVAIL) {
+					DEBUG(1, " <can't query IAS>\n");
+				} else {
+					DEBUG(1, ", doesn't have %s\n",
+					      self->trans.peer.irda.sir_name);
+				}
+				/* Go back to for(;;) */
+				continue;
+			}
+			DEBUG(1, ", has service %s\n",
+			      self->trans.peer.irda.sir_name);
+		}
+		else {
+			DEBUG(1, "\n");
+		}
+
+		/* Pick this device */
+		self->trans.peer.irda.sir_addr = list->dev[i].daddr;
+		self->trans.self.irda.sir_addr = list->dev[i].saddr;
+		ret = 0;
+	}
+#else
+	/* List all Obex devices : Win32 case */
+	if (len > 0) {
+		DEBUG(1, "Discovered: (list len=%d)\n", list->numDevice);
+
+		for (i=0; i<(int)list->numDevice; i++) {
+			DEBUG(1, "  name:  %s\n", list->Device[i].irdaDeviceName);
+			DEBUG(1, "  daddr: %08x\n", list->Device[i].irdaDeviceID);
+			memcpy(&self->trans.peer.irda.irdaDeviceID[0], &list->Device[i].irdaDeviceID[0], 4);
+			ret = 0;
+		}
+	}
+#endif /* _WIN32 */
+
+	if(ret <  0)
+		DEBUG(1, G_GNUC_FUNCTION "(), didn't find any OBEX devices!\n");
+	return(ret);
+}
+
+#if 0
+/* Deprecated by the above function. */
 /*
  * Function irobex_discover_devices (fd)
  *
@@ -232,6 +376,7 @@ static gint irobex_discover_devices(obex_t *self)
 	g_free(buf);
 	return ret;
 }
+#endif /* 0 */
 
 /*
  * Function irobex_irda_connect_request (self)
@@ -303,6 +448,23 @@ gint irobex_disconnect_request(obex_t *self)
 	if(ret < 0)
 		return ret;
 	self->fd = -1;
+	return ret;	
+}
+
+/*
+ * Function irobex_link_disconnect_server (self)
+ *
+ *    Close the server socket
+ *
+ * Used when we start handling a incomming request, or when the
+ * client just want to quit...
+ */
+gint irobex_disconnect_server(obex_t *self)
+{
+	gint ret;
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	ret = obex_delete_socket(self, self->serverfd);
+	self->serverfd = -1;
 	return ret;	
 }
 

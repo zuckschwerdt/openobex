@@ -1,3 +1,19 @@
+2000-11-20  Pontus Fuchs  <pontus.fuchs@tactel.se>
+	
+	Applied a buch of fixes/changes made by 
+	Jean Tourrilhes <jt@bougret.hpl.hp.com>
+
+	* Full "accept" capability in OBEX Server (optional) :
+		-> Keep server alive
+		-> Detach receiver instance from server instance
+	* Properly close all sockets (server + receiver) when Cleanup
+	* Declare OBEX_GetFD() in obex.h
+	* Updated irda.h to the latest
+	* OBEX Server do tell IrDA stack to advertise OBEX hint bit
+	* OBEX Client can do optional hint bit filtering of discovery log
+	* OBEX Client can do optional IAS entry filtering of discovery log
+	* Safer discovery log allocation
+
 2000-10-16  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* obex_object.c: When a header with 0 length was received 

@@ -57,9 +57,13 @@ typedef struct {
 #define OBEX_EV_REQDONE		3	/* Request has finished */
 #define OBEX_EV_LINKERR		4	/* Link has been disconnected */
 #define OBEX_EV_PARSEERR	5	/* Malformed data encountered */
+#define OBEX_EV_ACCEPTHINT	6	/* Connection accepted */
 
 /* For OBEX_Init() */
 #define OBEX_FL_ASYNC		0x01
+#define OBEX_FL_KEEPSERVER	0x02	/* Keep the server alive */
+#define OBEX_FL_FILTERHINT	0x04	/* Filter devices based on hint bit */
+#define OBEX_FL_FILTERIAS	0x08	/* Filter devices based on IAS entry */
 
 /* For OBEX_ObjectAddHeader */
 #define OBEX_FL_FIT_ONE_PACKET	0x01

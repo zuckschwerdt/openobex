@@ -85,6 +85,8 @@ gint inobex_listen(obex_t *self, const char *service)
  *
  *    Accept incoming connection.
  *
+ * Note : don't close the server socket here, so apps may want to continue
+ * using it...
  */
 gint inobex_accept(obex_t *self)
 {
@@ -92,9 +94,6 @@ gint inobex_accept(obex_t *self)
 
 	self->fd = accept(self->serverfd, (struct sockaddr *) 
 		&self->trans.peer.inet, &addrlen);
-
-	obex_delete_socket(self, self->serverfd);
-	self->serverfd = -1;
 
 	if(self->fd < 0)
 		return -1;
@@ -170,3 +169,19 @@ gint inobex_disconnect_request(obex_t *self)
 	return ret;	
 }
 
+/*
+ * Function inobex_transport_disconnect_server (self)
+ *
+ *    Close the server socket
+ *
+ * Used when we start handling a incomming request, or when the
+ * client just want to quit...
+ */
+gint inobex_disconnect_server(obex_t *self)
+{
+	gint ret;
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	ret = obex_delete_socket(self, self->serverfd);
+	self->serverfd = -1;
+	return ret;	
+}

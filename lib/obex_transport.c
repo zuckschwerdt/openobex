@@ -101,7 +101,18 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 
 		else if( (self->serverfd >= 0) && FD_ISSET(self->serverfd, &fdset)) {
 			DEBUG(4, G_GNUC_FUNCTION "() Data available on server socket\n");
+			/* Accept : create the connected socket */
 			ret = obex_transport_accept(self);
+
+			/* Tell the app to perform the OBEX_Accept() */
+			if(self->keepserver)
+				obex_deliver_event(self, OBEX_SERVER,
+						   OBEX_EV_ACCEPTHINT,
+						   0, 0, FALSE);
+			/* Otherwise, just disconnect the server */
+			if((ret >= 0) && (! self->keepserver)) {
+				obex_transport_disconnect_server(self);
+			}
 		}
 		else
 			ret = -1;
@@ -138,7 +149,7 @@ gint obex_transport_accept(obex_t *self)
 	}
 	return ret;
 }
-	
+
 
 
 /*
@@ -246,6 +257,36 @@ gint obex_transport_listen(obex_t *self, const char *service)
 		break;
 	}
 	return ret;
+}
+	
+/*
+ * Function obex_transport_disconnect_server (self)
+ *
+ *    Disconnect the listening server
+ *
+ * Used either after an accept, or directly at client request (app. exits)
+ * Note : obex_delete_socket() will catch the case when the socket
+ * doesn't exist (-1)...
+ */
+void obex_transport_disconnect_server(obex_t *self)
+{
+
+	switch (self->trans.type) {
+#ifdef HAVE_IRDA
+	case OBEX_TRANS_IRDA:
+		irobex_disconnect_server(self);
+		break;
+#endif /*HAVE_IRDA*/
+	case OBEX_TRANS_INET:
+		inobex_disconnect_server(self);
+		break;	
+	case OBEX_TRANS_CUST:
+		DEBUG(4, G_GNUC_FUNCTION "() Custom disconnect\n");
+		/* Fallback for now... */
+	default:
+		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
+		break;
+	}
 }
 
 /*

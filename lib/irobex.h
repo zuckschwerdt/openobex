@@ -38,5 +38,6 @@ gint irobex_listen(obex_t *self, const char *service);
 gint irobex_connect_request(obex_t *self);
 gint irobex_disconnect_request(obex_t *self);
 gint irobex_accept(obex_t *self);
+gint irobex_disconnect_server(obex_t *self);
 
 #endif

@@ -65,6 +65,7 @@ gint obex_transport_handle_input(obex_t *self, gint timeout);
 gint obex_transport_connect_request(obex_t *self);
 void obex_transport_disconnect_request(obex_t *self);
 gint obex_transport_listen(obex_t *self, const char *service);
+void obex_transport_disconnect_server(obex_t *self);
 gint obex_transport_write(obex_t *self, GNetBuf *msg);
 gint obex_transport_read(obex_t *self, guint8 *buf, gint buflen);
 

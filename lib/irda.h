@@ -1,12 +1,12 @@
 /*********************************************************************
  *                
  * Filename:      irda.h
- * Version:       1.0
+ * Version:       1.1
  * Description:   IrDA header file to be used by IrDA applications
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Mon Mar  8 14:06:12 1999
- * Modified at:   Sat Dec 25 16:07:54 1999
+ * Modified at:   Sat Dec 25 16:06:42 1999
  * Modified by:   Dag Brattli <dagb@cs.uit.no>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
@@ -80,22 +80,25 @@ enum {
 #define SOL_IRLMP      266 /* Same as SOL_IRDA for now */
 #define SOL_IRTTP      266 /* Same as SOL_IRDA for now */
 
-#define IRLMP_ENUMDEVICES        1
-#define IRLMP_IAS_SET            2
-#define IRLMP_IAS_QUERY          3
-#define IRLMP_HINTS_SET          4
+#define IRLMP_ENUMDEVICES        1	/* Return discovery log */
+#define IRLMP_IAS_SET            2	/* Set an attribute in local IAS */
+#define IRLMP_IAS_QUERY          3	/* Query remote IAS for attribute */
+#define IRLMP_HINTS_SET          4	/* Set hint bits advertised */
 #define IRLMP_QOS_SET            5
 #define IRLMP_QOS_GET            6
 #define IRLMP_MAX_SDU_SIZE       7
-#define IRLMP_IAS_GET            8
+#define IRLMP_IAS_GET            8	/* Get an attribute from local IAS */
+#define IRLMP_IAS_DEL		 9	/* Remove attribute from local IAS */
+#define IRLMP_HINT_MASK_SET	10	/* Set discovery filter */
+#define IRLMP_WAITDEVICE	11	/* Wait for a new discovery */
 
 #define IRTTP_MAX_SDU_SIZE IRLMP_MAX_SDU_SIZE /* Compatibility */
 
 /* LM-IAS Limits */
-#define IAS_MAX_STRING        256
-#define IAS_MAX_OCTET_STRING 1024
-#define IAS_MAX_CLASSNAME      64
-#define IAS_MAX_ATTRIBNAME    256
+#define IAS_MAX_STRING         256
+#define IAS_MAX_OCTET_STRING  1024
+#define IAS_MAX_CLASSNAME       64
+#define IAS_MAX_ATTRIBNAME     256
 
 /* LM-IAS Attribute types */
 #define IAS_MISSING 0
@@ -106,18 +109,18 @@ enum {
 #define LSAP_ANY              0xff
 
 struct sockaddr_irda {
-	sa_family_t   sir_family;   /* AF_IRDA */
-	u_int8_t      sir_lsap_sel; /* LSAP selector */
-	u_int32_t     sir_addr;     /* Device address */
-	char          sir_name[25]; /* Usually <service>:IrDA:TinyTP */
+	sa_family_t	sir_family;   /* AF_IRDA */
+	u_int8_t	sir_lsap_sel; /* LSAP selector */
+	u_int32_t	sir_addr;     /* Device address */
+	char		sir_name[25]; /* Usually <service>:IrDA:TinyTP */
 };
 
 struct irda_device_info {
-	u_int32_t     saddr;    /* Address of local interface */
-	u_int32_t     daddr;    /* Address of remote device */
-	char          info[22]; /* Description */
-	u_int8_t      charset;  /* Charset used for description */
-	u_int8_t      hints[2]; /* Hint bits */
+	u_int32_t	saddr;    /* Address of local interface */
+	u_int32_t	daddr;    /* Address of remote device */
+	char		info[22]; /* Description */
+	u_int8_t	charset;  /* Charset used for description */
+	u_int8_t	hints[2]; /* Hint bits */
 };
 
 struct irda_device_list {
@@ -133,14 +136,15 @@ struct irda_ias_set {
 		unsigned int irda_attrib_int;
 		struct {
 			unsigned short len;
-			u_char octet_seq[IAS_MAX_OCTET_STRING];
+			u_int8_t octet_seq[IAS_MAX_OCTET_STRING];
 		} irda_attrib_octet_seq;
 		struct {
-			unsigned char len;
-			unsigned char charset;
-			unsigned char string[IAS_MAX_STRING];
+			u_int8_t len;
+			u_int8_t charset;
+			u_int8_t string[IAS_MAX_STRING];
 		} irda_attrib_string;
 	} attribute;
+	u_int32_t       daddr;    /* Address of device (for IAS query only) */
 };
 
 /* Some private IOCTL's (max 16) */
@@ -171,8 +175,8 @@ struct if_irda_qos {
 
 /* For setting RTS and DTR lines of a dongle */
 struct if_irda_line {
-	unsigned char dtr;
-	unsigned char rts;
+	u_int8_t dtr;
+	u_int8_t rts;
 };
 
 /* IrDA interface configuration (data part must not exceed 16 bytes) */
