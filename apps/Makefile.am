@@ -23,5 +23,4 @@ irxfer_SOURCES = irxfer.c
 
 irobex_palm3_SOURCES = irobex_palm3.c
 
-bin_PROGRAMS = irxfer obex_tcp irobex_palm3
-noinst_PROGRAMS = obex_test
+bin_PROGRAMS = irxfer obex_tcp irobex_palm3 obex_test

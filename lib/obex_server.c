@@ -151,6 +151,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			   this event is delivered the app should append the
 			   headers that should be in the response */
 			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_REQ, cmd, 0, FALSE);
+			self->state = MODE_SRV | STATE_SEND;
 		}
 		/* Note the conditional fallthrough! */
 	
