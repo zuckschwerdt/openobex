@@ -3,7 +3,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <process.h>
+#else
 #include <sys/wait.h>
+#endif
 
 /*
  *	A simple filter for the templates
@@ -18,7 +22,9 @@ int main(int argc, char *argv[])
 	char type[64];
 	int i;
 	int vp=2;
+#ifndef _WIN32
 	pid_t pid;
+#endif
 
 	if(chdir(getenv("TOPDIR")))
 	{
@@ -85,6 +91,13 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Unknown ! escape.\n");
 			exit(1);
 		}
+#ifdef _WIN32
+		if(!_spawnvp(_P_WAIT, "doc/kernel-doc", svec))
+		{
+	       		perror("exec scripts/kernel-doc");
+			exit(1);
+		}
+#else
 		switch(pid=fork())
 		{
 		case -1:
@@ -97,6 +110,7 @@ int main(int argc, char *argv[])
 		default:
 			waitpid(pid, NULL,0);
 		}
+#endif
 	}
 	exit(0);
 }
