@@ -32,8 +32,8 @@
  *     
  ********************************************************************/
 
-#include <stdio.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include <openobex/obex.h>
 #include "obex_put_common.h"
