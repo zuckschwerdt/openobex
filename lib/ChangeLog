@@ -1,6 +1,7 @@
 2003-10-01  Marcel Holtmann  <marcel@holtmann.org>
 
 	* Add COPYING.LIB for LGPL stuff
+	* Don't auto generate openobex.spec
 
 2002-12-18  Marcel Holtmann  <marcel@holtmann.org>
 

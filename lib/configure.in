@@ -64,5 +64,4 @@ if test "$syslog_enable" != ""; then
 	AC_DEFINE_UNQUOTED([OBEX_SYSLOG],$syslog_enable, [syslog_enable])
 fi
 
-AC_OUTPUT([Makefile m4macros/Makefile src/Makefile doc/Makefile
-		openobex-config openobex.spec])
+AC_OUTPUT([Makefile m4macros/Makefile src/Makefile doc/Makefile openobex-config])

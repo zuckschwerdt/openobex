@@ -4,7 +4,7 @@
 
 Summary:     Library for using OBEX
 Name:        openobex
-Version:     @OBEX_VERSION@
+Version:     1.0.0
 Release:     1
 Copyright:   LGPL
 Group:       Libraries
