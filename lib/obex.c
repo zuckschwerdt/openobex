@@ -32,6 +32,7 @@
 #include <config.h>
 #endif
 
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
@@ -254,7 +255,7 @@ int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
 {
 	obex_return_val_if_fail(self != NULL, -EFAULT);
 	if (self->object)	{
-		DEBUG(1, __FUNCTION__ "() We are busy.\n");
+		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 	if((mtu_rx < OBEX_MINIMUM_MTU) || (mtu_rx > OBEX_MAXIMUM_MTU))
@@ -292,7 +293,7 @@ int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
  */
 int OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail((addrlen == 0) || (saddr != NULL), -1);
@@ -326,7 +327,7 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
 {
 	obex_t *self;
 
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, "\n");
 
 	obex_return_val_if_fail(server != NULL, NULL);
 
@@ -412,7 +413,7 @@ out_err:
  */
 int OBEX_HandleInput(obex_t *self, int timeout)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	obex_return_val_if_fail(self != NULL, -1);
 	return obex_transport_handle_input(self, timeout);
 }
@@ -426,7 +427,7 @@ int OBEX_HandleInput(obex_t *self, int timeout)
  */
 int OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(inputbuf != NULL, -1);
@@ -445,7 +446,7 @@ int OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual)
  */
 int OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail((addrlen == 0) || (saddr != NULL), -1);
@@ -462,7 +463,7 @@ int OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
  */
 int OBEX_TransportDisconnect(obex_t *self)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_transport_disconnect_request(self);
@@ -504,10 +505,10 @@ int OBEX_GetFD(obex_t *self)
  */
 int OBEX_Request(obex_t *self, obex_object_t *object)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	if (self->object)	{
-		DEBUG(1, __FUNCTION__ "() We are busy.\n");
+		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 
@@ -771,7 +772,7 @@ int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset)
 int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
 {
 	int n;
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 		
 	obex_return_val_if_fail(uc != NULL, -1);
 	obex_return_val_if_fail(c != NULL, -1);
@@ -798,7 +799,7 @@ int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
 int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
 {
 	int len, n;
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	obex_return_val_if_fail(uc != NULL, -1);
 	obex_return_val_if_fail(c != NULL, -1);
@@ -825,7 +826,7 @@ int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
  */
 char *OBEX_ResponseToString(int rsp)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	return obex_response_to_string(rsp);
 }
@@ -839,7 +840,7 @@ char *OBEX_ResponseToString(int rsp)
  */
 char* OBEX_GetResponseMessage(obex_t *self, int rsp)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	return obex_response_to_string(rsp);
 }
@@ -888,7 +889,7 @@ void * OBEX_GetCustomData(obex_t *self)
  */
 int InOBEX_ServerRegister(obex_t *self)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 
@@ -907,10 +908,10 @@ int InOBEX_ServerRegister(obex_t *self)
  */
 int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-     	DEBUG(4, __FUNCTION__ "()\n");
+     	DEBUG(4, "\n");
 
 	if (self->object)	{
-		DEBUG(1, __FUNCTION__ "() We are busy.\n");
+		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 
@@ -932,7 +933,7 @@ int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
  */
 int IrOBEX_ServerRegister(obex_t *self, const char *service)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(service != NULL, -1);
@@ -954,10 +955,10 @@ int IrOBEX_ServerRegister(obex_t *self, const char *service)
  */
 int IrOBEX_TransportConnect(obex_t *self, const char *service)
 {
-     	DEBUG(4, __FUNCTION__ "()\n");
+     	DEBUG(4, "\n");
 
 	if (self->object)	{
-		DEBUG(1, __FUNCTION__ "() We are busy.\n");
+		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 
@@ -983,7 +984,7 @@ int IrOBEX_TransportConnect(obex_t *self, const char *service)
  */
 int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 
@@ -1006,10 +1007,10 @@ int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
  */
 int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	if (self->object)	{
-		DEBUG(1, __FUNCTION__ "() We are busy.\n");
+		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 
@@ -1036,10 +1037,10 @@ int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t 
  */
 int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	if (self->object)	{
-		DEBUG(1, __FUNCTION__ "() We are busy.\n");
+		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 	obex_return_val_if_fail(self != NULL, -1);

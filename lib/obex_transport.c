@@ -60,7 +60,7 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 		if(self->ctrans.handleinput)
 			ret = self->ctrans.handleinput(self, self->ctrans.customdata, timeout);
 		else {
-			DEBUG(4, __FUNCTION__ "() No handleinput-callback exist!\n");
+			DEBUG(4, "No handleinput-callback exist!\n");
 			ret = -1;
 		}
 	}
@@ -69,12 +69,12 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 		fd_set fdset;
 		int highestfd = 0;
 	
-		DEBUG(4, __FUNCTION__ "()\n");
+		DEBUG(4, "\n");
 		obex_return_val_if_fail(self != NULL, -1);
 
 		/* Check of we have any fd's to do select on. */
 		if(self->fd < 0 && self->serverfd < 0) {
-			DEBUG(0, __FUNCTION__ "() No valid socket is open\n");
+			DEBUG(0, "No valid socket is open\n");
 			return -1;
 		}
 
@@ -101,12 +101,12 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 			return ret;
 	
 		if( (self->fd >= 0) && FD_ISSET(self->fd, &fdset)) {
-			DEBUG(4, __FUNCTION__ "() Data available on client socket\n");
+			DEBUG(4, "Data available on client socket\n");
 			ret = obex_data_indication(self, NULL, 0);
 		}
 
 		else if( (self->serverfd >= 0) && FD_ISSET(self->serverfd, &fdset)) {
-			DEBUG(4, __FUNCTION__ "() Data available on server socket\n");
+			DEBUG(4, "Data available on server socket\n");
 			/* Accept : create the connected socket */
 			ret = obex_transport_accept(self);
 
@@ -136,7 +136,7 @@ int obex_transport_accept(obex_t *self)
 {
 	int ret = -1;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	switch (self->trans.type) {
 #ifdef HAVE_IRDA
@@ -158,7 +158,7 @@ int obex_transport_accept(obex_t *self)
 		break;
 
 	default:
-		DEBUG(4, __FUNCTION__ "(), domain not implemented!\n");
+		DEBUG(4, "domain not implemented!\n");
 		break;
 	}
 	return ret;
@@ -188,12 +188,12 @@ int obex_transport_connect_request(obex_t *self)
 		ret = inobex_connect_request(self);
 		break;
 	case OBEX_TRANS_CUSTOM:
-		DEBUG(4, __FUNCTION__ "() Custom connect\n");
+		DEBUG(4, "Custom connect\n");
 		if(self->ctrans.connect)
 			ret = self->ctrans.connect(self, self->ctrans.customdata);
 		else
-			DEBUG(4, __FUNCTION__ "(), No connect-callback exist!\n");
-		DEBUG(4, __FUNCTION__ "ret=%d\n", ret);
+			DEBUG(4, "No connect-callback exist!\n");
+		DEBUG(4, "ret=%d\n", ret);
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -207,7 +207,7 @@ int obex_transport_connect_request(obex_t *self)
 		break;
 
 	default:
-		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
+		DEBUG(4, "Transport not implemented!\n");
 		break;
 	}
 	if (ret >= 0)
@@ -235,11 +235,11 @@ void obex_transport_disconnect_request(obex_t *self)
 		inobex_disconnect_request(self);
 		break;	
 	case OBEX_TRANS_CUSTOM:
-		DEBUG(4, __FUNCTION__ "() Custom disconnect\n");
+		DEBUG(4, "Custom disconnect\n");
 		if(self->ctrans.disconnect)
 			self->ctrans.disconnect(self, self->ctrans.customdata);
 		else
-			DEBUG(4, __FUNCTION__ "(), No disconnect-callback exist!\n");
+			DEBUG(4, "No disconnect-callback exist!\n");
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -251,7 +251,7 @@ void obex_transport_disconnect_request(obex_t *self)
 		self->fd = self->writefd = -1;
 		break;
 	default:
-		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
+		DEBUG(4, "Transport not implemented!\n");
 		break;
 	}
 	self->trans.connected = FALSE;
@@ -277,11 +277,11 @@ int obex_transport_listen(obex_t *self)
 		ret = inobex_listen(self);
 		break;
 	case OBEX_TRANS_CUSTOM:
-		DEBUG(4, __FUNCTION__ "() Custom listen\n");
+		DEBUG(4, "Custom listen\n");
 		if(self->ctrans.listen)
 			ret = self->ctrans.listen(self, self->ctrans.customdata);
 		else
-			DEBUG(4, __FUNCTION__ "(), No listen-callback exist!\n");
+			DEBUG(4, "No listen-callback exist!\n");
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -293,7 +293,7 @@ int obex_transport_listen(obex_t *self)
 		ret = 0;
 		break;
 	default:
-		DEBUG(4, __FUNCTION__ "() Transport %d not implemented!\n",
+		DEBUG(4, "Transport %d not implemented!\n",
 			  self->trans.type);
 		break;
 	}
@@ -322,7 +322,7 @@ void obex_transport_disconnect_server(obex_t *self)
 		inobex_disconnect_server(self);
 		break;	
 	case OBEX_TRANS_CUSTOM:
-		DEBUG(4, __FUNCTION__ "() Custom disconnect\n");
+		DEBUG(4, "Custom disconnect\n");
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -333,7 +333,7 @@ void obex_transport_disconnect_server(obex_t *self)
 		/* no real server on a file */;
 		break;
 	default:
-		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
+		DEBUG(4, "Transport not implemented!\n");
 		break;
 	}
 }
@@ -352,7 +352,7 @@ static int do_write(int fd, GNetBuf *msg, int mtu)
 			size = mtu;
 		else
 			size = msg->len;
-		DEBUG(1, __FUNCTION__ "(), sending %d bytes\n", size);
+		DEBUG(1, "sending %d bytes\n", size);
 
 		actual = write(fd, msg->data, size);
 		if (actual <= 0)
@@ -374,7 +374,7 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 {
 	int actual = -1;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	switch(self->trans.type)	{
 #ifdef HAVE_IRDA
@@ -390,14 +390,14 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 		actual = do_write(self->writefd, msg, self->trans.mtu);
 		break;
 	case OBEX_TRANS_CUSTOM:
-		DEBUG(4, __FUNCTION__ "() Custom write\n");
+		DEBUG(4, "Custom write\n");
 		if(self->ctrans.write)
 			actual = self->ctrans.write(self, self->ctrans.customdata, msg->data, msg->len);
 		else
-			DEBUG(4, __FUNCTION__ "(), No write-callback exist!\n");
+			DEBUG(4, "No write-callback exist!\n");
 		break;
 	default:
-		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
+		DEBUG(4, "Transport not implemented!\n");
 		break;
 	}	
 	return actual;
@@ -414,7 +414,7 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	int actual = -1;
 	GNetBuf *msg = self->rx_msg;
 
-	DEBUG(4, __FUNCTION__ "() Request to read max %d bytes\n", max);
+	DEBUG(4, "Request to read max %d bytes\n", max);
 
 	switch(self->trans.type)	{
 #ifdef HAVE_IRDA
@@ -438,7 +438,7 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 		}
 		break;
 	default:
-		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
+		DEBUG(4, "Transport not implemented!\n");
 		break;
 	}	
 	return actual;

@@ -82,11 +82,11 @@ void inobex_prepare_listen(obex_t *self)
  */
 int inobex_listen(obex_t *self)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	self->serverfd = obex_create_socket(self, AF_INET);
 	if(self->serverfd < 0) {
-		DEBUG(0, __FUNCTION__ "() Cannot create server-socket\n");
+		DEBUG(0, "Cannot create server-socket\n");
 		return -1;
 	}
 
@@ -95,16 +95,16 @@ int inobex_listen(obex_t *self)
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.inet,
 		 sizeof(struct sockaddr_in))) 
 	{
-		DEBUG(0, __FUNCTION__ "() bind() Failed\n");
+		DEBUG(0, "bind() Failed\n");
 		return -1;
 	}
 
 	if (listen(self->serverfd, 2)) {
-		DEBUG(0, __FUNCTION__ "() listen() Failed\n");
+		DEBUG(0, "listen() Failed\n");
 		return -1;
 	}
 
-	DEBUG(4, __FUNCTION__ "() Now listening for incomming connections. serverfd = %d\n", self->serverfd);
+	DEBUG(4, "Now listening for incomming connections. serverfd = %d\n", self->serverfd);
 	return 1;
 }
 
@@ -153,21 +153,21 @@ int inobex_connect_request(obex_t *self)
 
 	addr = (char *) &self->trans.peer.inet.sin_addr.s_addr;
 
-	DEBUG(2, __FUNCTION__ "(), peer addr = %d.%d.%d.%d\n",
+	DEBUG(2, "peer addr = %d.%d.%d.%d\n",
 		addr[0], addr[1], addr[2], addr[3]);
 
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.inet, 
 		      sizeof(struct sockaddr_in));
 	if (ret < 0) {
-		DEBUG(4, __FUNCTION__ "() Connect failed\n");
+		DEBUG(4, "Connect failed\n");
 		obex_delete_socket(self, self->fd);
 		self->fd = -1;
 		return ret;
 	}
 
 	self->trans.mtu = OBEX_DEFAULT_MTU;
-	DEBUG(3, __FUNCTION__ "(), transport mtu=%d\n", self->trans.mtu);
+	DEBUG(3, "transport mtu=%d\n", self->trans.mtu);
 
 	return ret;
 }
@@ -181,7 +181,7 @@ int inobex_connect_request(obex_t *self)
 int inobex_disconnect_request(obex_t *self)
 {
 	int ret;
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
@@ -200,7 +200,7 @@ int inobex_disconnect_request(obex_t *self)
 int inobex_disconnect_server(obex_t *self)
 {
 	int ret;
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
 	self->serverfd = -1;
 	return ret;	

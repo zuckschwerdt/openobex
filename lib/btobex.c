@@ -100,28 +100,28 @@ void btobex_prepare_listen(obex_t *self, bdaddr_t *src, uint8_t channel)
 int btobex_listen(obex_t *self)
 {
 #ifndef _WIN32
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, "\n");
 
 	self->serverfd = obex_create_socket(self, AF_BLUETOOTH);
 	if(self->serverfd < 0) {
-		DEBUG(0, __FUNCTION__ "() Error creating socket\n");
+		DEBUG(0, "Error creating socket\n");
 		return -1;
 	}
 	
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.rfcomm, 
 		 sizeof(struct sockaddr_rc)))
 	{
-		DEBUG(0, __FUNCTION__ "() Error doing bind\n");
+		DEBUG(0, "Error doing bind\n");
 		goto out_freesock;
 	}
 
 
 	if (listen(self->serverfd, 1)) {
-		DEBUG(0, __FUNCTION__ "() Error doing listen\n");
+		DEBUG(0, "Error doing listen\n");
 		goto out_freesock;
 	}
 
-	DEBUG(4, __FUNCTION__ "() We are now listening for connections\n");
+	DEBUG(4, "We are now listening for connections\n");
 	return 1;
 
 out_freesock:
@@ -172,7 +172,7 @@ int btobex_connect_request(obex_t *self)
 	int mtu = 0;
 	//int len = sizeof(int);
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	if(self->fd < 0)	{
 		self->fd = obex_create_socket(self, AF_BLUETOOTH);
@@ -184,21 +184,21 @@ int btobex_connect_request(obex_t *self)
 		   sizeof(struct sockaddr_rc));
 
 	if (ret < 0) {
-		DEBUG(4, __FUNCTION__ "(), ret=%d\n", ret);
+		DEBUG(4, "ret=%d\n", ret);
 		goto out_freesock;
 	}
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.rfcomm,
 		      sizeof(struct sockaddr_rc));
 	if (ret < 0) {
-		DEBUG(4, __FUNCTION__ "(), ret=%d\n", ret);
+		DEBUG(4, "ret=%d\n", ret);
 		goto out_freesock;
 	}
 
 	mtu = OBEX_DEFAULT_MTU;
 	self->trans.mtu = mtu;
 
-	DEBUG(2, __FUNCTION__ "(), transport mtu=%d\n", mtu);
+	DEBUG(2, "transport mtu=%d\n", mtu);
 
 	return 1;
 
@@ -219,7 +219,7 @@ int btobex_disconnect_request(obex_t *self)
 {
 	int ret;
 #ifndef _WIN32
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
@@ -240,7 +240,7 @@ int btobex_disconnect_server(obex_t *self)
 {
 	int ret;
 #ifndef _WIN32
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
 	self->serverfd = -1;
 #endif /* _WIN32 */

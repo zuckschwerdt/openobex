@@ -73,7 +73,7 @@ int obex_dump;
 int obex_create_socket(obex_t *self, int domain)
 {
 	int fd, proto;
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	proto = 0;
 
@@ -96,7 +96,7 @@ int obex_delete_socket(obex_t *self, int fd)
 {
 	int ret;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	if(fd < 0)
 		return fd;
@@ -216,7 +216,7 @@ int obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
 	hdr->len = htons((uint16_t)msg->len);
 
 	DUMPBUFFER(1, "Tx", msg);
-	DEBUG(1, __FUNCTION__ "(), len = %d bytes\n", msg->len);
+	DEBUG(1, "len = %d bytes\n", msg->len);
 
 	actual = obex_transport_write(self, msg);
 	return actual;
@@ -237,7 +237,7 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 	unsigned int size;
 	int ret;
 	
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 
@@ -247,7 +247,7 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 	if(msg->len < 3)  {
 		actual = obex_transport_read(self, 3 - (msg->len), buf, buflen);
 		
-		DEBUG(4, __FUNCTION__ "() Got %d bytes\n", actual);
+		DEBUG(4, "Got %d bytes\n", actual);
 
 		/* Check if we are still connected */
 		if (actual <= 0)	{
@@ -279,14 +279,14 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 	}
         else {
 		/* Wait until we have at least 3 bytes data */
-		DEBUG(3, __FUNCTION__ "() Need at least 3 bytes got only %d!\n", msg->len);
+		DEBUG(3, "Need at least 3 bytes got only %d!\n", msg->len);
 		return actual;
         }
 
 
 	/* New data has been inserted at the end of message */
 	g_netbuf_put(msg, actual);
-	DEBUG(1, __FUNCTION__ "() Got %d bytes msg len=%d\n", actual, msg->len);
+	DEBUG(1, "Got %d bytes msg len=%d\n", actual, msg->len);
 
 	/*
 	 * Make sure that the buffer we have, actually has the specified
@@ -296,7 +296,7 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 
 	/* Make sure we have a whole packet */
 	if (size > msg->len) {
-		DEBUG(3, __FUNCTION__ "() Need more data, size=%d, len=%d!\n",
+		DEBUG(3, "Need more data, size=%d, len=%d!\n",
 		      size, msg->len);
 
 		/* I'll be back! */

@@ -32,6 +32,7 @@
 #include <config.h>
 #endif
 
+#include <stdio.h>
 #include <string.h>
 
 #include "obex_main.h"
@@ -50,7 +51,7 @@ int obex_insert_connectframe(obex_t *self, obex_object_t *object)
 {
 	obex_connect_hdr_t *conn_hdr;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	object->tx_nonhdr_data = g_netbuf_new(4);
 	if(!object->tx_nonhdr_data) 
@@ -80,7 +81,7 @@ int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 	uint8_t opcode;
 	uint16_t length;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 
 	/* Remember opcode and size for later */
 	common_hdr = (obex_common_hdr_t *) msg->data;
@@ -91,7 +92,7 @@ int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 	if( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) && (opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
 		return 1;
 
-	DEBUG(4, __FUNCTION__ "() Len: %d\n", msg->len);
+	DEBUG(4, "Len: %d\n", msg->len);
 	if(msg->len >= 7) {
 		/* Get what we need */
 		conn_hdr = (obex_connect_hdr_t *) ((msg->data) + 3);
@@ -99,7 +100,7 @@ int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 		flags   = conn_hdr->flags;
 		mtu     = ntohs(conn_hdr->mtu);
 
-		DEBUG(1, __FUNCTION__ "version=%02x\n", version);
+		DEBUG(1, "version=%02x\n", version);
 
 		/* Limit to some reasonable value (usually OBEX_DEFAULT_MTU) */
 		if(mtu < self->mtu_tx_max)
@@ -107,9 +108,9 @@ int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 		else
 			self->mtu_tx = self->mtu_tx_max;
 
-		DEBUG(1, __FUNCTION__ "() requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
+		DEBUG(1, "requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
 		return 1;
 	}
-	DEBUG(1, __FUNCTION__ "() Malformed connect-header received\n");
+	DEBUG(1, "Malformed connect-header received\n");
 	return -1;
 }

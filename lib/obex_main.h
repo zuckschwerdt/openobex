@@ -79,12 +79,12 @@ typedef struct obex obex_t;
 #  if OBEX_DEBUG
 extern int obex_debug;
 #    ifdef OBEX_SYSLOG
-#    define DEBUG(n, args...) if (obex_debug >= (n)) syslog(LOG_DEBUG, "OpenObex: " args)
+#    define DEBUG(n, format, args...) if (obex_debug >= (n)) syslog(LOG_DEBUG, "OpenOBEX: %s(): " format, __FUNCTION__ , ##args)
 #    else
-#    define DEBUG(n, args...) if (obex_debug >= (n)) fprintf(stderr, args)
+#    define DEBUG(n, format, args...) if (obex_debug >= (n)) fprintf(stderr, "%s(): " format, __FUNCTION__ , ##args)
 #    endif	/* OBEX_SYSLOG */
 #  else
-#  define DEBUG(n, args, ...)
+#  define DEBUG(n, format, args...)
 #  endif /* OBEX_DEBUG != 0 */
 
 #  if OBEX_DUMP

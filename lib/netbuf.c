@@ -155,7 +155,7 @@ uint8_t *g_netbuf_put(GNetBuf *msg, unsigned int len)
         msg->len += len;
 	
         if (msg->tail > msg->end) {
-		//DEBUG(4, __FUNCTION__ "(), put over, trying to realloc ...!\n");
+		//DEBUG(4, "put over, trying to realloc ...!\n");
 		
 		msg = g_netbuf_realloc(msg, msg->truesize+len);
 		if (!msg)
@@ -188,7 +188,7 @@ uint8_t *g_netbuf_put_data(GNetBuf *msg, uint8_t *data, unsigned int len)
 uint8_t *g_netbuf_push(GNetBuf *msg, unsigned int len)
 {
 	if ((msg->data - len) < msg->head) {
-		//DEBUG(4, __FUNCTION__ "(), pushed under, trying to realloc!\n");
+		//DEBUG(4, "pushed under, trying to realloc!\n");
 
 		msg = g_netbuf_realloc(msg, msg->truesize+len);
 		if (!msg)

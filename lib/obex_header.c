@@ -49,7 +49,7 @@ int insert_uint_header(GNetBuf *msg, uint8_t identifier, uint32_t value)
 {
 	struct obex_uint_hdr *hdr;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
 
 	hdr = (struct obex_uint_hdr *) g_netbuf_put(msg, 5);
@@ -69,7 +69,7 @@ int insert_ubyte_header(GNetBuf *msg, uint8_t identifier, uint8_t value)
 {
 	struct obex_ubyte_hdr *hdr;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
 
 	hdr = (struct obex_ubyte_hdr *) g_netbuf_put(msg, 2);
@@ -91,7 +91,7 @@ int insert_unicode_header(GNetBuf *msg, uint8_t opcode,
 {
 	struct obex_unicode_hdr *hdr;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
 	obex_return_val_if_fail(text != NULL, -1);
 
@@ -116,13 +116,13 @@ int insert_byte_stream_header(GNetBuf *msg, uint8_t opcode,
 {
 	struct obex_byte_stream_hdr *hdr;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
 	obex_return_val_if_fail(stream != NULL, -1);
 	
 	hdr = (struct obex_byte_stream_hdr *) g_netbuf_put(msg, size+3);
 	if (hdr == 0) {
-		DEBUG(4, __FUNCTION__ "(), put failed!\n");
+		DEBUG(4, "put failed!\n");
 		return 0;
 	}
 
