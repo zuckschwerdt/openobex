@@ -71,7 +71,7 @@ void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t 
 
 	self->trans.peer.rfcomm.rc_family = AF_BLUETOOTH;
 	bacpy(&self->trans.peer.rfcomm.rc_bdaddr, dst);
-	self->trans.peer.rfcomm.rc_channel = htobs(channel);
+	self->trans.peer.rfcomm.rc_channel = channel;
 #endif /* _WIN32 */
 }
 
@@ -87,7 +87,7 @@ void btobex_prepare_listen(obex_t *self, bdaddr_t *src, uint8_t channel)
 	/* Bind local service */
 	self->trans.self.rfcomm.rc_family = AF_BLUETOOTH;
 	bacpy(&self->trans.self.rfcomm.rc_bdaddr, src);
-	self->trans.self.rfcomm.rc_channel = htobs(channel);
+	self->trans.self.rfcomm.rc_channel = channel;
 #endif /* _WIN32 */
 }
 
