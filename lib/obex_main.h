@@ -47,28 +47,44 @@ typedef struct obex obex_t;
 #include "obex_transport.h"
 #include "netbuf.h"
 
+#ifdef OBEX_SYSLOG
+#include <syslog.h>
+#endif
+
 /* use 0 for none, 1 for sendbuff, 2 for receivebuff and 3 for both */
-#ifndef DEBUG_DUMPBUFFERS
-#define DEBUG_DUMPBUFFERS 0
+#ifndef OBEX_DUMP
+#define OBEX_DUMP 0
 #endif
 
 /* use 0 for production, 1 for verification, >2 for debug */
 #ifndef OBEX_DEBUG
 #define OBEX_DEBUG 0
-unsigned int obex_debug;
 #endif
 
 #ifndef _WIN32
 
-#ifdef OBEX_DEBUG
-#define DEBUG(n, args...) if (obex_debug >= (n)) g_print(args)
-#else
-#define DEBUG(n, args, ...)
-#endif /* OBEX_DEBUG */
+#  if OBEX_DEBUG
+extern int obex_debug;
+#    ifdef OBEX_SYSLOG
+#    define DEBUG(n, args...) if (obex_debug >= (n)) syslog(LOG_DEBUG, "OpenObex: " args)
+#    else
+#    define DEBUG(n, args...) if (obex_debug >= (n)) g_print(args)
+#    endif	/* OBEX_SYSLOG */
+#  else
+#  define DEBUG(n, args, ...)
+#  endif /* OBEX_DEBUG != 0 */
+
+#  if OBEX_DUMP
+extern int obex_dump;
+#  define DUMPBUFFER(n, label, msg)	if (obex_dump & (n)) g_netbuf_print(label, msg);
+#  else
+#  define DUMPBUFFER(n, label, msg)
+#  endif /* OBEX_DUMP != 0 */
 
 #else /* _WIN32 */
 
 void DEBUG(unsigned int n, ...);
+void DUMPBUFFERS(n, label, msg);
 
 #endif /* _WIN32 */
 

@@ -72,7 +72,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 				
 		if(ntohs(response->len) > 3) {
 			DEBUG(1, G_GNUC_FUNCTION "() STATE_SEND. Didn't excpect data from peer (%d)\n", ntohs(response->len));
-			//g_netbuf_print(msg);
+			DUMPBUFFER(4, "unexpected data", msg);
 			/* At this point, we are in the middle of sending
 			 * our request to the server, and it is already
 			 * sending us some data ! This break the whole

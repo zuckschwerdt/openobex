@@ -83,8 +83,11 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 {
 	obex_t *self;
 
-#ifdef OBEX_DEBUG
+#if OBEX_DEBUG
 	obex_debug = OBEX_DEBUG;
+#endif
+#if OBEX_DUMP
+	obex_dump = OBEX_DUMP;
 #endif
 
 	g_return_val_if_fail(eventcb != NULL, NULL);

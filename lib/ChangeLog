@@ -1,6 +1,7 @@
 2002-10-23  Marcel Holtmann  <marcel@holtmann.org>
 
 	* Fix workaround for compilation without Bluetooth support.
+	* Add support for DEBUG and DUMP.
 
 2002-10-16  Marcel Holtmann  <marcel@holtmann.org>
 

@@ -30,11 +30,19 @@
  *     
  ********************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <glib.h>
+
+#ifdef OBEX_SYSLOG
+#include <syslog.h>
+#endif
 
 #include <netbuf.h>
 
@@ -282,13 +290,23 @@ void g_netbuf_trim(GNetBuf *msg, guint len)
         }
 }
 
-void g_netbuf_print(GNetBuf *msg)
+void g_netbuf_print(const char *label, GNetBuf *msg)
 {
-	guint i;
+	int 	i;
+	int	j = -1;
+	char	buf[81];
 
-	for (i=0; i<msg->len; i++)
-		g_print("%02x ", msg->data[i]);
-	g_print("\n");
+	for (i = 0; i < msg->len; i++) {
+		j = (i % 16) * 3;
+		sprintf(&(buf[j]), "%02x ", msg->data[i]);
+		if((j == (15 * 3)) || (i == (msg->len - 1))) {
+#ifdef OBEX_SYSLOG
+			syslog(LOG_DEBUG, "OpenObex: %s: %s\n", label, buf);
+#else
+			g_print("%s: %s\n", label, buf);
+#endif
+		}
+	}
 }
 
 

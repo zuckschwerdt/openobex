@@ -56,6 +56,12 @@
 #include "obex_client.h"
 #include "obex_const.h"
 
+#ifdef OBEX_DEBUG
+int obex_debug;
+#endif
+#ifdef OBEX_DUMP
+int obex_dump;
+#endif
 
 /*
  * Function obex_create_socket()
@@ -231,9 +237,7 @@ gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
 	hdr->opcode = opcode;
 	hdr->len = htons((guint16)msg->len);
 
-#if DEBUG_DUMPBUFFERS & 1
-	g_netbuf_print(msg);
-#endif
+	DUMPBUFFER(1, "Tx", msg);
 	DEBUG(1, G_GNUC_FUNCTION "(), len = %d bytes\n", msg->len);
 
 	actual = obex_transport_write(self, msg);
@@ -320,9 +324,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 		return msg->len;
 	}
 
-#if DEBUG_DUMPBUFFERS & 2
-	g_netbuf_print(msg);
-#endif
+	DUMPBUFFER(2, "Rx", msg);
 
 	actual = msg->len;
 	final = hdr->opcode & OBEX_FINAL; /* Extract final bit */
