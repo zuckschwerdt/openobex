@@ -31,7 +31,7 @@
 #ifndef INOBEX_H
 #define INOBEX_H
 
-gint inobex_listen(obex_t *self, char *service);
+gint inobex_listen(obex_t *self, const char *service);
 gint inobex_accept(obex_t *self);
 gint inobex_connect_request(obex_t *self);
 gint inobex_disconnect_request(obex_t *self);

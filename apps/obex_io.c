@@ -52,7 +52,7 @@ int obex_protocol_type = OBEX_PROTOCOL_GENERIC;
 //
 // Get the filesize in a "portable" way
 //
-gint get_filesize(char *filename)
+gint get_filesize(const char *filename)
 {
 #ifdef _WIN32
 	HANDLE fh;
@@ -79,7 +79,7 @@ gint get_filesize(char *filename)
 //
 // Read a file and alloc a buffer for it
 //
-guint8* easy_readfile(char *filename, int *file_size)
+guint8* easy_readfile(const char *filename, int *file_size)
 {
 	int actual;
 	int fd;
@@ -120,7 +120,7 @@ guint8* easy_readfile(char *filename, int *file_size)
 //
 //
 //
-obex_object_t *build_object_from_file(obex_t *handle, char *filename)
+obex_object_t *build_object_from_file(obex_t *handle, const char *filename)
 {
 	obex_headerdata_t hdd;
 	guint8 unicode_buf[200];
@@ -199,7 +199,7 @@ obex_object_t *build_object_from_file(obex_t *handle, char *filename)
  *    First remove path and add "/tmp/". Then save.
  *
  */
-gint safe_save_file(gchar *name, guint8 *buf, gint len)
+gint safe_save_file(gchar *name, const guint8 *buf, gint len)
 {
 	gchar *s = NULL;
 	gchar filename[255] = {0,};

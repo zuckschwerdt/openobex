@@ -113,7 +113,6 @@ gint obex_create_socket(obex_t *self, gint domain, gboolean async);
 gint obex_delete_socket(obex_t *self, gint fd);
 
 void obex_deliver_event(obex_t *self, gint mode, gint event, gint cmd, gint rsp, gboolean del);
-void obex_input_handler(int signal);
 gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen);
 
 gint obex_data_request(obex_t *self, GNetBuf *msg, gint opcode, 

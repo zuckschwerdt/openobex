@@ -62,7 +62,7 @@
  *    Prepare for IR-connect
  *
  */
-void irobex_prepare_connect(obex_t *self, char *service)
+void irobex_prepare_connect(obex_t *self, const char *service)
 {
 	self->trans.peer.irda.sir_family = AF_IRDA;
 
@@ -78,7 +78,7 @@ void irobex_prepare_connect(obex_t *self, char *service)
  *    Listen for incoming connections.
  *
  */
-gint irobex_listen(obex_t *self, char *service)
+gint irobex_listen(obex_t *self, const char *service)
 {
 	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
@@ -175,7 +175,7 @@ gint irobex_accept(obex_t *self)
  *    Try to discover some remote device(s) that we can connect to
  *
  */
-gint irobex_discover_devices(obex_t *self)
+static gint irobex_discover_devices(obex_t *self)
 {
 	struct irda_device_list *list;
 	unsigned char *buf;

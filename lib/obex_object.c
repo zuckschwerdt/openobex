@@ -371,8 +371,7 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 
 
 gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
-					obex_headerdata_t *hv,
-					guint32 *hv_size)
+				obex_headerdata_t *hv, guint32 *hv_size)
 {
 	guint32 *bq4;
 	struct obex_header_element *h;
@@ -411,7 +410,8 @@ gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 	return 1;
 }
 
-gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8 hi, guint8 *source, guint len)
+gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8 hi,
+				guint8 *source, guint len)
 {
 	struct obex_header_element *element;
 

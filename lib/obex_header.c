@@ -46,7 +46,6 @@ gint insert_uint_header(GNetBuf *msg, guint8 identifier, guint32 value)
 	struct obex_uint_hdr *hdr;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-
 	g_return_val_if_fail(msg != NULL, -1);
 
 	hdr = (struct obex_uint_hdr *) g_netbuf_put(msg, 5);
@@ -67,7 +66,6 @@ gint insert_ubyte_header(GNetBuf *msg, guint8 identifier, guint8 value)
 	struct obex_ubyte_hdr *hdr;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-
 	g_return_val_if_fail(msg != NULL, -1);
 
 	hdr = (struct obex_ubyte_hdr *) g_netbuf_put(msg, 2);
@@ -84,12 +82,12 @@ gint insert_ubyte_header(GNetBuf *msg, guint8 identifier, guint8 value)
  *    Insert a char string into the buffer after converting it to a 
  *    unicode string
  */
-gint insert_unicode_header(GNetBuf *msg, guint8 opcode, char *text, gint size)
+gint insert_unicode_header(GNetBuf *msg, guint8 opcode, 
+			const guint8 *text, gint size)
 {
 	struct obex_unicode_hdr *hdr;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-
 	g_return_val_if_fail(msg != NULL, -1);
 	g_return_val_if_fail(text != NULL, -1);
 
@@ -109,13 +107,12 @@ gint insert_unicode_header(GNetBuf *msg, guint8 opcode, char *text, gint size)
  *    Insert a byte stream into the buffer
  *
  */
-gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode, guint8 *stream, 
-			       gint size)
+gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode,
+			const guint8 *stream, gint size)
 {
 	struct obex_byte_stream_hdr *hdr;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-
 	g_return_val_if_fail(msg != NULL, -1);
 	g_return_val_if_fail(stream != NULL, -1);
 	

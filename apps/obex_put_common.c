@@ -52,7 +52,7 @@ void put_done(obex_object_t *object)
 	guint8 hi;
 	gint hlen;
 
-	guint8 *body = NULL;
+	const guint8 *body = NULL;
 	gint body_len = 0;
 	gchar *name = NULL;
 	gchar *namebuf = NULL;

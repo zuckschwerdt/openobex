@@ -221,7 +221,7 @@ void obex_transport_disconnect_request(obex_t *self)
  *    Prepare for incomming connections
  *
  */
-gint obex_transport_listen(obex_t *self, char *service)
+gint obex_transport_listen(obex_t *self, const char *service)
 {
 	int ret = -1;
 

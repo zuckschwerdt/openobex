@@ -9,7 +9,7 @@
  * Modified at:   Sun Aug 13 11:51:47 AM CEST 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -193,7 +193,7 @@ gpointer OBEX_GetUserData(obex_t *self)
  *    Register server interest in OBEX
  *
  */
-gint OBEX_ServerRegister(obex_t *self, char *service)
+gint OBEX_ServerRegister(obex_t *self, const char *service)
 {
 	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
@@ -276,7 +276,7 @@ gint OBEX_TransportDisconnect(obex_t *self)
  *    An easier connect function to use for IrDA (IrOBEX) only
  *
  */
-gint IrOBEX_TransportConnect(obex_t *self, char *service)
+gint IrOBEX_TransportConnect(obex_t *self, const char *service)
 {
      	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
@@ -520,7 +520,7 @@ gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
  *    Simple unicode to char function. Buffers may overlap.
  *
  */
-gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size)
+gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
 {
 	//FIXME: Check so that buffer is big enough
 	int n = 0;
@@ -541,7 +541,7 @@ gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size)
  *    Simple char to unicode function. Buffers may overlap.
  *
  */
-gint OBEX_CharToUnicode(guint8 *uc, guint8 *c, gint size)
+gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size)
 {
 	int len, n;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");

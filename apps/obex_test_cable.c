@@ -52,7 +52,7 @@ int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 	struct timeval tv;
 
 	char *answer;
-	char *answer_end;
+	char *answer_end = NULL;
 	unsigned int answer_size;
 
 	char tmpbuf[100] = {0,};

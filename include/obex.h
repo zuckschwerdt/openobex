@@ -61,7 +61,7 @@ gint    OBEX_TransportDisconnect(obex_t *self);
 gint    OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual);
 gint    OBEX_HandleInput(obex_t *self, gint timeout);
 
-gint    OBEX_ServerRegister(obex_t *self, char *service);
+gint    OBEX_ServerRegister(obex_t *self, const char *service);
 gint    OBEX_Request(obex_t *self, obex_object_t *object);
 gint    OBEX_CancelRequest(obex_t *self);
 
@@ -81,14 +81,14 @@ gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset);
 void OBEX_ObjectSetUserData(obex_object_t *object, gpointer data);
 gpointer OBEX_ObjectGetUserData(obex_object_t *object);
 
-gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size);
-gint OBEX_CharToUnicode(guint8 *uc, guint8 *c, gint size);
+gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size);
+gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size);
 
 GString* OBEX_GetResponseMessage(obex_t *self, gint rsp);
 
 /*
  * IrOBEX API 
  */
- gint IrOBEX_TransportConnect(obex_t *self, char *service);
+ gint IrOBEX_TransportConnect(obex_t *self, const char *service);
 
 #endif

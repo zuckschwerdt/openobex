@@ -1,3 +1,8 @@
+2000-08-28  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Minor improvements to many files. Defined
+	  some variables const as they ought to be.
+
 2000-08-23  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Fixed bug when receiving more than one fragment at a time.

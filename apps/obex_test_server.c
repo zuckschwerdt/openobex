@@ -46,7 +46,7 @@ void put_server(obex_t *handle, obex_object_t *object)
 	guint8 hi;
 	gint hlen;
 
-	guint8 *body = NULL;
+	const guint8 *body = NULL;
 	gint body_len = 0;
 	gchar *name = NULL;
 	gchar *namebuf = NULL;
@@ -149,7 +149,7 @@ void connect_server(obex_t *handle, obex_object_t *object)
 	guint8 hi;
 	gint hlen;
 
-	guint8 *who = NULL;
+	const guint8 *who = NULL;
 	gint who_len = 0;
 	g_print(G_GNUC_FUNCTION "()\n");
 

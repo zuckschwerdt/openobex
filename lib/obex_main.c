@@ -55,6 +55,30 @@ obex_t *async_self[OBEX_MAXINSTANCE] = {NULL, }; /* Which instances wants SIGIO 
 pid_t async_pid[OBEX_MAXINSTANCE] = {0, };
 #endif
 
+
+/*
+ * Function input_handler (signal)
+ *
+ *    Called by SIGIO and is used then the OBEX library is in asyncronous mode
+ *
+ */
+static void obex_input_handler(int signal)
+{
+#ifdef HAVE_FASYNC
+	gint i;
+	pid_t curr_pid;
+	
+	DEBUG(4, G_GNUC_FUNCTION "() Got some input!\n");
+	curr_pid = getpid();
+
+	for(i=0; i<OBEX_MAXINSTANCE ;i++) {
+		if( (async_self[i]) && (async_pid[i] == curr_pid) )	{
+			obex_data_indication(async_self[i], NULL, 0);
+		}
+	}
+#endif
+}
+
 /*
  * Function obex_register_async()
  *
@@ -163,28 +187,6 @@ gint obex_delete_socket(obex_t *self, gint fd)
 	return ret;
 }
 
-/*
- * Function input_handler (signal)
- *
- *    Called by SIGIO and is used then the OBEX library is in asyncronous mode
- *
- */
-void obex_input_handler(int signal)
-{
-#ifdef HAVE_FASYNC
-	gint i;
-	pid_t curr_pid;
-	
-	DEBUG(4, G_GNUC_FUNCTION "() Got some input!\n");
-	curr_pid = getpid();
-
-	for(i=0; i<OBEX_MAXINSTANCE ;i++) {
-		if( (async_self[i]) && (async_pid[i] == curr_pid) )	{
-			obex_data_indication(async_self[i], NULL, 0);
-		}
-	}
-#endif
-}
 
 /*
  * Function obex_get_last_response_message (self)

@@ -5,13 +5,12 @@
  * Version:       
  * Description:   
  * Status:        Experimental.
- * Author:        Pontus Fuchs <pontus@tactel.se>
+ * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon Mar  1 10:30:54 1999
- * Modified at:   Tue Nov 16 19:24:22 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Mon Aug 28 11:09:26 AM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1999 Pontus Fuchs, All Rights Reserved.
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -117,14 +116,13 @@ typedef struct {
 	} t;
 } obex_header_t;
 
-char *unicode_to_char(guint8 *buf);
-
 gint insert_uint_header(GNetBuf *msg, guint8 identifier, guint32 value);
 gint insert_ubyte_header(GNetBuf *msg, guint8 identifier, guint8 value);
-gint insert_unicode_header(GNetBuf *msg, guint8 opcode, char *text,
+gint insert_unicode_header(GNetBuf *msg, guint8 opcode, const guint8 *text,
 				gint size);
-gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode, guint8 *stream, 
-			       gint size);
+
+gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode, 
+			const guint8 *stream, gint size);
 
 gint obex_extract_header(GNetBuf *msg, obex_header_t *header);
 

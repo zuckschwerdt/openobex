@@ -36,7 +36,7 @@
 typedef union {
 	guint32 bq4;
 	guint8 bq1;
-	guint8 *bs;
+	const guint8 *bs;
 } obex_headerdata_t;
 
 typedef struct {

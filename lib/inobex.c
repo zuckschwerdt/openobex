@@ -49,7 +49,7 @@
  *    Wait for incomming connections
  *
  */
-gint inobex_listen(obex_t *self, char *service)
+gint inobex_listen(obex_t *self, const char *service)
 {
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
@@ -130,7 +130,7 @@ gint inobex_connect_request(obex_t *self)
 
 	addr = (char *) &self->trans.peer.inet.sin_addr.s_addr;
 
-	g_print(G_GNUC_FUNCTION "(), peer addr = %d.%d.%d.%d\n",
+	DEBUG(2, G_GNUC_FUNCTION "(), peer addr = %d.%d.%d.%d\n",
 		addr[0], addr[1], addr[2], addr[3]);
 
 

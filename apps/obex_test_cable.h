@@ -47,6 +47,7 @@ struct cobex_context
 /* User function */
 struct cobex_context *cobex_open(const gchar *port, gboolean r320);
 void cobex_close(struct cobex_context *gt);
+int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen);
 
 /* Callbacks */
 gint cobex_handle_input(obex_t *handle, gpointer userdata);

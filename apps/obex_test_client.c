@@ -249,7 +249,7 @@ void get_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
 	gint hlen;
 
 	gchar *req_name;
-	guint8 *body = NULL;
+	const guint8 *body = NULL;
 	gint body_len = 0;
 
 	if(obex_rsp != OBEX_RSP_SUCCESS) {
