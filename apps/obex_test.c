@@ -25,10 +25,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <unistd.h>
-#include <stdio.h>
-#include <openobex/obex.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
+#include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 
 #if _WIN32
@@ -39,6 +41,13 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #endif /* _WIN32 */
+
+#ifdef HAVE_BLUETOOTH
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
+#endif
+
+#include <openobex/obex.h>
 
 #include "obex_test.h"
 #include "obex_test_client.h"
@@ -147,6 +156,10 @@ int main (int argc, char *argv[])
 	int end = 0;
 	int cobex = FALSE, tcpobex = FALSE, btobex = FALSE, r320 = FALSE;
 	obex_t *handle;
+#ifdef HAVE_BLUETOOTH
+	bdaddr_t bdaddr;
+	uint8_t channel;
+#endif
 
 	struct context global_context = {0,};
 
@@ -165,7 +178,7 @@ int main (int argc, char *argv[])
 
 	if( (argc == 2) && (strcmp(argv[1], "-i") == 0 ) )
 		tcpobex = TRUE;
-	if( (argc == 2) && (strcmp(argv[1], "-b") == 0 ) )
+	if( (argc >= 2) && (strcmp(argv[1], "-b") == 0 ) )
 		btobex = TRUE;
 
 
@@ -216,8 +229,22 @@ int main (int argc, char *argv[])
 	}
 	else if(btobex) {
 #ifndef _WIN32
+		if(argc == 4) {
+#ifdef HAVE_BLUETOOTH
+			str2ba(argv[2], &bdaddr);
+			channel = atoi(argv[3]);
+#endif
+		}
+		else {
+			printf("Wrong number of arguments\n");
+			exit(0);
+		}
+
 		printf("Using Bluetooth RFCOMM transport\n");
-		printf("Not implemented yet.\n");
+		if(! (handle = OBEX_Init(OBEX_TRANS_BLUETOOTH, obex_event, 0)))      {
+			perror( "OBEX_Init failed");
+			exit(0);
+		}
 #else
 		printf("Not implemented in Win32 yet.\n");
 #endif	// _WIN32
@@ -267,8 +294,18 @@ int main (int argc, char *argv[])
 						break;
 					}
 				}
+				if(btobex) {
+#ifdef HAVE_BLUETOOTH
+					if(BtOBEX_TransportConnect(handle, BDADDR_ANY, &bdaddr, channel) <0) {
+						printf("Transport connect error! (Bluetooth)\n");
+						break;
+					}
+#else
+					printf("Transport not found! (Bluetooth)\n");
+#endif
+				}
 				else {
-					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0)	{
+					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0) {
 						printf("Transport connect error! (IrDA)\n");
 						break;
 					}
@@ -292,6 +329,10 @@ int main (int argc, char *argv[])
 						printf("Server register error! (Serial)\n");
 						break;
 					}
+				}
+				if(btobex) {
+					printf("Not implemented!");
+					break;
 				}
 				else {
 					if(IrOBEX_ServerRegister(handle, IR_SERVICE) < 0)	{

@@ -1,6 +1,7 @@
 2002-11-01  Marcel Holtmann  <marcel@holtmann.org>
 
 	* Add Bluetooth check
+	* Add Bluetooth client support
 
 2002-10-28  Marcel Holtmann  <marcel@holtmann.org>
 
