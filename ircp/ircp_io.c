@@ -31,7 +31,7 @@ guint8* easy_readfile(char *filename, int *file_size)
 	guint8 *buf;
 
 	*file_size = get_filesize(filename);
-	g_print("name=%s, size=%d\n", filename, *file_size);
+	DEBUG(4, G_GNUC_FUNCTION "()name=%s, size=%d\n", filename, *file_size);
 
 	fd = open(filename, O_RDONLY, 0);
 
@@ -144,7 +144,7 @@ gint ircp_save_file(gchar *path, gchar *name, gchar *body, guint len)
 
 	DEBUG(4, G_GNUC_FUNCTION "() Going to save with name %s\n", diskname->str);
 
-	fd = open(diskname->str, O_RDWR | O_CREAT, DEFFILEMODE);
+	fd = open(diskname->str, O_RDWR | O_CREAT | O_TRUNC, DEFFILEMODE);
 
 	if ( fd < 0) {
 		ret = -1;

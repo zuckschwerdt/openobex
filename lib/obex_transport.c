@@ -43,7 +43,7 @@
 /*
  * Function obex_transport_handle_input(self, timeout)
  *
- *    Used when the client or server is working in synchronous mode.
+ *    Used when working in synchronous mode.
  *
  */
 gint obex_transport_handle_input(obex_t *self, gint timeout)

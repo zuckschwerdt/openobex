@@ -1,6 +1,7 @@
 #include <openobex/obex.h>
 #include <string.h>
 
+#include "ircp.h"
 #include "ircp_io.h"
 #include "ircp_server.h"
 #include "debug.h"
@@ -213,7 +214,7 @@ out:	g_free(name);
 //
 // Create an ircp server
 //
-ircp_server_t *ircp_srv_open()
+ircp_server_t *ircp_srv_open(ircp_info_cb_t infocb)
 {
 	ircp_server_t *srv;
 

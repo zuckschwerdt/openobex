@@ -1,6 +1,40 @@
 #include <glib.h>
+
+#include "debug.h"
+#include "ircp.h"
 #include "ircp_client.h"
 #include "ircp_server.h"
+
+
+//
+//
+//
+void ircp_info_cb(gint event, gchar *param)
+{
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	switch (event) {
+	case IRCP_EV_ERR:
+		g_print("failed\n");
+		break;
+	case IRCP_EV_OK:
+		g_print("done\n");
+		break;
+
+
+	case IRCP_EV_CONNECTING:
+		g_print("Connecting...");
+		break;
+	case IRCP_EV_DISCONNECTING:
+		g_print("Disconnecting...");
+		break;
+	case IRCP_EV_SENDING:
+		g_print("Sending %s...", param);
+		break;
+	case IRCP_EV_RECIEVED:
+		g_print("Recieved %s\n", param);
+		break;
+	}
+}
 
 //
 //
@@ -10,23 +44,35 @@ int main(int argc, char *argv[])
 	int i;
 	ircp_client_t *cli;
 	ircp_server_t *srv;
+	gchar *inbox;
 
-	if(argc == 1) {
-		g_print("We are server\n");
-		srv = ircp_srv_open();
+	if(argc >= 2 && strcmp(argv[1], "-r") == 0) {
+		srv = ircp_srv_open(ircp_info_cb);
 		if(srv == NULL) {
-			g_print("Error opening ircp-client\n");
+			g_print("Error opening ircp-server\n");
 			return -1;
 		}
 
-		if(ircp_srv_recv(srv, "irinbox") < 0) {
+		if(argc >= 3)
+			inbox = argv[2];
+		else
+			inbox = "";
+
+		if(ircp_srv_recv(srv, inbox) < 0) {
 			g_print("Error receiving files\n");
 		}
-			
 		ircp_srv_close(srv);
 	}
+		
+
+	else if(argc == 1) {
+		g_print("Usage: %s file1, file2, ...\n"
+			"  or:  %s -r [DEST]\n\n"
+			"Send files over IR. Use -r to receive files.\n", argv[0], argv[0]);
+		return 0;
+	}
 	else {
-		cli = ircp_cli_open();
+		cli = ircp_cli_open(ircp_info_cb);
 		if(cli == NULL) {
 			g_print("Error opening ircp-client\n");
 			return -1;
@@ -34,7 +80,6 @@ int main(int argc, char *argv[])
 			
 		// Connect
 		if(ircp_cli_connect(cli) < 0) {
-			g_print("Connect failed\n");
 			return -1;
 		}
 			
@@ -45,7 +90,6 @@ int main(int argc, char *argv[])
 
 		// Disconnect
 		if(ircp_cli_disconnect(cli) < 0) {
-			g_print("Disonnect failed\n");
 			return -1;
 		}
 		ircp_cli_close(cli);
