@@ -8,6 +8,8 @@ OBEX_HandleInput
 OBEX_ServerRegister
 OBEX_Request
 OBEX_CancelRequest
+OBEX_SetUserData
+OBEX_GetUserData
 OBEX_ObjectNew
 OBEX_ObjectDelete
 OBEX_ObjectAddHeader
@@ -16,6 +18,8 @@ OBEX_ObjectSetRsp
 OBEX_ObjectGetNonHdrData
 OBEX_ObjectSetNonHdrData
 OBEX_ObjectSetHdrOffset
+OBEX_ObjectSetUserData
+OBEX_ObjectGetUserData
 OBEX_UnicodeToChar
 OBEX_CharToUnicode
 IrOBEX_TransportConnect
