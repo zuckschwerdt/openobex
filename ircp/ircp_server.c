@@ -143,6 +143,7 @@ gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 
 		if(strcmp(srv->currdir->str, srv->origdir) == 0) {
 			DEBUG(0, G_GNUC_FUNCTION "() Trying to go above inbox\n");
+			srv->infocb(IRCP_EV_ERRMSG, "Client trying to go above inbox!\n");
 			goto out;
 		}
 
@@ -167,7 +168,7 @@ gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 			// We could use the "create if needed" bit that the standard describes for setpath
 			// but irftp in Win2K does not use this bit. Stupid....
 
-			if(ircp_changedir(srv->currdir->str, name, TRUE) < 0)
+			if(ircp_checkdir(srv->currdir->str, name, TRUE) < 0)
 				goto out;
 			g_string_append(srv->currdir , "/");
 			g_string_append(srv->currdir , name);
@@ -177,7 +178,10 @@ gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 				
 	ret = 1;
 
-out:	g_free(name);
+out:
+	if(ret < 0)
+		OBEX_ObjectSetRsp(object, OBEX_RSP_FORBIDDEN, OBEX_RSP_FORBIDDEN);
+	g_free(name);
 	return ret;
 }
 
@@ -234,7 +238,6 @@ gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object)
 	else
 		srv->infocb(IRCP_EV_OK, "");
 
-
 out:	g_free(name);
 	return ret;
 }
@@ -288,6 +291,12 @@ void ircp_srv_close(ircp_server_t *srv)
 //
 gint ircp_srv_recv(ircp_server_t *srv, gchar *inbox)
 {
+	if(ircp_checkdir("", inbox, FALSE) < 0) {
+		srv->infocb(IRCP_EV_ERRMSG, "Specified desination directory does not exist.");
+		return -1;
+	}
+
+
 	if(OBEX_ServerRegister(srv->obexhandle, "OBEX:IrXfer") < 0)
 		return -1;
 	srv->infocb(IRCP_EV_LISTENING, "");

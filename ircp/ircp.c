@@ -13,6 +13,11 @@ void ircp_info_cb(gint event, gchar *param)
 {
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	switch (event) {
+
+	case IRCP_EV_ERRMSG:
+		g_print("Error: %s\n", param);
+		break;
+
 	case IRCP_EV_ERR:
 		g_print("failed\n");
 		break;
@@ -46,6 +51,7 @@ void ircp_info_cb(gint event, gchar *param)
 		break;
 
 
+
 	}
 }
 
@@ -71,9 +77,8 @@ int main(int argc, char *argv[])
 		else
 			inbox = "";
 
-		if(ircp_srv_recv(srv, inbox) < 0) {
-			g_print("Error receiving files\n");
-		}
+		ircp_srv_recv(srv, inbox);
+
 		ircp_srv_close(srv);
 	}
 		
@@ -92,18 +97,14 @@ int main(int argc, char *argv[])
 		}
 			
 		// Connect
-		if(ircp_cli_connect(cli) < 0) {
-			return -1;
-		}
-			
-		// Send all files
-		for(i = 1; i < argc; i++) {
-			ircp_put(cli, argv[i]);
-		}
+		if(ircp_cli_connect(cli)) {
+			// Send all files
+			for(i = 1; i < argc; i++) {
+				ircp_put(cli, argv[i]);
+			}
 
-		// Disconnect
-		if(ircp_cli_disconnect(cli) < 0) {
-			return -1;
+			// Disconnect
+			ircp_cli_disconnect(cli);
 		}
 		ircp_cli_close(cli);
 	}

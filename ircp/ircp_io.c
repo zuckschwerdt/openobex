@@ -164,7 +164,7 @@ out:
 //
 // Go to a directory. Create if not exists and create is true.
 //
-gint ircp_changedir(gchar *path, gchar *dir, gboolean create)
+gint ircp_checkdir(gchar *path, gchar *dir, gboolean create)
 {
 	GString *newpath;
 	struct stat statbuf;
@@ -174,12 +174,13 @@ gint ircp_changedir(gchar *path, gchar *dir, gboolean create)
 		return -1;
 
 	newpath = g_string_new(path);
-	g_string_append(newpath, "/");
+	if(strcmp(path, "") != 0)
+		g_string_append(newpath, "/");
 	g_string_append(newpath, dir);
 
 	DEBUG(4, G_GNUC_FUNCTION "() path = %s dir = %s, create = %d\n", path, dir, create);
 	if(stat(newpath->str, &statbuf) == 0) {
-		// If this directory aleady exist we are happy
+		// If this directory aleady exist we are done
 		if(S_ISDIR(statbuf.st_mode)) {
 			DEBUG(4, G_GNUC_FUNCTION "() Using existing dir\n");
 			ret = 1;
