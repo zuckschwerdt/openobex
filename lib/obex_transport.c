@@ -359,7 +359,7 @@ static int do_write(int fd, GNetBuf *msg, int mtu)
 			return actual;
 			
 		/* Hide sent data */
-		g_netbuf_pull(msg, size);
+		g_netbuf_pull(msg, actual);
 	}
 	return actual;
 }
