@@ -90,7 +90,8 @@ gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 gint obex_object_reparseheaders(obex_t *self, obex_object_t *object);
 gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd);
 gint obex_object_setrsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
-gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal);
+gint obex_object_send(obex_t *self, obex_object_t *object,
+		      gint allowfinalcmd, gint forcefinalbit);
 gint obex_object_receive(obex_t *self, GNetBuf *msg);
 gint obex_object_readstream(obex_t *self, obex_object_t *object, const guint8 **buf);
 

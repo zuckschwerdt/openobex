@@ -27,7 +27,9 @@
  *     
  ********************************************************************/
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -134,7 +136,8 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		}
 		
 		if(!final) {
-			if(obex_object_send(self, self->object, FALSE) < 0) {
+			/* As a server, the final bit is always SET- Jean II */
+			if(obex_object_send(self, self->object, FALSE, TRUE) < 0) {
 				obex_deliver_event(self, OBEX_EV_LINKERR, cmd, 0, TRUE);
 				return -1;
 			}			
@@ -178,7 +181,14 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			return 0;
 		}
 				
-		ret = obex_object_send(self, self->object, TRUE);
+		/* As a server, the final bit is always SET, and the
+		 * "real final" packet is distinguish by beeing SUCCESS
+		 * instead of CONTINUE.
+		 * It doesn't make sense to me, but that's the spec.
+		 * See Obex spec v1.2, chapter 3.2, page 21 and 22.
+		 * See also example on chapter 7.3, page 47.
+		 * So, force the final bit here. - Jean II */
+		ret = obex_object_send(self, self->object, TRUE, TRUE);
 		if(ret == 0) {
 			/* Made some progress */
 			obex_deliver_event(self, OBEX_EV_PROGRESS, cmd, 0, FALSE);

@@ -28,7 +28,10 @@
  *     
  ********************************************************************/
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #ifdef _WIN32
 #include <winsock.h>
 #else /* _WIN32 */
@@ -40,6 +43,10 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+
+#ifdef HAVE_BLUETOOTH
+#include <bluetooth/bluetooth.h>
+#endif /*HAVE_BLUETOOTH*/
 
 #endif /* _WIN32 */
 
@@ -58,10 +65,17 @@
  */
 gint obex_create_socket(obex_t *self, gint domain)
 {
-	gint fd;
+	gint fd, proto;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
-	fd = socket(domain, SOCK_STREAM, 0);
+	proto = 0;
+
+#ifdef HAVE_BLUETOOTH
+	if (domain == AF_BLUETOOTH)
+		proto = BTPROTO_RFCOMM;
+#endif /*HAVE_BLUETOOTH*/
+
+	fd = socket(domain, SOCK_STREAM, proto);
 	return fd;
 }
 

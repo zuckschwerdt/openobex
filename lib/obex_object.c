@@ -28,7 +28,9 @@
  *
  ********************************************************************/
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <string.h>
 
@@ -407,16 +409,18 @@ static gint send_body(obex_object_t *object,
  *       0 on progress made
  *     < 0 on error
  */
-gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal)
+gint obex_object_send(obex_t *self, obex_object_t *object,
+		      gint allowfinalcmd, gint forcefinalbit)
 {
 	struct obex_header_element *h;
 	GNetBuf *txmsg;
 	gint actual, finished = 0;
 	guint16 tx_left;
 	gboolean addmore = TRUE;
-	
+	int real_opcode;
+
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	
+
 	/* Calc how many bytes of headers we can fit in this package */
 	tx_left = self->mtu_tx - sizeof(struct obex_common_hdr);
 
@@ -485,23 +489,31 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal)
 	
 	/* Decide which command to use, and if to use final-bit */
 	if(object->tx_headerq) {
-		/* Have more headers to send */
-		DEBUG(4, G_GNUC_FUNCTION "() Sending non-final package\n");
-		actual = obex_data_request(self, txmsg, object->opcode);
+		/* Have more headers (or body) to send */
+		/* In server, final bit is always set.
+		 * In client, final bit is set only when we finish sending.
+		 * Jean II */
+		if(forcefinalbit)
+			real_opcode = object->opcode | OBEX_FINAL;
+		else
+			real_opcode = object->opcode;
 		finished = 0;
 	}
-	else if(allowfinal == FALSE) {
-		/* Have no more headers to send, but not allowed to send final*/
-		DEBUG(4, G_GNUC_FUNCTION "() Sending non-final package\n");
-		actual = obex_data_request(self, txmsg, object->opcode | OBEX_FINAL);
+	else if(allowfinalcmd == FALSE) {
+		/* Have no yet any headers to send, but not allowed to send
+		 * final command (== server, receiving incomming request) */
+		real_opcode = object->opcode | OBEX_FINAL;
 		finished = 0;
 	}
 	else {
-		/* Have no more headers to send, and allowed to send final */
-		DEBUG(4, G_GNUC_FUNCTION "() Sending final package\n");
-		actual = obex_data_request(self, txmsg, object->lastopcode | OBEX_FINAL);
+		/* Have no more headers to send, and allowed to send final
+		 * command (== end data we are sending) */
+		real_opcode = object->lastopcode | OBEX_FINAL;
 		finished = 1;
 	}
+	DEBUG(4, G_GNUC_FUNCTION "() Sending package with opcode %d\n",
+	      real_opcode);
+	actual = obex_data_request(self, txmsg, real_opcode);
 
 	if(actual < 0) {
 		DEBUG(4, G_GNUC_FUNCTION "() Send error\n");

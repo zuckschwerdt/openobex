@@ -39,6 +39,10 @@
 #ifdef HAVE_IRDA
 #include "irda_wrap.h"
 #endif /*HAVE_IRDA*/
+#ifdef HAVE_BLUETOOTH
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
+#endif /*HAVE_BLUETOOTH*/
 
 #include "obex_main.h"
 
@@ -47,6 +51,9 @@ typedef union {
 	struct sockaddr_irda irda;
 #endif /*HAVE_IRDA*/
 	struct sockaddr_in   inet;
+#ifdef HAVE_BLUETOOTH
+	struct sockaddr_rc   rfcomm;
+#endif /*HAVE_BLUETOOTH*/
 } saddr_t;
 
 typedef struct obex_transport {
@@ -63,7 +70,7 @@ gint obex_transport_accept(obex_t *self);
 gint obex_transport_handle_input(obex_t *self, gint timeout);
 gint obex_transport_connect_request(obex_t *self);
 void obex_transport_disconnect_request(obex_t *self);
-gint obex_transport_listen(obex_t *self, const char *service);
+gint obex_transport_listen(obex_t *self);
 void obex_transport_disconnect_server(obex_t *self);
 gint obex_transport_write(obex_t *self, GNetBuf *msg);
 gint obex_transport_read(obex_t *self, gint count, guint8 *buf, gint buflen);

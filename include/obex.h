@@ -42,6 +42,8 @@
 typedef void* obex_t;
 typedef void* obex_object_t;
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
+// This is to workaround compilation without BlueTooth support. - Jean II
+typedef char* bdaddr_t;
 
 #include "obex_const.h"
 
@@ -62,7 +64,7 @@ gint    OBEX_TransportDisconnect(obex_t *self);
 gint    OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual);
 gint    OBEX_HandleInput(obex_t *self, gint timeout);
 
-gint    OBEX_ServerRegister(obex_t *self, const char *service);
+gint    OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen);
 obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data);
 gint    OBEX_Request(obex_t *self, obex_object_t *object);
 gint    OBEX_CancelRequest(obex_t *self, gboolean nice);
@@ -89,8 +91,21 @@ gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size);
 GString* OBEX_GetResponseMessage(obex_t *self, gint rsp);
 
 /*
+ * InOBEX API (TCP/IP)
+ */
+ gint InOBEX_ServerRegister(obex_t *self);
+ gint InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen);
+
+/*
  * IrOBEX API 
  */
+ gint IrOBEX_ServerRegister(obex_t *self, const char *service);
  gint IrOBEX_TransportConnect(obex_t *self, const char *service);
+
+/*
+ * Bluetooth OBEX API
+ */
+ gint BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel);
+ gint BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
 
 #endif

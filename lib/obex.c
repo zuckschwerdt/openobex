@@ -28,7 +28,9 @@
  *     
  ********************************************************************/
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <string.h>
 #include <errno.h>
@@ -48,8 +50,15 @@
 #include "obex_connect.h"
 #include "obex_client.h"
 
+#include "inobex.h"
 #ifdef HAVE_IRDA
 #include "irobex.h"
+#endif
+#ifdef HAVE_BLUETOOTH
+#include "btobex.h"
+#else
+// This is to workaround compilation without BlueTooth support. - Jean II
+typedef char *bdaddr_t;
 #endif
 
 /**
@@ -58,6 +67,7 @@
  *             %OBEX_TRANS_IRDA : Use regular IrDA socket (need an IrDA stack)
  *             %OBEX_TRANS_INET : Use regular TCP/IP socket
  *             %OBEX_TRANS_CUST : Use user provided transport
+ *             %OBEX_TRANS_BLUETOOTH: Use regular Bluetooth RFCOMM socket (need the BlueZ stack)
  *             If you use %OBEX_TRANS_CUST you must register your own
  *             transport with OBEX_RegisterCTransport()
  * @eventcb: Function pointer to your event callback.
@@ -219,18 +229,21 @@ void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data)
 /**
  * OBEX_ServerRegister - Start listening for incoming connections
  * @self: OBEX handle
- * @service: Service to bind to. Only used then using IrDA transport.
+ * @saddr: Local address to bind to
+ * @addrlen: Length of address
  *
  * Returns -1 on error.
  */
-gint OBEX_ServerRegister(obex_t *self, const char *service)
+gint OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
 	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(service != NULL, -1);
+	g_return_val_if_fail(saddr != NULL, -1);
 
-	return obex_transport_listen(self, service);
+	memcpy(&self->trans.self, saddr, addrlen);
+
+	return obex_transport_listen(self);
 }
 
 
@@ -396,33 +409,6 @@ gint OBEX_TransportDisconnect(obex_t *self)
 	return 0;
 }
 
-
-/*
- * IrOBEX_TransportConnect - Connect Irda transport
- * @self: OBEX handle
- * @service: IrIAS service name to connect to
- *
- * An easier connect function to use for IrDA (IrOBEX) only.
- */
-gint IrOBEX_TransportConnect(obex_t *self, const char *service)
-{
-     	DEBUG(4, G_GNUC_FUNCTION "()\n");
-
-	if (self->object)	{
-		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
-		return -EBUSY;
-	}
-
-	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(service != NULL, -1);
-
-#ifdef HAVE_IRDA
-	irobex_prepare_connect(self, service);
-	return obex_transport_connect_request(self);
-#else
-	return -ESOCKTNOSUPPORT;
-#endif /* HAVE_IRDA */
-}
 
 /**
  * OBEX_GetFD - Get FD
@@ -786,4 +772,154 @@ GString* OBEX_GetResponseMessage(obex_t *self, gint rsp)
 	g_return_val_if_fail(self != NULL, NULL);
 	return obex_get_response_message(self, rsp);
 }
-	
+
+/* ---------------------------------------------------------------- */
+
+/**
+ * InOBEX_ServerRegister - Start listening for incoming connections
+ * @self: OBEX handle
+ *
+ * An easier server function to use for TCP/IP (InOBEX) only.
+ *
+ * Returns -1 on error.
+ */
+gint InOBEX_ServerRegister(obex_t *self)
+{
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
+
+	g_return_val_if_fail(self != NULL, -1);
+
+	inobex_prepare_listen(self);
+	return obex_transport_listen(self);
+}
+
+/**
+ * InOBEX_TransportConnect - Connect Inet transport
+ * @self: OBEX handle
+ *
+ * An easier connect function to use for TCP/IP (InOBEX) only.
+ *
+ * Note : I would like feedback on this API to know which input
+ * parameter make most sense. Thanks...
+ */
+gint InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
+{
+     	DEBUG(4, G_GNUC_FUNCTION "()\n");
+
+	if (self->object)	{
+		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		return -EBUSY;
+	}
+
+	g_return_val_if_fail(self != NULL, -1);
+	g_return_val_if_fail(saddr != NULL, -1);
+
+	inobex_prepare_connect(self, saddr, addrlen);
+	return obex_transport_connect_request(self);
+}
+
+/**
+ * IrOBEX_ServerRegister - Start listening for incoming connections
+ * @self: OBEX handle
+ * @service: Service to bind to.
+ *
+ * An easier server function to use for IrDA (IrOBEX) only.
+ *
+ * Returns -1 on error.
+ */
+gint IrOBEX_ServerRegister(obex_t *self, const char *service)
+{
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
+
+	g_return_val_if_fail(self != NULL, -1);
+	g_return_val_if_fail(service != NULL, -1);
+
+#ifdef HAVE_IRDA
+	irobex_prepare_listen(self, service);
+	return obex_transport_listen(self);
+#else
+	return -ESOCKTNOSUPPORT;
+#endif /* HAVE_IRDA */
+}
+
+/**
+ * IrOBEX_TransportConnect - Connect Irda transport
+ * @self: OBEX handle
+ * @service: IrIAS service name to connect to
+ *
+ * An easier connect function to use for IrDA (IrOBEX) only.
+ */
+gint IrOBEX_TransportConnect(obex_t *self, const char *service)
+{
+     	DEBUG(4, G_GNUC_FUNCTION "()\n");
+
+	if (self->object)	{
+		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		return -EBUSY;
+	}
+
+	g_return_val_if_fail(self != NULL, -1);
+	g_return_val_if_fail(service != NULL, -1);
+
+#ifdef HAVE_IRDA
+	irobex_prepare_connect(self, service);
+	return obex_transport_connect_request(self);
+#else
+	return -ESOCKTNOSUPPORT;
+#endif /* HAVE_IRDA */
+}
+
+
+/**
+ * BtOBEX_ServerRegister - Start listening for incoming connections
+ * @self: OBEX handle
+ * @service: Service to bind to. **FIXME**
+ *
+ * An easier server function to use for Bluetooth (Bluetooth OBEX) only. 
+ *
+ * Returns -1 on error.
+ */
+gint BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel)
+{
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
+
+	g_return_val_if_fail(self != NULL, -1);
+
+#ifdef HAVE_BLUETOOTH
+	if(src == NULL)
+		src = BDADDR_ANY;
+	btobex_prepare_listen(self, src, channel);
+	return obex_transport_listen(self);
+#else
+	return -ESOCKTNOSUPPORT;
+#endif /* HAVE_BLUETOOTH */
+}
+
+/**
+ *  BtOBEX_TransportConnect - Connect Bluetooth transport
+ *  @self: OBEX handle
+ *  @service: IrIAS service name to connect to **FIXME**
+ *
+ *  An easier connect function to use for Bluetooth (Bluetooth OBEX) only. 
+ */
+gint BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel)
+{
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+
+	if (self->object)	{
+		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		return -EBUSY;
+	}
+
+	g_return_val_if_fail(self != NULL, -1);
+	g_return_val_if_fail(dst != NULL, -1);
+
+#ifdef HAVE_BLUETOOTH
+	if(src == NULL)
+		src = BDADDR_ANY;
+	btobex_prepare_connect(self, src, dst, channel);
+	return obex_transport_connect_request(self);
+#else
+	return -ESOCKTNOSUPPORT;
+#endif /* HAVE_BLUETOOTH */
+}

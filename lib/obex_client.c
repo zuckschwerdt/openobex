@@ -27,7 +27,9 @@
  *     
  ********************************************************************/
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -81,7 +83,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		/* Nothing has been sent yet */
 		DEBUG(4, G_GNUC_FUNCTION "() STATE_START\n");
 		
-		ret = obex_object_send(self, self->object, TRUE);
+		ret = obex_object_send(self, self->object, TRUE, FALSE);
 		if(ret < 0) {
 			/* Error while sending */
 			obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
@@ -129,7 +131,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		/* Are we done yet? */
 		if(rsp == OBEX_RSP_CONTINUE) {
 			DEBUG(3, G_GNUC_FUNCTION "() Continue...\n");
-			if(obex_object_send(self, self->object, 1) < 0)
+			if(obex_object_send(self, self->object, TRUE, FALSE) < 0)
 				obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
 			else
 				obex_deliver_event(self, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);

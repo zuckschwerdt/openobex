@@ -28,7 +28,9 @@
  *     
  ********************************************************************/
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifdef HAVE_IRDA
 
@@ -76,21 +78,13 @@ void irobex_prepare_connect(obex_t *self, const char *service)
 }
 
 /*
- * Function irobex_listen (self)
+ * Function irobex_prepare_listen (self, service)
  *
- *    Listen for incoming connections.
+ *    Prepare for IR-listen
  *
  */
-gint irobex_listen(obex_t *self, const char *service)
+void irobex_prepare_listen(obex_t *self, const char *service)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
-
-	self->serverfd = obex_create_socket(self, AF_IRDA);
-	if(self->serverfd < 0) {
-		DEBUG(0, G_GNUC_FUNCTION "() Error creating socket\n");
-		return -1;
-	}
-	
 	/* Bind local service */
 	self->trans.self.irda.sir_family = AF_IRDA;
 
@@ -103,7 +97,24 @@ gint irobex_listen(obex_t *self, const char *service)
 #ifndef _WIN32
 	self->trans.self.irda.sir_lsap_sel = LSAP_ANY;
 #endif /* _WIN32 */
+}
 
+/*
+ * Function irobex_listen (self)
+ *
+ *    Listen for incoming connections.
+ *
+ */
+gint irobex_listen(obex_t *self)
+{
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
+
+	self->serverfd = obex_create_socket(self, AF_IRDA);
+	if(self->serverfd < 0) {
+		DEBUG(0, G_GNUC_FUNCTION "() Error creating socket\n");
+		return -1;
+	}
+	
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.irda, 
 		 sizeof(struct sockaddr_irda)))
 	{

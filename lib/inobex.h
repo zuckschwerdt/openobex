@@ -30,7 +30,9 @@
 #ifndef INOBEX_H
 #define INOBEX_H
 
-gint inobex_listen(obex_t *self, const char *service);
+void inobex_prepare_connect(obex_t *self, struct sockaddr *saddr, int addrlen);
+void inobex_prepare_listen(obex_t *self);
+gint inobex_listen(obex_t *self);
 gint inobex_accept(obex_t *self);
 gint inobex_connect_request(obex_t *self);
 gint inobex_disconnect_request(obex_t *self);

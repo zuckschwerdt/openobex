@@ -77,6 +77,7 @@ typedef struct {
 #define OBEX_TRANS_IRDA		1
 #define OBEX_TRANS_INET		2
 #define OBEX_TRANS_CUST		3
+#define OBEX_TRANS_BLUETOOTH	4
 
 /* Standard headers */
 #define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */

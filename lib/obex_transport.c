@@ -28,10 +28,11 @@
  *     
  ********************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <string.h>
-
-#include "config.h"
-
 #include <stdio.h>
 
 #include "obex_main.h"
@@ -39,6 +40,9 @@
 #include "irobex.h"
 #endif /*HAVE_IRDA*/
 #include "inobex.h"
+#ifdef HAVE_BLUETOOTH
+#include "btobex.h"
+#endif /*HAVE_BLUETOOTH*/
 
 #include "obex_transport.h"
 
@@ -143,6 +147,11 @@ gint obex_transport_accept(obex_t *self)
 	case OBEX_TRANS_INET:
 		ret = inobex_accept(self);
 		break;
+#ifdef HAVE_BLUETOOTH
+	case OBEX_TRANS_BLUETOOTH:
+		ret = btobex_accept(self);
+		break;
+#endif /*HAVE_BLUETOOTH*/
 
 	default:
 		g_message(G_GNUC_FUNCTION "(), domain not implemented!\n");
@@ -183,6 +192,11 @@ gint obex_transport_connect_request(obex_t *self)
 			g_message(G_GNUC_FUNCTION "(), No connect-callback exist!\n");
 		DEBUG(4, G_GNUC_FUNCTION "ret=%d\n", ret);
 		break;
+#ifdef HAVE_BLUETOOTH
+	case OBEX_TRANS_BLUETOOTH:
+		ret = btobex_connect_request(self);
+		break;
+#endif /*HAVE_BLUETOOTH*/
 
 	default:
 		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
@@ -219,6 +233,11 @@ void obex_transport_disconnect_request(obex_t *self)
 		else
 			g_message(G_GNUC_FUNCTION "(), No disconnect-callback exist!\n");
 		break;
+#ifdef HAVE_BLUETOOTH
+	case OBEX_TRANS_BLUETOOTH:
+		btobex_disconnect_request(self);
+		break;
+#endif /*HAVE_BLUETOOTH*/
 	default:
 		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
 		break;
@@ -227,23 +246,23 @@ void obex_transport_disconnect_request(obex_t *self)
 }
 
 /*
- * Function obex_transport_listen (self, service)
+ * Function obex_transport_listen (self)
  *
  *    Prepare for incomming connections
  *
  */
-gint obex_transport_listen(obex_t *self, const char *service)
+gint obex_transport_listen(obex_t *self)
 {
 	int ret = -1;
 
 	switch (self->trans.type) {
 #ifdef HAVE_IRDA
 	case OBEX_TRANS_IRDA:
-		ret = irobex_listen(self, service);
+		ret = irobex_listen(self);
 		break;
 #endif /*HAVE_IRDA*/
 	case OBEX_TRANS_INET:
-		ret = inobex_listen(self, service);
+		ret = inobex_listen(self);
 		break;
 	case OBEX_TRANS_CUST:
 		DEBUG(4, G_GNUC_FUNCTION "() Custom listen\n");
@@ -252,6 +271,11 @@ gint obex_transport_listen(obex_t *self, const char *service)
 		else
 			g_message(G_GNUC_FUNCTION "(), No listen-callback exist!\n");
 		break;
+#ifdef HAVE_BLUETOOTH
+	case OBEX_TRANS_BLUETOOTH:
+		ret = btobex_listen(self);
+		break;
+#endif /*HAVE_BLUETOOTH*/
 	default:
 		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
 		break;
@@ -283,6 +307,11 @@ void obex_transport_disconnect_server(obex_t *self)
 	case OBEX_TRANS_CUST:
 		DEBUG(4, G_GNUC_FUNCTION "() Custom disconnect\n");
 		break;
+#ifdef HAVE_BLUETOOTH
+	case OBEX_TRANS_BLUETOOTH:
+		btobex_disconnect_server(self);
+		break;
+#endif /*HAVE_BLUETOOTH*/
 	default:
 		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
 		break;
@@ -306,6 +335,9 @@ gint obex_transport_write(obex_t *self, GNetBuf *msg)
 #ifdef HAVE_IRDA
 	case OBEX_TRANS_IRDA:
 #endif /*HAVE_IRDA*/
+#ifdef HAVE_BLUETOOTH
+	case OBEX_TRANS_BLUETOOTH:
+#endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
 		/* Send and fragment if necessary  */
 		while (msg->len) {
@@ -356,6 +388,9 @@ gint obex_transport_read(obex_t *self, gint max, guint8 *buf, gint buflen)
 #ifdef HAVE_IRDA
 	case OBEX_TRANS_IRDA:
 #endif /*HAVE_IRDA*/
+#ifdef HAVE_BLUETOOTH
+	case OBEX_TRANS_BLUETOOTH:
+#endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
 		actual = recv(self->fd, msg->tail, max, 0);
 		break;

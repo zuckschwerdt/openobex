@@ -26,7 +26,11 @@
  *     MA  02111-1307  USA
  *     
  ********************************************************************/
-#include "config.h"
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
 
 #ifdef _WIN32
@@ -43,12 +47,40 @@
 #define OBEX_PORT 650
 
 /*
+ * Function inobex_prepare_connect (self, service)
+ *
+ *    Prepare for INET-connect
+ *
+ */
+void inobex_prepare_connect(obex_t *self, struct sockaddr *saddr, int addrlen)
+{
+	memcpy(&self->trans.peer, saddr, addrlen);
+	/* Override to be safe... */
+	self->trans.peer.inet.sin_family = AF_INET;
+	self->trans.peer.inet.sin_port = htons(OBEX_PORT);
+}
+
+/*
+ * Function inobex_prepare_listen (self)
+ *
+ *    Prepare for INET-listen
+ *
+ */
+void inobex_prepare_listen(obex_t *self)
+{
+	/* Bind local service */
+	self->trans.self.inet.sin_family = AF_INET;
+	self->trans.self.inet.sin_port = htons(OBEX_PORT);
+	self->trans.self.inet.sin_addr.s_addr = INADDR_ANY;
+}
+
+/*
  * Function inobex_listen (self)
  *
  *    Wait for incomming connections
  *
  */
-gint inobex_listen(obex_t *self, const char *service)
+gint inobex_listen(obex_t *self)
 {
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
@@ -58,11 +90,8 @@ gint inobex_listen(obex_t *self, const char *service)
 		return -1;
 	}
 
-	/* Bind local service */
-	self->trans.self.inet.sin_family = AF_INET;
-	self->trans.self.inet.sin_port = htons(OBEX_PORT);
-	self->trans.self.inet.sin_addr.s_addr = INADDR_ANY;
-	
+	printf("TCP/IP listen %d %X\n", self->trans.self.inet.sin_port,
+	       self->trans.self.inet.sin_addr.s_addr);
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.inet,
 		 sizeof(struct sockaddr_in))) 
 	{

@@ -1,14 +1,14 @@
 /*********************************************************************
  *                
- * Filename:      irobex.h
+ * Filename:      btobex.h
  * Version:       
  * Description:   
  * Status:        Experimental.
- * Author:        Dag Brattli <dagb@cs.uit.no>
- * Created at:    Fri Apr 23 14:32:31 1999
+ * Author:        Marcel Holtmann <marcel@holtmann.org>
+ * Created at:    Fri Aug 23 14:32:31 2002
  * CVS ID:        $Id$
  * 
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 2002 Marcel Holtmann, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -27,17 +27,15 @@
  *     
  ********************************************************************/
 
-#ifndef IROBEX_H
-#define IROBEX_H
+#ifndef BTOBEX_H
+#define BTOBEX_H
 
-#define MAX_DEVICES 10     /* Max devices to discover */
-
-void irobex_prepare_connect(obex_t *self, const char *service);
-void irobex_prepare_listen(obex_t *self, const char *service);
-gint irobex_listen(obex_t *self);
-gint irobex_connect_request(obex_t *self);
-gint irobex_disconnect_request(obex_t *self);
-gint irobex_accept(obex_t *self);
-gint irobex_disconnect_server(obex_t *self);
+void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
+void btobex_prepare_listen(obex_t *self, bdaddr_t *src, int channel);
+gint btobex_listen(obex_t *self);
+gint btobex_connect_request(obex_t *self);
+gint btobex_disconnect_request(obex_t *self);
+gint btobex_accept(obex_t *self);
+gint btobex_disconnect_server(obex_t *self);
 
 #endif
