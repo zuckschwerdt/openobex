@@ -77,7 +77,8 @@ typedef struct {
 /* Transports */
 #define OBEX_TRANS_IRDA		1
 #define OBEX_TRANS_INET		2
-#define OBEX_TRANS_CUST		3
+#define OBEX_TRANS_CUST		3	/* Fixme: This will go away in future */
+#define OBEX_TRANS_CUSTOM	3
 #define OBEX_TRANS_BLUETOOTH	4
 
 /* Standard headers */

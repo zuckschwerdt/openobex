@@ -66,9 +66,9 @@ typedef char *bdaddr_t;
  * @transport: Which transport to use. The following transports are available :
  *             %OBEX_TRANS_IRDA : Use regular IrDA socket (need an IrDA stack)
  *             %OBEX_TRANS_INET : Use regular TCP/IP socket
- *             %OBEX_TRANS_CUST : Use user provided transport
+ *             %OBEX_TRANS_CUSTOM : Use user provided transport
  *             %OBEX_TRANS_BLUETOOTH: Use regular Bluetooth RFCOMM socket (need the BlueZ stack)
- *             If you use %OBEX_TRANS_CUST you must register your own
+ *             If you use %OBEX_TRANS_CUSTOM you must register your own
  *             transport with OBEX_RegisterCTransport()
  * @eventcb: Function pointer to your event callback.
  *           See obex.h for prototype of this callback.

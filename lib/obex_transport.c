@@ -56,7 +56,7 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 {
 	int ret;
 	
-	if(self->trans.type == OBEX_TRANS_CUST) {
+	if(self->trans.type == OBEX_TRANS_CUSTOM) {
 		if(self->ctrans.handleinput)
 			ret = self->ctrans.handleinput(self, self->ctrans.userdata, timeout);
 		else {
@@ -184,7 +184,7 @@ int obex_transport_connect_request(obex_t *self)
 	case OBEX_TRANS_INET:
 		ret = inobex_connect_request(self);
 		break;
-	case OBEX_TRANS_CUST:
+	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom connect\n");
 		if(self->ctrans.connect)
 			ret = self->ctrans.connect(self, self->ctrans.userdata);
@@ -226,7 +226,7 @@ void obex_transport_disconnect_request(obex_t *self)
 	case OBEX_TRANS_INET:
 		inobex_disconnect_request(self);
 		break;	
-	case OBEX_TRANS_CUST:
+	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom disconnect\n");
 		if(self->ctrans.disconnect)
 			self->ctrans.disconnect(self, self->ctrans.userdata);
@@ -264,7 +264,7 @@ int obex_transport_listen(obex_t *self)
 	case OBEX_TRANS_INET:
 		ret = inobex_listen(self);
 		break;
-	case OBEX_TRANS_CUST:
+	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom listen\n");
 		if(self->ctrans.listen)
 			ret = self->ctrans.listen(self, self->ctrans.userdata);
@@ -305,7 +305,7 @@ void obex_transport_disconnect_server(obex_t *self)
 	case OBEX_TRANS_INET:
 		inobex_disconnect_server(self);
 		break;	
-	case OBEX_TRANS_CUST:
+	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom disconnect\n");
 		break;
 #ifdef HAVE_BLUETOOTH
@@ -358,7 +358,7 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 			g_netbuf_pull(msg, size);
 		}
 		break;
-	case OBEX_TRANS_CUST:
+	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom write\n");
 		if(self->ctrans.write)
 			actual = self->ctrans.write(self, self->ctrans.userdata, msg->data, msg->len);
@@ -395,7 +395,7 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	case OBEX_TRANS_INET:
 		actual = recv(self->fd, msg->tail, max, 0);
 		break;
-	case OBEX_TRANS_CUST:
+	case OBEX_TRANS_CUSTOM:
 		if(buflen > max) {
 			memcpy(msg->tail, buf, max);
 			actual = max;
