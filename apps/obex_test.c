@@ -61,6 +61,7 @@
 #define FALSE 0
 
 #define IR_SERVICE "OBEX"
+#define BT_CHANNEL 4
 
 //
 // Called by the obex-layer when some event occurs.
@@ -229,13 +230,25 @@ int main (int argc, char *argv[])
 	}
 	else if(btobex) {
 #ifndef _WIN32
-		if(argc == 4) {
+		switch (argc) {
 #ifdef HAVE_BLUETOOTH
+		case 4:
 			str2ba(argv[2], &bdaddr);
 			channel = atoi(argv[3]);
+			break;
+		case 3:
+			str2ba(argv[2], &bdaddr);
+			if (bacmp(&bdaddr, BDADDR_ANY) == 0)
+				channel = atoi(argv[2]);
+			else
+				channel = BT_CHANNEL;
+			break;
+		case 2:
+			bacpy(&bdaddr, BDADDR_ANY);
+			channel = BT_CHANNEL;
+			break;
 #endif
-		}
-		else {
+		default:
 			printf("Wrong number of arguments\n");
 			exit(0);
 		}
@@ -296,6 +309,10 @@ int main (int argc, char *argv[])
 				}
 				if(btobex) {
 #ifdef HAVE_BLUETOOTH
+					if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
+						printf("Device address error! (Bluetooth)\n");
+						break;
+					}
 					if(BtOBEX_TransportConnect(handle, BDADDR_ANY, &bdaddr, channel) <0) {
 						printf("Transport connect error! (Bluetooth)\n");
 						break;
@@ -331,8 +348,14 @@ int main (int argc, char *argv[])
 					}
 				}
 				if(btobex) {
-					printf("Not implemented!");
-					break;
+#if HAVE_BLUETOOTH
+					if(BtOBEX_ServerRegister(handle, BDADDR_ANY, channel) < 0) {
+						printf("Server register error! (Bluetooth)\n");
+						break;
+					}
+#else
+					printf("Transport not found! (Bluetooth)\n");
+#endif
 				}
 				else {
 					if(IrOBEX_ServerRegister(handle, IR_SERVICE) < 0)	{
