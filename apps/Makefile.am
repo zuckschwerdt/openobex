@@ -1,6 +1,6 @@
-INCLUDES = @GLIB_CFLAGS@
+INCLUDES = @GLIB_CFLAGS@ @OPENOBEX_CFLAGS@
 
-LDADD = @GLIB_LIBS@ libmisc.a
+LDADD = @GLIB_LIBS@ @OPENOBEX_LIBS@ libmisc.a
 
 libmisc_a_SOURCES = \
 		obex_io.c obex_io.h \
@@ -20,4 +20,5 @@ irxfer_SOURCES = irxfer.c
 
 irobex_palm3_SOURCES = irobex_palm3.c
 
-bin_PROGRAMS = obex_test irxfer obex_tcp irobex_palm3
+bin_PROGRAMS = irxfer obex_tcp irobex_palm3
+noinst_PROGRAMS = obex_test
