@@ -54,7 +54,7 @@ typedef struct {
 	GSList *rx_headerq;		/* List of received headers */
 	GSList *rx_headerq_rm;		/* List of recieved header already read by the app */
 	GNetBuf *rx_body;		/* The rx body header need some extra help */
-	GNetBuf *tx_nonhdr_data;	/* Data outside of headers (like CONNECT and SETPATH) */
+	GNetBuf *tx_nonhdr_data;	/* Data before of headers (like CONNECT and SETPATH) */
 	GNetBuf *rx_nonhdr_data;	/* -||- */
 
 	guint8 cmd;			/* The command of this object */
@@ -74,7 +74,8 @@ typedef struct {
 	const guint8 *s_buf;		/* Pointer to streaming data */
 	guint s_len;			/* Length of stream-data */
         guint s_offset;			/* Current offset in buf */
-        gboolean s_stop;		/* If true we shall ask for no more data */
+        gboolean s_stop;		/* End of stream */
+        gboolean s_srv;			/* Deliver body as stream when server */
 
 } obex_object_t;
 
@@ -90,6 +91,7 @@ gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd);
 gint obex_object_setrsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
 gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal);
-gint obex_object_receive(obex_object_t *object, GNetBuf *msg);
+gint obex_object_receive(obex_t *self, GNetBuf *msg);
+gint obex_object_readstream(obex_t *self, obex_object_t *object, const guint8 **buf);
 
 #endif

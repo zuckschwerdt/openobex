@@ -49,7 +49,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
-	// If this is a response we have some data in msg */
+	/* If this is a response we have some data in msg */
 	if(msg) {
 		response = (obex_common_hdr_t *) msg->data;
 		rsp = response->opcode & ~OBEX_FINAL;
@@ -68,10 +68,12 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 			return 0;		
 		}
 				
-		if(response->len < 3) {
-			/* Hmmm, we got some data while sending. This is no good! */
+		if(ntohs(response->len) > 3) {
+			DEBUG(0, G_GNUC_FUNCTION "() STATE_SEND. Didn't excpect data from peer (%d)\n", ntohs(response->len));
+			g_netbuf_print(msg);
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 			obex_deliver_event(self, OBEX_EV_PARSEERR, rsp, 0, TRUE);
+			return 0;
 		}
 		// No break here!! Fallthrough	
 	
@@ -118,7 +120,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		}
 
 		/* Recieve any headers */
-		if(obex_object_receive(self->object, msg) < 0)	{
+		if(obex_object_receive(self, msg) < 0)	{
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			self->state = MODE_SRV | STATE_IDLE;
 			return -1;

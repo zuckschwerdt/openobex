@@ -1,6 +1,7 @@
 2000-12-04  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
-	* Added streaming support when sending objects.
+	* Added streaming support.
+	* Fixed endian-bug in obex_client.c and obex_server.c
 
 2000-12-02  Pontus Fuchs  <pontus.fuchs@tactel.se>
 

@@ -435,6 +435,8 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal)
 		object->tx_nonhdr_data = NULL;
 	}
 
+	DEBUG(4, G_GNUC_FUNCTION "() 4\n");
+	
 	/* Take headers from the tx queue and try to stuff as
 	   many as possible into the tx-msg */
 	while(addmore == TRUE && object->tx_headerq != NULL) {
@@ -562,6 +564,44 @@ gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 	return 1;
 }
 
+/*
+ * Function obex_object_receive_stream()
+ *
+ *    Handle receiving of body-stream
+ *
+ */
+static void obex_object_receive_stream(obex_t *self, guint8 hi,
+				guint8 *source, guint len)
+{
+	obex_object_t *object = self->object;
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	
+	/* Spare the app this empty nonlast body-hdr */
+	if(hi == OBEX_HDR_BODY && len == 0) {
+		return;
+	}
+	
+	object->s_buf = source;
+	object->s_len = len;
+	
+	/* Notify app that data has arrived */
+	obex_deliver_event(self, OBEX_EV_STREAMFULL, 0, 0, FALSE);
+	
+	/* If send send EOS to app */
+	if(hi == OBEX_HDR_BODY_END && len != 0) {
+		object->s_buf = source;
+		object->s_len = 0;
+		obex_deliver_event(self, OBEX_EV_STREAMFULL, 0, 0, FALSE);
+	}
+}
+
+
+/*
+ * Function obex_object_receive_body()
+ *
+ *    Handle receiving of body
+ *
+ */
 static gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8 hi,
 				guint8 *source, guint len)
 {
@@ -629,8 +669,9 @@ static gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8
  *    Add any incoming headers to headerqueue.
  *
  */
-gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
+gint obex_object_receive(obex_t *self, GNetBuf *msg)
 {
+	obex_object_t *object;
 	struct obex_header_element *element;
 	guint8 *source = NULL;
 	guint len, hlen;
@@ -645,6 +686,7 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	object = self->object;
 
 	/* Remove command from buffer */
 	g_netbuf_pull(msg, sizeof(struct obex_common_hdr));
@@ -678,12 +720,16 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 			hlen = ntohs(h.bstream->hl);
 			len = hlen - 3;
 
-			if( (hi == OBEX_HDR_BODY) ||
-				(hi == OBEX_HDR_BODY_END) ) {
+			if(hi == OBEX_HDR_BODY || hi == OBEX_HDR_BODY_END) {
 				/* The body-header need special treatment */
-				if(obex_object_receive_body(object, msg, hi, source, len) < 0)
-
-					err = -1;
+				if(object->s_srv) {
+					obex_object_receive_stream(self, hi, source, len);
+				}
+				else  {
+					if(obex_object_receive_body(object, msg, hi, source, len) < 0)
+						err = -1;
+				}
+				/* We have already handled this data! */
 				source = NULL;
 			}
 			break;
@@ -769,3 +815,25 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 
 	return 1;
 }
+
+/*
+ * Function obex_object_readstream()
+ *
+ *    App wants to read stream fragment.
+ *
+ */
+gint obex_object_readstream(obex_t *self, obex_object_t *object, const guint8 **buf)
+{
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	/* Enable streaming */
+	if(buf == NULL) {
+		DEBUG(4, G_GNUC_FUNCTION "() Streaming is enabled!\n");
+		object->s_srv = TRUE;
+		return 0;
+	}
+
+	DEBUG(4, G_GNUC_FUNCTION "() s_len = %d\n", object->s_len);
+	*buf = object->s_buf;
+	return object->s_len;
+}
+

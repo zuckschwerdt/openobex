@@ -59,7 +59,8 @@ typedef struct {
 #define OBEX_EV_PARSEERR	5	/* Malformed data encountered */
 #define OBEX_EV_ACCEPTHINT	6	/* Connection accepted */
 #define OBEX_EV_ABORT		7	/* Request was aborted */
-#define OBEX_EV_STREAMEMPTY	8	/* Need to feed more data in streaming operation */
+#define OBEX_EV_STREAMEMPTY	8	/* Need to feed more data when sending a  stream */
+#define OBEX_EV_STREAMFULL	9	/* Time to pick up data when receiving a stream */
 
 /* For OBEX_Init() */
 #define OBEX_FL_KEEPSERVER	0x02	/* Keep the server alive */

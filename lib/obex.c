@@ -521,6 +521,22 @@ gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
 	return obex_object_getnextheader(self, object, hi, hv, hv_size);
 }
 
+/*
+ * Function OBEX_ObjectReadStream ()
+ *
+ *    Read data from body stream
+ *
+ */
+gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **buf)
+{
+	g_return_val_if_fail(self != NULL, -1);
+	g_return_val_if_fail(object != NULL, -1);
+	return obex_object_readstream(self, object, buf);
+}
+
+
+
+
 
 /*
  * Function OBEX_ObjectSetRsp ()

@@ -48,12 +48,14 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 {
 	obex_common_hdr_t *request;
 	gint cmd, ret;
+	guint len;
 
 	
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	request = (obex_common_hdr_t *) msg->data;
 	cmd = request->opcode & ~OBEX_FINAL;
+	len = ntohs(request->len);
 	
 	switch(self->state & ~MODE_SRV)
 	{
@@ -98,7 +100,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		case OBEX_CMD_SETPATH:
 			self->object->headeroffset = 2;
 			break;
-			}
+		}
 
 		self->state = MODE_SRV | STATE_REC;
 		// no break! Fallthrough */
@@ -125,7 +127,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		}
 		
 		/* Get the headers... */
-		if(obex_object_receive(self->object, msg) < 0)	{
+		if(obex_object_receive(self, msg) < 0)	{
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			return -1;
@@ -152,6 +154,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			   headers that should be in the response */
 			obex_deliver_event(self, OBEX_EV_REQ, cmd, 0, FALSE);
 			self->state = MODE_SRV | STATE_SEND;
+			len = 3; /* Otherwise sanitycheck later will fail */
 		}
 		/* Note the conditional fallthrough! */
 	
@@ -167,10 +170,12 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			return 0;		
 		}
 		
-		if(request->len < 3) {
+		if(len > 3) {
+			DEBUG(0, G_GNUC_FUNCTION "() STATE_SEND Didn't excpect data from peer (%d)\n", len);
 			/* Hmmm, we got some data while sending. This is no good! */
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 			obex_deliver_event(self, OBEX_EV_PARSEERR, cmd, 0, TRUE);
+			return 0;
 		}
 				
 		ret = obex_object_send(self, self->object, TRUE);

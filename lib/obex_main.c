@@ -291,11 +291,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	g_netbuf_put(msg, actual);
 	DEBUG(1, G_GNUC_FUNCTION "() Got %d bytes msg len=%d\n", actual, msg->len);
 
-#if DEBUG_DUMPBUFFERS & 2
-	g_netbuf_print(msg);
-#endif
-
-	/*  
+	/*
 	 * Make sure that the buffer we have, actually has the specified
 	 * number of bytes. If not the frame may have been fragmented, and
 	 * we will then need to read more from the socket.  

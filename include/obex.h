@@ -81,6 +81,7 @@ gint OBEX_ObjectSetNonHdrData(obex_object_t *object, guint8 *buffer, guint len);
 gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset);
 void OBEX_ObjectSetUserData(obex_object_t *object, gpointer data);
 gpointer OBEX_ObjectGetUserData(obex_object_t *object);
+gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **buf);
 
 gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size);
 gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size);
