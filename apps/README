@@ -8,7 +8,8 @@ Then you do the usual:
 # make
 # make install
 
-To build on win32 using VC6:
 
-# cd src
+To build on win32 you need to edit makefile.msc.rules.
+To compile using VC6:
+
 # nmake -f makefile.msc

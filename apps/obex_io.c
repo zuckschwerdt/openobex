@@ -64,6 +64,7 @@ gint get_filesize(char *filename)
 		return -1;	
 	}
 	size = GetFileSize(fh, NULL);
+	g_print("fize size was %d\n", size);
 	CloseHandle(fh);
 	return size;
 
@@ -86,6 +87,7 @@ guint8* easy_readfile(char *filename, int *file_size)
 	guint8 *buf;
 
 	*file_size = get_filesize(filename);
+	g_print("name=%s, size=%d\n", filename, *file_size);
 	fd = open(filename, O_RDONLY, 0);
 	if (fd == -1) {
 		return NULL;
@@ -98,11 +100,16 @@ guint8* easy_readfile(char *filename, int *file_size)
 	actual = read(fd, buf, *file_size);
 	close(fd); 
 
+#ifndef _WIN32
 	if(actual != *file_size) {
 		g_free(buf);
 		buf = NULL;
 	}
+#else
+	*file_size = actual;
+#endif
 
+	g_print("buf=%08lx, size=%d\n", buf, actual);
 	return buf;
 }
 
@@ -125,7 +132,7 @@ obex_object_t *build_object_from_file(obex_t *handle, char *filename)
 	buf = easy_readfile(filename, &file_size);
 	if(buf == NULL)
 		return NULL;
-	
+
 	/* Set Memopad as the default creator ID */
 	creator_id = MEMO_PAD;	
 

@@ -7,7 +7,7 @@
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 30 19:43:40 1999
  * Modified at:   Sat Nov 20 13:12:54 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -126,7 +126,6 @@ int main(int argc, char *argv[])
 			printf("Sorry, unable to connect!\n");
 			exit(ret);
 		}
-
 
 		object = OBEX_ObjectNew(handle, OBEX_CMD_CONNECT);
 		ret = do_sync_request(handle, object, 0);

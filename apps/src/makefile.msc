@@ -1,13 +1,4 @@
-GLIB=c:\pf\glib-1.2.8
-GLIB_VER=1.2
-OBEX=c:\pf\projekt\openobex\lib\src
-OBEX_VER=0.9
-
-CC = cl -G5 -GF -Ox -W3 -MD -nologo
-LDFLAGS = /link
-INSTALL = copy
-
-CFLAGS = -I. -I$(GLIB)
+!include ..\makefile.msc.rules
 
 all : \
         irobex_palm3.exe \
@@ -48,7 +39,6 @@ clean:
 	-@del *.lib
 	-@del *.err
 	-@del *.map
-	-@del *.sym
 	-@del *.exp
 	-@del *.lk1
 	-@del *.mk1
