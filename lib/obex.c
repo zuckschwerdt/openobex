@@ -54,8 +54,11 @@
 
 /**
  * OBEX_Init - Initialize OBEX.
- * @transport: %OBEX_TRANS_IRDA, %OBEX_TRANS_INET or %OBEX_TRANS_CUST
- * @eventcb: Function pointer to your event-callback.
+ * @transport: Which transport to use. Available are
+ *             %OBEX_TRANS_IRDA, %OBEX_TRANS_INET or %OBEX_TRANS_CUST.
+ *             If you use %OBEX_TRANS_CUST you must register your own
+ *             transport with OBEX_RegisterCTransport()
+ * @eventcb: Function pointer to your event callback.
  * @flags: Bitmask of flags. See obex_const.h or available flags
  *
  * Returns an OBEX handle or %NULL on error.
@@ -287,9 +290,15 @@ out_err:
 
 
 /**
- * OBEX_HandleInput - Let OBEX do some work
+ * OBEX_HandleInput - Let the OBEX parser do some work
  * @self: OBEX handle
  * @timeout: Maximum time to wait in seconds
+ *
+ * Let the OBEX parser read and process incoming data. If no data
+ * is available this call will block.
+ *
+ * When a request has been sent or you are waiting for an incoming server-
+ * request you should call this function until the request has finished.
  *
  * Like select() this function returns -1 on error, 0 on timeout or
  * positive on success.
