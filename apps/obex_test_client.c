@@ -44,13 +44,15 @@ void syncwait(obex_t *handle)
 	gt = OBEX_GetUserData(handle);
 
 	while(!gt->clientdone) {
-		ret = OBEX_HandleInput(handle, 20);
+		ret = OBEX_HandleInput(handle, 10);
 		if(ret < 0) {
 			g_print("Error while doing OBEX_HandleInput()\n");
 			break;
 		}
 		if(ret == 0) {
-			g_print("Timeout waiting for data\n");
+			/* If running cable. We get no link-errors, so cancel on timeout */
+			g_print("Timeout waiting for data. Aborting\n");
+			OBEX_CancelRequest(handle, FALSE);
 			break;
 		}
 	}
@@ -242,6 +244,7 @@ void get_client(obex_t *handle, struct context *gt)
 	gt->get_name = req_name;
 	OBEX_Request(handle, object);
 	syncwait(handle);
+	g_print("Leaving PUT\n");
 }
 
 //

@@ -64,7 +64,7 @@ gint    OBEX_HandleInput(obex_t *self, gint timeout);
 gint    OBEX_ServerRegister(obex_t *self, const char *service);
 obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data);
 gint    OBEX_Request(obex_t *self, obex_object_t *object);
-gint    OBEX_CancelRequest(obex_t *self);
+gint    OBEX_CancelRequest(obex_t *self, gboolean nice);
 
 obex_object_t	*OBEX_ObjectNew(obex_t *self, guint8 cmd);
 gint		OBEX_ObjectDelete(obex_t *self, obex_object_t *object);

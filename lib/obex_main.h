@@ -122,7 +122,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen);
 
 void obex_response_request(obex_t *self, guint8 opcode);
 gint obex_data_request(obex_t *self, GNetBuf *msg, gint opcode);
-gint obex_cancelrequest(obex_t *self, gboolean sendabort);
+gint obex_cancelrequest(obex_t *self, gboolean nice);
 
 GString *obex_get_response_message(obex_t *self, gint rsp);
 

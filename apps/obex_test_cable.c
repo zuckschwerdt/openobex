@@ -7,9 +7,8 @@
  * Status:        Experimental.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Wed Nov 17 22:05:16 1999
- * Modified at:   Sun Aug 13 10:56:03 PM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
- * 
+ * CVS ID:        $Id$
+ *
  *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *      
  *     This library is free software; you can redistribute it and/or

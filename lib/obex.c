@@ -431,11 +431,15 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
 /**
  * OBEX_CancelRequest - Cancel an ongoing operation
  * @self: OBEX handle
+ * @nice: If true an OBEX Abort will be send if client
+ *        or OBEX_RSP_UNAUTHORIZED as reponse if server.
+ *
+ *
  */
-gint OBEX_CancelRequest(obex_t *self)
+gint OBEX_CancelRequest(obex_t *self, gboolean nice)
 {
 	g_return_val_if_fail(self != NULL, -1);
-	return obex_cancelrequest(self, FALSE);
+	return obex_cancelrequest(self, nice);
 }
 
 

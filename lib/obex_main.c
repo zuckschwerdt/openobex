@@ -333,28 +333,27 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
  *    Cancel an ongoing request
  *
  */
-gint obex_cancelrequest(obex_t *self, gboolean sendabort)
+gint obex_cancelrequest(obex_t *self, gboolean nice)
 {
 	/* If we have no ongoing request do nothing */
 	if(self->object == NULL)
 		return 0;
 
-	/* Abort request without sending abort (client)
-	   or unauthorized (server) */
-	
-	if(!sendabort) {
-		obex_object_delete(self->object);
-		self->object = NULL;
+	/* Abort request without sending abort */
+	if(!nice) {
+		/* Deliver event will delete the object */
+		obex_deliver_event(self, OBEX_EV_ABORT, 0, 0, TRUE);
 		g_netbuf_recycle(self->tx_msg);
 		g_netbuf_recycle(self->rx_msg);
-		obex_deliver_event(self, OBEX_EV_ABORT, 0, 0, TRUE);
 		/* Since we didn't send ABORT to peer we are out of sync
 		   and need to disconnect transport immediately, so we signal
 		   link error to app */
-		obex_deliver_event(self, OBEX_EV_LINKERR, 0, 0, TRUE);
+		obex_deliver_event(self, OBEX_EV_LINKERR, 0, 0, FALSE);
 		return 1;
 	}
+	
 	/* Do a "nice" abort */
+	g_message("Nice abort not implemented yet!!\n");
 	self->object->abort = TRUE;
 	return 0;
 }

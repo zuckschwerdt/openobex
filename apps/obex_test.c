@@ -6,9 +6,8 @@
  * Status:        Experimental.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Wed Nov 17 22:05:16 1999
- * Modified at:   Sun Aug 13 02:08:45 PM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
- * 
+ * CVS ID:        $Id$
+ *
  *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -61,10 +60,6 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 
 	case OBEX_EV_ABORT:
 		g_print("Request aborted!\n");
-		if(mode == OBEX_CLIENT)
-			client_done(handle, object, obex_cmd, obex_rsp);
-		else
-			server_done(handle, object, obex_cmd, obex_rsp);
 		break;
 
 	case OBEX_EV_REQDONE:
@@ -76,7 +71,8 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 		}
 		break;
 	case OBEX_EV_REQHINT:
-		OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);	//Dirty...
+		/* Accept any command. Not rellay good, but this is a test-program :) */
+		OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 		break;
 
 	case OBEX_EV_REQ:
@@ -84,6 +80,7 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 		break;
 
 	case OBEX_EV_LINKERR:
+		OBEX_TransportDisconnect(handle);
 		g_print("Link broken!\n");
 		break;
 
