@@ -1,15 +1,16 @@
 /*********************************************************************
  *                
  * Filename:      obex.c
- * Version:       0.5
+ * Version:       0.9
  * Description:   API to be used by applications wanting to use OBEX
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat Apr 17 16:50:25 1999
- * Modified at:   Sun Aug 13 11:51:47 AM CEST 2000
+ * Modified at:   Thu Nov 30 16:32:00 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -78,12 +79,11 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	}
 #endif
 
-	self = (obex_t*) g_malloc(sizeof(obex_t));
+	self = g_new0(obex_t, 1);
 	if (!self) {
 		/* perror(G_GNUC_FUNCTION "()"); */
 		return NULL;
 	}
-	memset(self, 0, sizeof(obex_t));
 
 	self->eventcb = eventcb;
 
@@ -92,7 +92,8 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	self->filterias  = (flags & OBEX_FL_FILTERIAS ) ? TRUE : FALSE;
 	self->fd = -1;
 	self->serverfd = -1;
-
+        self->state = MODE_SRV | STATE_IDLE;
+	
 	/* Init transport */
 	self->trans.type = transport;
 	self->trans.connected = FALSE;
@@ -397,11 +398,9 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
 	g_return_val_if_fail(object != NULL, -1);
 
 	self->object = object;
-	self->response_next = 1;
-	self->lastcmd = object->cmd;
-
-	if(obex_object_send(self, self->object, 1) < 0)
-		obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_LINKERR, self->object->cmd, 0, TRUE);
+        self->state = STATE_START | MODE_CLI;
+	
+	obex_client(self, NULL, 0);
 	return 0;
 }
 
@@ -574,7 +573,7 @@ gint OBEX_ObjectSetNonHdrData(obex_object_t *object, guint8 *buffer, guint len)
  *    Call this when you get a OBEX_EV_REQHINT and you know
  *    that the command has data before the headers comes.
  *    You do NOT need to use this function on CONNECT and
- *    SETPATH. It's handled internally
+ *    SETPATH, they are handled internally.
  */
 gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
 {

@@ -6,11 +6,12 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:28:13 1999
- * Modified at:   Sun Aug 13 12:50:31 PM CEST 2000
+ * Modified at:   Thu Aug 30 14:57:00 2000
  * Modified by:   Pontus Fuchs <pontus@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
- *     
+ *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
+ *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
  *     License as published by the Free Software Foundation; either
@@ -124,8 +125,8 @@ gint irobex_listen(obex_t *self, const char *service)
 		/* Tell the stack about it */
 		if (setsockopt(self->serverfd, SOL_IRLMP, IRLMP_HINTS_SET,
 			       hints, sizeof(hints))) {
-			perror("setsockopt:");
-			return(-1);
+			/* This command is not supported by older kernels,
+			   so ignore any errors! */
 		}
 	}
 #else /* _WIN32 */

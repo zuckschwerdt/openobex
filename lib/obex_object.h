@@ -1,16 +1,17 @@
 /*********************************************************************
  *                
  * Filename:      obex_object.h
- * Version:       
+ * Version:       0.8
  * Description:   
- * Status:        Experimental.
+ * Status:        Stable.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:05:28 1999
- * Modified at:   Tue Aug 15 10:11:45 PM CEST 2000
+ * Modified at:   Thu Nov 30 14:25:00 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
- *     
+ *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
+ *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
  *     License as published by the Free Software Foundation; either
@@ -36,7 +37,7 @@
 
 /* If an object has no expected length we have to 
 reallocated every OBEX_OBJECT_ALLOCATIONTRESHOLD bytes */
-#define OBEX_OBJECT_ALLOCATIONTRESHOLD 1024
+#define OBEX_OBJECT_ALLOCATIONTRESHOLD 10240
 
 typedef struct {
         time_t time;
@@ -47,17 +48,20 @@ typedef struct {
 	GNetBuf *rx_body;		/* The rx body header need some extra help */
 	GNetBuf *tx_nonhdr_data;	/* Data outside of headers (like CONNECT and SETPATH) */
 	GNetBuf *rx_nonhdr_data;	/* -||- */
-	gboolean app_is_called;		/* Set after an app has been called */
 
-	guint8 cmd;			/* Command for normal packets */
-	guint8 lastcmd;			/* Command for last packet */
-	guint8 mode;			/* OBEX_RSP or OBEX_CMD */
+	guint8 cmd;			/* The command of this object */
+					
+					/* The opcode fields are used as
+					   command when sending and response
+					   when recieving */
+
+	guint8 opcode;			/* Opcode for normal packets */
+	guint8 lastopcode;		/* Opcode for last packet */
 	guint headeroffset;		/* Where to start parsing headers */
 
 	gint hinted_body_len;		/* Hinted body-length or 0 */
 	gint totallen;			/* Size of all headers */
 	gpointer userdata;		/* Up to the user */
-	gboolean send_done;		/* Set when this object has been sent away */
 
 } obex_object_t;
 
@@ -66,6 +70,7 @@ struct obex_header_element {
 	guint8 hi;
 	guint length;
 	guint offset;
+	gboolean body_touched;
 };
 
 obex_object_t *obex_object_new(void);
@@ -76,8 +81,8 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 				obex_headerdata_t *hv, guint32 *hv_size);
 gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd);
-gint obex_object_setrsp(obex_object_t *object, guint8 cmd, guint8 lastcmd);
-gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish);
+gint obex_object_setrsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
+gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal);
 gint obex_object_receive(obex_object_t *object, GNetBuf *msg);
 
 #endif

@@ -58,6 +58,7 @@ typedef struct {
 #define OBEX_EV_LINKERR		4	/* Link has been disconnected */
 #define OBEX_EV_PARSEERR	5	/* Malformed data encountered */
 #define OBEX_EV_ACCEPTHINT	6	/* Connection accepted */
+#define OBEX_EV_ABORT		6	/* Request was aborted */
 
 /* For OBEX_Init() */
 #define OBEX_FL_KEEPSERVER	0x02	/* Keep the server alive */

@@ -59,6 +59,14 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 		g_print("Made some progress...\n");
 		break;
 
+	case OBEX_EV_ABORT:
+		g_print("Request aborted!\n");
+		if(mode == OBEX_CLIENT)
+			client_done(handle, object, obex_cmd, obex_rsp);
+		else
+			server_done(handle, object, obex_cmd, obex_rsp);
+		break;
+
 	case OBEX_EV_REQDONE:
 		if(mode == OBEX_CLIENT) {
 			client_done(handle, object, obex_cmd, obex_rsp);

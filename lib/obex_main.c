@@ -1,16 +1,17 @@
 /*********************************************************************
  *                
  * Filename:      obex_main.c
- * Version:       0.5
+ * Version:       0.8
  * Description:   Implementation of the Object Exchange Protocol OBEX
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Jul 17 23:02:02 1998
- * Modified at:   Sun Aug 13 09:13:58 PM CEST 2000
+ * Modified at:   Thu Nov 30 13:58:00 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
- *     
+ *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
+ *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
  *     License as published by the Free Software Foundation; either
@@ -36,7 +37,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-//#include <signal.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -170,15 +170,11 @@ GString *obex_get_response_message(obex_t *self, gint rsp)
 void obex_deliver_event(obex_t *self, gint mode, gint event, gint cmd, gint rsp, gboolean del)
 {
 	self->eventcb(self, self->object, mode, event, cmd, rsp);
-	if(del) {
-		if(self->object)	{
-			obex_object_delete(self->object);
-			self->object = NULL;
-		}
-		self->response_next = FALSE;
+	if(del == TRUE && self->object != NULL) {
+		obex_object_delete(self->object);
+		self->object = NULL;
 	}
 }
-
 
 /*
  * Function obex_response_request (self, opcode)
@@ -195,7 +191,7 @@ void obex_response_request(obex_t *self, guint8 opcode)
 	msg = g_netbuf_recycle(self->tx_msg);
 	g_netbuf_reserve(msg, sizeof(obex_common_hdr_t));
 
-	obex_data_request(self, msg, opcode | OBEX_FINAL, OBEX_RSP);
+	obex_data_request(self, msg, opcode | OBEX_FINAL);
 }
 
 /*
@@ -204,25 +200,13 @@ void obex_response_request(obex_t *self, guint8 opcode)
  *    Send response or command code along with optional headers/data.
  *
  */
-gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode, int cmd)
+gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
 {
 	obex_common_hdr_t *hdr;
 	int actual = 0;
 
 	g_return_val_if_fail(self != NULL, -1);
 	g_return_val_if_fail(msg != NULL, -1);
-
-	if (cmd == OBEX_CMD) {
-		/* This is a half duplex protocol, so remember the last cmd */
-		/* self->last_cmd = opcode & ~OBEX_FINAL; */
-
-		/* Next indication will/should be a response */
-		self->response_next = TRUE;
-	} else
-		self->response_next = FALSE;
-
-	DEBUG(4, G_GNUC_FUNCTION "(), self->response_next=%d\n", 
-	      self->response_next);
 
 	/* Insert common header */
 	hdr = (obex_common_hdr_t *) g_netbuf_push(msg, sizeof(obex_common_hdr_t));
@@ -275,7 +259,6 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 		g_netbuf_put(msg, actual);
 	}
 
-
 	if(msg->len >= 3) {
 		// We shall now read hdr->len and bytes exactly,
 		// otherwise we will confuse the parser.
@@ -293,9 +276,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 				obex_deliver_event(self, 0, OBEX_EV_LINKERR, 0, 0, TRUE);
 				return actual;
 			}
-
 		}
-
 	}
 
 
@@ -340,15 +321,15 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 
 	final = hdr->opcode & OBEX_FINAL; /* Extract final bit */
 
-	/* Check if this is a response */
-	if (self->response_next) {
-		DEBUG(3, G_GNUC_FUNCTION "() Expecting response\n");
-		obex_client(self, msg, final);
-		g_netbuf_recycle(msg);
-	}
-	else	{
+	/* Dispatch to the mode we are in */
+	if(self->state & MODE_SRV) {
 		opcode = hdr->opcode & ~OBEX_FINAL; /* Remove final bit */
 		obex_server(self, msg, final);
+		g_netbuf_recycle(msg);
+		
+	}
+	else	{
+		obex_client(self, msg, final);
 		g_netbuf_recycle(msg);
 	}
 

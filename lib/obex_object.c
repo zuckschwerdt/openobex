@@ -38,7 +38,7 @@
 #include "obex_connect.h"
 
 /*
- * Function obex_object_new (name, description)
+ * Function obex_object_new ()
  *
  *    Create a new OBEX object
  *
@@ -51,9 +51,7 @@ obex_object_t *obex_object_new(void)
 	if (!object)
 		return NULL;
 
-	object->app_is_called = FALSE;
 	obex_object_setrsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
-
 	return object;
 }
 
@@ -70,19 +68,19 @@ gint obex_object_delete(obex_object_t *object)
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	g_return_val_if_fail(object != NULL, -1);
 
-	//Free TX headers
+	/* Free TX headers */
 	while(object->tx_headerq)	{
 	 	h = object->tx_headerq->data;
-		g_netbuf_free(h->buf);
 		object->tx_headerq = g_slist_remove(object->tx_headerq, h);
+		g_netbuf_free(h->buf);
 		g_free(h);
 	}
 
-	//Free RX headers
+	/* Free RX headers */
 	while(object->rx_headerq)	{
 	 	h = object->rx_headerq->data;
-		g_netbuf_free(h->buf);
 		object->rx_headerq = g_slist_remove(object->rx_headerq, h);
+		g_netbuf_free(h->buf);
 		g_free(h);
 	}
 
@@ -111,8 +109,8 @@ gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd)
 {
 	DEBUG(4,G_GNUC_FUNCTION "() %02x\n", cmd);
 	object->cmd = cmd;
-	object->lastcmd = lastcmd;
-	object->mode = OBEX_CMD;
+	object->opcode = cmd;
+	object->lastopcode = lastcmd;
 	return 1;
 }
 
@@ -122,12 +120,11 @@ gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd)
  *    Set the response for an object
  *
  */
-gint obex_object_setrsp(obex_object_t *object, guint8 cmd, guint8 lastcmd)
+gint obex_object_setrsp(obex_object_t *object, guint8 rsp, guint8 lastrsp)
 {
 	DEBUG(4,G_GNUC_FUNCTION "()\n");
-	object->cmd = cmd;
-	object->lastcmd = lastcmd;
-	object->mode = OBEX_RSP;
+	object->opcode = rsp;
+	object->lastopcode = lastrsp;
 	return 1;
 }
 
@@ -135,7 +132,7 @@ gint obex_object_setrsp(obex_object_t *object, guint8 cmd, guint8 lastcmd)
  * Function gint obex_object_addheader(obex_object_t *object, guint8 hi, 
  *                      obex_headerdata_t hv, guint32 hv_size, guint flags)
  *
- *    Add a header to an object for sending later on.
+ *    Add a header to the TX-queue.
  *
  */
 gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
@@ -154,10 +151,11 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 		maxlen = self->mtu_tx - sizeof(struct obex_common_hdr);
 	}
 
-
-	element = g_malloc0(sizeof(struct obex_header_element));
-	if(!element)
+	element = g_new0(struct obex_header_element, 1);
+	if(element == NULL)
 		return -1;
+
+	element->hi = hi;
 
 	switch (hi & OBEX_HI_MASK) {
 	case OBEX_INT:
@@ -166,7 +164,6 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 		element->buf = g_netbuf_new(sizeof(struct obex_uint_hdr));
 		if(element->buf) {
 			element->length = (guint) sizeof(struct obex_uint_hdr);
-			element->hi = hi;
 			object->totallen += insert_uint_header(element->buf, hi, hv.bq4);
 			ret = 1;
 		}
@@ -178,11 +175,10 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 		element->buf = g_netbuf_new(sizeof(struct obex_ubyte_hdr));
 		if(element->buf) {
 			element->length = sizeof(struct obex_ubyte_hdr);
-			element->hi = hi;
 			object->totallen += insert_ubyte_header(element->buf, hi, hv.bq1);
 			ret = 1;
 		}
-	break;
+		break;
 
 	case OBEX_BYTE_STREAM:
 		DEBUG(2, G_GNUC_FUNCTION "() BS  header size %d\n", hv_size);
@@ -190,33 +186,32 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 		element->buf = g_netbuf_new(hv_size + sizeof(struct obex_byte_stream_hdr) );
 		if(element->buf) {
 			element->length = hv_size + sizeof(struct obex_byte_stream_hdr);
-			element->hi = hi;
 			object->totallen += insert_byte_stream_header(element->buf, hi, hv.bs, hv_size);
 			ret = 1;
 		}
-	break;
+		break;
+	
 	case OBEX_UNICODE:
 		DEBUG(2, G_GNUC_FUNCTION "() Unicode header size %d\n", hv_size);
 
 		element->buf = g_netbuf_new(hv_size + sizeof(struct obex_unicode_hdr) );
 		if(element->buf) {
 			element->length = hv_size + sizeof(struct obex_unicode_hdr);
-			element->hi = hi;
 			object->totallen += insert_unicode_header(element->buf, hi, hv.bs, hv_size);
 			ret = 1;
 		}
-	break;
+		break;
+	
 	default:
 		DEBUG(2, G_GNUC_FUNCTION "() Unsupported encoding %02x\n", hi & OBEX_HI_MASK);
+		ret = -1;
 		break;
 	}
 
 	/* Check if you can send this header without violating MTU or OBEX_FIT_ONE_PACKET */
 	if( (element->hi != OBEX_HDR_BODY) || (flags & OBEX_FL_FIT_ONE_PACKET) )	{
 		if(maxlen < element->length)	{
-			DEBUG(1, G_GNUC_FUNCTION "() Header to big\n");
-			g_free(element->buf);
-			g_free(element);
+			DEBUG(0, G_GNUC_FUNCTION "() Header to big\n");
 			ret = -1;
 		}
 	}
@@ -224,11 +219,70 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 	if(ret > 0)
 		object->tx_headerq = g_slist_append(object->tx_headerq, element);
 	else {
+		g_netbuf_free(element->buf);
 		g_free(element);
 	}
-	
+
 	return ret;
 }
+
+
+/*
+ * Function send_body_fragment(object, header, txmsg, tx_left)
+ *
+ *  Fragment and send the body
+ *
+ */
+static gint obex_object_send_body(obex_object_t *object,
+				struct obex_header_element *h,
+				GNetBuf *txmsg, gint tx_left)
+{
+	struct obex_byte_stream_hdr *body_txh;
+        guint actual;
+		
+	body_txh = (struct obex_byte_stream_hdr*) txmsg->tail;
+			
+	if(!h->body_touched) {
+		/* This is the first time we try to send this header
+		   obex_object_addheaders has added a struct_byte_stream_hdr
+		   before the actual body-data. We shall send this in every fragment
+		   so we just remove it for now.*/
+
+		g_netbuf_pull(h->buf,  sizeof(struct obex_byte_stream_hdr) );
+		h->body_touched = TRUE;
+	}
+		
+	if(tx_left < ( h->buf->len +
+			sizeof(struct obex_byte_stream_hdr) ) )	{
+		DEBUG(4, G_GNUC_FUNCTION "() Add BODY header\n");
+		body_txh->hi = OBEX_HDR_BODY;
+		body_txh->hl = htons((guint16)tx_left);
+
+		g_netbuf_put(txmsg, sizeof(struct obex_byte_stream_hdr) );
+		g_netbuf_put_data(txmsg, h->buf->data, tx_left
+				- sizeof(struct obex_byte_stream_hdr) );
+
+		g_netbuf_pull(h->buf, tx_left
+				- sizeof(struct obex_byte_stream_hdr) );
+		/* We have completely filled the tx-buffer */
+		actual = tx_left;
+	}
+	else	{
+		DEBUG(4, G_GNUC_FUNCTION "() Add BODY_END header\n");
+
+		body_txh->hi = OBEX_HDR_BODY_END;
+		body_txh->hl = htons((guint16) (h->buf->len + sizeof(struct obex_byte_stream_hdr)));
+		g_netbuf_put(txmsg, sizeof(struct obex_byte_stream_hdr) );
+		g_netbuf_put_data(txmsg, h->buf->data, h->buf->len);
+		actual = h->buf->len;
+		
+		object->tx_headerq = g_slist_remove(object->tx_headerq, h);
+		g_netbuf_free(h->buf);
+		g_free(h);
+	}
+	return actual;
+}
+
 
 /* 
  * Function obex_object_send()
@@ -238,28 +292,18 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
  *       0 on progress made
  *     < 0 on error
  */
-gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
+gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinal)
 {
 	struct obex_header_element *h;
 	GNetBuf *txmsg;
 	gint actual, finished = 0;
-	gint lastcmd;
 	guint16 tx_left;
 	gboolean addmore = TRUE;
-	struct obex_byte_stream_hdr *body_txh;
-
-	/* Calc how many bytes of headers we can fit in this package */
-	tx_left = self->mtu_tx - sizeof(struct obex_common_hdr);
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-
-	/* Automagical final-handling */
-	if(allowfinish)
-		lastcmd = object->lastcmd;
-	else
-		lastcmd = object->cmd;
 	
-	DEBUG(4, G_GNUC_FUNCTION "() Allowfinish = %d\n", allowfinish);
+	/* Calc how many bytes of headers we can fit in this package */
+	tx_left = self->mtu_tx - sizeof(struct obex_common_hdr);
 
 	/* Reuse transmit buffer */
 	txmsg = g_netbuf_recycle(self->tx_msg);
@@ -267,104 +311,80 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 	/* Reserve space for common header */
 	g_netbuf_reserve(txmsg, sizeof(obex_common_hdr_t));
 
-	/* Check if this command has some nonheader data to send */
+	/* Add nonheader-data first if any (SETPATH, CONNECT)*/
 	if(object->tx_nonhdr_data) {
-		DEBUG(4, G_GNUC_FUNCTION "() Adding %d bytes of non-headerdata to tx buffer\n", object->tx_nonhdr_data->len);
+		DEBUG(4, G_GNUC_FUNCTION "() Adding %d bytes of non-headerdata\n", object->tx_nonhdr_data->len);
 		g_netbuf_put_data(txmsg, object->tx_nonhdr_data->data, object->tx_nonhdr_data->len);
+		
 		g_netbuf_free(object->tx_nonhdr_data);
 		object->tx_nonhdr_data = NULL;
 	}
 
-
-
-	/* This loop takes params from the tx queue and tries to stuff as
-	   many as possile into the send-buffer */
-	while (addmore)	{
-		/* Stop when we have no headers to send */
-		if(! object->tx_headerq)
-			break;
-
-		h =  object->tx_headerq->data;
-
-		body_txh = (struct obex_byte_stream_hdr*) txmsg->tail;
-
-		/* The body may be sent over several packets. Take care of this! */
-		if(h->hi == OBEX_HDR_BODY) {
-			/* Remove the header from the buffer. We will add it later
-			   in all fragments of the body */
-			if(! g_netbuf_headroom(h->buf))	{
-				DEBUG(4, G_GNUC_FUNCTION "() Removing old body-header\n");
-				g_netbuf_pull(h->buf,  sizeof(struct obex_byte_stream_hdr) );
-			}
+	/* Take headers from the tx queue and try to stuff as
+	   many as possible into the tx-msg */
+	while(addmore == TRUE && object->tx_headerq != NULL) {
 		
-			if(tx_left < ( h->buf->len + 
-					sizeof(struct obex_byte_stream_hdr) ) )	{
-				DEBUG(4, G_GNUC_FUNCTION "() Add BODY header\n");
-				body_txh->hi = OBEX_HDR_BODY;
-				body_txh->hl = htons((guint16)tx_left);
+		h = object->tx_headerq->data;
 
-				g_netbuf_put(txmsg, sizeof(struct obex_byte_stream_hdr) );
-				g_netbuf_put_data(txmsg, h->buf->data, tx_left
-						- sizeof(struct obex_byte_stream_hdr) );
-
-				g_netbuf_pull(h->buf, tx_left
-						- sizeof(struct obex_byte_stream_hdr) ); 
-				/* We have completely filled the tx-buffer */
-				addmore = FALSE;
-			}
-			else	{
-				DEBUG(4, G_GNUC_FUNCTION "() Add BODY_END header\n");
-
-				body_txh->hi = OBEX_HDR_BODY_END;
-				body_txh->hl = htons((guint16) (h->buf->len + sizeof(struct obex_byte_stream_hdr)));
-				g_netbuf_put(txmsg, sizeof(struct obex_byte_stream_hdr) );
-
-				g_netbuf_put_data(txmsg, h->buf->data, h->buf->len);
-				object->tx_headerq = g_slist_remove(object->tx_headerq, h);
-				g_netbuf_free(h->buf);
-				g_free(h);
-			}
+		if(h->hi == OBEX_HDR_BODY) {
+			/* The body may be fragmented over several packets. */
+			tx_left -= obex_object_send_body(object, h, txmsg, tx_left);
+		}
+		else if(h->length <= tx_left) {
+			/* There is room for more data in tx msg */
+			DEBUG(4, G_GNUC_FUNCTION "() Adding non-body header\n");
+			g_netbuf_put_data(txmsg, h->buf->data, h->length);
+			tx_left -= h->length;
+				
+			/* Remove from tx-queue */
+			object->tx_headerq = g_slist_remove(object->tx_headerq, h);
+			g_netbuf_free(h->buf);
+			g_free(h);
+		}
+		else if(h->length > self->mtu_tx) {
+			/* Header is bigger than MTU. This should not happen,
+			   because OBEX_ObjectAddHeader() rejects headers
+			   bigger than the MTU */
+				
+			DEBUG(0, G_GNUC_FUNCTION "() ERROR! header to big for MTU\n");
+			return -1;
 		}
 		else	{
-			DEBUG(4, G_GNUC_FUNCTION "() Add NON-BODY header\n");
-			if(h->length <= tx_left) {
-				object->tx_headerq = g_slist_remove(object->tx_headerq, h);
-				g_netbuf_put_data(txmsg, h->buf->data, h->length);
-				g_netbuf_free(h->buf);
-				tx_left -= h->length;
-				g_free(h);
-			}
-			else if(h->length > self->mtu_tx) {
-				DEBUG(1, G_GNUC_FUNCTION "() ERROR! Non-body header to big for MTU. Skipping it\n");
-				/* If this happens we just skip the header.
-				   OBEX_ObjectAddHeader() have made this impossible */
-				object->tx_headerq = g_slist_remove(object->tx_headerq, h);
-			}
-			else	{
-				/* This header won't fit. Now go send what we have! */
-				addmore = FALSE;
-			}
+			/* This header won't fit. */
+			addmore = FALSE;
 		}
-	}
+		
+		if(tx_left == 0)
+			addmore = FALSE;
+	};
 
-
+	
+	/* Decide which command to use, and if to use final-bit */
 	if(object->tx_headerq) {
-		DEBUG(4, G_GNUC_FUNCTION "() Sending non-last package\n");
-		actual = obex_data_request(self, txmsg, object->cmd, object->mode);
+		/* Have more headers to send */
+		DEBUG(4, G_GNUC_FUNCTION "() Sending non-final package\n");
+		actual = obex_data_request(self, txmsg, object->opcode);
+		finished = 0;
+	}
+	else if(allowfinal == FALSE) {
+		/* Have no more headers to send, but not allowed to send final*/
+		DEBUG(4, G_GNUC_FUNCTION "() Sending non-final package\n");
+		actual = obex_data_request(self, txmsg, object->opcode | OBEX_FINAL);
 		finished = 0;
 	}
 	else {
+		/* Have no more headers to send, and allowed to send final */
 		DEBUG(4, G_GNUC_FUNCTION "() Sending final package\n");
-		actual = obex_data_request(self, txmsg, lastcmd | OBEX_FINAL, object->mode);
-		finished = allowfinish;
+		actual = obex_data_request(self, txmsg, object->lastopcode | OBEX_FINAL);
+		finished = 1;
 	}
 
+	
 	if(actual < 0) {
 		DEBUG(4, G_GNUC_FUNCTION "() Send error\n");
 		return actual;
 	}
 	else {
-		object->send_done = finished;
 		return finished;
 	}
 }

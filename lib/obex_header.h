@@ -2,9 +2,9 @@
  *                
  *                
  * Filename:      obex_header.h
- * Version:       
+ * Version:       1.0
  * Description:   
- * Status:        Experimental.
+ * Status:        Stable.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon Mar  1 10:30:54 1999
  * Modified at:   Mon Aug 28 11:09:26 AM CEST 2000
@@ -77,13 +77,6 @@ struct obex_uint_hdr {
 	guint8  hi;
 	guint32 hv;
 } PACKED;
-
-/*
-struct obex_ushort_hdr {
-	guint8  hi;
-	guint16 hv;	
-} PACKED;
-*/
 
 #ifdef _WIN32
 #pragma pack(1)

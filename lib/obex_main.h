@@ -54,7 +54,7 @@ typedef struct obex obex_t;
 
 /* use 0 for production, 1 for verification, >2 for debug */
 #ifndef OBEX_DEBUG
-#define OBEX_DEBUG 0
+#define OBEX_DEBUG 4
 unsigned int obex_debug;
 #endif
 
@@ -72,24 +72,32 @@ void DEBUG(unsigned int n, ...);
 
 #endif /* _WIN32 */
 
-
 #define OBEX_VERSION		0x11      /* Version 1.1 */
 #define OBEX_DEFAULT_MTU	1024
 #define OBEX_MINIMUM_MTU	255      
 
-#define OBEX_CMD	1
-#define OBEX_RSP	0
-
 // Note that this one is also defined in obex.h
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
 
+#define MODE_SRV	0x80
+#define MODE_CLI	0x00
+
+enum
+{
+	STATE_IDLE,
+	STATE_START,
+	STATE_SEND,
+	STATE_REC,
+};
+
 struct obex {
-	guint16 mtu_tx;			/* Maximum OBEX Tx packet size */
-        guint16 mtu_rx;			/* Maximum OBEX Rx packet size */
+	guint16 mtu_tx;			/* Maximum OBEX TX packet size */
+        guint16 mtu_rx;			/* Maximum OBEX RX packet size */
 
 	gint fd;			/* Socket descriptor */
 	gint serverfd;
-
+        guint state;
+	
 	gboolean keepserver;		/* Keep server alive */
 	gboolean filterhint;		/* Filter devices based on hint bits */
 	gboolean filterias;		/* Filter devices based on IAS entry */
@@ -100,13 +108,11 @@ struct obex {
 	obex_object_t	*object;	/* Current object being transfered */      
 	obex_event_t	eventcb;	/* Event-callback */
 
-	volatile int response_next;	/* Next indication a response? */
-	gint lastcmd;
-
 	obex_transport_t trans;		/* Transport being used */
 	obex_ctrans_t ctrans;
 	gpointer userdata;		/* For user */
 };
+
 
 gint obex_create_socket(obex_t *self, gint domain);
 gint obex_delete_socket(obex_t *self, gint fd);
@@ -114,10 +120,8 @@ gint obex_delete_socket(obex_t *self, gint fd);
 void obex_deliver_event(obex_t *self, gint mode, gint event, gint cmd, gint rsp, gboolean del);
 gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen);
 
-gint obex_data_request(obex_t *self, GNetBuf *msg, gint opcode, 
-		       gint response);
-
 void obex_response_request(obex_t *self, guint8 opcode);
+gint obex_data_request(obex_t *self, GNetBuf *msg, gint opcode);
 
 GString *obex_get_response_message(obex_t *self, gint rsp);
 

@@ -1,13 +1,13 @@
 /*********************************************************************
  *                
  * Filename:      obex_header.c
- * Version:       0.5
+ * Version:       0.9
  * Description:   OBEX header releated functions
- * Status:        Experimental.
- * Author:        Pontus Fuchs <pontus@tactel.se>
+ * Status:        Stable.
+ * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Sun Mar 21 14:00:03 1999
  * Modified at:   Tue Nov 16 19:23:51 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Pontus Fuchs, All Rights Reserved.
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
@@ -79,8 +79,8 @@ gint insert_ubyte_header(GNetBuf *msg, guint8 identifier, guint8 value)
 /*
  * Function insert_unicode_header (buf, opcode, text)
  *
- *    Insert a char string into the buffer after converting it to a 
- *    unicode string
+ *    Insert a char string into the buffer
+ *
  */
 gint insert_unicode_header(GNetBuf *msg, guint8 opcode, 
 			const guint8 *text, gint size)
@@ -129,4 +129,3 @@ gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode,
 	
 	return size+3;
 }
-
