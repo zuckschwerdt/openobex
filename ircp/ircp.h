@@ -1,9 +1,10 @@
 #ifndef IRCP_H
 #define IRCP_H
 
-#include <glib.h>
+#define ircp_return_if_fail(test)       do { if (!(test)) return; } while(0);
+#define ircp_return_val_if_fail(test, val)      do { if (!(test)) return val; } while(0);
 
-typedef void (*ircp_info_cb_t)(gint event, gchar *param);
+typedef void (*ircp_info_cb_t)(int event, char *param);
 
 enum {
 	IRCP_EV_ERRMSG,

@@ -1,11 +1,12 @@
-#include <glib.h>
-#include <openobex/obex.h>
-
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <malloc.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#include <openobex/obex.h>
 
 #include "ircp.h"
 #include "ircp_client.h"
@@ -23,19 +24,22 @@
 #include <netinet/in.h>
 #endif
 
+#define TRUE  1
+#define FALSE 0
+
 //
 // Add more data to stream.
 //
-static gint cli_fillstream(ircp_client_t *cli, obex_object_t *object)
+static int cli_fillstream(ircp_client_t *cli, obex_object_t *object)
 {
-	gint actual;
+	int actual;
 	obex_headerdata_t hdd;
 		
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 	
 	actual = read(cli->fd, cli->buf, STREAM_CHUNK);
 	
-	DEBUG(4, G_GNUC_FUNCTION "() Read %d bytes\n", actual);
+	DEBUG(4, "Read %d bytes\n", actual);
 	
 	if(actual > 0) {
 		/* Read was ok! */
@@ -67,7 +71,7 @@ static gint cli_fillstream(ircp_client_t *cli, obex_object_t *object)
 //
 // Incoming event from OpenOBEX.
 //
-static void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp)
+static void cli_obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp)
 {
 	ircp_client_t *cli;
 
@@ -95,7 +99,7 @@ static void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gin
 		break;
 	
 	default:
-		DEBUG(1, G_GNUC_FUNCTION "() Unknown event %d\n", event);
+		DEBUG(1, "Unknown event %d\n", event);
 		break;
 	}
 }
@@ -103,23 +107,23 @@ static void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gin
 //
 // Do an OBEX request sync.
 //
-static gint cli_sync_request(ircp_client_t *cli, obex_object_t *object)
+static int cli_sync_request(ircp_client_t *cli, obex_object_t *object)
 {
-	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	int ret;
+	DEBUG(4, "\n");
 
 	cli->finished = FALSE;
 	OBEX_Request(cli->obexhandle, object);
 
 	while(cli->finished == FALSE) {
 		ret = OBEX_HandleInput(cli->obexhandle, 20);
-		DEBUG(4, G_GNUC_FUNCTION "() ret = %d\n", ret);
+		DEBUG(4, "ret = %d\n", ret);
 
 		if (ret <= 0)
 			return -1;
 	}
 
-	DEBUG(4, G_GNUC_FUNCTION "() Done success=%d\n", cli->success);
+	DEBUG(4, "Done success=%d\n", cli->success);
 
 	if(cli->success)
 		return 1;
@@ -135,8 +139,8 @@ ircp_client_t *ircp_cli_open(ircp_info_cb_t infocb)
 {
 	ircp_client_t *cli;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	cli = g_new0(ircp_client_t, 1);
+	DEBUG(4, "\n");
+	cli = malloc(sizeof(ircp_client_t));
 	if(cli == NULL)
 		return NULL;
 
@@ -155,13 +159,13 @@ ircp_client_t *ircp_cli_open(ircp_info_cb_t infocb)
 	OBEX_SetUserData(cli->obexhandle, cli);
 	
 	/* Buffer for body */
-	cli->buf = g_malloc(STREAM_CHUNK);
+	cli->buf = malloc(STREAM_CHUNK);
 	return cli;
 
 out_err:
 	if(cli->obexhandle != NULL)
 		OBEX_Cleanup(cli->obexhandle);
-	g_free(cli);
+	free(cli);
 	return NULL;
 }
 	
@@ -170,25 +174,25 @@ out_err:
 //
 void ircp_cli_close(ircp_client_t *cli)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	g_return_if_fail(cli != NULL);
+	DEBUG(4, "\n");
+	ircp_return_if_fail(cli != NULL);
 
 	OBEX_Cleanup(cli->obexhandle);
-	g_free(cli->buf);
-	g_free(cli);
+	free(cli->buf);
+	free(cli);
 }
 
 //
 // Do connect as client
 //
-gint ircp_cli_connect(ircp_client_t *cli)
+int ircp_cli_connect(ircp_client_t *cli)
 {
 	obex_object_t *object;
 	int ret;
 
 
-	DEBUG(4, G_GNUC_FUNCTION "\n");
-	g_return_val_if_fail(cli != NULL, -1);
+	DEBUG(4, "\n");
+	ircp_return_val_if_fail(cli != NULL, -1);
 
 	cli->infocb(IRCP_EV_CONNECTING, "");
 #ifdef DEBUG_TCP
@@ -226,13 +230,13 @@ gint ircp_cli_connect(ircp_client_t *cli)
 //
 // Do disconnect as client
 //
-gint ircp_cli_disconnect(ircp_client_t *cli)
+int ircp_cli_disconnect(ircp_client_t *cli)
 {
 	obex_object_t *object;
 	int ret;
 
-	DEBUG(4, G_GNUC_FUNCTION "\n");
-	g_return_val_if_fail(cli != NULL, -1);
+	DEBUG(4, "\n");
+	ircp_return_val_if_fail(cli != NULL, -1);
 
 	cli->infocb(IRCP_EV_DISCONNECTING, "");
 
@@ -251,15 +255,15 @@ gint ircp_cli_disconnect(ircp_client_t *cli)
 //
 // Do an OBEX PUT.
 //
-static gint ircp_put_file(ircp_client_t *cli, gchar *localname, gchar *remotename)
+static int ircp_put_file(ircp_client_t *cli, char *localname, char *remotename)
 {
 	obex_object_t *object;
 	int ret;
 
 	cli->infocb(IRCP_EV_SENDING, localname);
 
-	DEBUG(4, G_GNUC_FUNCTION "() Sending %s -> %s\n", localname, remotename);
-	g_return_val_if_fail(cli != NULL, -1);
+	DEBUG(4, "Sending %s -> %s\n", localname, remotename);
+	ircp_return_val_if_fail(cli != NULL, -1);
 
 	object = build_object_from_file(cli->obexhandle, localname, remotename);
 	
@@ -282,17 +286,17 @@ static gint ircp_put_file(ircp_client_t *cli, gchar *localname, gchar *remotenam
 //
 // Do OBEX SetPath
 //
-static gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
+static int ircp_setpath(ircp_client_t *cli, char *name, int up)
 {
 	obex_object_t *object;
 	obex_headerdata_t hdd;
 
-	guint8 setpath_nohdr_data[2] = {0,};
-	gchar *ucname;
-	gint ucname_len;
-	gint ret;
+	uint8_t setpath_nohdr_data[2] = {0,};
+	char *ucname;
+	int ucname_len;
+	int ret;
 
-	DEBUG(4, G_GNUC_FUNCTION "() %s\n", name);
+	DEBUG(4, "%s\n", name);
 
 	object = OBEX_ObjectNew(cli->obexhandle, OBEX_CMD_SETPATH);
 
@@ -301,7 +305,7 @@ static gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 	}
 	else {
 		ucname_len = strlen(name)*2 + 2;
-		ucname = g_malloc(ucname_len);
+		ucname = malloc(ucname_len);
 		if(ucname == NULL) {
 			OBEX_ObjectDelete(cli->obexhandle, object);
 			return -1;
@@ -310,7 +314,7 @@ static gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 
 		hdd.bs = ucname;
 		OBEX_ObjectAddHeader(cli->obexhandle, object, OBEX_HDR_NAME, hdd, ucname_len, 0);
-		g_free(ucname);
+		free(ucname);
 	}
 
 	OBEX_ObjectSetNonHdrData(object, setpath_nohdr_data, 2);
@@ -321,12 +325,12 @@ static gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 //
 // Callback from dirtraverse.
 //
-static gint ircp_visit(gint action, gchar *name, gchar *path, gpointer userdata)
+static int ircp_visit(int action, char *name, char *path, void *userdata)
 {
-	gchar *remotename;
-	gint ret = -1;
+	char *remotename;
+	int ret = -1;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 	switch(action) {
 	case VISIT_FILE:
 		// Strip /'s before sending file
@@ -346,7 +350,7 @@ static gint ircp_visit(gint action, gchar *name, gchar *path, gpointer userdata)
 		ret = ircp_setpath(userdata, "", TRUE);
 		break;
 	}
-	DEBUG(4, G_GNUC_FUNCTION "() returning %d\n", ret);
+	DEBUG(4, "returning %d\n", ret);
 	return ret;
 }
 
@@ -354,11 +358,11 @@ static gint ircp_visit(gint action, gchar *name, gchar *path, gpointer userdata)
 //
 // Put file or directory
 //
-gint ircp_put(ircp_client_t *cli, gchar *name)
+int ircp_put(ircp_client_t *cli, char *name)
 {
 	struct stat statbuf;
-	gchar *origdir;
-	gint ret;
+	char *origdir;
+	int ret;
 	
 	/* Remember cwd */
 	origdir = getcwd(NULL, 0);
@@ -371,8 +375,8 @@ gint ircp_put(ircp_client_t *cli, gchar *name)
 	
 	/* This is a directory. CD into it */
 	if(S_ISDIR(statbuf.st_mode)) {
-		gchar *newrealdir = NULL;
-		gchar *dirname;
+		char *newrealdir = NULL;
+		char *dirname;
 		
 		chdir(name);
 		name = ".";

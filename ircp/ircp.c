@@ -1,4 +1,3 @@
-#include <glib.h>
 #include <string.h>
 
 #include "debug.h"
@@ -10,45 +9,45 @@
 //
 //
 //
-void ircp_info_cb(gint event, gchar *param)
+void ircp_info_cb(int event, char *param)
 {
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, "\n");
 	switch (event) {
 
 	case IRCP_EV_ERRMSG:
-		g_print("Error: %s\n", param);
+		printf("Error: %s\n", param);
 		break;
 
 	case IRCP_EV_ERR:
-		g_print("failed\n");
+		printf("failed\n");
 		break;
 	case IRCP_EV_OK:
-		g_print("done\n");
+		printf("done\n");
 		break;
 
 
 	case IRCP_EV_CONNECTING:
-		g_print("Connecting...");
+		printf("Connecting...");
 		break;
 	case IRCP_EV_DISCONNECTING:
-		g_print("Disconnecting...");
+		printf("Disconnecting...");
 		break;
 	case IRCP_EV_SENDING:
-		g_print("Sending %s...", param);
+		printf("Sending %s...", param);
 		break;
 	case IRCP_EV_RECEIVING:
-		g_print("Receiving %s...", param);
+		printf("Receiving %s...", param);
 		break;
 
 	case IRCP_EV_LISTENING:
-		g_print("Waiting for incoming connection\n");
+		printf("Waiting for incoming connection\n");
 		break;
 
 	case IRCP_EV_CONNECTIND:
-		g_print("Incoming connection\n");
+		printf("Incoming connection\n");
 		break;
 	case IRCP_EV_DISCONNECTIND:
-		g_print("Disconnecting\n");
+		printf("Disconnecting\n");
 		break;
 
 
@@ -64,12 +63,12 @@ int main(int argc, char *argv[])
 	int i;
 	ircp_client_t *cli;
 	ircp_server_t *srv;
-	gchar *inbox;
+	char *inbox;
 
 	if(argc >= 2 && strcmp(argv[1], "-r") == 0) {
 		srv = ircp_srv_open(ircp_info_cb);
 		if(srv == NULL) {
-			g_print("Error opening ircp-server\n");
+			printf("Error opening ircp-server\n");
 			return -1;
 		}
 
@@ -87,7 +86,7 @@ int main(int argc, char *argv[])
 		
 
 	else if(argc == 1) {
-		g_print("Usage: %s file1, file2, ...\n"
+		printf("Usage: %s file1, file2, ...\n"
 			"  or:  %s -r [DEST]\n\n"
 			"Send files over IR. Use -r to receive files.\n", argv[0], argv[0]);
 		return 0;
@@ -95,7 +94,7 @@ int main(int argc, char *argv[])
 	else {
 		cli = ircp_cli_open(ircp_info_cb);
 		if(cli == NULL) {
-			g_print("Error opening ircp-client\n");
+			printf("Error opening ircp-client\n");
 			return -1;
 		}
 			

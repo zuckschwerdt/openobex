@@ -7,19 +7,19 @@
 typedef struct ircp_client
 {
 	obex_t *obexhandle;
-	gboolean finished;
-	gboolean success;
-	gint obex_rsp;
+	int finished;
+	int success;
+	int obex_rsp;
 	ircp_info_cb_t infocb;
-	gint fd;
-	guint8 *buf;
+	int fd;
+	uint8_t *buf;
 } ircp_client_t;
 
 
 ircp_client_t *ircp_cli_open(ircp_info_cb_t infocb);
 void ircp_cli_close(ircp_client_t *cli);
-gint ircp_cli_connect(ircp_client_t *cli);
-gint ircp_cli_disconnect(ircp_client_t *cli);
-gint ircp_put(ircp_client_t *cli, gchar *name);
+int ircp_cli_connect(ircp_client_t *cli);
+int ircp_cli_disconnect(ircp_client_t *cli);
+int ircp_put(ircp_client_t *cli, char *name);
 	
 #endif

@@ -1,31 +1,30 @@
-#include <glib.h>
-
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/param.h>
 #include <dirent.h>
 #include "dirtraverse.h"
 
 #include "debug.h"
 
+#define TRUE  1
+#define FALSE 0
+
 //
 // Read all files in a directory. Continue recusively down in directories.
 //
-int visit_dir(GString *path, visit_cb cb, gpointer userdata)
+int visit_dir(char *path, visit_cb cb, void *userdata)
 {
 	struct stat statbuf;
 	DIR *dir;
 	struct dirent *dirent;
-	GString *t;
+	char t[MAXPATHLEN];
 	int len;
 	int ret = 1;
 
-	t = g_string_new("");
-	if(t == NULL)
-		return -1;
-
-	dir = opendir(path->str);
+	dir = opendir(path);
 	if(dir == NULL) {
 		return -1;
 	}
@@ -36,29 +35,28 @@ int visit_dir(GString *path, visit_cb cb, gpointer userdata)
 		else if(strcmp("..", dirent->d_name) == 0) {
 		}
 		else {
-			g_string_sprintf(t, "%s/%s", path->str, dirent->d_name);
-			if(lstat(t->str, &statbuf) < 0) {
+			snprintf(t, MAXPATHLEN, "%s/%s", path, dirent->d_name);
+			if(lstat(t, &statbuf) < 0) {
 				return -1;
 			}
 			else if(S_ISREG(statbuf.st_mode)) {
-				ret = cb(VISIT_FILE, t->str, "", userdata);
+				ret = cb(VISIT_FILE, t, "", userdata);
 				if( ret  < 0)
 					goto out;
 			}			
 			else if(S_ISDIR(statbuf.st_mode)) {
-				ret = cb(VISIT_GOING_DEEPER, dirent->d_name, path->str, userdata);
+				ret = cb(VISIT_GOING_DEEPER, dirent->d_name, path, userdata);
 				if( ret < 0)
 					goto out;
-				len = path->len;
-				g_string_append(path, dirent->d_name);
-				g_string_append(path, "/");
+				len = strlen(path);
+				sprintf(path, "%s%s/", path, dirent->d_name);
 				ret = visit_dir(t, cb, userdata);
 				if(ret < 0)
 					goto out;
 				ret = cb(VISIT_GOING_UP, "", "", userdata);
 				if(ret < 0)
 					goto out;
-				g_string_truncate(path, len);
+				path[len] = '\0';
 			}
 			else {
 				// This was probably a symlink. Just skip
@@ -67,19 +65,18 @@ int visit_dir(GString *path, visit_cb cb, gpointer userdata)
 		dirent = readdir(dir);
 	}
 
-out:	g_string_free(t, TRUE);
+out:
 	return ret;
 }
 
 //
 //
 //
-gint visit_all_files(gchar *name, visit_cb cb, gpointer userdata)
+int visit_all_files(char *name, visit_cb cb, void *userdata)
 {
 	struct stat statbuf;
 	int ret;
-	GString *path;
-	path = g_string_new("");
+	char path[MAXPATHLEN];
 
 	if(stat(name, &statbuf) < 0) {
 		DEBUG(0, "Error stating %s\n", name);
@@ -93,8 +90,8 @@ gint visit_all_files(gchar *name, visit_cb cb, gpointer userdata)
 	}
 	else if(S_ISDIR(statbuf.st_mode)) {
 		/* A directory! Enter it */
-		path = g_string_assign(path, name);
-		
+		snprintf(path, MAXPATHLEN, "%s", name);
+
 		/* Don't notify app if going "down" to "." */
 		if(strcmp(name, ".") == 0)
 			ret = 1;
@@ -116,27 +113,26 @@ gint visit_all_files(gchar *name, visit_cb cb, gpointer userdata)
 	}
 
 out:
-	g_string_free(path, TRUE);
 	return ret;
 }
 
 #if 0
-gint visit(gint action, gchar *name, gchar *path, gpointer userdata)
+int visit(int action, char *name, char *path, void *userdata)
 {
 	switch(action) {
 	case VISIT_FILE:
-		g_print("Visiting %s\n", filename);
+		printf("Visiting %s\n", filename);
 		break;
 
 	case VISIT_GOING_DEEPER:
-		g_print("Going deeper %s\n", filename);
+		printf("Going deeper %s\n", filename);
 		break;
 
 	case VISIT_GOING_UP:
-		g_print("Going up\n");
+		printf("Going up\n");
 		break;
 	default:
-		g_print("going %d\n", action);
+		printf("going %d\n", action);
 	}
 	return 1;
 }
