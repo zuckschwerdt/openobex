@@ -163,9 +163,10 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 {
 	switch (event)	{
 	case OBEX_EV_PROGRESS:
-		g_print("Made some progress...\n");
+		g_print(".");
 		break;
 	case OBEX_EV_REQDONE:
+		g_print("\n");
 		/* Comes when a command has finished. */
 		if(mode == OBEX_CLIENT)
 			client_done(object, obex_cmd, obex_rsp);

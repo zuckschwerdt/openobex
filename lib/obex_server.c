@@ -4,12 +4,12 @@
  * Version:       0.5
  * Description:   Handles server-like operations
  * Status:        Experimental.
- * Author:        Pontus Fuchs <pontus@tactel.se>
+ * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Thu Nov 11 20:55:00 1999
  * Modified at:   Sun Dec  5 15:36:36 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1998-1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999-2000 Pontus Fuchs, All Rights Reserved.
  *      
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public

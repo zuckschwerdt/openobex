@@ -1,3 +1,9 @@
+2000-08-15  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Various fixes to Makefiles etc
+	* Did a workaround for client.c to be able
+	  to do PUT to Win2K.
+
 2000-08-14  Pontus Fuchs  <pontus.fuchs@tactel.se>
 	
 	* Fixed dependencies for win32. You need cygwin to

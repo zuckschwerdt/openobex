@@ -2,7 +2,7 @@
  *                
  * Filename:      obex_test.c
  * Version:       0.8
- * Description:   Test IrOBEX, TCPONBEX and OBEX over cable to R320s. 
+ * Description:   Test IrOBEX, TCPOBEX and OBEX over cable to R320s. 
  * Status:        Experimental.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Wed Nov 17 22:05:16 1999

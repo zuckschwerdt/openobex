@@ -6,10 +6,10 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:04:29 1999
- * Modified at:   Sun Dec  5 15:35:42 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Tue Aug 15 10:11:26 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,6 @@
  ********************************************************************/
 
 #include "config.h"
-//#include <assert.h>
 
 #include <string.h>
 
@@ -365,6 +364,7 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 		return actual;
 	}
 	else {
+		object->send_done = finished;
 		return finished;
 	}
 }

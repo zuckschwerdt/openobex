@@ -1,5 +1,3 @@
-# Targets
-
 lib_LTLIBRARIES = libopenobex.la
 
 INCLUDES = @GLIB_CFLAGS@ -I.
@@ -12,31 +10,26 @@ libopenobex_la_LDFLAGS = \
 	-export-symbols obex.sym
 
 libopenobex_la_SOURCES = \
-	obex_main.c \
-	obex_connect.c \
+	obex_main.c obex_main.h \
+	obex_connect.c obex_connect.h \
 	obex.c \
-	obex_header.c \
-	obex_object.c \
-	obex_transport.c \
-	obex_server.c \
-	obex_client.c \
-	irobex.c \
-	inobex.c \
-	netbuf.c
+	obex_header.c obex_header.h \
+	obex_object.c obex_object.h \
+	obex_transport.c obex_transport.h \
+	obex_server.c obex_server.h \
+	obex_client.c obex_client.h \
+	irobex.c irobex.h \
+	inobex.c inobex.h \
+	netbuf.c netbuf.h \
+	irda.h irda_wrap.h
 
 libopenobexinclude_HEADERS = \
 	obex.h \
 	obex_const.h
 
-EXTRA_DIST = 
-	obex_main.h \
-	obex_connect.h \
-	obex_header.h \
-	obex_object.h \
-	obex_transport.h \
-	obex_server.h \
-	obex_client.h \
-	irobex.h \
-	inobex.h \
-	netbuf.h \
-	obex.sym
+EXTRA_DIST = \
+	obex.sym \
+	obex.def \
+	makefile.msc \
+	win32compat.c
+

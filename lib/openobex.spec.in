@@ -10,13 +10,13 @@ Version: %ver
 Release: %rel
 Copyright: LGPL
 Group: Libraries
-Source: ftp://ftp.ravioli.pasta.cs.uit.no/pub/Ravioli/obex/openobex-%{ver}.tar.gz
+Source: ftp://---sourceforge...---/openobex-%{ver}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{PACKAGE_VERSION}-root
 URL: http://www.ravioli.pasta.cs.uit.no/open-obex/
 Docdir: %{prefix}/doc
 Requires: glib >= 1.2.0
 %description
-OBEX shared library
+Open OBEX shared c-library
 
 %changelog
 
@@ -29,13 +29,11 @@ rm -rf $RPM_BUILD_ROOT
 %setup -q
 
 %build
-cd lib
 CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix}
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-cd lib
 make prefix=$RPM_BUILD_ROOT%{prefix} install
 
 %clean
@@ -48,8 +46,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-, root, root)
 
-%{prefix}/lib/libobex*
+%{prefix}/lib/libopenobex*
 %{prefix}/include/obex/
-%{prefix}/bin/obex-config
+%{prefix}/bin/openobex-config
 
-%doc lib/AUTHORS lib/COPYING lib/ChangeLog lib/NEWS lib/README
+%doc AUTHORS COPYING ChangeLog NEWS README

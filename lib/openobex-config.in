@@ -87,7 +87,7 @@ if $cflags; then
 fi
 
 if $libs; then
-    all_flags="$all_flags $services $the_libs -lobex"
+    all_flags="$all_flags $services $the_libs -lopenbobex @GLIB_LIBS@"
 fi
 
 if test -z "$all_flags" || test "x$all_flags" = "x "; then

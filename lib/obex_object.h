@@ -6,10 +6,10 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:05:28 1999
- * Modified at:   Sun Dec  5 15:36:22 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Tue Aug 15 10:11:45 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -48,6 +48,7 @@ typedef struct {
 	GNetBuf *tx_nonhdr_data;	/* Data outside of headers (like CONNECT and SETPATH) */
 	GNetBuf *rx_nonhdr_data;	/* -||- */
 	gboolean app_is_called;		/* Set after an app has been called */
+
 	guint8 cmd;			/* Command for normal packets */
 	guint8 lastcmd;			/* Command for last packet */
 	guint8 mode;			/* OBEX_RSP or OBEX_CMD */
@@ -56,6 +57,7 @@ typedef struct {
 	gint hinted_body_len;		/* Hinted body-length or 0 */
 	gint totallen;			/* Size of all headers */
 	gpointer userdata;		/* Up to the user */
+	gboolean send_done;		/* Set when this object has been sent away */
 
 } obex_object_t;
 
