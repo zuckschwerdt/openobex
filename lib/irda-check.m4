@@ -10,12 +10,13 @@ AC_DEFUN([IRDA_HOOK],[
 		AC_TRY_COMPILE([#include <sys/socket.h>
 				#include "src/irda.h"],
 		[struct irda_device_list l;],
-		am_cv_irda_found=yes,
+		am_cv_irda_found=yes
+		AC_DEFINE(HAVE_IRDA,1,[Define if system supports IrDA]),
 		am_cv_irda_found=no)])
 	])
 
-	if test $am_cv_irda_found = yes; then
-		AC_DEFINE(HAVE_IRDA,1,[Define if system supports IrDA])
+#	if test $am_cv_irda_found = yes; then
+#		AC_DEFINE(HAVE_IRDA,1,[Define if system supports IrDA])
 ])
 
 AC_DEFUN([IRDA_CHECK], [
