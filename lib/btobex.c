@@ -195,7 +195,7 @@ int btobex_connect_request(obex_t *self)
 		goto out_freesock;
 	}
 
-	mtu = 512;
+	mtu = OBEX_DEFAULT_MTU;
 	self->trans.mtu = mtu;
 
 	DEBUG(2, __FUNCTION__ "(), transport mtu=%d\n", mtu);
