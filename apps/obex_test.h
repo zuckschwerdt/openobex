@@ -10,9 +10,6 @@ struct context
 {
 	gboolean serverdone;
 	gboolean clientdone;
-#ifndef _WIN32
-	struct cobex_context *cobex_gt;
-#endif
 };
 
 #endif

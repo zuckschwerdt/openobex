@@ -83,8 +83,8 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	// Win2K irXfer will send OBEX_RSP_SUCCESS after every fragment sent to it.
 	// We have to deal with that here.
 
-	if(self->object->send_done == FALSE && 
-			(opcode == OBEX_RSP_CONTINUE || opcode==OBEX_RSP_SUCCESS)) {
+//	DEBUG(4, G_GNUC_FUNCTION "() send_done=%d, opcode=%d\n", self->object->send_done, opcode);
+	if( (opcode == OBEX_RSP_CONTINUE) || (self->object->send_done == FALSE && opcode==OBEX_RSP_SUCCESS) ) {
 		DEBUG(3, G_GNUC_FUNCTION "() Continue...\n");
 		if(obex_object_send(self, self->object, 1) < 0)
 			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_LINKERR, self->object->cmd, 0, TRUE);

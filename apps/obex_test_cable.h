@@ -51,7 +51,7 @@ gint cobex_write(obex_t *self, gpointer userdata, guint8 *buffer, gint length);
 gint cobex_connect(obex_t *handle, gpointer userdata);
 gint cobex_disconnect(obex_t *handle, gpointer userdata);
 
+/* Internally only */
 void cobex_cleanup(struct cobex_context *gt, gboolean force);
-
 
 #endif

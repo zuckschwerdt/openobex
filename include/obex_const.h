@@ -40,12 +40,12 @@ typedef union {
 } obex_headerdata_t;
 
 typedef struct {
-	gint (*connect)(obex_t *handle);
-	gint (*disconnect)(obex_t *handle);
-	gint (*listen)(obex_t *handle);
-	gint (*write)(obex_t *handle, guint8 *buf, gint buflen);
-	gint (*handleinput)(obex_t *handle);
-
+	gint (*connect)(obex_t *handle, gpointer userdata);
+	gint (*disconnect)(obex_t *handle, gpointer userdata);
+	gint (*listen)(obex_t *handle, gpointer userdata);
+	gint (*write)(obex_t *handle, gpointer userdata, guint8 *buf, gint buflen);
+	gint (*handleinput)(obex_t *handle, gpointer userdata);
+	gpointer userdata;
 } obex_ctrans_t;
 
 #define	OBEX_CLIENT		0

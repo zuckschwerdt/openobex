@@ -257,9 +257,10 @@ int main (int argc, char *argv[])
 				printf("Unknown command %s\n", cmd);
 		}
 	}
+#ifndef _WIN32
 	if(cobex)
 		cobex_close(custfunc.userdata);
-
+#endif
 
 	return 0;
 }

@@ -52,7 +52,7 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 	
 	if(self->trans.type == OBEX_TRANS_CUST) {
 		if(self->ctrans.handleinput)
-			ret = self->ctrans.handleinput(self);
+			ret = self->ctrans.handleinput(self, self->ctrans.userdata);
 		else {
 			g_message(G_GNUC_FUNCTION "() No handleinput-callback exist!\n");
 			ret = -1;
@@ -167,7 +167,7 @@ gint obex_transport_connect_request(obex_t *self)
 	case OBEX_TRANS_CUST:
 		DEBUG(4, G_GNUC_FUNCTION "() Custom connect\n");
 		if(self->ctrans.connect)
-			ret = self->ctrans.connect(self);
+			ret = self->ctrans.connect(self, self->ctrans.userdata);
 		else
 			g_message(G_GNUC_FUNCTION "(), No connect-callback exist!\n");
 		DEBUG(4, G_GNUC_FUNCTION "ret=%d\n", ret);
@@ -204,7 +204,7 @@ void obex_transport_disconnect_request(obex_t *self)
 	case OBEX_TRANS_CUST:
 		DEBUG(4, G_GNUC_FUNCTION "() Custom disconnect\n");
 		if(self->ctrans.disconnect)
-			self->ctrans.disconnect(self);
+			self->ctrans.disconnect(self, self->ctrans.userdata);
 		else
 			g_message(G_GNUC_FUNCTION "(), No disconnect-callback exist!\n");
 		break;
@@ -237,7 +237,7 @@ gint obex_transport_listen(obex_t *self, char *service)
 	case OBEX_TRANS_CUST:
 		DEBUG(4, G_GNUC_FUNCTION "() Custom listen\n");
 		if(self->ctrans.listen)
-			ret = self->ctrans.listen(self);
+			ret = self->ctrans.listen(self, self->ctrans.userdata);
 		else
 			g_message(G_GNUC_FUNCTION "(), No listen-callback exist!\n");
 		break;
@@ -287,7 +287,7 @@ gint obex_transport_write(obex_t *self, GNetBuf *msg)
 	case OBEX_TRANS_CUST:
 		DEBUG(4, G_GNUC_FUNCTION "() Custom write\n");
 		if(self->ctrans.write)
-			actual = self->ctrans.write(self, msg->data, msg->len);
+			actual = self->ctrans.write(self, self->ctrans.userdata, msg->data, msg->len);
 		else
 			g_message(G_GNUC_FUNCTION "(), No write-callback exist!\n");
 		break;

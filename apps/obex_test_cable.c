@@ -1,7 +1,7 @@
 /*********************************************************************
  *                
  * Filename:      obex_test_cable.c
- * Version:       0.3
+ * Version:       0.4
  * Description:   OBEX over a serial port in Linux. 
  *                Can be used with an Ericsson R320s phone.
  * Status:        Experimental.
@@ -45,7 +45,7 @@
 #include "obex_test.h"
 
 //
-//
+// Do an AT-command.
 //
 int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 {
@@ -133,7 +133,9 @@ int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 	return 0;
 }
 
-/* Set the phone in OBEX-mode */
+//
+// Open serial port and if we are using an r320, set it in OBEX-mode.
+//
 gint cobex_init(struct cobex_context *gt)
 {
 	char rspbuf[200];
@@ -215,7 +217,7 @@ struct cobex_context * cobex_open(const gchar *port, gboolean r320)
 }
 
 //
-//
+// Close down cable OBEX.
 //
 void cobex_close(struct cobex_context *gt)
 {
@@ -247,7 +249,7 @@ gint cobex_connect(obex_t *handle, gpointer userdata)
 }
 
 //
-// Do transport disconnect.
+// Do transport disconnect
 //
 gint cobex_disconnect(obex_t *handle, gpointer userdata)
 {
@@ -261,7 +263,7 @@ gint cobex_disconnect(obex_t *handle, gpointer userdata)
 }
 
 //
-//  Called from OBEX-lib when data needs to be written
+//  Called when data needs to be written
 //
 gint cobex_write(obex_t *handle, gpointer userdata, guint8 *buffer, gint length)
 {
