@@ -8,7 +8,7 @@ includedir=@includedir@
 usage()
 {
     cat <<EOF
-Usage: obex-config [OPTION]... [TARGET]...
+Usage: openobex-config [OPTION]... [TARGET]...
 
 Known values for OPTION are:
 
@@ -58,7 +58,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo @PACKAGE@ @OBEX_VERSION@
+	echo @OBEX_VERSION@
 	exit 0
 	;;
 
