@@ -296,7 +296,6 @@ gint ircp_srv_recv(ircp_server_t *srv, gchar *inbox)
 		return -1;
 	}
 
-
 	if(OBEX_ServerRegister(srv->obexhandle, "OBEX:IrXfer") < 0)
 		return -1;
 	srv->infocb(IRCP_EV_LISTENING, "");

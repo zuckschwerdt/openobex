@@ -4,8 +4,8 @@
 #include <glib.h>
 
 typedef enum {
-	CD_CREATE,
-	CD_ALLOWABS
+	CD_CREATE=1,
+	CD_ALLOWABS=2
 } cd_flags;
 
 obex_object_t *build_object_from_file(obex_t *handle, const gchar *localname, const gchar *remotename);
