@@ -6,7 +6,7 @@ dnl
 
 AC_INIT(src/obex_test.c)
 
-AM_INIT_AUTOMAKE(openobex-apps, 1.0.0-pre2)
+AM_INIT_AUTOMAKE(openobex-apps, 1.0.0-pre3)
 AM_CONFIG_HEADER(config.h)
 
 AM_MAINTAINER_MODE
