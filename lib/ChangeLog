@@ -1,3 +1,8 @@
+2000-08-23  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Fixed bug when receiving more than one fragment at a time.
+	  Win2K irftp seems to do this.
+
 2000-08-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Fixes to win32 makefiles.

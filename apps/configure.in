@@ -1,5 +1,5 @@
 AC_INIT(src/obex_test.c)
-AM_INIT_AUTOMAKE(openobex-apps, 0.9)
+AM_INIT_AUTOMAKE(openobex-apps, 0.9.6)
 AM_CONFIG_HEADER(config.h)
 
 AM_MAINTAINER_MODE
