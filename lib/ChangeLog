@@ -1,3 +1,10 @@
+2001-02-27  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Added a patch from Jean:
+	  o OBEX_SetUserCallBack - change callback after OBEX_init()
+	  o OBEX_ObjectReParseHeaders - Parse headers more than one time
+	  o Some documentation fixes.
+
 2000-12-06  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Removed OBEX_Object(G|S)etUserData as they were not needed.

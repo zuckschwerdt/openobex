@@ -565,6 +565,32 @@ gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 }
 
 /*
+ * Function obex_object_reparseheader()
+ *
+ * Allow the user to re-parse the headers in the rx-queue
+ *
+ */
+gint obex_object_reparseheaders(obex_t *self, obex_object_t *object)
+{
+	guint32 *bq4;
+	struct obex_header_element *h;
+
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+
+	/* Check that there is no more active headers */
+	if(object->rx_headerq != NULL)
+		return 0;
+
+	/* Put the old headers back in the active list */
+	object->rx_headerq = object->rx_headerq_rm;
+	object->rx_headerq_rm = NULL;
+
+	/* Success */
+	return 1;
+}
+
+
+/*
  * Function obex_object_receive_stream()
  *
  *    Handle receiving of body-stream

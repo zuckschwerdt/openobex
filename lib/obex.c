@@ -54,12 +54,18 @@
 
 /**
  * OBEX_Init - Initialize OBEX.
- * @transport: Which transport to use. Available are
- *             %OBEX_TRANS_IRDA, %OBEX_TRANS_INET or %OBEX_TRANS_CUST.
+ * @transport: Which transport to use. The following transports are available :
+ *             %OBEX_TRANS_IRDA : Use regular IrDA socket (need an IrDA stack)
+ *             %OBEX_TRANS_INET : Use regular TCP/IP socket
+ *             %OBEX_TRANS_CUST : Use user provided transport
  *             If you use %OBEX_TRANS_CUST you must register your own
  *             transport with OBEX_RegisterCTransport()
  * @eventcb: Function pointer to your event callback.
- * @flags: Bitmask of flags. See obex_const.h or available flags
+ *           See obex.h for prototype of this callback.
+ * @flags: Bitmask of flags. The following flags are available :
+ *         %OBEX_FL_KEEPSERVER : Keep the server alive after incomming request
+ *         %OBEX_FL_FILTERHINT : Filter target devices based on Obex hint bit
+ *         %OBEX_FL_FILTERIAS  : Filter target devices based on IAS entry
  *
  * Returns an OBEX handle or %NULL on error.
  */
@@ -183,11 +189,31 @@ void OBEX_SetUserData(obex_t *self, gpointer data)
 /**
  * OBEX_GetUserData - Read the userdata from an OBEX handle
  * @self: OBEX handle
+ *
+ * Returns userdata
  */
 gpointer OBEX_GetUserData(obex_t *self)
 {
 	g_return_val_if_fail(self != NULL, 0);
 	return self->userdata;
+}
+
+/**
+ * OBEX_SetUserCallBack - Change user callback on an OBEX handle
+ * @self: OBEX handle
+ * @eventcb: Function pointer to your new event callback.
+ * @data: Pointer to the new user data to pass to the new callback (optional)
+ */
+void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data)
+{
+	g_return_if_fail(self != NULL);
+	/* The callback can't be NULL */
+	if(eventcb != NULL) {
+		self->eventcb = eventcb;
+		/* Optionaly change the user data */
+		if(data != NULL)
+			self->userdata = data;
+	}
 }
 
 /**
@@ -215,7 +241,15 @@ gint OBEX_ServerRegister(obex_t *self, const char *service)
  * @data: Userdata for client (use %NULL for same as server)
  *
  * Create a new OBEX instance to handle the incomming connection.
- * The old instance will continue to listen for new conenctions.
+ * The old OBEX instance will continue to listen for new connections.
+ * The two OBEX instances become totally independant from each other.
+ *
+ * This function should be called after the library generates
+ * an %OBEX_EV_ACCEPTHINT event to the user, but before the user
+ * start to pull data out of the incomming connection.
+ *
+ * Using this function also requires that the OBEX handle was created
+ * with the %OBEX_FL_KEEPSERVER flag set while calling OBEX_Init().
  *
  * Returns the client instance or %NULL for error.
  */
@@ -400,6 +434,12 @@ gint IrOBEX_TransportConnect(obex_t *self, const char *service)
  *
  * The returned filehandle can be used to do select() on, before
  * calling OBEX_HandleInput()
+ *
+ * There is one subtelty about this function. When the OBEX connection is
+ * established, it returns the connection filedescriptor, while for
+ * an unconnected server it will return the listening filedescriptor.
+ * This mean that after receiving an incomming connection, you need to
+ * call this function again.
  */
 gint OBEX_GetFD(obex_t *self)
 {
@@ -552,6 +592,26 @@ gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
 	g_return_val_if_fail(self != NULL, -1);
 	g_return_val_if_fail(object != NULL, -1);
 	return obex_object_getnextheader(self, object, hi, hv, hv_size);
+}
+
+/**
+ * OBEX_ObjectReParseHeaders - Allow the user to parse again the rx headers
+ * @self: OBEX handle
+ * @object: OBEX object
+ *
+ * The user must have extracted all headers from the object before
+ * calling this function (until %OBEX_ObjectGetNextHeader() returns 0).
+ * Next call to %OBEX_ObjectGetNextHeader() will return the first received
+ * header.
+ *
+ * Returns 1 on success
+ * Returns 0 if failed due previous parsing not completed.
+ */
+gint OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object)
+{
+	g_return_val_if_fail(self != NULL, -1);
+	g_return_val_if_fail(object != NULL, -1);
+	return obex_object_reparseheaders(self, object);
 }
 
 /**

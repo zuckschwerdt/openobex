@@ -52,6 +52,7 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags);
 void    OBEX_Cleanup(obex_t *self);
 void OBEX_SetUserData(obex_t *self, gpointer data);
 gpointer OBEX_GetUserData(obex_t *self);
+void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data);
 gint OBEX_GetFD(obex_t *self);
 
 gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans);
@@ -74,6 +75,7 @@ gint		OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi,
 gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
 					obex_headerdata_t *hv,
 					guint32 *hv_size);
+gint OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object);
 gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
 
 gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer);
