@@ -57,7 +57,7 @@
 #ifdef HAVE_BLUETOOTH
 #include "btobex.h"
 #else
-// This is to workaround compilation without BlueTooth support. - Jean II
+// This is to workaround compilation without Bluetooth support. - Jean II
 typedef char *bdaddr_t;
 #endif
 

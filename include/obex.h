@@ -42,8 +42,10 @@
 typedef void* obex_t;
 typedef void* obex_object_t;
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
-// This is to workaround compilation without BlueTooth support. - Jean II
+// This is to workaround compilation without Bluetooth support. - Jean II
+#ifndef BDADDR_ANY
 typedef char* bdaddr_t;
+#endif
 
 #include "obex_const.h"
 
