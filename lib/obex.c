@@ -406,7 +406,7 @@ gint OBEX_GetFD(obex_t *self)
  * @self: OBEX handle
  * @object: Object containing request
  *
- * Returns regative on error.
+ * Returns negative on error.
  */
 gint OBEX_Request(obex_t *self, obex_object_t *object)
 {
