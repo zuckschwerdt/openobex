@@ -114,8 +114,8 @@ char* OBEX_GetResponseMessage(obex_t *self, int rsp);
 /*
  * Bluetooth OBEX API
  */
- int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel);
- int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
+ int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel);
+ int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel);
 
 /*
  * OBEX File API

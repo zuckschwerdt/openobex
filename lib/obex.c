@@ -937,7 +937,7 @@ int IrOBEX_TransportConnect(obex_t *self, const char *service)
  *
  * Returns -1 on error.
  */
-int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel)
+int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
 {
 	DEBUG(3, __FUNCTION__ "()\n");
 
@@ -960,7 +960,7 @@ int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel)
  *
  *  An easier connect function to use for Bluetooth (Bluetooth OBEX) only. 
  */
-int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel)
+int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel)
 {
 	DEBUG(4, __FUNCTION__ "()\n");
 

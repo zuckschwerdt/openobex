@@ -62,7 +62,7 @@
  *    Prepare for Bluetooth RFCOMM connect
  *
  */
-void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel)
+void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel)
 {
 #ifndef _WIN32
 	self->trans.self.rfcomm.rc_family = AF_BLUETOOTH;
@@ -81,7 +81,7 @@ void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int chan
  *    Prepare for Bluetooth RFCOMM listen
  *
  */
-void btobex_prepare_listen(obex_t *self, bdaddr_t *src, int channel)
+void btobex_prepare_listen(obex_t *self, bdaddr_t *src, uint8_t channel)
 {
 #ifndef _WIN32
 	/* Bind local service */

@@ -30,8 +30,8 @@
 #ifndef BTOBEX_H
 #define BTOBEX_H
 
-void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
-void btobex_prepare_listen(obex_t *self, bdaddr_t *src, int channel);
+void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel);
+void btobex_prepare_listen(obex_t *self, bdaddr_t *src, uint8_t channel);
 int btobex_listen(obex_t *self);
 int btobex_connect_request(obex_t *self);
 int btobex_disconnect_request(obex_t *self);
