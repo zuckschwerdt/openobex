@@ -1,17 +1,4 @@
-#Change these to match your system
-GLIB=c:\pf\glib-1.2.8
-GLIB_VER=1.2
-
-
-# Nothing to change here.
-CC = cl -G5 -GF -Ox -W3 -MD -nologo
-
-LDFLAGS = /link
-INSTALL = copy
-
-CFLAGS = -I. -I.. -I$(GLIB) -DHAVE_CONFIG_H
-
-OBEX_VER=0.9
+!include ..\makefile.msc.rules
 
 all : \
 	openobex-$(OBEX_VER).dll
@@ -55,9 +42,10 @@ clean:
 	-@del *.lib
 	-@del *.err
 	-@del *.map
-	-@del *.sym
 	-@del *.lk1
 	-@del *.mk1
 	-@del *.pdb
 	-@del *.ilk
 	-@del *.exe
+
+!include windeps.dep

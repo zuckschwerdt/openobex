@@ -28,22 +28,17 @@
  *     
  ********************************************************************/
 
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 
-#include <obex_main.h>
+#include "obex_main.h"
 #ifdef HAVE_IRDA
-#include <irobex.h>
+#include "irobex.h"
 #endif /*HAVE_IRDA*/
-#include <inobex.h>
+#include "inobex.h"
 
-#include <obex_transport.h>
-
-#ifndef AF_IRDA
-#define AF_IRDA 23
-#endif /* AF_IRDA */
-
+#include "obex_transport.h"
 
 /*
  * Function obex_transport_handle_input(self, timeout)

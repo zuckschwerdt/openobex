@@ -44,11 +44,11 @@
 
 #endif /* _WIN32 */
 
-#include <obex_main.h>
-#include <obex_header.h>
-#include <obex_server.h>
-#include <obex_client.h>
-#include <obex_const.h>
+#include "obex_main.h"
+#include "obex_header.h"
+#include "obex_server.h"
+#include "obex_client.h"
+#include "obex_const.h"
 
 #ifdef HAVE_FASYNC
 obex_t *async_self[OBEX_MAXINSTANCE] = {NULL, }; /* Which instances wants SIGIO */
@@ -380,6 +380,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 #if DEBUG_DUMPBUFFERS & 2
 	g_netbuf_print(msg);
 #endif
+
 	/*  
 	 * Make sure that the buffer we have, actually has the specified
 	 * number of bytes. If not the frame may have been fragmented, and
@@ -387,6 +388,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	 */
 
 	DEBUG(4,G_GNUC_FUNCTION "() hdr->len = %04x\n", hdr->len);
+
 	size = ntohs(hdr->len);
 	if (size > msg->len) {
 		DEBUG(3, G_GNUC_FUNCTION "() Need more data, size=%d, len=%d!\n",

@@ -31,7 +31,7 @@
 #ifndef OBEX_OBJECT_H
 #define OBEX_OBJECT_H
 
-#include <obex_main.h>
+#include "obex_main.h"
 #include "netbuf.h"
 
 /* If an object has no expected length we have to 

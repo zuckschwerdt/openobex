@@ -29,10 +29,10 @@
  *     
  ********************************************************************/
 
-#include <config.h>
+#include "config.h"
 
-#include <obex_main.h>
-#include <obex_header.h>
+#include "obex_main.h"
+#include "obex_header.h"
 
 /*
  * Function insert_uint_header (buf, identifier, value)

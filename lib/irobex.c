@@ -28,7 +28,7 @@
  *     
  ********************************************************************/
 
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_IRDA
 
@@ -44,7 +44,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#include <irda_wrap.h>
+#include "irda_wrap.h"
 
 #ifndef AF_IRDA
 #define AF_IRDA 23

@@ -1,0 +1,4 @@
+To compile for win32 you need MS VC6 and glib 1.2 installed.
+Edit makefile.msc.rules.
+copy config.h.win to config.h
+run nmake -f makefile.msc

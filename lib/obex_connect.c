@@ -28,15 +28,15 @@
  *     
  ********************************************************************/
 
-#include <config.h>
+#include "config.h"
 
 #include <string.h>
 
-#include <obex_main.h>
-#include <obex_object.h>
-#include <obex_header.h>
+#include "obex_main.h"
+#include "obex_object.h"
+#include "obex_header.h"
 
-#include <obex_connect.h>
+#include "obex_connect.h"
 
 /*
  * Function obex_insert_connectframe ()

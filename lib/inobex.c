@@ -27,7 +27,7 @@
  *     MA  02111-1307  USA
  *     
  ********************************************************************/
-#include <config.h>
+#include "config.h"
 #include <stdio.h>
 
 #ifdef _WIN32
@@ -39,7 +39,7 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #endif /*_WIN32*/
-#include <obex_main.h>
+#include "obex_main.h"
 
 #define OBEX_PORT 650
 

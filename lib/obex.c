@@ -43,13 +43,13 @@
 #include <unistd.h>
 #endif
 
-#include <obex_main.h>
-#include <obex_object.h>
-#include <obex_connect.h>
-#include <obex_client.h>
+#include "obex_main.h"
+#include "obex_object.h"
+#include "obex_connect.h"
+#include "obex_client.h"
 
 #ifdef HAVE_IRDA
-#include <irobex.h>
+#include "irobex.h"
 #endif
 
 /*

@@ -31,7 +31,7 @@
 #ifndef OBEX_CONNECT_H
 #define OBEX_CONNECT_H
 
-#include <obex_main.h>
+#include "obex_main.h"
 
 gint obex_insert_connectframe(obex_t *self, obex_object_t *object);
 gint obex_parse_connect_header(obex_t *self, GNetBuf *msg);

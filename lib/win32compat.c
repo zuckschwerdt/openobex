@@ -2,7 +2,7 @@
  *
  * Filename:      win32compat.c
  * Version:       0.5
- * Description:   Functions used inly by win32
+ * Description:   Functions used only by win32
  * Status:        Experimental.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Sun Aug 06 10:22:00 2000
@@ -28,7 +28,7 @@
  *
  ********************************************************************/
 
-#include <config.h>
+#include "config.h"
 
 #include <stdarg.h>
 #include <stdio.h>

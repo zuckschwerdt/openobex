@@ -28,15 +28,15 @@
  *
  ********************************************************************/
 
-#include <assert.h>
-#include <config.h>
+#include "config.h"
+//#include <assert.h>
 
 #include <string.h>
 
-#include <obex_main.h>
-#include <obex_object.h>
-#include <obex_header.h>
-#include <obex_connect.h>
+#include "obex_main.h"
+#include "obex_object.h"
+#include "obex_header.h"
+#include "obex_connect.h"
 
 /*
  * Function obex_object_new (name, description)
@@ -532,6 +532,7 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 				(hi == OBEX_HDR_BODY_END) ) {
 				/* The body-header need special treatment */
 				if(obex_object_receive_body(object, msg, hi, source, len) < 0)
+
 					err = -1;
 				source = NULL;
 			}

@@ -33,14 +33,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-//#include <assert.h>
-//#include <sys/ioctl.h>
-//#include <sys/types.h>
-//#include <sys/socket.h>
 
-#include <obex_main.h>
-#include <obex_header.h>
-#include <obex_connect.h>
+#include "obex_main.h"
+#include "obex_header.h"
+#include "obex_connect.h"
 
 
 /*
