@@ -10,12 +10,14 @@ typedef struct ircp_server
 	obex_t *obexhandle;
 	gboolean finished;
 	gboolean success;
-	GString *currdir;
-	gchar *origdir;
+	gchar *inbox;
 	ircp_info_cb_t infocb;
+	gint fd;
+	gint dirdepth;
+
 } ircp_server_t;
 
-gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object);
+gint ircp_srv_receive(ircp_server_t *srv, obex_object_t *object, gboolean finished);
 gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object);
 
 ircp_server_t *ircp_srv_open(ircp_info_cb_t infocb);

@@ -2,6 +2,10 @@
 #include <openobex/obex.h>
 
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "ircp.h"
 #include "ircp_client.h"
@@ -9,8 +13,8 @@
 
 #include "dirtraverse.h"
 #include "debug.h"
+
 #ifdef DEBUG_TCP
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include <sys/socket.h>
@@ -19,16 +23,55 @@
 #include <netinet/in.h>
 #endif
 
+//
+// Add more data to stream.
+//
+static gint cli_fillstream(ircp_client_t *cli, obex_object_t *object)
+{
+	gint actual;
+	obex_headerdata_t hdd;
+		
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	
+	actual = read(cli->fd, cli->buf, STREAM_CHUNK);
+	
+	DEBUG(4, G_GNUC_FUNCTION "() Read %d bytes\n", actual);
+	
+	if(actual > 0) {
+		/* Read was ok! */
+		hdd.bs = cli->buf;
+		OBEX_ObjectAddHeader(cli->obexhandle, object, OBEX_HDR_BODY,
+				hdd, actual, OBEX_FL_STREAM_DATA);
+	}
+	else if(actual == 0) {
+		/* EOF */
+		hdd.bs = cli->buf;
+		close(cli->fd);
+		cli->fd = -1;
+		OBEX_ObjectAddHeader(cli->obexhandle, object, OBEX_HDR_BODY,
+				hdd, 0, OBEX_FL_STREAM_DATAEND);
+	}
+        else {
+		/* Error */
+		hdd.bs = NULL;
+		close(cli->fd);
+		cli->fd = -1;
+		OBEX_ObjectAddHeader(cli->obexhandle, object, OBEX_HDR_BODY,
+				hdd, 0, OBEX_FL_STREAM_DATA);
+	}
+
+	return actual;
+}
+
 
 //
+// Incoming event from OpenOBEX.
 //
-//
-void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp)
+static void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp)
 {
 	ircp_client_t *cli;
 
 	cli = OBEX_GetUserData(handle);
-//	DEBUG(4, G_GNUC_FUNCTION "\n");
 
 	switch (event)	{
 	case OBEX_EV_PROGRESS:
@@ -41,19 +84,26 @@ void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 			cli->success = FALSE;
 		cli->obex_rsp = obex_rsp;
 		break;
+	
 	case OBEX_EV_LINKERR:
 		cli->finished = 1;
 		cli->success = FALSE;
 		break;
+	
+	case OBEX_EV_STREAMEMPTY:
+		cli_fillstream(cli, object);
+		break;
+	
 	default:
+		DEBUG(1, G_GNUC_FUNCTION "() Unknown event %d\n", event);
 		break;
 	}
 }
 
 //
+// Do an OBEX request sync.
 //
-//
-gint cli_sync_request(ircp_client_t *cli, obex_object_t *object)
+static gint cli_sync_request(ircp_client_t *cli, obex_object_t *object)
 {
 	gint ret;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
@@ -63,13 +113,13 @@ gint cli_sync_request(ircp_client_t *cli, obex_object_t *object)
 
 	while(cli->finished == FALSE) {
 		ret = OBEX_HandleInput(cli->obexhandle, 20);
-		DEBUG(4, G_GNUC_FUNCTION "()ret = %d\n", ret);
+		DEBUG(4, G_GNUC_FUNCTION "() ret = %d\n", ret);
 
 		if (ret <= 0)
 			return -1;
 	}
 
-	DEBUG(4, G_GNUC_FUNCTION "() Done succes=%d\n", cli->success);
+	DEBUG(4, G_GNUC_FUNCTION "() Done success=%d\n", cli->success);
 
 	if(cli->success)
 		return 1;
@@ -86,8 +136,12 @@ ircp_client_t *ircp_cli_open(ircp_info_cb_t infocb)
 	ircp_client_t *cli;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	cli = g_malloc0(sizeof(ircp_client_t));
+	cli = g_new0(ircp_client_t, 1);
+	if(cli == NULL)
+		return NULL;
+
 	cli->infocb = infocb;
+	cli->fd = -1;
 
 #ifdef DEBUG_TCP
 	cli->obexhandle = OBEX_Init(OBEX_TRANS_INET, cli_obex_event, 0);
@@ -96,11 +150,19 @@ ircp_client_t *ircp_cli_open(ircp_info_cb_t infocb)
 #endif
 
 	if(cli->obexhandle == NULL) {
-		g_free(cli);
-		return NULL;
+		goto out_err;
 	}
 	OBEX_SetUserData(cli->obexhandle, cli);
+	
+	/* Buffer for body */
+	cli->buf = g_malloc(STREAM_CHUNK);
 	return cli;
+
+out_err:
+	if(cli->obexhandle != NULL)
+		OBEX_Cleanup(cli->obexhandle);
+	g_free(cli);
+	return NULL;
 }
 	
 //
@@ -112,6 +174,7 @@ void ircp_cli_close(ircp_client_t *cli)
 	g_return_if_fail(cli != NULL);
 
 	OBEX_Cleanup(cli->obexhandle);
+	g_free(cli->buf);
 	g_free(cli);
 }
 
@@ -186,9 +249,9 @@ gint ircp_cli_disconnect(ircp_client_t *cli)
 }
 
 //
+// Do an OBEX PUT.
 //
-//
-gint ircp_put_file(ircp_client_t *cli, gchar *localname, gchar *remotename)
+static gint ircp_put_file(ircp_client_t *cli, gchar *localname, gchar *remotename)
 {
 	obex_object_t *object;
 	int ret;
@@ -199,9 +262,15 @@ gint ircp_put_file(ircp_client_t *cli, gchar *localname, gchar *remotename)
 	g_return_val_if_fail(cli != NULL, -1);
 
 	object = build_object_from_file(cli->obexhandle, localname, remotename);
-
-	ret = cli_sync_request(cli, object);
-
+	
+	cli->fd = open(localname, O_RDONLY, 0);
+	if(cli->fd < 0)
+		ret = -1;
+	else
+		ret = cli_sync_request(cli, object);
+	
+	close(cli->fd);
+		
 	if(ret < 0)
 		cli->infocb(IRCP_EV_ERR, localname);
 	else
@@ -211,9 +280,9 @@ gint ircp_put_file(ircp_client_t *cli, gchar *localname, gchar *remotename)
 }
 
 //
+// Do OBEX SetPath
 //
-//
-gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
+static gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 {
 	obex_object_t *object;
 	obex_headerdata_t hdd;
@@ -223,7 +292,7 @@ gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 	gint ucname_len;
 	gint ret;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "() %s\n", name);
 
 	object = OBEX_ObjectNew(cli->obexhandle, OBEX_CMD_SETPATH);
 
@@ -231,8 +300,6 @@ gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 		setpath_nohdr_data[0] = 1;
 	}
 	else {
-		setpath_nohdr_data[0] = 2;		//Tell server to create dir if it does not exist.
-
 		ucname_len = strlen(name)*2 + 2;
 		ucname = g_malloc(ucname_len);
 		if(ucname == NULL) {
@@ -252,9 +319,9 @@ gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 }
 
 //
+// Callback from dirtraverse.
 //
-//
-gint ircp_visit(gint action, gchar *name, gchar *path, gpointer userdata)
+static gint ircp_visit(gint action, gchar *name, gchar *path, gpointer userdata)
 {
 	gchar *remotename;
 	gint ret = -1;
@@ -289,5 +356,40 @@ gint ircp_visit(gint action, gchar *name, gchar *path, gpointer userdata)
 //
 gint ircp_put(ircp_client_t *cli, gchar *name)
 {
-	return visit_all_files(name, ircp_visit, cli);
+	struct stat statbuf;
+	gchar *origdir;
+	gint ret;
+	
+	/* Remember cwd */
+	origdir = getcwd(NULL, 0);
+	if(origdir == NULL)
+		return -1;
+
+	if(stat(name, &statbuf) == -1) {
+		return -1;
+	}
+	
+	/* This is a directory. CD into it */
+	if(S_ISDIR(statbuf.st_mode)) {
+		gchar *newrealdir = NULL;
+		gchar *dirname;
+		
+		chdir(name);
+		name = ".";
+		
+		/* Get real name of new wd, extract last part of and do setpath to it */
+		newrealdir = getcwd(NULL, 0);
+		dirname = strrchr(newrealdir, '/') + 1;
+		if(strlen(dirname) != 0)
+			ircp_setpath(cli, dirname, FALSE);
+		
+		free(newrealdir);
+	}
+	
+	ret = visit_all_files(name, ircp_visit, cli);
+
+	chdir(origdir);
+	free(origdir);
+	return ret;
+
 }

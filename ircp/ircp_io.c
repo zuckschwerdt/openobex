@@ -3,81 +3,48 @@
 
 #include <fcntl.h>
 #include <string.h>
+#include <time.h>
 
 #include <glib.h>
 #include <openobex/obex.h>
 
 #include "debug.h"
 #include "ircp_io.h"
+
 //
-// Get the filesize.
+// Get some file-info. (size and lastmod)
 //
-static gint get_filesize(const char *filename)
+static gint get_fileinfo(const char *name, char *lastmod)
 {
 	struct stat stats;
-
-	stat(filename, &stats);
+	struct tm *tm;
+	
+	stat(name, &stats);
+	tm = gmtime(&stats.st_mtime);
+	g_snprintf(lastmod, 21, "%04d-%02d-%02dT%02d:%02d:%02dZ",
+			tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+			tm->tm_hour, tm->tm_min, tm->tm_sec);
 	return (gint) stats.st_size;
 }
 
 
 //
-// Read a file and alloc a buffer for it
-//
-guint8* easy_readfile(const char *filename, int *file_size)
-{
-	int actual;
-	int fd;
-	guint8 *buf;
-
-	*file_size = get_filesize(filename);
-	DEBUG(4, G_GNUC_FUNCTION "()name=%s, size=%d\n", filename, *file_size);
-	
-	// If the filesize is 0 we have allocate a dummy-buffer, because allocating 0
-	// bytes will give back NULL and that's the same as en error,
-	if(*file_size == 0) {
-		buf = g_malloc(1);
-		return buf;
-	}
-	
-		
-	fd = open(filename, O_RDONLY, 0);
-
-	if (fd == -1) {
-		return NULL;
-	}
-	
-	if(! (buf = g_malloc(*file_size)) )	{
-		return NULL;
-	}
-
-	actual = read(fd, buf, *file_size);
-	close(fd); 
-
-	*file_size = actual;
-	return buf;
-}
-
-
-//
-//
+// Create an object from a file. Attach some info-headers to it
 //
 obex_object_t *build_object_from_file(obex_t *handle, const gchar *localname, const gchar *remotename)
 {
 	obex_object_t *object = NULL;
 	obex_headerdata_t hdd;
 	guint8 *ucname;
-	gint ucname_len;
-	int file_size;
-	guint8 *buf;
-
-	buf = easy_readfile(localname, &file_size);
-	if(buf == NULL)
-		return NULL;
+	gint ucname_len, size;
+	gchar lastmod[21*2] = {"1970-01-01T00:00:00Z"};
+		
+	/* Get filesize and modification-time */
+	size = get_fileinfo(localname, lastmod);
 
 	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
 	if(object == NULL)
-		goto err;
+		return NULL;
 
 	ucname_len = strlen(remotename)*2 + 2;
 	ucname = g_malloc(ucname_len);
@@ -90,84 +57,80 @@ obex_object_t *build_object_from_file(obex_t *handle, const gchar *localname, co
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hdd, ucname_len, 0);
 	g_free(ucname);
 
-	hdd.bq4 = file_size;
+	hdd.bq4 = size;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hdd, sizeof(guint32), 0);
 
 #if 0
-	/* Optional header for win95 irxfer, allows date to be set on file */
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_TIME2,
-				(obex_headerdata_t) (guint32) stats.st_mtime,
-				sizeof(guint32), 0);
+	/* Win2k excpects this header to be in unicode. I suspect this in
+	   incorrect so this will have to wait until that's investigated */
+	hdd.bs = lastmod;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_TIME, hdd, strlen(lastmod)+1, 0);
 #endif
-
-	hdd.bs = buf;
+		
+	hdd.bs = NULL;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY,
-				hdd, file_size, 0);
+				hdd, 0, OBEX_FL_STREAM_START);
 
-	g_free(buf);
+	DEBUG(4, G_GNUC_FUNCTION "() Lastmod = %s\n", lastmod);
 	return object;
 
 err:
-	g_free(buf);
 	if(object != NULL)
 		OBEX_ObjectDelete(handle, object);
 	return NULL;
 }
 
 //
-// Check for dangerous filenames (TODO: Make better)
+// Check for dangerous filenames.
 //
 static gboolean ircp_nameok(const gchar *name)
 {
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	
+	/* No abs paths */
 	if(name[0] == '/')
 		return FALSE;
 
-	if(strlen(name) == 3 && name[0] == '.' && name[1] == '.' && name[2] == '/')
-		return FALSE;
-
+	if(strlen(name) >= 3) {
+		/* "../../vmlinuz" */
+		if(name[0] == '.' && name[1] == '.' && name[2] == '/')
+			return FALSE;
+		/* "dir/../../../vmlinuz" */
+		if(strstr(name, "/../") != NULL)
+			return FALSE;
+	}
 	return TRUE;
 }
 	
-
-
 //
-// Save a file...
+// Open a file, but do some sanity-checking first.
 //
-gint ircp_save_file(const gchar *path, const gchar *name, const gchar *body, guint len)
+gint ircp_open_safe(const gchar *path, const gchar *name)
 {
 	GString *diskname;
-	gint fd, ret;
+	gint fd;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	
-	//Check for dangerous filenames
+	/* Check for dangerous filenames */
 	if(ircp_nameok(name) == FALSE)
 		return -1;
 
 	diskname = g_string_new(path);
+	if(diskname == NULL)
+		return -1;
 
+	//TODO! Rename file if already exist.
+	
 	if(diskname->len > 0)
 		g_string_append(diskname, "/");
 	g_string_append(diskname, name);
 
-	DEBUG(4, G_GNUC_FUNCTION "() Going to save with name %s\n", diskname->str);
+	DEBUG(4, G_GNUC_FUNCTION "() Creating file %s\n", diskname->str);
 
 	fd = open(diskname->str, O_RDWR | O_CREAT | O_TRUNC, DEFFILEMODE);
-
-	if ( fd < 0) {
-		ret = -1;
-		goto out;
-	}
-
-	ret = write(fd, body, len);
-	close(fd);
-
-	DEBUG( 4, G_GNUC_FUNCTION "() Wrote %s (%d bytes)\n", diskname->str, ret);
-
-out:
 	g_string_free(diskname, TRUE);
-	return ret;
+	return fd;
 }
 
 //

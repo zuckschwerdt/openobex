@@ -11,6 +11,8 @@ typedef struct ircp_client
 	gboolean success;
 	gint obex_rsp;
 	ircp_info_cb_t infocb;
+	gint fd;
+	guint8 *buf;
 } ircp_client_t;
 
 

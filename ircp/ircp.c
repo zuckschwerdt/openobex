@@ -35,8 +35,8 @@ void ircp_info_cb(gint event, gchar *param)
 	case IRCP_EV_SENDING:
 		g_print("Sending %s...", param);
 		break;
-	case IRCP_EV_RECEIVED:
-		g_print("Recieved %s, saving...", param);
+	case IRCP_EV_RECEIVING:
+		g_print("Receiving %s...", param);
 		break;
 
 	case IRCP_EV_LISTENING:
@@ -78,7 +78,9 @@ int main(int argc, char *argv[])
 			inbox = ".";
 
 		ircp_srv_recv(srv, inbox);
-
+#ifdef DEBUG_TCP
+		sleep(2);
+#endif
 		ircp_srv_close(srv);
 	}
 		
@@ -110,4 +112,3 @@ int main(int argc, char *argv[])
 	}
 	return 0;
 }
-	

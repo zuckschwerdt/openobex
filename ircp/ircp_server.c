@@ -1,5 +1,6 @@
 #include <openobex/obex.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "ircp.h"
 #include "ircp_io.h"
@@ -8,17 +9,21 @@
 
 
 //
-//
+// Incoming event from OpenOBEX
 //
 void srv_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rsp)
 {
 	ircp_server_t *srv;
 	int ret;
-	
+		
 	srv = OBEX_GetUserData(handle);
 //	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	switch (event)	{
+	case OBEX_EV_STREAMFULL:
+		DEBUG(4, G_GNUC_FUNCTION "() Time to read some data from stream\n");
+		ret = ircp_srv_receive(srv, object, FALSE);
+		break;
 	case OBEX_EV_PROGRESS:
 		break;
 	case OBEX_EV_REQ:
@@ -35,7 +40,7 @@ void srv_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 			break;
 
 		case OBEX_CMD_PUT:
-			ret = ircp_srv_got_file(srv, object);
+			ret = ircp_srv_receive(srv, object, TRUE);
 			break;
 
 		case OBEX_CMD_SETPATH:
@@ -54,17 +59,28 @@ void srv_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 		break;
 
 	case OBEX_EV_REQHINT:
+		/* An incoming request is about to come. Accept it! */
 		switch(obex_cmd) {
 		case OBEX_CMD_PUT:
+			DEBUG(4, G_GNUC_FUNCTION "() Going to turn streaming on!\n");
+			/* Set response to ok! */
+			OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
+			/* Turn streaming on */
+			OBEX_ObjectReadStream(handle, object, NULL);
+			break;
+		
 		case OBEX_CMD_SETPATH:
 		case OBEX_CMD_CONNECT:
 		case OBEX_CMD_DISCONNECT:
+			/* Set response to ok! */
 			OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 			break;
+		
 		default:
 			DEBUG(0, G_GNUC_FUNCTION "() Skipping unsupported command:%02x\n", obex_cmd);
 			OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
 			break;
+		
 		}
 		break;
 
@@ -103,7 +119,7 @@ gint ircp_srv_sync_wait(ircp_server_t *srv)
 }
 
 //
-//
+// Change current dir after some sanity-checking
 //
 gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 {
@@ -139,40 +155,32 @@ gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 
 	// If bit 0 is set we shall go up
 	if(nonhdr_data[0] & 1) {
-		gchar *lastslash;
-
-		if(strcmp(srv->currdir->str, srv->origdir) == 0) {
-			DEBUG(0, G_GNUC_FUNCTION "() Trying to go above inbox\n");
-			srv->infocb(IRCP_EV_ERRMSG, "Client trying to go above inbox!\n");
+		/* Cannot cd above inbox */
+		if(srv->dirdepth == 0)
 			goto out;
-		}
+		
+		if(chdir("..") == -1)
+			goto out;
 
-		// Find last / in filename and remove enything after it.
-		lastslash = strrchr(srv->currdir->str, '/');
-		if(lastslash == NULL)
-			ret = -1;
-		else {
-			g_string_truncate(srv->currdir, (lastslash- srv->currdir->str));
-			ret = 1;
-		}		
+		srv->dirdepth--;
 	}
 	else {
 		if(name == NULL)
 			goto out;
+		
 		// A setpath with empty name meens "goto root"
 		if(strcmp(name, "") == 0) {
-			g_string_assign(srv->currdir, srv->origdir);
+			if(chdir(srv->inbox) == -1)
+				goto out;
+			srv->dirdepth = 0;
 		}
 		else {
 			DEBUG(4, G_GNUC_FUNCTION "() Going down to %s\n", name);
-			// We could use the "create if needed" bit that the standard describes for setpath
-			// but irftp in Win2K does not use this bit. Stupid....
-
-			if(ircp_checkdir(srv->currdir->str, name, CD_CREATE) < 0)
+			if(ircp_checkdir("", name, CD_CREATE) < 0)
 				goto out;
-			g_string_append(srv->currdir , "/");
-			g_string_append(srv->currdir , name);
-			DEBUG(4, G_GNUC_FUNCTION "() New directory = %s\n", srv->currdir->str);
+			if(chdir(name) == -1)
+				goto out;
+			srv->dirdepth++;		
 		}
 	}
 				
@@ -187,25 +195,19 @@ out:
 
 
 //
-// Extract interesting things from object and save to disk.
+// Open a file for receivning
 //
-gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object)
+static gint new_file(ircp_server_t *srv, obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	guint8 hi;
 	gint hlen;
-	const guint8 *body = NULL;
-	gint body_len = 0;
 	gchar *name = NULL;
-	int ret = -1;
-	GString *fullname;
+	gint ret = -1;
 
+	/* First iterate through recieved header to find name */
 	while(OBEX_ObjectGetNextHeader(srv->obexhandle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
-		case OBEX_HDR_BODY:
-			body = hv.bs;
-			body_len = hlen;
-			break;
 		case OBEX_HDR_NAME:
 			if( (name = g_malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(name, hv.bs, hlen);
@@ -215,33 +217,64 @@ gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object)
 			DEBUG(4, G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
 		}
 	}
-	if(body == NULL)	{
-		DEBUG(0, "Got a PUT without a body\n");
-		goto out;
-	}
 	if(name == NULL)	{
-		DEBUG(0, "Got a PUT without a name\n");
+		DEBUG(0, "Got a PUT without a name. Refusing\n");
+		/* Send back error */
+		OBEX_ObjectSetRsp(object, OBEX_RSP_BAD_REQUEST, OBEX_RSP_BAD_REQUEST);
+		srv->infocb(IRCP_EV_ERR, "");
 		goto out;
 	}
 
-	fullname = g_string_new(srv->currdir->str);
-	g_string_append(fullname, "/");
-	g_string_append(fullname, name);
-
-	srv->infocb(IRCP_EV_RECEIVED, fullname->str);	
-	g_string_free(fullname, TRUE);
-
-	ret = ircp_save_file(srv->currdir->str, name, body, body_len);
-
-	if(ret < 0)
-		srv->infocb(IRCP_EV_ERR, "");
-	else
-		srv->infocb(IRCP_EV_OK, "");
+	srv->infocb(IRCP_EV_RECEIVING, name);	
+	srv->fd = ircp_open_safe("", name);
+	
+	ret = srv->fd;
 
 out:	g_free(name);
 	return ret;
 }
+
+//
+// Extract interesting things from object and save to disk.
+//
+gint ircp_srv_receive(ircp_server_t *srv, obex_object_t *object, gboolean finished)
+{
+	const guint8 *body = NULL;
+	gint body_len = 0;
+
+	if(srv->fd < 0 && finished == FALSE) {
+		/* Not receiving a file */
+		if(new_file(srv, object) < 0)
+			return 1;
+	}
 	
+	if(finished == TRUE) {
+        	/* Recieve done! */
+		DEBUG(4, G_GNUC_FUNCTION "() Done!...\n");
+		return 1;		
+	}
+	else if (srv->fd > 0) {
+		/* fd is valid. We are currently receiving a file */
+		body_len = OBEX_ObjectReadStream(srv->obexhandle, object, &body);
+		DEBUG(4, G_GNUC_FUNCTION "() Got %d bytes of stream-data\n", body_len);
+		
+		if(body_len < 0) {
+			/* Error */
+		}
+		else if(body_len == 0) {
+			/* EOS */
+			close(srv->fd);
+	        	srv->fd = -1;
+			srv->infocb(IRCP_EV_OK, "");
+		}
+		else {
+			if(srv->fd > 0)
+				write(srv->fd, body, body_len);
+		}
+		return 1;
+	}
+	return -1;
+}	
 
 //
 // Create an ircp server
@@ -251,13 +284,12 @@ ircp_server_t *ircp_srv_open(ircp_info_cb_t infocb)
 	ircp_server_t *srv;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	srv = g_malloc0(sizeof(ircp_server_t));
+	srv = g_new0(ircp_server_t, 1);
 	if(srv == NULL)
 		return NULL;
 
+	srv->fd = -1;
 	srv->infocb = infocb;
-
-	srv->currdir = g_string_new("");
 
 #ifdef DEBUG_TCP
 	srv->obexhandle = OBEX_Init(OBEX_TRANS_INET, srv_obex_event, 0);
@@ -282,7 +314,6 @@ void ircp_srv_close(ircp_server_t *srv)
 	g_return_if_fail(srv != NULL);
 
 	OBEX_Cleanup(srv->obexhandle);
-	g_string_free(srv->currdir, TRUE);
 	g_free(srv);
 }
 
@@ -291,17 +322,27 @@ void ircp_srv_close(ircp_server_t *srv)
 //
 gint ircp_srv_recv(ircp_server_t *srv, gchar *inbox)
 {
+	gint ret;
+	
 	if(ircp_checkdir("", inbox, CD_ALLOWABS) < 0) {
 		srv->infocb(IRCP_EV_ERRMSG, "Specified desination directory does not exist.");
 		return -1;
 	}
 
+	/* Start receiving files in inbox */
+	if(chdir(inbox) == -1)
+		return -1;
+	srv->dirdepth = 0;
+			
 	if(OBEX_ServerRegister(srv->obexhandle, "OBEX:IrXfer") < 0)
 		return -1;
 	srv->infocb(IRCP_EV_LISTENING, "");
+	srv->inbox = inbox;
 	
-	srv->origdir = inbox;
-	g_string_assign(srv->currdir, inbox);
-
-	return ircp_srv_sync_wait(srv);
+	ret = ircp_srv_sync_wait(srv);
+	
+	/* Go back to inbox */
+	chdir(inbox);
+	
+	return ret;
 }
