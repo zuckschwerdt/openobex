@@ -30,9 +30,22 @@ void ircp_info_cb(gint event, gchar *param)
 	case IRCP_EV_SENDING:
 		g_print("Sending %s...", param);
 		break;
-	case IRCP_EV_RECIEVED:
-		g_print("Recieved %s\n", param);
+	case IRCP_EV_RECEIVED:
+		g_print("Recieved %s, saving...", param);
 		break;
+
+	case IRCP_EV_LISTENING:
+		g_print("Waiting for incoming connection\n");
+		break;
+
+	case IRCP_EV_CONNECTIND:
+		g_print("Incoming connection\n");
+		break;
+	case IRCP_EV_DISCONNECTIND:
+		g_print("Disconnecting\n");
+		break;
+
+
 	}
 }
 

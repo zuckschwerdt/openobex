@@ -12,6 +12,7 @@ typedef struct ircp_server
 	gboolean success;
 	GString *currdir;
 	gchar *origdir;
+	ircp_info_cb_t infocb;
 } ircp_server_t;
 
 gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object);

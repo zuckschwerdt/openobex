@@ -23,12 +23,28 @@ void srv_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 		break;
 	case OBEX_EV_REQ:
 		DEBUG(4, G_GNUC_FUNCTION "() Incoming request %02x, %d\n", obex_cmd, OBEX_CMD_SETPATH);
-		if(obex_cmd == OBEX_CMD_PUT)
-			ret = ircp_srv_got_file(srv, object);
-		else if(obex_cmd == OBEX_CMD_SETPATH)
-			ret = ircp_srv_setpath(srv, object);
-		else
+
+		switch(obex_cmd) {
+		case OBEX_CMD_CONNECT:
+			srv->infocb(IRCP_EV_CONNECTIND, "");	
 			ret = 1;
+			break;
+		case OBEX_CMD_DISCONNECT:
+			srv->infocb(IRCP_EV_DISCONNECTIND, "");	
+			ret = 1;
+			break;
+
+		case OBEX_CMD_PUT:
+			ret = ircp_srv_got_file(srv, object);
+			break;
+
+		case OBEX_CMD_SETPATH:
+			ret = ircp_srv_setpath(srv, object);
+			break;
+		default:
+			ret = 1;
+			break;
+		}
 
 		if(ret < 0) {
 			srv->finished = TRUE;
@@ -46,7 +62,7 @@ void srv_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 			OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 			break;
 		default:
-			DEBUG(0, G_GNUC_FUNCTION "() Skipping unsopported command:%02x\n", obex_cmd);
+			DEBUG(0, G_GNUC_FUNCTION "() Skipping unsupported command:%02x\n", obex_cmd);
 			OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
 			break;
 		}
@@ -86,7 +102,6 @@ gint ircp_srv_sync_wait(ircp_server_t *srv)
 		return -1;
 }
 
-
 //
 //
 //
@@ -116,11 +131,11 @@ gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 			}
 			break;
 		default:
-			DEBUG(0, G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
+			DEBUG(2, G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
 		}
 	}
 
-	DEBUG(0, G_GNUC_FUNCTION "() Got setpath flags=%d, name=%s\n", nonhdr_data[0], name);
+	DEBUG(2, G_GNUC_FUNCTION "() Got setpath flags=%d, name=%s\n", nonhdr_data[0], name);
 
 	// If bit 0 is set we shall go up
 	if(nonhdr_data[0] & 1) {
@@ -179,6 +194,7 @@ gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object)
 	gint body_len = 0;
 	gchar *name = NULL;
 	int ret = -1;
+	GString *fullname;
 
 	while(OBEX_ObjectGetNextHeader(srv->obexhandle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
@@ -192,7 +208,7 @@ gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object)
 			}
 			break;
 		default:
-			DEBUG(0, G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
+			DEBUG(4, G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
 		}
 	}
 	if(body == NULL)	{
@@ -204,7 +220,20 @@ gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object)
 		goto out;
 	}
 
+	fullname = g_string_new(srv->currdir->str);
+	g_string_append(fullname, "/");
+	g_string_append(fullname, name);
+
+	srv->infocb(IRCP_EV_RECEIVED, fullname->str);	
+	g_string_free(fullname, TRUE);
+
 	ret = ircp_save_file(srv->currdir->str, name, body, body_len);
+
+	if(ret < 0)
+		srv->infocb(IRCP_EV_ERR, "");
+	else
+		srv->infocb(IRCP_EV_OK, "");
+
 
 out:	g_free(name);
 	return ret;
@@ -220,6 +249,10 @@ ircp_server_t *ircp_srv_open(ircp_info_cb_t infocb)
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	srv = g_malloc0(sizeof(ircp_server_t));
+	if(srv == NULL)
+		return NULL;
+
+	srv->infocb = infocb;
 
 	srv->currdir = g_string_new("");
 
@@ -257,7 +290,8 @@ gint ircp_srv_recv(ircp_server_t *srv, gchar *inbox)
 {
 	if(OBEX_ServerRegister(srv->obexhandle, "OBEX:IrXfer") < 0)
 		return -1;
-
+	srv->infocb(IRCP_EV_LISTENING, "");
+	
 	srv->origdir = inbox;
 	g_string_assign(srv->currdir, inbox);
 
