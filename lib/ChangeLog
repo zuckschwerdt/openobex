@@ -2,6 +2,7 @@
 
 	* Remove GLib dependencies.
 	* Remove default prefix statement.
+	* Fix workaround for Bluetooth support, again.
 
 2002-10-25  Marcel Holtmann  <marcel@holtmann.org>
 
