@@ -111,15 +111,13 @@ int obex_delete_socket(obex_t *self, int fd)
 
 
 /*
- * Function obex_get_last_response_message (self)
+ * Function obex_response_to_string(rsp)
  *
  *    Return a string of an OBEX-response
  *
  */
-char *obex_get_response_message(obex_t *self, int rsp)
+char *obex_response_to_string(int rsp)
 {
-	obex_return_val_if_fail(self != NULL, NULL);
-
 	switch (rsp) {
 	case OBEX_RSP_CONTINUE:
 		return "Continue";

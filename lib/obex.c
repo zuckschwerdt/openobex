@@ -818,6 +818,19 @@ int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
 }
 
 /**
+ * OBEX_ResponseToString - Return a human understandable string from a response-code.
+ * @rsp: Response code.
+ *
+ * The returned char must not be freed. Returns %NULL on error.
+ */
+char *OBEX_ResponseToString(int rsp)
+{
+	DEBUG(4, __FUNCTION__ "()\n");
+
+	return obex_response_to_string(rsp);
+}
+
+/**
  * OBEX_GetResponseMessage - Return a human understandable string from a response-code.
  * @self: OBEX handle
  * @rsp: Response code.
@@ -828,8 +841,7 @@ char* OBEX_GetResponseMessage(obex_t *self, int rsp)
 {
 	DEBUG(4, __FUNCTION__ "()\n");
 
-	obex_return_val_if_fail(self != NULL, NULL);
-	return obex_get_response_message(self, rsp);
+	return obex_response_to_string(rsp);
 }
 
 /* ---------------------------------------------------------------- */

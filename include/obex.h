@@ -97,6 +97,14 @@ int OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const uint8_t **b
 int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size);
 int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size);
 
+char *OBEX_ResponseToString(int rsp);
+
+/*
+ * This function is deprecated and will be removed in OpenOBEX 1.1.0
+ *
+ * Please use the OBEX_ResponseToString instead.
+ *
+ */
 char* OBEX_GetResponseMessage(obex_t *self, int rsp);
 
 /*

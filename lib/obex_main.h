@@ -153,6 +153,6 @@ void obex_response_request(obex_t *self, uint8_t opcode);
 int obex_data_request(obex_t *self, GNetBuf *msg, int opcode);
 int obex_cancelrequest(obex_t *self, int nice);
 
-char *obex_get_response_message(obex_t *self, int rsp);
+char *obex_response_to_string(int rsp);
 
 #endif
