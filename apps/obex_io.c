@@ -88,7 +88,7 @@ guint8* easy_readfile(char *filename, int *file_size)
 
 	*file_size = get_filesize(filename);
 	g_print("name=%s, size=%d\n", filename, *file_size);
-	fd = open(filename, O_RDONLY, 0);
+	fd = open(filename, O_RDONLY | O_BINARY, 0);
 	if (fd == -1) {
 		return NULL;
 	}
@@ -100,7 +100,7 @@ guint8* easy_readfile(char *filename, int *file_size)
 	actual = read(fd, buf, *file_size);
 	close(fd); 
 
-#ifndef _WIN32
+#ifdef _WIN32
 	if(actual != *file_size) {
 		g_free(buf);
 		buf = NULL;
