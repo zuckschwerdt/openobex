@@ -43,6 +43,8 @@
 
 static void cobex_cleanup(struct cobex_context *gt, gboolean force);
 
+/*#define TTBT "AT*TTBT=0001EC4AF6E7\r"*/
+
 //
 // Send an AT-command and return back one line of answer if any.
 // To read a line without sending anything set cmd as NULL
@@ -159,7 +161,7 @@ static gint cobex_init(struct cobex_context *gt)
 
 	tcgetattr(gt->ttyfd, &gt->oldtio);
 	bzero(&gt->newtio, sizeof(struct termios));
-	gt->newtio.c_cflag = B115200 | CS8 | CREAD;
+	gt->newtio.c_cflag = B115200 | CS8 | CREAD | CRTSCTS;
 	gt->newtio.c_iflag = IGNPAR;
 	gt->newtio.c_oflag = 0;
 	tcflush(gt->ttyfd, TCIFLUSH);
@@ -175,6 +177,19 @@ static gint cobex_init(struct cobex_context *gt)
 		goto err;
 	}
 
+#ifdef TTBT
+	/* Special BT-mode */
+	if(cobex_do_at_cmd(gt, TTBT, rspbuf, sizeof(rspbuf), 10) < 0) {
+		printf("Comm-error sending AT*TTBT\n");
+		goto err;
+	}
+
+	if(strcasecmp("OK", rspbuf) != 0)       {
+		printf("Error doing AT*TTBT (%s)\n", rspbuf);
+		goto err;
+	}
+#endif
+	
 	if(strcasecmp("OK", rspbuf) != 0)	{
 		printf("Error doing ATZ (%s)\n", rspbuf);
 		goto err;
@@ -276,6 +291,15 @@ gint cobex_disconnect(obex_t *handle, gpointer userdata)
 		else if(strcasecmp(rspbuf, "OK") != 0)
 			g_print("Excpected OK after OBEX diconnect got %s\n", rspbuf);
 	
+#ifdef TTBT
+		sleep(2);
+		if(cobex_do_at_cmd(gt, "---", rspbuf, sizeof(rspbuf), 5) < 0)
+			g_print("Comm-error Sending ---\n");
+		else if(strcasecmp(rspbuf, "DISCONNECT") != 0)
+			 g_print("Error waiting for DISCONNECT (%s)\n", rspbuf);
+		sleep(2);
+#endif
+
 	}
 	
 	cobex_cleanup(gt, FALSE);
