@@ -41,12 +41,17 @@ struct cobex_context
 	gboolean r320;
 };
 
-struct cobex_context *cobex_setup(const gchar *port, gboolean r320);
+/* User function */
+struct cobex_context *cobex_open(const gchar *port, gboolean r320);
+void cobex_close(struct cobex_context *gt);
+
+/* Callbacks */
+gint cobex_handle_input(obex_t *handle, gpointer userdata);
+gint cobex_write(obex_t *self, gpointer userdata, guint8 *buffer, gint length);
+gint cobex_connect(obex_t *handle, gpointer userdata);
+gint cobex_disconnect(obex_t *handle, gpointer userdata);
+
 void cobex_cleanup(struct cobex_context *gt, gboolean force);
 
-gint cobex_handle_input(obex_t *handle);
-gint cobex_write(obex_t *self, guint8 *buffer, gint length);
-gint cobex_connect(obex_t *handle);
-gint cobex_disconnect(obex_t *handle);
 
 #endif

@@ -45,29 +45,6 @@
 #include "obex_test.h"
 
 //
-// Called when more data is needed.
-//
-gint cobex_handle_input(obex_t *handle)
-{
-	int actual;
-	struct context *gt_main;
-	struct cobex_context *gt;
-
-	printf(G_GNUC_FUNCTION "()\n");
-
-	gt_main = OBEX_GetUserData(handle);
-	gt = gt_main->cobex_gt;
-
-	actual = read(gt->ttyfd, &gt->inputbuf, sizeof(gt->inputbuf));
-	g_print(__FUNCTION__ "() Read %d bytes\n", actual);
-	if(actual <= 0)
-		return actual;
-	OBEX_CustomDataFeed(handle, gt->inputbuf, actual);
-	return actual;
-}
-
-
-//
 //
 //
 int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
@@ -176,7 +153,6 @@ gint cobex_init(struct cobex_context *gt)
 	tcflush(gt->ttyfd, TCIFLUSH);
 	tcsetattr(gt->ttyfd, TCSANOW, &gt->newtio);
 
-
 	// If we don't speak to an R320s we are happy here.
 	if(!gt->r320)
 		return 1;
@@ -222,19 +198,43 @@ void cobex_cleanup(struct cobex_context *gt, gboolean force)
 	gt->ttyfd = -1;
 }
 
+//
+// Set up cable OBEX. if r320 is true we will do some magic
+// AT-commands that puts an R320s phone in OBEX mode at connect-time.
+//
+struct cobex_context * cobex_open(const gchar *port, gboolean r320)
+{
+	struct cobex_context *gt;
+	gt = g_malloc0(sizeof(struct cobex_context));
+	if (gt == NULL)
+		return NULL;
+	gt->ttyfd = -1;
+	gt->portname = port;
+	gt->r320 = r320;
+	return gt;
+}
+
+//
+//
+//
+void cobex_close(struct cobex_context *gt)
+{
+	g_free(gt);
+}
+	
 
 //
 // Do transport connect or listen
 //
-gint cobex_connect(obex_t *handle)
+gint cobex_connect(obex_t *handle, gpointer userdata)
 {
-	struct context *gt_main;
+//	struct context *gt_main;
 	struct cobex_context *gt;
 
 	printf(G_GNUC_FUNCTION "()\n");
 	
-	gt_main = OBEX_GetUserData(handle);
-	gt = gt_main->cobex_gt;
+//	gt_main = OBEX_GetUserData(handle);
+	gt = userdata;
 
 	if(gt->ttyfd >= 0)	{
 		printf(G_GNUC_FUNCTION "() fd already exist. Using it\n");
@@ -249,14 +249,12 @@ gint cobex_connect(obex_t *handle)
 //
 // Do transport disconnect.
 //
-gint cobex_disconnect(obex_t *handle)
+gint cobex_disconnect(obex_t *handle, gpointer userdata)
 {
-	struct context *gt_main;
 	struct cobex_context *gt;
 
 	printf(G_GNUC_FUNCTION "()\n");
-	gt_main = OBEX_GetUserData(handle);
-	gt = gt_main->cobex_gt;
+	gt = userdata;
 
 	cobex_cleanup(gt, FALSE);
 	return 1;
@@ -265,15 +263,13 @@ gint cobex_disconnect(obex_t *handle)
 //
 //  Called from OBEX-lib when data needs to be written
 //
-gint cobex_write(obex_t *handle, guint8 *buffer, gint length)
+gint cobex_write(obex_t *handle, gpointer userdata, guint8 *buffer, gint length)
 {
-	struct context *gt_main;
 	struct cobex_context *gt;
 	int actual;
 
 	printf(G_GNUC_FUNCTION "()\n");
-	gt_main = OBEX_GetUserData(handle);
-	gt = gt_main->cobex_gt;
+	gt = userdata;
 
 	actual = write(gt->ttyfd, buffer, length);
 	g_print(G_GNUC_FUNCTION "() Wrote %d bytes (expected %d)\n", actual, length);
@@ -281,18 +277,20 @@ gint cobex_write(obex_t *handle, guint8 *buffer, gint length)
 }
 
 //
-// Set up cable OBEX. if r320 is true we will do some magic
-// AT-commands that puts an R320s phone in OBEX mode at connect-time.
+// Called when more data is needed.
 //
-struct cobex_context * cobex_setup(const gchar *port, gboolean r320)
+gint cobex_handle_input(obex_t *handle, gpointer userdata)
 {
+	int actual;
 	struct cobex_context *gt;
-	gt = g_malloc0(sizeof(struct cobex_context));
-	if (gt == NULL)
-		return NULL;
-	gt->ttyfd = -1;
-	gt->portname = port;
-	gt->r320 = r320;
-	return gt;
 
+//	printf(G_GNUC_FUNCTION "()\n");
+	gt = userdata;
+
+	actual = read(gt->ttyfd, &gt->inputbuf, sizeof(gt->inputbuf));
+	if(actual <= 0)
+		return actual;
+	g_print(__FUNCTION__ "() Read %d bytes\n", actual);
+	OBEX_CustomDataFeed(handle, gt->inputbuf, actual);
+	return actual;
 }

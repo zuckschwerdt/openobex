@@ -163,10 +163,10 @@ int main (int argc, char *argv[])
 		else
 			g_print("OBEX on %s!\n", port);
 
-		global_context.cobex_gt = cobex_setup(port, r320);
+		custfunc.userdata = cobex_open(port, r320);
 
-		if(global_context.cobex_gt == NULL) {
-			g_print("cobex_setup() failed\n");
+		if(custfunc.userdata == NULL) {
+			g_print("cobex_open() failed\n");
 			return -1;
 		}
 
@@ -257,6 +257,10 @@ int main (int argc, char *argv[])
 				printf("Unknown command %s\n", cmd);
 		}
 	}
+	if(cobex)
+		cobex_close(custfunc.userdata);
+
+
 	return 0;
 }
 
