@@ -1,79 +1,48 @@
+dnl
+dnl  $Id$
+dnl
 dnl Process this file with autoconf to produce a configure script.
-builtin(include, irda-check.m4)dnl
+dnl
 
-AC_INIT(src/irobex.c)
-AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(openobex)
+AC_INIT(src/obex.c)
 
-dnl Checks for programs.
-AC_PROG_CC
-AC_PROG_MAKE_SET
+AC_CANONICAL_SYSTEM
+AC_CANONICAL_HOST
 
-dnl Checks for libraries.
-AM_PATH_GLIB(1.2.0)
+OBEX_MAJOR_VERSION=1
+OBEX_MINOR_VERSION=0
+OBEX_MICRO_VERSION=0
 
-dnl Checks for header files.
-AC_HEADER_STDC
-
-dnl AC_CONFIG_HEADER
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-
-dnl Checks for library functions.
-IRDA_CHECK
-
-dnl Use -Wall if we have gcc, and use -ansi -pedantic if ansi is enabled.
-changequote(,)dnl
-if test "x$GCC" = "xyes"; then
-  case " $CFLAGS " in
-  *[\ \	]-Wall[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wall" ;;
-  esac
-
-  if test "x$enable_ansi" = "xyes"; then
-    case " $CFLAGS " in
-    *[\ \	]-ansi[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -ansi" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-pedantic[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -pedantic" ;;
-    esac
-  fi
-fi
-changequote([,])dnl
-
-OBEX_MAJOR_VERSION=0
-OBEX_MINOR_VERSION=9
-OBEX_MICRO_VERSION=8
 OBEX_INTERFACE_AGE=0
 OBEX_BINARY_AGE=0
+
 OBEX_VERSION=$OBEX_MAJOR_VERSION.$OBEX_MINOR_VERSION.$OBEX_MICRO_VERSION
 
 AC_SUBST(OBEX_VERSION)
 
-VERSION=$OBEX_VERSION
-PACKAGE=openobex
+AM_INIT_AUTOMAKE(openobex, $OBEX_VERSION)
+AM_CONFIG_HEADER(config.h)
 
-dnl libtool versioning
+AC_PREFIX_DEFAULT(/usr)
+
+AC_PROG_CC
+AC_PROG_INSTALL
+AM_PROG_LIBTOOL
+
 LT_RELEASE=$OBEX_MAJOR_VERSION.$OBEX_MINOR_VERSION
 LT_CURRENT=`expr $OBEX_MICRO_VERSION - $OBEX_INTERFACE_AGE`
 LT_REVISION=$OBEX_INTERFACE_AGE
 LT_AGE=`expr $OBEX_BINARY_AGE - $OBEX_INTERFACE_AGE`
+
 AC_SUBST(LT_RELEASE)
 AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
-dnl Initialize libtool
-AM_PROG_LIBTOOL
+AM_PATH_GLIB(1.2.0)
 
-AC_OUTPUT([
-openobex.spec
-Makefile
-openobex-config
-src/Makefile
-doc/Makefile],[case "$CONFIG_FILES" in
-*openobex-config*)chmod +x openobex-config;;
-esac])
+IRDA_CHECK
+BLUETOOTH_CHECK
+
+AC_OUTPUT([Makefile m4macros/Makefile src/Makefile doc/Makefile
+		openobex-config openobex.spec])

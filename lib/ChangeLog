@@ -1,3 +1,9 @@
+2002-10-11  Marcel Holtmann  <marcel@holtmann.org>
+
+	* Cleanup of autoconf/automake stuff.
+	* Support for Bluetooth transport layer.
+	* Bump version number to 1.0.0
+
 2001-02-27  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Added a patch from Jean:
