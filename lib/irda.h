@@ -26,7 +26,7 @@
 #define IRDA_H
 
 #include <sys/types.h>
-#include <stdint.h>
+#include <inttypes.h>
 
 /* Hint bit positions for first hint byte */
 #define HINT_PNP         0x01

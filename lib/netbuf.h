@@ -37,7 +37,7 @@
 #ifndef G_NETBUF_H
 #define G_NETBUF_H
 
-#include <stdint.h>
+#include <inttypes.h>
 
 typedef struct _slist_t{
 	void		*data;

@@ -30,7 +30,7 @@
 #ifndef OBEX_H
 #define OBEX_H
 
-#include <stdint.h>
+#include <inttypes.h>
 
 #ifdef _WIN32
 #include <winsock.h>

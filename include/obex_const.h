@@ -30,7 +30,7 @@
 #ifndef OBEX_CONST_H
 #define OBEX_CONST_H
 
-#include <stdint.h>
+#include <inttypes.h>
 
 typedef union {
 	uint32_t bq4;
