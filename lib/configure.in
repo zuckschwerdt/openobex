@@ -1,0 +1,79 @@
+dnl Process this file with autoconf to produce a configure script.
+builtin(include, irda-check.m4)dnl
+
+AC_INIT(src/irobex.c)
+AM_CONFIG_HEADER(config.h)
+#AM_INIT_AUTOMAKE(obex, 0.9)
+AM_INIT_AUTOMAKE(obex)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_MAKE_SET
+
+dnl Checks for libraries.
+AM_PATH_GLIB(1.2.0)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl AC_CONFIG_HEADER
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+dnl Checks for library functions.
+IRDA_CHECK
+
+dnl Use -Wall if we have gcc, and use -ansi -pedantic if ansi is enabled.
+changequote(,)dnl
+if test "x$GCC" = "xyes"; then
+  case " $CFLAGS " in
+  *[\ \	]-Wall[\ \	]*) ;;
+  *) CFLAGS="$CFLAGS -Wall" ;;
+  esac
+
+  if test "x$enable_ansi" = "xyes"; then
+    case " $CFLAGS " in
+    *[\ \	]-ansi[\ \	]*) ;;
+    *) CFLAGS="$CFLAGS -ansi" ;;
+    esac
+
+    case " $CFLAGS " in
+    *[\ \	]-pedantic[\ \	]*) ;;
+    *) CFLAGS="$CFLAGS -pedantic" ;;
+    esac
+  fi
+fi
+changequote([,])dnl
+
+OBEX_MAJOR_VERSION=0
+OBEX_MINOR_VERSION=9
+OBEX_MICRO_VERSION=0
+OBEX_INTERFACE_AGE=0
+OBEX_BINARY_AGE=0
+OBEX_VERSION=$OBEX_MAJOR_VERSION.$OBEX_MINOR_VERSION.$OBEX_MICRO_VERSION
+
+AC_SUBST(OBEX_VERSION)
+
+VERSION=$OBEX_VERSION
+PACKAGE=obex
+
+dnl libtool versioning
+LT_RELEASE=$OBEX_MAJOR_VERSION.$OBEX_MINOR_VERSION
+LT_CURRENT=`expr $OBEX_MICRO_VERSION - $OBEX_INTERFACE_AGE`
+LT_REVISION=$OBEX_INTERFACE_AGE
+LT_AGE=`expr $OBEX_BINARY_AGE - $OBEX_INTERFACE_AGE`
+AC_SUBST(LT_RELEASE)
+AC_SUBST(LT_CURRENT)
+AC_SUBST(LT_REVISION)
+AC_SUBST(LT_AGE)
+
+dnl Initialize libtool
+AM_PROG_LIBTOOL
+
+AC_OUTPUT([
+obex.spec
+Makefile
+obex-config
+src/Makefile],[case "$CONFIG_FILES" in
+*obex-config*)chmod +x obex-config;;
+esac])

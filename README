@@ -1,0 +1,13 @@
+Fast instructions on how to install obex:
+
+First you have to compile and install the shared library:
+cd lib
+./configure --prefix=/usr
+make
+make install (as root)
+
+Now you can compile the optional testprograms in apps:
+cd apps
+make
+
+Done!

@@ -1,0 +1,112 @@
+/*********************************************************************
+ *                
+ * Filename:      obex_connect.c
+ * Version:       0.5
+ * Description:   
+ * Status:        Experimental.
+ * Author:        Dag Brattli <dagb@cs.uit.no>
+ * Created at:    Wed May  5 11:53:44 1999
+ * Modified at:   Sun Dec  5 15:36:12 1999
+ * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * 
+ *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     
+ *     This library is free software; you can redistribute it and/or
+ *     modify it under the terms of the GNU Lesser General Public
+ *     License as published by the Free Software Foundation; either
+ *     version 2 of the License, or (at your option) any later version.
+ *
+ *     This library is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *     Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public
+ *     License along with this library; if not, write to the Free Software
+ *     Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *     MA  02111-1307  USA
+ *     
+ ********************************************************************/
+
+#include <config.h>
+
+#include <string.h>
+
+#include <obex_main.h>
+#include <obex_object.h>
+#include <obex_header.h>
+
+#include <obex_connect.h>
+
+/*
+ * Function obex_insert_connectframe ()
+ *
+ *    Add the data needed to send/reply to a connect
+ *
+ */
+gint obex_insert_connectframe(obex_t *self, obex_object_t *object)
+{
+	obex_connect_hdr_t *conn_hdr;
+
+	DEBUG(4, __FUNCTION__ "()\n");
+
+	object->tx_nonhdr_data = g_netbuf_new(4);
+	if(!object->tx_nonhdr_data) 
+		return -1;
+	conn_hdr = (obex_connect_hdr_t *) object->tx_nonhdr_data->data;
+	conn_hdr->version = OBEX_VERSION; 
+	conn_hdr->flags = 0x00;              /* Flags */
+	conn_hdr->mtu = htons(self->mtu_rx); /* Max packet size */
+	g_netbuf_put(object->tx_nonhdr_data, 4);
+	return 0;
+}
+
+/*
+ * Function obex_parse_connect_header ()
+ *
+ *    Parse a Connect
+ *
+ */
+gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
+{
+	obex_connect_hdr_t *conn_hdr;
+	obex_common_hdr_t *common_hdr;
+		
+	guint8 version;
+	gint flags;
+	guint16 mtu;  /* Maximum send data unit */
+	guint8 opcode;
+	guint16 length;
+
+	DEBUG(4, __FUNCTION__ "()\n");
+
+	/* Remember opcode and size for later */
+	common_hdr = (obex_common_hdr_t *) msg->data;
+	opcode = common_hdr->opcode;
+	length = ntohs(common_hdr->len);
+
+	/* Parse beyond 3 bytes only if response is success */
+	if( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) && (opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
+		return 1;
+
+	DEBUG(4, __FUNCTION__ "() Len: %d\n", msg->len);
+	if(msg->len >= 7) {
+		/* Get what we need */
+		conn_hdr = (obex_connect_hdr_t *) ((msg->data) + 3);
+		version = conn_hdr->version;
+		flags   = conn_hdr->flags;
+		mtu     = ntohs(conn_hdr->mtu);
+
+		DEBUG(1, __FUNCTION__ "version=%d.%d\n", version >> 4, version & 0x0f);
+
+		if(mtu < OBEX_DEFAULT_MTU)
+			self->mtu_tx = mtu;
+		else
+			self->mtu_tx = OBEX_DEFAULT_MTU;
+
+		DEBUG(1, __FUNCTION__ "() requested MTU=%d, used MTU=%d\n", mtu, self->mtu_tx);
+		return 1;
+	}
+	DEBUG(1, __FUNCTION__ "() Malformed connect-header received\n");
+	return -1;
+}
