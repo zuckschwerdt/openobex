@@ -47,24 +47,29 @@ typedef struct obex obex_t;
 #include "obex_transport.h"
 #include "netbuf.h"
 
-/* use 0 for production, 1 for sendbuff, 2 for receivebuff and 3 for both */
+/* use 0 for none, 1 for sendbuff, 2 for receivebuff and 3 for both */
 #ifndef DEBUG_DUMPBUFFERS
-#define DEBUG_DUMPBUFFERS 3
+#define DEBUG_DUMPBUFFERS 0
+#endif
+
+/* use 0 for production, 1 for verification, >2 for debug */
+#ifndef OBEX_DEBUG
+//#define OBEX_DEBUG 0
+unsigned int obex_debug;
 #endif
 
 #ifndef _WIN32
-/* use 0 for production, 1 for verification, >2 for debug */
-#ifndef OBEX_DEBUG
-#define OBEX_DEBUG 4
-#endif
+
 #ifdef OBEX_DEBUG
-unsigned int obex_net_debug;
-#define DEBUG(n, args...) if (obex_net_debug >= (n)) g_print(args)
+#define DEBUG(n, args...) if (obex_debug >= (n)) g_print(args)
 #else
-#define DEBUG(n, args...)
+#define DEBUG(n, args, ...)
 #endif /* OBEX_DEBUG */
+
 #else /* _WIN32 */
-void DEBUG(int n, ...);
+
+void DEBUG(unsigned int n, ...);
+
 #endif /* _WIN32 */
 
 

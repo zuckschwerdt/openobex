@@ -34,8 +34,20 @@
 #include <stdio.h>
 #include <glib.h>
 
-void DEBUG(int n, const char *format, void *a1, void *a2, void *a3, void *a4, 
+#include "obex_main.h"
+
+// The VC proprocessor can't handle variable argument macros,
+// so we are forced to do an ugly thing like this.
+
+#ifdef OBEX_DEBUG
+extern obex_debug;
+
+void DEBUG(unsigned int n, const char *format, void *a1, void *a2, void *a3, void *a4, 
 		void *a5, void *a6, void *a7, void *a8, void *a9, void *a10)
 {
-	g_print(format, a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+	if(n >= obex_debug)
+		g_print(format, a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
 }
+#else
+void DEBUG(int n, const char *format, ...){};
+#endif
