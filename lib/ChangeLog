@@ -1,7 +1,7 @@
 2002-10-16  Marcel Holtmann  <marcel@holtmann.org>
 
-	* Allow higher MTUs
-	* Handle unexpected data in continue
+	* Allow higher MTUs.
+	* Handle unexpected data in continue.
 
 2002-10-11  Marcel Holtmann  <marcel@holtmann.org>
 
