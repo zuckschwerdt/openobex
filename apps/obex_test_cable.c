@@ -337,8 +337,10 @@ gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout)
 	gt = userdata;
 	
 	/* Return if no fd */
-	if(gt->ttyfd < 0)
+	if(gt->ttyfd < 0) {
+		CDEBUG("No fd!");
 		return -1;
+	}
 
 	time.tv_sec = timeout;
 	time.tv_usec = 0;
@@ -357,6 +359,19 @@ gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout)
 	if(actual <= 0)
 		return actual;
 	CDEBUG("Read %d bytes\n", actual);
+#ifdef CABLE_DEBUG
+	{
+		int i = 0;
+		for(i=0;i<actual;i++) {
+			g_print("[%0X",gt->inputbuf[i]);
+			if(gt->inputbuf[i] >= 32) {
+				g_print(",%c",gt->inputbuf[i]);
+			}
+			g_print("]");
+		}
+		g_print("\n");
+	}
+#endif
 	OBEX_CustomDataFeed(handle, gt->inputbuf, actual);
 	return actual;
 }

@@ -205,13 +205,15 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
  *
  *    Wait for a request to finish!
  *
+ * Timeout set to 10s. Should be more than good enough for most transport.
  */
 int wait_for_rsp()
 {
 	int ret;
 
 	while(!finished) {
-		ret = OBEX_HandleInput(handle, 1);
+		//g_print("wait_for_rsp()\n");
+		ret = OBEX_HandleInput(handle, 10);
 		if (ret < 0)
 			return ret;
 	}

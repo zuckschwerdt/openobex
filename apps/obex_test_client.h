@@ -11,6 +11,9 @@ void connect_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp);
 void disconnect_client(obex_t *handle);
 void disconnect_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp);
 
+gint fillstream(obex_t *handle, obex_object_t *object);
+void push_client(obex_t *handle);
+
 void put_client(obex_t *handle);
 void put_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp);
 

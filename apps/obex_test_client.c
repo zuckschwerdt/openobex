@@ -26,12 +26,24 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <libgen.h>
 #include <openobex/obex.h>
 #include <glib.h>
 
 #include "obex_io.h"
 #include "obex_test_client.h"
 #include "obex_test.h"
+
+#define OBEX_STREAM_CHUNK       4096
+
+
+guint8 buffer[OBEX_STREAM_CHUNK];
+
+int fileDesc;
+
 
 //
 // Wait for an obex command to finish.
@@ -44,6 +56,7 @@ void syncwait(obex_t *handle)
 	gt = OBEX_GetUserData(handle);
 
 	while(!gt->clientdone) {
+		//g_print("syncwait()\n");
 		ret = OBEX_HandleInput(handle, 10);
 		if(ret < 0) {
 			g_print("Error while doing OBEX_HandleInput()\n");
@@ -155,7 +168,96 @@ void disconnect_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp
 	g_print("Disconnect done!\n");
 	OBEX_TransportDisconnect(handle);
 }
+
+
+gint fillstream(obex_t *handle, obex_object_t *object)
+{
+	gint                    actual;
+	obex_headerdata_t       hv;
+
+	g_print("Filling stream!\n");
+
+	actual = read(fileDesc, buffer, OBEX_STREAM_CHUNK);
+	if(actual > 0) {
+		/* Read was ok! */
+		hv.bs = buffer;
+		OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY,
+				hv, actual, OBEX_FL_STREAM_DATA);
+	}
+	else if(actual == 0) {
+		/* EOF */
+		hv.bs = buffer;
+		close(fileDesc); fileDesc = -1;
+		OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY,
+				hv, 0, OBEX_FL_STREAM_DATAEND);
+	}
+	else {
+		/* Error */
+		hv.bs = NULL;
+		close(fileDesc); fileDesc = -1;
+		OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY,
+				hv, 0, OBEX_FL_STREAM_DATA);
+	}
+
+	return actual;
+}
+
 	
+
+void push_client(obex_t *handle)
+{
+	obex_object_t *object;
+
+	gchar fname[200];
+	guint uname_size;
+	char *bfname;
+	gchar *uname;
+
+	obex_headerdata_t hd;
+	
+	guint8 *buf;
+	int file_size;
+
+	g_print("PUSH filename> ");
+	scanf("%s", fname);
+	bfname = basename(fname);
+
+	buf = easy_readfile(fname, &file_size);
+	if(buf == NULL)
+		return;
+	fileDesc = open(fname, O_RDONLY, 0);
+
+	if (fileDesc < 0) {
+		g_free(buf);
+		free(bfname);
+		return;
+	}
+
+	g_print("Going to send %s(%s), %d bytes\n",fname,bfname, file_size);
+
+	/* Build object */
+	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
+	
+	uname_size = (strlen(bfname)+1)<<1;
+	uname = g_malloc(uname_size);
+	OBEX_CharToUnicode(uname, bfname, uname_size);
+
+	hd.bs = uname;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd, uname_size, 0);
+
+	hd.bq4 = file_size;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hd, sizeof(guint32), 0);
+
+	hd.bs = NULL;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, hd, 0, OBEX_FL_STREAM_START);
+
+	g_free(buf);
+	g_free(uname);
+	free(bfname);
+
+ 	OBEX_Request(handle, object);
+	syncwait(handle);
+}
 
 //
 //

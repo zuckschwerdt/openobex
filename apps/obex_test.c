@@ -86,6 +86,10 @@ void obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event, gi
 		g_print("Link broken!\n");
 		break;
 
+	case OBEX_EV_STREAMEMPTY:
+		fillstream(handle, object);
+		break;
+
 	default:
 		g_print("Unknown event %02x!\n", event);
 		break;
@@ -138,7 +142,7 @@ int main (int argc, char *argv[])
 {
 	char cmd[10];
 	int end = 0;
-	gboolean cobex = FALSE, tcpobex = FALSE, r320 = FALSE;
+	gboolean cobex = FALSE, tcpobex = FALSE, btobex = FALSE, r320 = FALSE;
 	obex_t *handle;
 
 	struct context global_context = {0,};
@@ -158,6 +162,8 @@ int main (int argc, char *argv[])
 
 	if( (argc == 2) && (strcmp(argv[1], "-i") == 0 ) )
 		tcpobex = TRUE;
+	if( (argc == 2) && (strcmp(argv[1], "-b") == 0 ) )
+		btobex = TRUE;
 
 
 	if(cobex)	{
@@ -205,8 +211,16 @@ int main (int argc, char *argv[])
 			exit(0);
 		}
 	}
+	else if(btobex) {
+#ifndef _WIN32
+		g_print("Using Bluetooth RFCOMM transport\n");
+		g_message("Not implemented yet.\n");
+#else
+		g_message("Not implemented in Win32 yet.\n");
+#endif	// _WIN32
+	}
 	else	{
-		g_print("Using IRDA transport\n");
+		g_print("Using IrDA transport\n");
 		if(! (handle = OBEX_Init(OBEX_TRANS_IRDA, obex_event, 0)))	{
 			perror( "OBEX_Init failed");
 			exit(0);
@@ -233,23 +247,26 @@ int main (int argc, char *argv[])
 			case 'p':
 				put_client(handle);
 			break;
+			case 'x':
+				push_client(handle);
+			break;
 			case 'c':
 				/* First connect transport */
 				if(tcpobex) {
 					if(inet_connect(handle)) {
-						g_print("Transport connect error!\n");
+						g_print("Transport connect error! (TCP)\n");
 						break;
 					}
 				}
 				if(cobex) {
 					if(OBEX_TransportConnect(handle, (void*) 1, 0) < 0) {
-						g_print("Transport connect error!\n");
+						g_print("Transport connect error! (Serial)\n");
 						break;
 					}
 				}
 				else {
 					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0)	{
-						g_print("Transport connect error!\n");
+						g_print("Transport connect error! (IrDA)\n");
 						break;
 					}
 				}
@@ -263,19 +280,19 @@ int main (int argc, char *argv[])
 				/* First register server */
 				if(tcpobex) {
 					if(InOBEX_ServerRegister(handle)) {
-						g_print("Server register error!\n");
+						g_print("Server register error! (TCP)\n");
 						break;
 					}
 				}
 				if(cobex) {
 					if(OBEX_ServerRegister(handle, (void*) 1, 0) < 0) {
-						g_print("Server register error!\n");
+						g_print("Server register error! (Serial)\n");
 						break;
 					}
 				}
 				else {
 					if(IrOBEX_ServerRegister(handle, IR_SERVICE) < 0)	{
-						g_print("Server register error!\n");
+						g_print("Server register error! (IrDA)\n");
 						break;
 					}
 				}
