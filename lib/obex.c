@@ -822,7 +822,7 @@ int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
  * @self: OBEX handle
  * @rsp: Response code.
  *
- * The returned char shall be freed by you. Returns %NULL on error.
+ * The returned char must not be freed. Returns %NULL on error.
  */
 char* OBEX_GetResponseMessage(obex_t *self, int rsp)
 {
