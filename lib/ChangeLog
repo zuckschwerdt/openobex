@@ -1,3 +1,7 @@
+2000-12-05  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Pass timeout to handleinput when using a custom transport.
+
 2000-12-04  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Added streaming support.

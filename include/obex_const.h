@@ -43,7 +43,7 @@ typedef struct {
 	gint (*disconnect)(obex_t *handle, gpointer userdata);
 	gint (*listen)(obex_t *handle, gpointer userdata);
 	gint (*write)(obex_t *handle, gpointer userdata, guint8 *buf, gint buflen);
-	gint (*handleinput)(obex_t *handle, gpointer userdata);
+	gint (*handleinput)(obex_t *handle, gpointer userdata, gint timeout);
 	gpointer userdata;
 } obex_ctrans_t;
 

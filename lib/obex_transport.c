@@ -8,6 +8,7 @@
  * Created at:    Sat May  1 20:15:04 1999
  * CVS ID:        $Id$
  * 
+ *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or
@@ -51,7 +52,7 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 	
 	if(self->trans.type == OBEX_TRANS_CUST) {
 		if(self->ctrans.handleinput)
-			ret = self->ctrans.handleinput(self, self->ctrans.userdata);
+			ret = self->ctrans.handleinput(self, self->ctrans.userdata, timeout);
 		else {
 			g_message(G_GNUC_FUNCTION "() No handleinput-callback exist!\n");
 			ret = -1;
