@@ -125,16 +125,20 @@ gint irobex_discover_devices(obex_t *self)
 	struct irda_device_list *list;
 	unsigned char *buf;
 	int len;
-	int i;
+	int i, ret = -1;
 
 	len = sizeof(struct irda_device_list) -
 		sizeof(struct irda_device_info) +
 		sizeof(struct irda_device_info) * MAX_DEVICES;
 
 	buf = g_malloc(len);
+	if(buf == NULL)
+		return -1;
+
 	list = (struct irda_device_list *) buf;
 	
 	if (getsockopt(self->fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
+		g_free(buf);
 		return -1;
 	}
 
@@ -155,18 +159,20 @@ gint irobex_discover_devices(obex_t *self)
 			   It is not required by the standard to have the 
 			   hint bit set, only recommended. Win95 does not.
 			*/
-			return 0;
+			ret = 0;
 #else
 			/* Make sure we discovered an OBEX device */
 			if (list->dev[i].hints[1] & HINT_OBEX) {
 				DEBUG(1, __FUNCTION__ "(), this one looks good\n");
-				return 0;
+				ret = 0;
 			}
 #endif
 		}
 	}
+
 	DEBUG(1, __FUNCTION__ "(), didn't find any OBEX devices!\n");
-	return -1;
+	g_free(buf);
+	return ret;
 }
 
 /*
