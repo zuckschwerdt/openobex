@@ -74,7 +74,7 @@ gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint r
 		gint cmdlen;
 		
 		cmdlen = strlen(cmd);
-		CDEBUG("Sending command %s\n", cmd\);		
+		CDEBUG("Sending command %s\n", cmd);
 		if(write(fd, cmd, cmdlen) < cmdlen)	{
 			perror("Error writing to port");
 			return -1;
