@@ -68,6 +68,8 @@ gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint r
 	
 	fd = gt->ttyfd;
 	rspbuf[0] = 0;
+	if(fd < 0)
+		return -1;
 
 	if(cmd != NULL) {
 		// Write command
