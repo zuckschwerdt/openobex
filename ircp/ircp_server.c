@@ -20,7 +20,7 @@ void srv_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 //	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	switch (event)	{
-	case OBEX_EV_STREAMFULL:
+	case OBEX_EV_STREAMAVAIL:
 		DEBUG(4, G_GNUC_FUNCTION "() Time to read some data from stream\n");
 		ret = ircp_srv_receive(srv, object, FALSE);
 		break;
