@@ -32,25 +32,47 @@
 
 #ifdef HAVE_IRDA
 
-#include <fcntl.h>
-#include <signal.h>
+#ifdef _WIN32
+#include <winsock.h>
+
+#include <irda_wrap.h>
+
+#else /* _WIN32 */
+
 #include <string.h>
-
-/* for getpid */
 #include <unistd.h>
-
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#include <irda.h>
-
-#include <obex_main.h>
-#include <irobex.h>
+#include <irda_wrap.h>
+//#include <irda.h>
 
 #ifndef AF_IRDA
 #define AF_IRDA 23
 #endif /* AF_IRDA */
 
+#endif /* _WIN32 */
+
+
+#include <obex_main.h>
+#include <irobex.h>
+
+
+/*
+ * Function irobex_listen (self, service)
+ *
+ *    Prepare for IR-connect
+ *
+ */
+void irobex_prepare_connect(obex_t *self, char *service)
+{
+	self->trans.peer.irda.sir_family = AF_IRDA;
+
+	if (service)
+		strncpy(self->trans.peer.irda.sir_name, service, 25);
+	else
+		strcpy(self->trans.peer.irda.sir_name, "OBEX");
+}
 
 /*
  * Function irobex_listen (self)
@@ -60,11 +82,12 @@
  */
 gint irobex_listen(obex_t *self, char *service)
 {
+#ifndef _WIN32
 	int addrlen = sizeof(struct sockaddr_irda);
 	int mtu;
 	int len = sizeof(int);
 
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	if(obex_create_socket(self, AF_IRDA, self->async) < 0)
 		return -1;
@@ -109,9 +132,12 @@ gint irobex_listen(obex_t *self, char *service)
 		return -1;
 	}
 	self->trans.mtu = mtu;
-	DEBUG(3, __FUNCTION__ "(), transport mtu=%d\n", mtu);
+	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
 
 	return 0;
+#else /* _WIN32 */
+	return -1;
+#endif /* _WIN32 */
 }
 
 /*
@@ -142,6 +168,8 @@ gint irobex_discover_devices(obex_t *self)
 		return -1;
 	}
 
+
+#ifndef _WIN32
 	if (len > 0) {
 		DEBUG(1, "Discovered: (list len=%d)\n", list->len);
 
@@ -153,24 +181,25 @@ gint irobex_discover_devices(obex_t *self)
 			
 			self->trans.peer.irda.sir_addr = list->dev[i].daddr;
 			self->trans.self.irda.sir_addr = list->dev[i].saddr;
-
-#if 1
-			/* 
-			   It is not required by the standard to have the 
-			   hint bit set, only recommended. Win95 does not.
-			*/
 			ret = 0;
+		}
+	}
 #else
-			/* Make sure we discovered an OBEX device */
-			if (list->dev[i].hints[1] & HINT_OBEX) {
-				DEBUG(1, __FUNCTION__ "(), this one looks good\n");
-				ret = 0;
-			}
-#endif
+	if (len > 0) {
+		DEBUG(1, "Discovered: (list len=%d)\n", list->numDevice);
+
+		for (i=0; i<(int)list->numDevice; i++) {
+			DEBUG(1, "  name:  %s\n", list->Device[i].irdaDeviceName);
+			DEBUG(1, "  daddr: %08x\n", list->Device[i].irdaDeviceID);
+			memcpy(&self->trans.peer.irda.irdaDeviceID[0], &list->Device[i].irdaDeviceID[0], 4);
+			ret = 0;
 		}
 	}
 
-	DEBUG(1, __FUNCTION__ "(), didn't find any OBEX devices!\n");
+#endif /* _WIN32 */
+
+	if(ret <  0)
+		DEBUG(1, G_GNUC_FUNCTION "(), didn't find any OBEX devices!\n");
 	g_free(buf);
 	return ret;
 }
@@ -187,7 +216,7 @@ gint irobex_connect_request(obex_t *self)
 	int len = sizeof(int);
 	int ret;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	if(obex_create_socket(self, AF_IRDA, self->async) < 0)
 		return -1;
@@ -200,9 +229,11 @@ gint irobex_connect_request(obex_t *self)
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.irda,
 		      sizeof(struct sockaddr_irda));
 	if (ret < 0) {
-		g_print(__FUNCTION__ "(), ret=%d\n", ret);
+		g_print(G_GNUC_FUNCTION "(), ret=%d\n", ret);
 		return ret;
 	}
+
+#ifndef _WIN32
 
 	/* Check what the IrLAP data size is */
 	ret = getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE, 
@@ -210,8 +241,12 @@ gint irobex_connect_request(obex_t *self)
 	if (ret < 0) {
 		return ret;
 	}
+#else
+	mtu = 512;
+#endif
 	self->trans.mtu = mtu;
-	DEBUG(2, __FUNCTION__ "(), transport mtu=%d\n", mtu);
+
+	DEBUG(2, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
 	
 	return 0;
 }
@@ -224,7 +259,7 @@ gint irobex_connect_request(obex_t *self)
  */
 gint irobex_disconnect_request(obex_t *self)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	return obex_delete_socket(self);
 }
 

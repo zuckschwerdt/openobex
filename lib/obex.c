@@ -30,22 +30,27 @@
 
 #include <config.h>
 
+#include <string.h>
+#include <errno.h>
+
+#ifdef _WIN32
+#include <winsock.h>
+#define ESOCKTNOSUPPORT 1
+#else /* _WIN32 */
+
 #include <fcntl.h>
 #include <signal.h>
-#include <errno.h>
 #include <unistd.h>
-#include <string.h>
+#endif
 
 #include <obex_main.h>
 #include <obex_object.h>
 #include <obex_connect.h>
 #include <obex_client.h>
-//#include <obex.h>
 
-#ifndef AF_IRDA
-#define AF_IRDA 23
-#endif /* AF_IRDA */
-
+#ifdef HAVE_IRDA
+#include <irobex.h>
+#endif
 
 /*
  * Function OBEX_Init ()
@@ -61,7 +66,6 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	obex_net_debug = NET_DEBUG;
 #endif
 
-
 #ifndef HAVE_FASYNC
 	if(flags & OBEX_FL_ASYNC) {
 		g_message("This platform doesn't support async IO\n");
@@ -71,9 +75,19 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 
 	g_return_val_if_fail(eventcb != NULL, NULL);
 
+#ifdef _WIN32
+	{
+		WSADATA WSAData;	 // Contains details of the Winsocket implementation
+	  	if (WSAStartup (MAKEWORD(2,0), &WSAData) != 0) {
+			g_message("WSAStartup failed\n");
+			return NULL;
+		}
+	}
+#endif
+
 	self = (obex_t*) g_malloc(sizeof(obex_t));
 	if (!self) {
-		/* perror(__FUNCTION__ "()"); */
+		/* perror(G_GNUC_FUNCTION "()"); */
 		return NULL;
 	}
 	memset(self, 0, sizeof(obex_t));
@@ -103,8 +117,10 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	self->mtu_rx = OBEX_DEFAULT_MTU;
 	self->mtu_tx = OBEX_MINIMUM_MTU;
 
+#ifndef _WIN32
 	/* Ignore SIGPIPE. Otherwise send() will raise it and the app will quit */
 	signal(SIGPIPE, SIG_IGN);
+#endif
 
 	return self;
 }
@@ -134,7 +150,6 @@ void OBEX_Cleanup(obex_t *self)
 {
 	g_return_if_fail(self != NULL);
 	
-//	close(self->fd);
 	obex_transport_disconnect_request(self);
 	
 	if (self->tx_msg)
@@ -181,7 +196,7 @@ gpointer OBEX_GetUserData(obex_t *self)
  */
 gint OBEX_ServerRegister(obex_t *self, char *service)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(self != NULL, -1);
 	g_return_val_if_fail(service != NULL, -1);
@@ -204,7 +219,7 @@ gint OBEX_HandleInput(obex_t *self, gint timeout)
 		if(self->ctrans.handleinput)
 			ret = self->ctrans.handleinput(self);
 		else {
-			g_message(__FUNCTION__ "(), No handleinput-callback exist!\n");
+			g_message(G_GNUC_FUNCTION "(), No handleinput-callback exist!\n");
 			ret = -1;
 		}
 	}
@@ -212,7 +227,7 @@ gint OBEX_HandleInput(obex_t *self, gint timeout)
 		struct timeval time;
 		fd_set fdset;
 
-		DEBUG(3, __FUNCTION__ "()\n");
+		DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 		g_return_val_if_fail(self != NULL, -1);
 
@@ -245,7 +260,7 @@ gint OBEX_HandleInput(obex_t *self, gint timeout)
  */
 gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(self != NULL, -1);
 	g_return_val_if_fail(inputbuf != NULL, -1);
@@ -262,7 +277,7 @@ gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
  */
 gint OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(self != NULL, -1);
 	g_return_val_if_fail(saddr != NULL, -1);
@@ -281,7 +296,7 @@ gint OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
  */
 gint OBEX_TransportDisconnect(obex_t *self)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(self != NULL, -1);
 	obex_transport_disconnect_request(self);
@@ -297,10 +312,10 @@ gint OBEX_TransportDisconnect(obex_t *self)
  */
 gint IrOBEX_TransportConnect(obex_t *self, char *service)
 {
-     	DEBUG(4, __FUNCTION__ "()\n");
+     	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	if (self->object)	{
-		DEBUG(3, __FUNCTION__ "() We are busy. Bail out...\n");
+		DEBUG(3, G_GNUC_FUNCTION "() We are busy. Bail out...\n");
 		return -EBUSY;
 	}
 
@@ -308,15 +323,8 @@ gint IrOBEX_TransportConnect(obex_t *self, char *service)
 	g_return_val_if_fail(service != NULL, -1);
 
 #ifdef HAVE_IRDA
-	self->trans.peer.irda.sir_family = AF_IRDA;
-
-	if (service)
-		strncpy(self->trans.peer.irda.sir_name, service, 25);
-	else
-		strcpy(self->trans.peer.irda.sir_name, "OBEX");
-
+	irobex_prepare_connect(self, service);
 	return obex_transport_connect_request(self);
-
 #else
 	return -ESOCKTNOSUPPORT;
 #endif /* HAVE_IRDA */
@@ -344,10 +352,10 @@ gint OBEX_GetFD(obex_t *self)
  */
 gint OBEX_Request(obex_t *self, obex_object_t *object)
 {
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	if (self->object)	{
-		DEBUG(3, __FUNCTION__ "() We are busy. Bail out...\n");
+		DEBUG(3, G_GNUC_FUNCTION "() We are busy. Bail out...\n");
 		return -EBUSY;
 	}
 
@@ -372,7 +380,7 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
  */
 gint OBEX_CancelRequest(obex_t *self)
 {
-	g_print(__FUNCTION__ "(), not implemented yet!\n");
+	g_print(G_GNUC_FUNCTION "(), not implemented yet!\n");
 	g_return_val_if_fail(self != NULL, -1);
 	return -1;
 }
@@ -384,13 +392,15 @@ gint OBEX_CancelRequest(obex_t *self)
  *    Create a new OBEX-object.
  *
  */
-obex_object_t *OBEX_ObjectNew(obex_t *self, gint cmd)
+obex_object_t *OBEX_ObjectNew(obex_t *self, guint8 cmd)
 {
 	obex_object_t *object;
 
 	object = obex_object_new();
-	if(object)
-		obex_object_setcmd(object, cmd, cmd | OBEX_FINAL);
+	if(object == NULL)
+		return NULL;
+
+	obex_object_setcmd(object, cmd, (guint8) (cmd | OBEX_FINAL));
 	/* Need some special woodoo magic on connect-frame */
 	if(cmd == OBEX_CMD_CONNECT)	{
 		if(obex_insert_connectframe(self, object) < 0)	{
@@ -549,7 +559,7 @@ gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size)
 {
 	//FIXME: Check so that buffer is big enough
 	int n = 0;
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(uc != NULL, -1);
 	g_return_val_if_fail(c != NULL, -1);
@@ -569,7 +579,7 @@ gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size)
 gint OBEX_CharToUnicode(guint8 *uc, guint8 *c, gint size)
 {
 	int len, n;
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(uc != NULL, -1);
 	g_return_val_if_fail(c != NULL, -1);

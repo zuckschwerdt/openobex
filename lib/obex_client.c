@@ -33,10 +33,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+//#include <assert.h>
+//#include <sys/ioctl.h>
+//#include <sys/types.h>
+//#include <sys/socket.h>
 
 #include <obex_main.h>
 #include <obex_header.h>
@@ -54,7 +54,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	gint opcode;
 	gint len;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	hdr = (obex_common_hdr_t *) msg->data;
 	opcode = hdr->opcode & ~OBEX_FINAL;
@@ -62,7 +62,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 
 	/* Catch and handle a response from a CMD_CONNECT */
 	if(self->lastcmd == OBEX_CMD_CONNECT)	{
-		DEBUG(2, __FUNCTION__ "() We excpect a connect-rsp\n");
+		DEBUG(2, G_GNUC_FUNCTION "() We excpect a connect-rsp\n");
 		if(obex_parse_connect_header(self, msg) < 0)	{
 			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PARSEERR, self->object->cmd, 0, TRUE);
 			return -1;
@@ -71,13 +71,13 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	}
 
 	if(self->lastcmd == OBEX_CMD_DISCONNECT)	{
-		DEBUG(2, __FUNCTION__ "() CMD_DISCONNECT done. Resetting MTU!\n");
+		DEBUG(2, G_GNUC_FUNCTION "() CMD_DISCONNECT done. Resetting MTU!\n");
 		self->mtu_tx = OBEX_MINIMUM_MTU;
 	}
 
-	DEBUG(4, __FUNCTION__ "() RSP = %02x Final= %02x\n", opcode, final);
+	DEBUG(4, G_GNUC_FUNCTION "() RSP = %02x Final= %02x\n", opcode, final);
 	if(len > 3) {
-		DEBUG(3, __FUNCTION__ "() Response has headers. Size=%d\n", len);
+		DEBUG(3, G_GNUC_FUNCTION "() Response has headers. Size=%d\n", len);
 		if(obex_object_receive(self->object, msg) < 0)	{
 			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PARSEERR, self->object->cmd, 0, TRUE);
 			return -1;
@@ -85,7 +85,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	}
 
 	if(opcode == OBEX_RSP_CONTINUE)	{
-		DEBUG(3, __FUNCTION__ "() Continue...\n");
+		DEBUG(3, G_GNUC_FUNCTION "() Continue...\n");
 		if(obex_object_send(self, self->object, 1) < 0)
 			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_LINKERR, self->object->cmd, 0, TRUE);
 		else
@@ -93,7 +93,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 	}
 	else	{
 		/* Notify app that client-operation is done! */
-		DEBUG(3, __FUNCTION__ "() Done doing what we did. Rsp=%02x!\n", opcode);
+		DEBUG(3, G_GNUC_FUNCTION "() Done doing what we did. Rsp=%02x!\n", opcode);
 		obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_REQDONE, self->object->cmd, opcode, TRUE);
 	}
 	return 0;

@@ -30,12 +30,15 @@
 
 #include <config.h>
 
+#ifdef _WIN32
+#include <winsock.h>
+#else
+
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <fcntl.h>
-//#include <signal.h>
 #include <sys/socket.h>
-
+#endif /*_WIN32*/
 #include <obex_main.h>
 
 #define OBEX_PORT 650
@@ -52,7 +55,7 @@ gint inobex_listen(obex_t *self, char *service)
 
 	int addrlen = sizeof(struct sockaddr_in);
 
-	DEBUG(3, __FUNCTION__ "()\n");
+	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	if(obex_create_socket(self, AF_INET, FALSE) < 0)
 		return -1;
@@ -65,13 +68,13 @@ gint inobex_listen(obex_t *self, char *service)
 	if (bind(self->fd, (struct sockaddr*) &self->trans.self.inet,
 		 sizeof(struct sockaddr_in))) 
 	{
-		DEBUG(4, __FUNCTION__ "() bind() Failed\n");
+		DEBUG(4, G_GNUC_FUNCTION "() bind() Failed\n");
 		return -1;
 	}
 
 
 	if (listen(self->fd, 2)) {
-		DEBUG(4, __FUNCTION__ "() listen() Failed\n");
+		DEBUG(4, G_GNUC_FUNCTION "() listen() Failed\n");
 		return -1;
 	}
 
@@ -87,7 +90,7 @@ gint inobex_listen(obex_t *self, char *service)
 	}
 	
 
-//	DEBUG(3, __FUNCTION__ "(), transport mtu=%d\n", mtu);
+//	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
 
 	return 0;
 }
@@ -112,19 +115,19 @@ gint inobex_connect_request(obex_t *self)
 
 	addr = (char *) &self->trans.peer.inet.sin_addr.s_addr;
 
-	g_print(__FUNCTION__ "(), peer addr = %d.%d.%d.%d\n",
+	g_print(G_GNUC_FUNCTION "(), peer addr = %d.%d.%d.%d\n",
 		addr[0], addr[1], addr[2], addr[3]);
 
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.inet, 
 		      sizeof(struct sockaddr_in));
 	if (ret < 0) {
-		DEBUG(4, __FUNCTION__ "() Connect failed\n");
+		DEBUG(4, G_GNUC_FUNCTION "() Connect failed\n");
 		return ret;
 	}
 
 	self->trans.mtu = OBEX_DEFAULT_MTU;
-	DEBUG(3, __FUNCTION__ "(), transport mtu=%d\n", self->trans.mtu);
+	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", self->trans.mtu);
 
 	if(self->async)	{
 		obex_register_async(self, self->fd);

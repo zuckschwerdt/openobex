@@ -29,6 +29,9 @@
  ********************************************************************/
 
 #include <config.h>
+#ifdef _WIN32
+#include <winsock.h>
+#else /* _WIN32 */
 
 #include <unistd.h>
 #include <string.h>
@@ -39,13 +42,16 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#endif /* _WIN32 */
+
+
 #include <obex_main.h>
 #include <obex_header.h>
 #include <obex_server.h>
 #include <obex_client.h>
 #include <obex_const.h>
 
-#ifdef HAVE_ASYNC
+#ifdef HAVE_FASYNC
 obex_t *async_self[OBEX_MAXINSTANCE] = {NULL, }; /* Which instances wants SIGIO */
 pid_t async_pid[OBEX_MAXINSTANCE] = {0, };
 #endif
@@ -58,13 +64,13 @@ pid_t async_pid[OBEX_MAXINSTANCE] = {0, };
  */
 gint obex_register_async(obex_t *self, gint fd)
 {
-#ifdef HAVE_ASYNC
+#ifdef HAVE_FASYNC
 	gint oflags;
 	gint i;
 	gboolean ok = FALSE;
 	pid_t curr_pid;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	curr_pid = getpid();
 
 	/* Register for asynchronous notification */
@@ -101,7 +107,7 @@ gint obex_register_async(obex_t *self, gint fd)
  */
 gint obex_create_socket(obex_t *self, gint domain, gboolean async)
 {
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	/* We may be called even if we have a socket */
 	if(self->fd > 0)
@@ -111,13 +117,15 @@ gint obex_create_socket(obex_t *self, gint domain, gboolean async)
 	if(self->fd < 0)
 		return self->fd;
 
-	if(async)	{
+#ifdef HAVE_FASYNC
+	if(async) {
 		if(obex_register_async(self, self->fd) < 0)	{
 			close(self->fd);
 			self->fd = -1;
 			return -1;
 		}
 	}
+#endif
 	return self->fd;
 }
 
@@ -131,9 +139,9 @@ gint obex_delete_socket(obex_t *self)
 {
 	gint ret;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
-#ifdef HAVE_ASYNC
+#ifdef HAVE_FASYNC
 	if(self->async) {
 		gint i, cnt = 0;
 		/* Remove handle from async-array */
@@ -150,7 +158,11 @@ gint obex_delete_socket(obex_t *self)
 	if(self->fd < 0)
 		return self->fd;
 	
+#ifdef _WIN32
+	ret = closesocket(self->fd);
+#else /* _WIN32 */
 	ret = close(self->fd);
+#endif /* _WIN32 */
 	if(ret < 0)
 		return ret;
 		
@@ -167,11 +179,11 @@ gint obex_delete_socket(obex_t *self)
  */
 void obex_input_handler(int signal)
 {
-#ifdef HAVE_ASYNC
+#ifdef HAVE_FASYNC
 	gint i;
 	pid_t curr_pid;
 	
-	DEBUG(4, __FUNCTION__ "() Got some input!\n");
+	DEBUG(4, G_GNUC_FUNCTION "() Got some input!\n");
 	curr_pid = getpid();
 
 	for(i=0; i<OBEX_MAXINSTANCE ;i++) {
@@ -313,19 +325,19 @@ gint obex_data_request(obex_t *self, GNetBuf *msg, int opcode, int cmd)
 	} else
 		self->response_next = FALSE;
 
-	DEBUG(4, __FUNCTION__ "(), self->response_next=%d\n", 
+	DEBUG(4, G_GNUC_FUNCTION "(), self->response_next=%d\n", 
 	      self->response_next);
 
 	/* Insert common header */
 	hdr = (obex_common_hdr_t *) g_netbuf_push(msg, sizeof(obex_common_hdr_t));
 
 	hdr->opcode = opcode;
-	hdr->len = htons(msg->len);
+	hdr->len = htons((guint16)msg->len);
 
 #if DEBUG_DUMPBUFFERS & 1
 	g_netbuf_print(msg);
 #endif
-	DEBUG(1, __FUNCTION__ "(), len = %d bytes\n", msg->len);
+	DEBUG(1, G_GNUC_FUNCTION "(), len = %d bytes\n", msg->len);
 
 	actual = obex_transport_write(self, msg);
 	return actual;
@@ -341,12 +353,12 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 {
 	obex_common_hdr_t *hdr;
 	GNetBuf *msg;
-	int final;
-	int actual;
+	gint final;
+	gint actual;
 	guint8 opcode;
-	int size;
+	guint size;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(self != NULL, -1);
 
@@ -354,7 +366,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	actual = obex_transport_read(self, buf, buflen);
 	msg = self->rx_msg;
 
-	DEBUG(1, __FUNCTION__ "(), got %d bytes\n", actual);
+	DEBUG(1, G_GNUC_FUNCTION "(), got %d bytes\n", actual);
 
 	/* Check if we are still connected */
 	if (actual <= 0)	{
@@ -363,25 +375,29 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	}
 	/* New data has been inserted at the end of message */
 	g_netbuf_put(msg, actual);
-	DEBUG(4, __FUNCTION__ "(), msg len=%d\n", msg->len);
+	DEBUG(4, G_GNUC_FUNCTION "(), msg len=%d\n", msg->len);
 
 	hdr = (obex_common_hdr_t *) msg->data;
 
 	/* We must have at least 3 bytes of a package to know the size */
 	if(actual < 3)	{
-		DEBUG(3, __FUNCTION__ "(), Need MUCH more data, len=%d!\n", msg->len);
+		DEBUG(3, G_GNUC_FUNCTION "(), Need MUCH more data, len=%d!\n", msg->len);
 		return actual;
 	}	
 
+#if DEBUG_DUMPBUFFERS & 2
+	g_netbuf_print(msg);
+#endif
 	/*  
 	 * Make sure that the buffer we have, actually has the specified
 	 * number of bytes. If not the frame may have been fragmented, and
 	 * we will then need to read more from the socket.  
 	 */
 
+	DEBUG(4,G_GNUC_FUNCTION "() hdr->len = %04x\n", hdr->len);
 	size = ntohs(hdr->len);
 	if (size > msg->len) {
-		DEBUG(3, __FUNCTION__ "(), Need more data, size=%d, len=%d!\n",
+		DEBUG(3, G_GNUC_FUNCTION "() Need more data, size=%d, len=%d!\n",
 		      size, msg->len);
 
 		/* I'll be back! */
@@ -396,7 +412,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 
 	/* Check if this is a response */
 	if (self->response_next) {
-		DEBUG(3, __FUNCTION__ "() Expecting response\n");
+		DEBUG(3, G_GNUC_FUNCTION "() Expecting response\n");
 		obex_client(self, msg, final);
 		g_netbuf_recycle(msg);
 	}

@@ -68,7 +68,7 @@ gint obex_object_delete(obex_object_t *object)
 {
 	struct obex_header_element *h;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	g_return_val_if_fail(object != NULL, -1);
 
 	//Free TX headers
@@ -110,7 +110,7 @@ gint obex_object_delete(obex_object_t *object)
  */
 gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd)
 {
-	DEBUG(4,__FUNCTION__ "() %02x\n", cmd);
+	DEBUG(4,G_GNUC_FUNCTION "() %02x\n", cmd);
 	object->cmd = cmd;
 	object->lastcmd = lastcmd;
 	object->mode = OBEX_CMD;
@@ -125,7 +125,7 @@ gint obex_object_setcmd(obex_object_t *object, guint8 cmd, guint8 lastcmd)
  */
 gint obex_object_setrsp(obex_object_t *object, guint8 cmd, guint8 lastcmd)
 {
-	DEBUG(4,__FUNCTION__ "()\n");
+	DEBUG(4,G_GNUC_FUNCTION "()\n");
 	object->cmd = cmd;
 	object->lastcmd = lastcmd;
 	object->mode = OBEX_RSP;
@@ -144,12 +144,11 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 {
 	gint ret = -1;
 	struct obex_header_element *element;
-
-	int maxlen;
+	guint maxlen;
 
 	if(flags & OBEX_FL_FIT_ONE_PACKET)	{
 		/* In this command all headers must fit in one packet! */
-		DEBUG(3, __FUNCTION__ "() Fit one packet!\n");
+		DEBUG(3, G_GNUC_FUNCTION "() Fit one packet!\n");
 		maxlen = self->mtu_tx - object->totallen - sizeof(struct obex_common_hdr);
 	}
 	else	{
@@ -163,7 +162,7 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 
 	switch (hi & OBEX_HI_MASK) {
 	case OBEX_INT:
-		DEBUG(2, __FUNCTION__ "() 4BQ header %d\n", hv.bq4);
+		DEBUG(2, G_GNUC_FUNCTION "() 4BQ header %d\n", hv.bq4);
 		
 		element->buf = g_netbuf_new(sizeof(struct obex_uint_hdr));
 		if(element->buf) {
@@ -175,7 +174,7 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 		break;
 		
 	case OBEX_BYTE:
-		DEBUG(2, __FUNCTION__ "() 1BQ header %d\n", hv.bq1);
+		DEBUG(2, G_GNUC_FUNCTION "() 1BQ header %d\n", hv.bq1);
 
 		element->buf = g_netbuf_new(sizeof(struct obex_ubyte_hdr));
 		if(element->buf) {
@@ -187,7 +186,7 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 	break;
 
 	case OBEX_BYTE_STREAM:
-		DEBUG(2, __FUNCTION__ "() BS  header size %d\n", hv_size);
+		DEBUG(2, G_GNUC_FUNCTION "() BS  header size %d\n", hv_size);
 
 		element->buf = g_netbuf_new(hv_size + sizeof(struct obex_byte_stream_hdr) );
 		if(element->buf) {
@@ -198,7 +197,7 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 		}
 	break;
 	case OBEX_UNICODE:
-		DEBUG(2, __FUNCTION__ "() Unicode header size %d\n", hv_size);
+		DEBUG(2, G_GNUC_FUNCTION "() Unicode header size %d\n", hv_size);
 
 		element->buf = g_netbuf_new(hv_size + sizeof(struct obex_unicode_hdr) );
 		if(element->buf) {
@@ -209,14 +208,14 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
 		}
 	break;
 	default:
-		DEBUG(2, __FUNCTION__ "() Unsupported encoding %02x\n", hi & OBEX_HI_MASK);
+		DEBUG(2, G_GNUC_FUNCTION "() Unsupported encoding %02x\n", hi & OBEX_HI_MASK);
 		break;
 	}
 
 	/* Check if you can send this header without violating MTU or OBEX_FIT_ONE_PACKET */
 	if( (element->hi != OBEX_HDR_BODY) || (flags & OBEX_FL_FIT_ONE_PACKET) )	{
 		if(maxlen < element->length)	{
-			DEBUG(1, __FUNCTION__ "() Header to big\n");
+			DEBUG(1, G_GNUC_FUNCTION "() Header to big\n");
 			g_free(element->buf);
 			g_free(element);
 			ret = -1;
@@ -246,14 +245,14 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 	GNetBuf *txmsg;
 	gint actual, finished = 0;
 	gint lastcmd;
-	gint tx_left;
+	guint16 tx_left;
 	gboolean addmore = TRUE;
 	struct obex_byte_stream_hdr *body_txh;
 
 	/* Calc how many bytes of headers we can fit in this package */
 	tx_left = self->mtu_tx - sizeof(struct obex_common_hdr);
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	/* Automagical final-handling */
 	if(allowfinish)
@@ -261,7 +260,7 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 	else
 		lastcmd = object->cmd;
 	
-	DEBUG(4, __FUNCTION__ "() Allowfinish = %d\n", allowfinish);
+	DEBUG(4, G_GNUC_FUNCTION "() Allowfinish = %d\n", allowfinish);
 
 	/* Reuse transmit buffer */
 	txmsg = g_netbuf_recycle(self->tx_msg);
@@ -271,7 +270,7 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 
 	/* Check if this command has some nonheader data to send */
 	if(object->tx_nonhdr_data) {
-		DEBUG(4, __FUNCTION__ "() Adding %d bytes of non-headerdata to tx buffer\n", object->tx_nonhdr_data->len);
+		DEBUG(4, G_GNUC_FUNCTION "() Adding %d bytes of non-headerdata to tx buffer\n", object->tx_nonhdr_data->len);
 		g_netbuf_put_data(txmsg, object->tx_nonhdr_data->data, object->tx_nonhdr_data->len);
 		g_netbuf_free(object->tx_nonhdr_data);
 		object->tx_nonhdr_data = NULL;
@@ -295,15 +294,15 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 			/* Remove the header from the buffer. We will add it later
 			   in all fragments of the body */
 			if(! g_netbuf_headroom(h->buf))	{
-				DEBUG(4, __FUNCTION__ "() Removing old body-header\n");
+				DEBUG(4, G_GNUC_FUNCTION "() Removing old body-header\n");
 				g_netbuf_pull(h->buf,  sizeof(struct obex_byte_stream_hdr) );
 			}
 		
 			if(tx_left < ( h->buf->len + 
 					sizeof(struct obex_byte_stream_hdr) ) )	{
-				DEBUG(4, __FUNCTION__ "() Add BODY header\n");
+				DEBUG(4, G_GNUC_FUNCTION "() Add BODY header\n");
 				body_txh->hi = OBEX_HDR_BODY;
-				body_txh->hl = htons(tx_left);
+				body_txh->hl = htons((guint16)tx_left);
 
 				g_netbuf_put(txmsg, sizeof(struct obex_byte_stream_hdr) );
 				g_netbuf_put_data(txmsg, h->buf->data, tx_left
@@ -315,10 +314,10 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 				addmore = FALSE;
 			}
 			else	{
-				DEBUG(4, __FUNCTION__ "() Add BODY_END header\n");
+				DEBUG(4, G_GNUC_FUNCTION "() Add BODY_END header\n");
 
 				body_txh->hi = OBEX_HDR_BODY_END;
-				body_txh->hl = htons(h->buf->len + sizeof(struct obex_byte_stream_hdr));
+				body_txh->hl = htons((guint16) (h->buf->len + sizeof(struct obex_byte_stream_hdr)));
 				g_netbuf_put(txmsg, sizeof(struct obex_byte_stream_hdr) );
 
 				g_netbuf_put_data(txmsg, h->buf->data, h->buf->len);
@@ -328,7 +327,7 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 			}
 		}
 		else	{
-			DEBUG(4, __FUNCTION__ "() Add NON-BODY header\n");
+			DEBUG(4, G_GNUC_FUNCTION "() Add NON-BODY header\n");
 			if(h->length <= tx_left) {
 				object->tx_headerq = g_slist_remove(object->tx_headerq, h);
 				g_netbuf_put_data(txmsg, h->buf->data, h->length);
@@ -337,7 +336,7 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 				g_free(h);
 			}
 			else if(h->length > self->mtu_tx) {
-				DEBUG(1, __FUNCTION__ "() ERROR! Non-body header to big for MTU. Skipping it\n");
+				DEBUG(1, G_GNUC_FUNCTION "() ERROR! Non-body header to big for MTU. Skipping it\n");
 				/* If this happens we just skip the header.
 				   OBEX_ObjectAddHeader() have made this impossible */
 				object->tx_headerq = g_slist_remove(object->tx_headerq, h);
@@ -351,18 +350,18 @@ gint obex_object_send(obex_t *self, obex_object_t *object, gint allowfinish)
 
 
 	if(object->tx_headerq) {
-		DEBUG(4, __FUNCTION__ "() Sending non-last package\n");
+		DEBUG(4, G_GNUC_FUNCTION "() Sending non-last package\n");
 		actual = obex_data_request(self, txmsg, object->cmd, object->mode);
 		finished = 0;
 	}
 	else {
-		DEBUG(4, __FUNCTION__ "() Sending final package\n");
+		DEBUG(4, G_GNUC_FUNCTION "() Sending final package\n");
 		actual = obex_data_request(self, txmsg, lastcmd | OBEX_FINAL, object->mode);
 		finished = allowfinish;
 	}
 
 	if(actual < 0) {
-		DEBUG(4, __FUNCTION__ "() Send error\n");
+		DEBUG(4, G_GNUC_FUNCTION "() Send error\n");
 		return actual;
 	}
 	else {
@@ -378,7 +377,7 @@ gint obex_object_getnextheader(obex_t *self, obex_object_t *object, guint8 *hi,
 	guint32 *bq4;
 	struct obex_header_element *h;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	/* Return if no headers */
 	if(object->rx_lasthdr == NULL)
@@ -416,11 +415,11 @@ gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8 hi, gu
 {
 	struct obex_header_element *element;
 
-	DEBUG(4, __FUNCTION__ "() This is a body-header. Len=%d\n", len);
+	DEBUG(4, G_GNUC_FUNCTION "() This is a body-header. Len=%d\n", len);
 
 
 	if(len > msg->len)	{
-		DEBUG(1, __FUNCTION__ "() Header %d to big. HSize=%d Buffer=%d\n", hi,
+		DEBUG(1, G_GNUC_FUNCTION "() Header %d to big. HSize=%d Buffer=%d\n", hi,
 						len,
 						msg->len);
 		return -1;
@@ -431,17 +430,17 @@ gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8 hi, gu
 		if(object->hinted_body_len)
 			alloclen = object->hinted_body_len;
 
-		DEBUG(4, __FUNCTION__ "() Allocating new body-buffer. Len=%d\n", alloclen);
+		DEBUG(4, G_GNUC_FUNCTION "() Allocating new body-buffer. Len=%d\n", alloclen);
 		if(! (object->rx_body = g_netbuf_new(alloclen)))
 			return -1;
 	}
 
 	/* Reallocate body-netbuf if needed */ 
-	if(g_netbuf_tailroom(object->rx_body) < len)	{
-		DEBUG(4, __FUNCTION__ "() Buffer too small. Go realloc\n");
+	if(g_netbuf_tailroom(object->rx_body) < (gint)len)	{
+		DEBUG(4, G_GNUC_FUNCTION "() Buffer too small. Go realloc\n");
 		if(! (object->rx_body = g_netbuf_realloc(object->rx_body,
 				object->rx_body->truesize + OBEX_OBJECT_ALLOCATIONTRESHOLD + len) ) )	{
-			DEBUG(1, __FUNCTION__ "() Can't realloc rx_body\n");
+			DEBUG(1, G_GNUC_FUNCTION "() Can't realloc rx_body\n");
 			return -1;
 			// FIXME: Handle this in a nice way...
 		}
@@ -450,7 +449,7 @@ gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8 hi, gu
 	g_netbuf_put_data(object->rx_body, source, len);
 
 	if(hi == OBEX_HDR_BODY_END)	{
-		DEBUG(4, __FUNCTION__ "() Body receive done\n");
+		DEBUG(4, G_GNUC_FUNCTION "() Body receive done\n");
 		if( (element = g_malloc0(sizeof(struct obex_header_element)) ) ) {
 			element->length = object->rx_body->len;
 			element->hi = OBEX_HDR_BODY;
@@ -468,7 +467,7 @@ gint obex_object_receive_body(obex_object_t *object, GNetBuf *msg, guint8 hi, gu
 		object->rx_body = NULL;
 	}
 	else	{
-		DEBUG(4, __FUNCTION__ "() Normal body fragment...\n");
+		DEBUG(4, G_GNUC_FUNCTION "() Normal body fragment...\n");
 	}
 	return 1;
 }
@@ -485,7 +484,7 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 	struct obex_header_element *element;
 	guint8 *source = NULL;
 	guint len, hlen;
-	gint hi;
+	guint8 hi;
 	gint err = 0;
 
 	union {
@@ -495,7 +494,7 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 	} h;
 
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	/* Remove command from buffer */
 	g_netbuf_pull(msg, sizeof(struct obex_common_hdr));
@@ -506,14 +505,14 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 		if(!object->rx_nonhdr_data)
 			return -1;
 		g_netbuf_put_data(object->rx_nonhdr_data, msg->data, object->headeroffset);
-		DEBUG(4, __FUNCTION__ "() Command has %d bytes non-headerdata\n", object->rx_nonhdr_data->len);
+		DEBUG(4, G_GNUC_FUNCTION "() Command has %d bytes non-headerdata\n", object->rx_nonhdr_data->len);
 		g_netbuf_pull(msg, object->headeroffset);
 		object->headeroffset = 0;
 	}
 
 	while ((msg->len > 0) && (!err)) {
 		hi = msg->data[0];
-		DEBUG(4, __FUNCTION__ "() Header: %02x\n", hi);
+		DEBUG(4, G_GNUC_FUNCTION "() Header: %02x\n", hi);
 		switch (hi & OBEX_HI_MASK) {
 
 		case OBEX_UNICODE:
@@ -550,7 +549,7 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 			hlen = 5;
 			break;
 		default:
-			DEBUG(1, __FUNCTION__ "() Badly formed header received\n");
+			DEBUG(1, G_GNUC_FUNCTION "() Badly formed header received\n");
 			source = NULL;
 			hlen = 0;
 			len = 0;
@@ -560,7 +559,7 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 
 		/* Make sure that the msg is big enough for header */
 		if(len > msg->len)	{
-			DEBUG(1, __FUNCTION__ "() Header %d to big. HSize=%d Buffer=%d\n", hi,
+			DEBUG(1, G_GNUC_FUNCTION "() Header %d to big. HSize=%d Buffer=%d\n", hi,
 						len,
 						msg->len);
 			source = NULL;
@@ -572,13 +571,13 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 			if(hi == OBEX_HDR_LENGTH)	{
 				h.uint = (struct obex_uint_hdr *) msg->data;
 				object->hinted_body_len = ntohl(h.uint->hv);
-				DEBUG(4, __FUNCTION__ "() Hinted body len is %d\n",
+				DEBUG(4, G_GNUC_FUNCTION "() Hinted body len is %d\n",
 							object->hinted_body_len);
 			}
 
 			if( (element = g_malloc0(sizeof(struct obex_header_element)) ) ) {
 				if( (element->buf = g_netbuf_new(len)) )	{
-					DEBUG(4, __FUNCTION__ "() Copying %d bytes\n", len);
+					DEBUG(4, G_GNUC_FUNCTION "() Copying %d bytes\n", len);
 					element->length = len;
 					element->hi = hi;
 					g_netbuf_put_data(element->buf, source, len);
@@ -588,13 +587,13 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 					object->rx_lasthdr = object->rx_headerq;
 				}
 				else	{
-					DEBUG(1, __FUNCTION__ "() Cannot allocate memory\n");
+					DEBUG(1, G_GNUC_FUNCTION "() Cannot allocate memory\n");
 					g_free(element);
 					err = -1;
 				}
 			}
 			else {
-				DEBUG(1, __FUNCTION__ "() Cannot allocate memory\n");
+				DEBUG(1, G_GNUC_FUNCTION "() Cannot allocate memory\n");
 				err = -1;
 			}
 		}
@@ -602,7 +601,7 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 		if(err)
 			return err;
 
-		DEBUG(4, __FUNCTION__ "() Pulling %d bytes\n", hlen);
+		DEBUG(4, G_GNUC_FUNCTION "() Pulling %d bytes\n", hlen);
 		g_netbuf_pull(msg, hlen);
 	}
 

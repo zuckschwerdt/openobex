@@ -32,9 +32,12 @@
 #define OBEX_MAIN_H
 
 #include <time.h>
+
+#ifndef _WIN32
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#endif
 
 /* Forward decl */
 struct obex;
@@ -50,16 +53,21 @@ typedef struct obex obex_t;
 #define DEBUG_DUMPBUFFERS 0
 #endif
 
+#ifndef _WIN32
 /* use 0 for production, 1 for verification, >2 for debug */
-#ifndef NET_DEBUG
-//#define NET_DEBUG 4
+#ifndef OBEX_DEBUG
+#define OBEX_DEBUG 4
 #endif
-#ifdef NET_DEBUG
+#ifdef OBEX_DEBUG
 unsigned int obex_net_debug;
 #define DEBUG(n, args...) if (obex_net_debug >= (n)) g_print(args)
 #else
 #define DEBUG(n, args...)
-#endif /* NET_DEBUG */
+#endif /* OBEX_DEBUG */
+#else /* _WIN32 */
+void DEBUG(int n, ...);
+#endif /* _WIN32 */
+
 
 #define OBEX_VERSION		0x11      /* Version 1.1 */
 #define OBEX_DEFAULT_MTU	1024

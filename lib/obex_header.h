@@ -41,16 +41,29 @@
 #define OBEX_BYTE        0x80
 #define OBEX_INT         0xc0
 
+#ifdef _WIN32
+#define PACKED
+#else
 #define PACKED __attribute__((packed))
+#endif
 
 /* Common header used by all frames */
+
+#ifdef _WIN32
+#pragma pack(1)
+#endif /* _WIN32 */
 struct obex_common_hdr {
 	guint8  opcode;
 	guint16 len;
 } PACKED;
+
+
 typedef struct obex_common_hdr obex_common_hdr_t;
 
 /* Connect header */
+#ifdef _WIN32
+#pragma pack(1)
+#endif /* _WIN32 */
 struct obex_connect_hdr {
 	guint8  version;
 	guint8  flags;
@@ -58,6 +71,9 @@ struct obex_connect_hdr {
 } PACKED;
 typedef struct obex_connect_hdr obex_connect_hdr_t;
 
+#ifdef _WIN32
+#pragma pack(1)
+#endif /* _WIN32 */
 struct obex_uint_hdr {
 	guint8  hi;
 	guint32 hv;
@@ -70,11 +86,17 @@ struct obex_ushort_hdr {
 } PACKED;
 */
 
+#ifdef _WIN32
+#pragma pack(1)
+#endif /* _WIN32 */
 struct obex_ubyte_hdr {
 	guint8 hi;
 	guint8 hv;
 } PACKED;
 
+#ifdef _WIN32
+#pragma pack(1)
+#endif /* _WIN32 */
 struct obex_unicode_hdr {
 	guint8  hi;
 	guint16 hl;

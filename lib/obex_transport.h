@@ -31,10 +31,14 @@
 #ifndef OBEX_TRANSPORT_H
 #define OBEX_TRANSPORT_H
 
+#ifdef _WIN32
+#include <winsock.h>
+#else
 #include <netinet/in.h>
+#endif
 
 #ifdef HAVE_IRDA
-#include <irda.h>
+#include "irda_wrap.h"
 #endif /*HAVE_IRDA*/
 
 #include "obex_main.h"
@@ -49,7 +53,7 @@ typedef union {
 typedef struct obex_transport {
 	gint	type;
      	gboolean connected;	/* Link connection state */
-     	gint	mtu;		/* Tx MTU of the link */
+     	guint	mtu;		/* Tx MTU of the link */
 	saddr_t	self;		/* Source address */
 	saddr_t	peer;		/* Destination address */
 

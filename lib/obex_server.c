@@ -33,10 +33,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+//#include <assert.h>
+//#include <sys/ioctl.h>
+//#include <sys/types.h>
+//#include <sys/socket.h>
 
 #include <obex_main.h>
 #include <obex_header.h>
@@ -55,18 +55,18 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 	gint opcode;
 	gint ret;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	hdr = (obex_common_hdr_t *) msg->data;
 	opcode = hdr->opcode & ~OBEX_FINAL;
 
 	if(! self->object) {
-		DEBUG(4, __FUNCTION__ "() First package of a request\n");
+		DEBUG(4, G_GNUC_FUNCTION "() First package of a request\n");
 		/* This is the first package of a request */
 		self->object = obex_object_new();
 
 		if(! self->object) {
-			DEBUG(1, __FUNCTION__ "() Allocation of object failed!\n");
+			DEBUG(1, G_GNUC_FUNCTION "() Allocation of object failed!\n");
 			obex_response_request(self, OBEX_RSP_INTERNAL_SERVER_ERROR);
 			return -1;
 		}
@@ -79,7 +79,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 
 		switch(opcode)	{
 		case OBEX_CMD_CONNECT:
-			DEBUG(4, __FUNCTION__ "() Got CMD_CONNECT\n");
+			DEBUG(4, G_GNUC_FUNCTION "() Got CMD_CONNECT\n");
 			/* Connect needs some special treatment */
 			if(obex_parse_connect_header(self, msg) < 0) {
 				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
@@ -108,7 +108,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 	}
 
 	if( ( self->object->app_is_called == FALSE ) && final)	{
-		DEBUG(4, __FUNCTION__ "() We got a request!\n");
+		DEBUG(4, G_GNUC_FUNCTION "() We got a request!\n");
 		self->object->app_is_called = TRUE;
 		/* More connect-magic woodoo stuff */
 		if(opcode == OBEX_CMD_CONNECT)
@@ -121,10 +121,10 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 	if(ret == 0)
 		obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PROGRESS, opcode, 0, FALSE);
 	else if(ret > 0) {
-		DEBUG(3, __FUNCTION__ "() Done doing what we did!\n");
+		DEBUG(3, G_GNUC_FUNCTION "() Done doing what we did!\n");
 
 		if(opcode == OBEX_CMD_DISCONNECT)	{
-			DEBUG(2, __FUNCTION__ "() CMD_DISCONNECT done. Resetting MTU!\n");
+			DEBUG(2, G_GNUC_FUNCTION "() CMD_DISCONNECT done. Resetting MTU!\n");
 			self->mtu_tx = OBEX_MINIMUM_MTU;
 		}
 		obex_deliver_event(self, OBEX_SERVER, OBEX_EV_REQDONE, opcode, 0, TRUE);

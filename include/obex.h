@@ -32,7 +32,9 @@
 #define OBEX_H
 
 #include <glib.h>
+#ifndef _WIN32
 #include <sys/socket.h>
+#endif
 
 typedef void* obex_event_t;
 typedef void* obex_t;
@@ -59,7 +61,7 @@ gint    OBEX_ServerRegister(obex_t *self, char *service);
 gint    OBEX_Request(obex_t *self, obex_object_t *object);
 gint    OBEX_CancelRequest(obex_t *self);
 
-obex_object_t	*OBEX_ObjectNew(obex_t *self, gint cmd);
+obex_object_t	*OBEX_ObjectNew(obex_t *self, guint8 cmd);
 gint		OBEX_ObjectDelete(obex_t *self, obex_object_t *object);
 
 gint		OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi, 

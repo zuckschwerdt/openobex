@@ -1,9 +1,18 @@
+2000-08-06  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Lots of small win32 fixes.
+	* irobex_palm3 and obex_tcp now compiles in win32.
+
+2000-08-05  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Made this thing compile on win32!
+
 2000-08-03  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Fixed a memleak when doing IrDA-discovery.
 	* Fixed irda-check.m4 to really check for IrDA.
 	* Added check to see if SIGIO is supported.
-	  Hopefully this syuff compiles on solaris now.
+	  Hopefully this stuff compiles on solaris now.
 
 2000-07-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
 

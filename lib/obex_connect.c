@@ -48,7 +48,7 @@ gint obex_insert_connectframe(obex_t *self, obex_object_t *object)
 {
 	obex_connect_hdr_t *conn_hdr;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	object->tx_nonhdr_data = g_netbuf_new(4);
 	if(!object->tx_nonhdr_data) 
@@ -78,7 +78,7 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 	guint8 opcode;
 	guint16 length;
 
-	DEBUG(4, __FUNCTION__ "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	/* Remember opcode and size for later */
 	common_hdr = (obex_common_hdr_t *) msg->data;
@@ -89,7 +89,7 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 	if( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) && (opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
 		return 1;
 
-	DEBUG(4, __FUNCTION__ "() Len: %d\n", msg->len);
+	DEBUG(4, G_GNUC_FUNCTION "() Len: %d\n", msg->len);
 	if(msg->len >= 7) {
 		/* Get what we need */
 		conn_hdr = (obex_connect_hdr_t *) ((msg->data) + 3);
@@ -97,16 +97,16 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 		flags   = conn_hdr->flags;
 		mtu     = ntohs(conn_hdr->mtu);
 
-		DEBUG(1, __FUNCTION__ "version=%d.%d\n", version >> 4, version & 0x0f);
+		DEBUG(1, G_GNUC_FUNCTION "version=%02x\n", version);
 
 		if(mtu < OBEX_DEFAULT_MTU)
 			self->mtu_tx = mtu;
 		else
 			self->mtu_tx = OBEX_DEFAULT_MTU;
 
-		DEBUG(1, __FUNCTION__ "() requested MTU=%d, used MTU=%d\n", mtu, self->mtu_tx);
+		DEBUG(1, G_GNUC_FUNCTION "() requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
 		return 1;
 	}
-	DEBUG(1, __FUNCTION__ "() Malformed connect-header received\n");
+	DEBUG(1, G_GNUC_FUNCTION "() Malformed connect-header received\n");
 	return -1;
 }
