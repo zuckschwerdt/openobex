@@ -223,7 +223,7 @@ void push_client(obex_t *handle)
 
 	printf("PUSH filename> ");
 	scanf("%s", fname);
-	bfname = basename(fname);
+	bfname = strdup(basename(fname));
 
 	buf = easy_readfile(fname, &file_size);
 	if(buf == NULL)
