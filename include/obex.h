@@ -1,7 +1,7 @@
 /*********************************************************************
  *                
  * Filename:      obex.h
- * Version:       0.9
+ * Version:       0.9.6
  * Description:   OBEX API
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
