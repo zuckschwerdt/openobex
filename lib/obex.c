@@ -6,8 +6,8 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat Apr 17 16:50:25 1999
- * Modified at:   Sun Dec  5 15:35:33 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Sun Aug 13 11:51:47 AM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *
@@ -97,7 +97,8 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	if(flags & OBEX_FL_ASYNC) {
 		self->async = 1;
 	}
-
+	self->fd = -1;
+	self->serverfd = -1;
 
 	/* Init transport */
 	self->trans.type = transport;
@@ -126,7 +127,7 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 }
 
 /*
- * Function OBEX_RegisterCTransport)
+ * Function OBEX_RegisterCTransport()
  *
  *    Register a custom transport.
  *
@@ -186,8 +187,6 @@ gpointer OBEX_GetUserData(obex_t *self)
 	return self->userdata;
 }
 
-
-
 /*
  * Function OBEX_ServerRegister (self, service)
  *
@@ -213,42 +212,9 @@ gint OBEX_ServerRegister(obex_t *self, char *service)
  */
 gint OBEX_HandleInput(obex_t *self, gint timeout)
 {
-	int ret;
-	
-	if(self->trans.type==OBEX_TRANS_CUST) {
-		if(self->ctrans.handleinput)
-			ret = self->ctrans.handleinput(self);
-		else {
-			g_message(G_GNUC_FUNCTION "(), No handleinput-callback exist!\n");
-			ret = -1;
-		}
-	}
-	else {
-		struct timeval time;
-		fd_set fdset;
-
-		DEBUG(3, G_GNUC_FUNCTION "()\n");
-
-		g_return_val_if_fail(self != NULL, -1);
-
-		time.tv_sec = timeout;
-		time.tv_usec = 0;
-
-		FD_ZERO(&fdset);
-		FD_SET(self->fd, &fdset);
-
-		/* Wait for input */
-		ret = select(self->fd+1, &fdset, NULL, NULL, &time);
-	
-		/* Check if this is a timeout (0) or error (-1) */
-		if (ret < 1)
-			return ret;
-	
-		/* Read input */
-		ret = obex_data_indication(self, NULL, 0);
-
-	}
-	return ret;
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	g_return_val_if_fail(self != NULL, -1);
+	return obex_transport_handle_input(self, timeout);
 }
 
 
@@ -342,7 +308,6 @@ gint OBEX_GetFD(obex_t *self)
 	g_return_val_if_fail(self != NULL, -1);
 	return self->fd;
 }
-
 
 /*
  * Function OBEX_Request ()
@@ -552,7 +517,7 @@ gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
 /*
  * Function OBEX_UnicodeToChar ()
  *
- *    Simple Unicode to Char function. Buffers may overlap
+ *    Simple unicode to char function. Buffers may overlap.
  *
  */
 gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size)
@@ -573,7 +538,7 @@ gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size)
 /*
  * Function OBEX_CharToUnicode ()
  *
- *    Simple Char to Unicode function. Buffers may overlap
+ *    Simple char to unicode function. Buffers may overlap.
  *
  */
 gint OBEX_CharToUnicode(guint8 *uc, guint8 *c, gint size)
@@ -597,3 +562,19 @@ gint OBEX_CharToUnicode(guint8 *uc, guint8 *c, gint size)
 
 	return (len*2)+2 ;
 }
+
+
+/*
+ * Function OBEX_GetResponseMessage (self, rsp)
+ *
+ *    Return a human understandable string from a response-code.
+ *
+ */
+GString* OBEX_GetResponseMessage(obex_t *self, gint rsp)
+{
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+
+	g_return_val_if_fail(self != NULL, NULL);
+	return obex_get_response_message(self, rsp);
+}
+	

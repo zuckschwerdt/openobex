@@ -5,12 +5,12 @@
 %define prefix   /usr
 
 Summary: Library for using OBEX
-Name: obex
+Name: openobex
 Version: %ver
 Release: %rel
 Copyright: LGPL
 Group: Libraries
-Source: ftp://ftp.ravioli.pasta.cs.uit.no/pub/Ravioli/obex/obex-%{ver}.tar.gz
+Source: ftp://ftp.ravioli.pasta.cs.uit.no/pub/Ravioli/obex/openobex-%{ver}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{PACKAGE_VERSION}-root
 URL: http://www.ravioli.pasta.cs.uit.no/open-obex/
 Docdir: %{prefix}/doc

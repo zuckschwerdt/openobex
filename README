@@ -1,2 +1,2 @@
-To compile and install the open OBEX c-library read README in lib/.
+To compile and install the openOBEX c-library read README in lib/.
 After you have done this you can compile the test-applications in apps/.

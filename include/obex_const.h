@@ -4,12 +4,12 @@
  * Version:       
  * Description:   Lots of constants and some typedefs for obex.
  * Status:        Experimental.
- * Author:        Dag Brattli <dagb@cs.uit.no>
+ * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon May 08 15:03:03 2000
- * Modified at:   Mon May 08 15:03:04 2000
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Sun Aug 13 09:05:39 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1998, 1999, Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
  *      
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -57,10 +57,6 @@ typedef struct {
 #define OBEX_EV_REQDONE		3	/* Request has finished */
 #define OBEX_EV_LINKERR		4	/* Link has been disconnected */
 #define OBEX_EV_PARSEERR	5	/* Malformed data encountered */
-
-// #define OBEX_VERSION		0x11      /* Version 1.1 */
-// #define OBEX_DEFAULT_MTU	1024
-// #define OBEX_MINIMUM_MTU	255      
 
 /* For OBEX_Init() */
 #define OBEX_FL_ASYNC		0x01

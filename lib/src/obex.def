@@ -23,4 +23,5 @@ OBEX_ObjectSetUserData
 OBEX_ObjectGetUserData
 OBEX_UnicodeToChar
 OBEX_CharToUnicode
+OBEX_GetResponseMessage
 IrOBEX_TransportConnect

@@ -1,0 +1,14 @@
+This is the apps that comes with the openOBEX c-library. These are not meant
+to be more than test-programs to look at if you want to see how use the
+library itself.
+
+To build them you need to first compile and _install_ the library.
+Then you do the usual:
+# ./configure --prefix=<where you want>
+# make
+# make install
+
+To build on win32 using VC6:
+
+# cd src
+# nmake -f makefile.msc

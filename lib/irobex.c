@@ -1,12 +1,12 @@
 /*************************************<********************************
  *                
  * Filename:      irobex.c
- * Version:       0.5
+ * Version:       0.6
  * Description:   IrOBEX, IrDA transport for OBEX
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:28:13 1999
- * Modified at:   Tue Nov 23 21:34:42 1999
+ * Modified at:   Sun Aug 13 12:50:31 PM CEST 2000
  * Modified by:   Pontus Fuchs <pontus@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
@@ -45,12 +45,10 @@
 #include <sys/socket.h>
 
 #include <irda_wrap.h>
-//#include <irda.h>
 
 #ifndef AF_IRDA
 #define AF_IRDA 23
 #endif /* AF_IRDA */
-
 #endif /* _WIN32 */
 
 
@@ -59,7 +57,7 @@
 
 
 /*
- * Function irobex_listen (self, service)
+ * Function irobex_prepare_connect (self, service)
  *
  *    Prepare for IR-connect
  *
@@ -77,21 +75,20 @@ void irobex_prepare_connect(obex_t *self, char *service)
 /*
  * Function irobex_listen (self)
  *
- *    Wait for incomming connections
+ *    Listen for incoming connections.
  *
  */
 gint irobex_listen(obex_t *self, char *service)
 {
 #ifndef _WIN32
-	int addrlen = sizeof(struct sockaddr_irda);
-	int mtu;
-	int len = sizeof(int);
-
 	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
-	if(obex_create_socket(self, AF_IRDA, self->async) < 0)
+	self->serverfd = obex_create_socket(self, AF_IRDA, FALSE);
+	if(self->serverfd < 0) {
+		DEBUG(0, G_GNUC_FUNCTION "() Error creating socket\n");
 		return -1;
-
+	}
+	
 	/* Bind local service */
 	self->trans.self.irda.sir_family = AF_IRDA;
 
@@ -102,24 +99,60 @@ gint irobex_listen(obex_t *self, char *service)
 
 	self->trans.self.irda.sir_lsap_sel = LSAP_ANY;
 	
-	if (bind(self->fd, (struct sockaddr*) &self->trans.self.irda, 
-		 sizeof(struct sockaddr_irda))) 
+	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.irda, 
+		 sizeof(struct sockaddr_irda)))
 	{
-		return -1;
+		DEBUG(0, __FUNCTION__ "() Error doing bind\n");
+		goto out_freesock;
 	}
 
-	if (listen(self->fd, 2)) {
-		return -1;
+	if (listen(self->serverfd, 1)) {
+		DEBUG(0, __FUNCTION__ "() Error doing listen\n");
+		goto out_freesock;
 	}
-	self->fd = accept(self->fd, (struct sockaddr *) &self->trans.peer.irda,
+
+	DEBUG(4, __FUNCTION__ "() We are now listening for connections\n");
+	return 1;
+
+out_freesock:
+	obex_delete_socket(self, self->serverfd);
+	self->serverfd = -1;
+	return -1;
+
+#else /* _WIN32 */
+	g_message("Not supported on WIN32 (yet)...\n");
+	return -1;
+#endif /* _WIN32 */
+}
+
+/*
+ * Function irobex_accept (self)
+ *
+ *    Accept an incoming connection.
+ *
+ */
+gint irobex_accept(obex_t *self)
+{
+#ifndef _WIN32
+	int addrlen = sizeof(struct sockaddr_irda);
+	int mtu;
+	int len = sizeof(int);
+
+	// First accept the connection and get the new client socket.
+	self->fd = accept(self->serverfd, (struct sockaddr *) &self->trans.peer.irda,
  			  &addrlen);
+
+	// Now close the serversocket.
+	obex_delete_socket(self, self->serverfd);
+	self->serverfd = -1;
+
 	if (self->fd < 0) {
 		return -1;
 	}
 
 	if(self->async) {
 		if(obex_register_async(self, self->fd) < 0)	{
-			close(self->fd);
+			obex_delete_socket(self, self->fd);
 			self->fd = -1;
 			return -1;
 		}
@@ -135,11 +168,9 @@ gint irobex_listen(obex_t *self, char *service)
 	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
 
 	return 0;
-#else /* _WIN32 */
-	return -1;
-#endif /* _WIN32 */
+#endif
 }
-
+	
 /*
  * Function irobex_discover_devices (fd)
  *
@@ -218,19 +249,23 @@ gint irobex_connect_request(obex_t *self)
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
-	if(obex_create_socket(self, AF_IRDA, self->async) < 0)
-		return -1;
+	if(self->fd < 0)	{
+		self->fd = obex_create_socket(self, AF_IRDA, self->async);
+		if(self->fd < 0)
+			return -1;
+	}
 
 	ret = irobex_discover_devices(self);
-	if (ret == -1)	{
-		return -1;
+	if (ret < 0)	{
+		DEBUG(1, G_GNUC_FUNCTION "() No devices in range\n");
+		goto out_freesock;
 	}
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.irda,
 		      sizeof(struct sockaddr_irda));
 	if (ret < 0) {
-		g_print(G_GNUC_FUNCTION "(), ret=%d\n", ret);
-		return ret;
+		DEBUG(4, G_GNUC_FUNCTION "(), ret=%d\n", ret);
+		goto out_freesock;
 	}
 
 #ifndef _WIN32
@@ -239,7 +274,7 @@ gint irobex_connect_request(obex_t *self)
 	ret = getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE, 
 			 (void *) &mtu, &len);
 	if (ret < 0) {
-		return ret;
+		goto out_freesock;
 	}
 #else
 	mtu = 512;
@@ -248,7 +283,12 @@ gint irobex_connect_request(obex_t *self)
 
 	DEBUG(2, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
 	
-	return 0;
+	return 1;
+
+out_freesock:
+	obex_delete_socket(self, self->fd);
+	self->fd = -1;
+	return ret;	
 }
 
 /*
@@ -259,8 +299,13 @@ gint irobex_connect_request(obex_t *self)
  */
 gint irobex_disconnect_request(obex_t *self)
 {
+	gint ret;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	return obex_delete_socket(self);
+	ret = obex_delete_socket(self, self->fd);
+	if(ret < 0)
+		return ret;
+	self->fd = -1;
+	return ret;	
 }
 
 #endif /* HAVE_IRDA */

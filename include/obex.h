@@ -1,15 +1,15 @@
 /*********************************************************************
  *                
  * Filename:      obex.h
- * Version:       0.5
+ * Version:       0.9
  * Description:   OBEX API
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:02:42 1999
- * Modified at:   Sun Dec  5 15:35:50 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Sun Aug 13 09:10:19 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -36,9 +36,13 @@
 #include <sys/socket.h>
 #endif
 
-typedef void* obex_event_t;
+// These are also defined in obex_main.h
+// They are defined here otherwise any app including it
+// would require obex_main.h which includes a lot of other 
+// unnecessary stuff.
 typedef void* obex_t;
 typedef void* obex_object_t;
+typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
 
 #include "obex_const.h"
 
@@ -80,7 +84,7 @@ gpointer OBEX_ObjectGetUserData(obex_object_t *object);
 gint OBEX_UnicodeToChar(guint8 *c, guint8 *uc, gint size);
 gint OBEX_CharToUnicode(guint8 *uc, guint8 *c, gint size);
 
-#define OBEX_GetResponseMessage obex_get_response_message
+GString* OBEX_GetResponseMessage(obex_t *self, gint rsp);
 
 /*
  * IrOBEX API 

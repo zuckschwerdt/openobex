@@ -1,0 +1,6 @@
+2000-08-13  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Remade this directory to use autoconf!
+	* Lots of small changes especially to obex_test*
+	* All programs are now using sync mode.
+ 

@@ -6,8 +6,8 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat May  1 20:15:04 1999
- * Modified at:   Fri Oct  8 21:22:04 1999
- * Modified by:   Dag Brattli <dagb@cs.uit.no>
+ * Modified at:   Sun Aug 13 12:02:18 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -44,6 +44,108 @@
 #define AF_IRDA 23
 #endif /* AF_IRDA */
 
+
+/*
+ * Function obex_transport_handle_input(self, timeout)
+ *
+ *    Used when the client or server is working in synchronous mode.
+ *
+ */
+gint obex_transport_handle_input(obex_t *self, gint timeout)
+{
+	int ret;
+	
+	if(self->trans.type == OBEX_TRANS_CUST) {
+		if(self->ctrans.handleinput)
+			ret = self->ctrans.handleinput(self);
+		else {
+			g_message(G_GNUC_FUNCTION "() No handleinput-callback exist!\n");
+			ret = -1;
+		}
+	}
+	else {
+		struct timeval time;
+		fd_set fdset;
+		int highestfd = 0;
+	
+		DEBUG(4, G_GNUC_FUNCTION "()\n");
+		g_return_val_if_fail(self != NULL, -1);
+
+		// Check of we have any fd's to do select on.
+		if(self->fd < 0 && self->serverfd < 0) {
+			DEBUG(0, G_GNUC_FUNCTION "() No valid socket is open\n");
+			return -1;
+		}
+
+		time.tv_sec = timeout;
+		time.tv_usec = 0;
+
+		// Add the fd's to the set.
+		FD_ZERO(&fdset);
+		if(self->fd >= 0) {
+			FD_SET(self->fd, &fdset);
+				highestfd = self->fd;
+		}
+		if(self->serverfd >= 0) {
+			FD_SET(self->serverfd, &fdset);
+			if(self->serverfd > highestfd)
+				highestfd = self->serverfd;
+		}
+
+		/* Wait for input */
+		ret = select(highestfd+1, &fdset, NULL, NULL, &time);
+	
+		/* Check if this is a timeout (0) or error (-1) */
+		if (ret < 1)
+			return ret;
+	
+		if( (self->fd >= 0) && FD_ISSET(self->fd, &fdset)) {
+			DEBUG(4, G_GNUC_FUNCTION "() Data available on client socket\n");
+			ret = obex_data_indication(self, NULL, 0);
+		}
+
+		else if( (self->serverfd >= 0) && FD_ISSET(self->serverfd, &fdset)) {
+			DEBUG(4, G_GNUC_FUNCTION "() Data available on server socket\n");
+			ret = obex_transport_accept(self);
+		}
+		else
+			ret = -1;
+	}
+	return ret;
+}
+
+
+/*
+ * Function obex_transport_accept(self)
+ *
+ *    Accept an incoming connection.
+ *
+ */
+gint obex_transport_accept(obex_t *self)
+{
+	gint ret = -1;
+
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+
+	switch (self->trans.type) {
+#ifdef HAVE_IRDA
+	case OBEX_TRANS_IRDA:
+		ret = irobex_accept(self);
+		break;
+#endif /*HAVE_IRDA*/
+	case OBEX_TRANS_INET:
+		ret = inobex_accept(self);
+		break;
+
+	default:
+		g_message(G_GNUC_FUNCTION "(), domain not implemented!\n");
+		break;
+	}
+	return ret;
+}
+	
+
+
 /*
  * Function obex_transport_connect_request (self, service)
  *
@@ -52,7 +154,7 @@
  */
 gint obex_transport_connect_request(obex_t *self)
 {
-	int ret = -1;
+	gint ret = -1;
 
 
 	if(self->trans.connected)

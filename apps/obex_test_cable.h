@@ -1,15 +1,15 @@
 /*********************************************************************
  *                
- * Filename:      cobex_R320.h
+ * Filename:      obex_test_cable.h
  * Version:       
  * Description:   
  * Status:        Experimental.
- * Author:        Pontus Fuchs <pontus@tactel.se>
+ * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Wed Nov 17 22:05:16 1999
- * Modified at:   Wed Nov 17 22:06:57 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Sun Aug 13 10:55:20 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1998, 1999, Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *      
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -27,11 +27,26 @@
  *     MA  02111-1307  USA
  *     
  ********************************************************************/
+#ifndef OBEX_TEST_CABLE_H
+#define OBEX_TEST_CABLE_H
 
-int cobex_init(char *ttyname);
-void cobex_cleanup(int force);
-int cobex_start_io(void);
+#include <termios.h>
 
+struct cobex_context
+{
+	const char *portname;
+	int ttyfd;
+	char inputbuf[500];
+	struct termios oldtio, newtio;
+	gboolean r320;
+};
+
+struct cobex_context *cobex_setup(const gchar *port, gboolean r320);
+void cobex_cleanup(struct cobex_context *gt, gboolean force);
+
+gint cobex_handle_input(obex_t *handle);
 gint cobex_write(obex_t *self, guint8 *buffer, gint length);
 gint cobex_connect(obex_t *handle);
 gint cobex_disconnect(obex_t *handle);
+
+#endif

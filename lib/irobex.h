@@ -6,8 +6,8 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:32:31 1999
- * Modified at:   Sat May 22 15:07:54 1999
- * Modified by:   Dag Brattli <dagb@cs.uit.no>
+ * Modified at:   Sun Aug 13 12:50:11 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -37,9 +37,6 @@ void irobex_prepare_connect(obex_t *self, char *service);
 gint irobex_listen(obex_t *self, char *service);
 gint irobex_connect_request(obex_t *self);
 gint irobex_disconnect_request(obex_t *self);
+gint irobex_accept(obex_t *self);
 
 #endif
-
-
-
-

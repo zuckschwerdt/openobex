@@ -6,8 +6,8 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat Apr 17 16:50:35 1999
- * Modified at:   Fri Oct  8 21:23:53 1999
- * Modified by:   Dag Brattli <dagb@cs.uit.no>
+ * Modified at:   Sun Aug 13 02:10:12 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -27,8 +27,8 @@
  *     MA  02111-1307  USA
  *     
  ********************************************************************/
-
 #include <config.h>
+#include <stdio.h>
 
 #ifdef _WIN32
 #include <winsock.h>
@@ -51,36 +51,53 @@
  */
 gint inobex_listen(obex_t *self, char *service)
 {
-//	int mtu;
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
-	int addrlen = sizeof(struct sockaddr_in);
-
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
-
-	if(obex_create_socket(self, AF_INET, FALSE) < 0)
+	self->serverfd = obex_create_socket(self, AF_INET, FALSE);
+	if(self->serverfd < 0) {
+		DEBUG(0, G_GNUC_FUNCTION "() Cannot create server-socket\n");
 		return -1;
+	}
 
 	/* Bind local service */
 	self->trans.self.inet.sin_family = AF_INET;
 	self->trans.self.inet.sin_port = htons(OBEX_PORT);
 	self->trans.self.inet.sin_addr.s_addr = INADDR_ANY;
 	
-	if (bind(self->fd, (struct sockaddr*) &self->trans.self.inet,
+	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.inet,
 		 sizeof(struct sockaddr_in))) 
 	{
-		DEBUG(4, G_GNUC_FUNCTION "() bind() Failed\n");
+		DEBUG(0, G_GNUC_FUNCTION "() bind() Failed\n");
 		return -1;
 	}
 
-
-	if (listen(self->fd, 2)) {
-		DEBUG(4, G_GNUC_FUNCTION "() listen() Failed\n");
+	if (listen(self->serverfd, 2)) {
+		DEBUG(0, G_GNUC_FUNCTION "() listen() Failed\n");
 		return -1;
 	}
 
-	self->fd = accept(self->fd, (struct sockaddr *) &self->trans.peer.inet,
-			  &addrlen);
+	DEBUG(4, G_GNUC_FUNCTION "() Now listening for incomming connections. serverfd = %d\n", self->serverfd);
+	return 1;
+}
 
+/*
+ * Function inobex_accept (self)
+ *
+ *    Accept incoming connection.
+ *
+ */
+gint inobex_accept(obex_t *self)
+{
+	int addrlen = sizeof(struct sockaddr_in);
+
+	self->fd = accept(self->serverfd, (struct sockaddr *) 
+		&self->trans.peer.inet, &addrlen);
+
+	obex_delete_socket(self, self->serverfd);
+	self->serverfd = -1;
+
+	if(self->fd < 0)
+		return -1;
 
 	/* Just use the default MTU for now */
 	self->trans.mtu = OBEX_DEFAULT_MTU;
@@ -88,12 +105,9 @@ gint inobex_listen(obex_t *self, char *service)
 	if(self->async)	{
 		obex_register_async(self, self->fd);
 	}
-	
-
-//	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
-
-	return 0;
+	return 1;
 }
+	
 
 /*
  * Function inobex_connect_request (self)
@@ -106,7 +120,8 @@ gint inobex_connect_request(obex_t *self)
 	guchar *addr;
 	gint ret;
 
-	if(obex_create_socket(self, AF_INET, 0) < 0)
+	self->fd = obex_create_socket(self, AF_INET, 0);
+	if(self->fd < 0)
 		return -1;
 
 	/* Set these just in case */
@@ -123,6 +138,8 @@ gint inobex_connect_request(obex_t *self)
 		      sizeof(struct sockaddr_in));
 	if (ret < 0) {
 		DEBUG(4, G_GNUC_FUNCTION "() Connect failed\n");
+		obex_delete_socket(self, self->fd);
+		self->fd = -1;
 		return ret;
 	}
 
@@ -144,6 +161,12 @@ gint inobex_connect_request(obex_t *self)
  */
 gint inobex_disconnect_request(obex_t *self)
 {
-	return obex_delete_socket(self);
+	gint ret;
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	ret = obex_delete_socket(self, self->fd);
+	if(ret < 0)
+		return ret;
+	self->fd = -1;
+	return ret;	
 }
 

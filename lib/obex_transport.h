@@ -6,8 +6,8 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat May  1 20:16:45 1999
- * Modified at:   Mon May 24 19:44:41 1999
- * Modified by:   Dag Brattli <dagb@cs.uit.no>
+ * Modified at:   Sun Aug 13 12:45:08 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -59,9 +59,15 @@ typedef struct obex_transport {
 
 } obex_transport_t;
 
-struct obex_t;
+gint obex_transport_accept(obex_t *self);
 
-/* function declarations are in obex_main.h to avoid circular dependencies */
+gint obex_transport_handle_input(obex_t *self, gint timeout);
+gint obex_transport_connect_request(obex_t *self);
+void obex_transport_disconnect_request(obex_t *self);
+gint obex_transport_listen(obex_t *self, char *service);
+gint obex_transport_write(obex_t *self, GNetBuf *msg);
+gint obex_transport_read(obex_t *self, guint8 *buf, gint buflen);
+
 
 #endif OBEX_TRANSPORT_H
 

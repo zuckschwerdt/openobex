@@ -1,15 +1,16 @@
 /*********************************************************************
  *                
- * Filename:      cobex_R320.c
- * Version:       0.1
- * Description:   Talk OBEX over a serial port (Ericsson specific)
+ * Filename:      obex_test_cable.c
+ * Version:       0.3
+ * Description:   OBEX over a serial port in Linux. 
+ *                Can be used with an Ericsson R320s phone.
  * Status:        Experimental.
- * Author:        Pontus Fuchs <pontus@tactel.se>
+ * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Wed Nov 17 22:05:16 1999
- * Modified at:   Fri Nov 26 16:39:29 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Sun Aug 13 10:56:03 PM CEST 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
- *     Copyright (c) 1998, 1999, Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *      
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -28,43 +29,47 @@
  *     
  ********************************************************************/
 
-#define SERPORT "/dev/ttyS0"
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#include <signal.h>
 #include <unistd.h>
 #include <termios.h>
 
 #include <glib.h>
 #include <obex/obex.h>
-#include "cobex_R320.h"
+#include "obex_test_cable.h"
+#include "obex_test.h"
 
-int ttyfd = -1;
-char inputbuf[500];
-extern obex_t *handle;
-struct termios oldtio, newtio;
-
-
-/* Called when data arrives */
-void cobex_input_handler(int signal)
+//
+// Called when more data is needed.
+//
+gint cobex_handle_input(obex_t *handle)
 {
 	int actual;
+	struct context *gt_main;
+	struct cobex_context *gt;
 
-	g_print(__FUNCTION__ "()\n");
+	printf(G_GNUC_FUNCTION "()\n");
 
-	actual = read(ttyfd, &inputbuf, sizeof(inputbuf));
+	gt_main = OBEX_GetUserData(handle);
+	gt = gt_main->cobex_gt;
+
+	actual = read(gt->ttyfd, &gt->inputbuf, sizeof(gt->inputbuf));
 	g_print(__FUNCTION__ "() Read %d bytes\n", actual);
-	OBEX_CustomDataFeed(handle, inputbuf, actual);
+	if(actual <= 0)
+		return actual;
+	OBEX_CustomDataFeed(handle, gt->inputbuf, actual);
+	return actual;
 }
 
 
-/* Send an AT-command an expect 1 line back as answer */
+//
+//
+//
 int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 {
 	fd_set ttyset;
@@ -152,26 +157,32 @@ int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 }
 
 /* Set the phone in OBEX-mode */
-gint cobex_init(char *ttyname)
+gint cobex_init(struct cobex_context *gt)
 {
 	char rspbuf[200];
 
 	printf(__FUNCTION__ "()\n");
 
-	if( (ttyfd = open(ttyname, O_RDWR | O_NONBLOCK | O_NOCTTY, 0)) < 0 )	{
+	if( (gt->ttyfd = open(gt->portname, O_RDWR | O_NONBLOCK | O_NOCTTY, 0)) < 0 )	{
 		perror("Can' t open tty");
 		return -1;
 	}
 
-	tcgetattr(ttyfd, &oldtio);
-	bzero(&newtio, sizeof(newtio));
-	newtio.c_cflag = B115200 | CS8 | CREAD;
-	newtio.c_iflag = IGNPAR;
-	newtio.c_oflag = 0;
-	tcflush(ttyfd, TCIFLUSH);
-	tcsetattr(ttyfd, TCSANOW, &newtio);
+	tcgetattr(gt->ttyfd, &gt->oldtio);
+	bzero(&gt->newtio, sizeof(struct termios));
+	gt->newtio.c_cflag = B115200 | CS8 | CREAD;
+	gt->newtio.c_iflag = IGNPAR;
+	gt->newtio.c_oflag = 0;
+	tcflush(gt->ttyfd, TCIFLUSH);
+	tcsetattr(gt->ttyfd, TCSANOW, &gt->newtio);
 
-	if(cobex_do_at_cmd(ttyfd, "ATZ\r\n", rspbuf, sizeof(rspbuf)) < 0)	{
+
+	// If we don't speak to an R320s we are happy here.
+	if(!gt->r320)
+		return 1;
+
+	// Set up R320s phone in OBEX mode.
+	if(cobex_do_at_cmd(gt->ttyfd, "ATZ\r\n", rspbuf, sizeof(rspbuf)) < 0)	{
 		printf("Comm-error\n");
 		goto err;
 	}
@@ -181,7 +192,7 @@ gint cobex_init(char *ttyname)
 		goto err;
 	}
 
-	if(cobex_do_at_cmd(ttyfd, "AT*EOBEX\r\n", rspbuf, sizeof(rspbuf)) < 0)	{
+	if(cobex_do_at_cmd(gt->ttyfd, "AT*EOBEX\r\n", rspbuf, sizeof(rspbuf)) < 0)	{
 		printf("Comm-error\n");
 		goto err;
 	}
@@ -189,75 +200,99 @@ gint cobex_init(char *ttyname)
 		printf("Error doing AT*EOBEX (%s)\n", rspbuf);
 		goto err;
 	}
-	
-
-	return 1;
+		return 1;
 err:
-	cobex_cleanup(TRUE);
+	cobex_cleanup(gt, TRUE);
 	return -1;
 }
 
-/* Set up input-handler */
-int cobex_start_io(void)
+//
+// Close down. If force is TRUE. Try to break out of OBEX-mode.
+//
+void cobex_cleanup(struct cobex_context *gt, gboolean force)
 {
-	int oflags;
-	int ret;
-
-	signal(SIGIO, &cobex_input_handler);
-	fcntl(ttyfd, F_SETOWN, getpid());
-	oflags = fcntl(0, F_GETFL);
-	ret = fcntl(ttyfd, F_SETFL, oflags | FASYNC);
-	if(ret < 0)
-		return ret;
-	return 0;
-}
-
-void cobex_cleanup(int force)
-{
-	signal(SIGIO, SIG_IGN);
 	if(force)	{
 		// Send a break to get out of OBEX-mode
-		if(ioctl(ttyfd, TCSBRKP, 0) < 0)	{
+		if(ioctl(gt->ttyfd, TCSBRKP, 0) < 0)	{
 			printf("Unable to send break!\n");
 		}
 		sleep(1);
 	}
-	close(ttyfd);
-	ttyfd = -1;
+	close(gt->ttyfd);
+	gt->ttyfd = -1;
 }
 
 
+//
+// Do transport connect or listen
+//
 gint cobex_connect(obex_t *handle)
 {
-	printf(__FUNCTION__ "()\n");
+	struct context *gt_main;
+	struct cobex_context *gt;
 
-	if(ttyfd >= 0)	{
-		printf(__FUNCTION__ "() Already connected\n");
+	printf(G_GNUC_FUNCTION "()\n");
+	
+	gt_main = OBEX_GetUserData(handle);
+	gt = gt_main->cobex_gt;
+
+	if(gt->ttyfd >= 0)	{
+		printf(G_GNUC_FUNCTION "() fd already exist. Using it\n");
 		return 1;
 
 	}
-
-	if(cobex_init(SERPORT) < 0)
-		return -1;
-	if(cobex_start_io() < 0)
+	if(cobex_init(gt) < 0)
 		return -1;
 	return 1;
 }
 
+//
+// Do transport disconnect.
+//
 gint cobex_disconnect(obex_t *handle)
 {
-	printf(__FUNCTION__ "()\n");
-	cobex_cleanup(FALSE);
+	struct context *gt_main;
+	struct cobex_context *gt;
+
+	printf(G_GNUC_FUNCTION "()\n");
+	gt_main = OBEX_GetUserData(handle);
+	gt = gt_main->cobex_gt;
+
+	cobex_cleanup(gt, FALSE);
 	return 1;
 }
 
-/* Called from OBEX-lib when data needs to be written */
+//
+//  Called from OBEX-lib when data needs to be written
+//
 gint cobex_write(obex_t *handle, guint8 *buffer, gint length)
 {
+	struct context *gt_main;
+	struct cobex_context *gt;
 	int actual;
-	printf(__FUNCTION__ "()\n");
 
-	actual = write(ttyfd, buffer, length);
-	g_print(__FUNCTION__ "() Wrote %d bytes (expected %d)\n", actual, length);
+	printf(G_GNUC_FUNCTION "()\n");
+	gt_main = OBEX_GetUserData(handle);
+	gt = gt_main->cobex_gt;
+
+	actual = write(gt->ttyfd, buffer, length);
+	g_print(G_GNUC_FUNCTION "() Wrote %d bytes (expected %d)\n", actual, length);
 	return actual;
+}
+
+//
+// Set up cable OBEX. if r320 is true we will do some magic
+// AT-commands that puts an R320s phone in OBEX mode at connect-time.
+//
+struct cobex_context * cobex_setup(const gchar *port, gboolean r320)
+{
+	struct cobex_context *gt;
+	gt = g_malloc0(sizeof(struct cobex_context));
+	if (gt == NULL)
+		return NULL;
+	gt->ttyfd = -1;
+	gt->portname = port;
+	gt->r320 = r320;
+	return gt;
+
 }

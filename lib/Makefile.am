@@ -1,17 +1,17 @@
 # Targets
 
-lib_LTLIBRARIES = libobex.la
+lib_LTLIBRARIES = libopenobex.la
 
 INCLUDES = @GLIB_CFLAGS@ -I.
 
-libobexincludedir = $(includedir)/obex
+libopenobexincludedir = $(includedir)/obex
 
-libobex_la_LDFLAGS = \
+libopenobex_la_LDFLAGS = \
         -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
         -release $(LT_RELEASE) \
 	-export-symbols obex.sym
 
-libobex_la_SOURCES = \
+libopenobex_la_SOURCES = \
 	obex_main.c \
 	obex_connect.c \
 	obex.c \
@@ -24,7 +24,7 @@ libobex_la_SOURCES = \
 	inobex.c \
 	netbuf.c
 
-libobexinclude_HEADERS = \
+libopenobexinclude_HEADERS = \
 	obex.h \
 	obex_const.h
 

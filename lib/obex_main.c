@@ -6,7 +6,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Jul 17 23:02:02 1998
- * Modified at:   Thu Aug 3 22:00:00 2000
+ * Modified at:   Sun Aug 13 09:13:58 PM CEST 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
@@ -43,7 +43,6 @@
 #include <sys/types.h>
 
 #endif /* _WIN32 */
-
 
 #include <obex_main.h>
 #include <obex_header.h>
@@ -107,39 +106,39 @@ gint obex_register_async(obex_t *self, gint fd)
  */
 gint obex_create_socket(obex_t *self, gint domain, gboolean async)
 {
+	gint fd;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
-	/* We may be called even if we have a socket */
-	if(self->fd > 0)
-		return self->fd;
-		
-	self->fd = socket(domain, SOCK_STREAM, 0);
-	if(self->fd < 0)
-		return self->fd;
+	fd = socket(domain, SOCK_STREAM, 0);
+	if(fd < 0)
+		return fd;
 
 #ifdef HAVE_FASYNC
 	if(async) {
-		if(obex_register_async(self, self->fd) < 0)	{
-			close(self->fd);
-			self->fd = -1;
+		if(obex_register_async(self, fd) < 0)	{
+			close(fd);
+			fd = -1;
 			return -1;
 		}
 	}
 #endif
-	return self->fd;
+	return fd;
 }
 
 /*
- * Function obex_create_socket()
+ * Function obex_delete_socket()
  *
  *    Close socket if opened.
  *
  */
-gint obex_delete_socket(obex_t *self)
+gint obex_delete_socket(obex_t *self, gint fd)
 {
 	gint ret;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
+
+	if(fd < 0)
+		return fd;
 
 #ifdef HAVE_FASYNC
 	if(self->async) {
@@ -155,21 +154,14 @@ gint obex_delete_socket(obex_t *self)
 			signal(SIGIO, SIG_DFL);
 	}
 #endif
-	if(self->fd < 0)
-		return self->fd;
-	
-#ifdef _WIN32
-	ret = closesocket(self->fd);
-#else /* _WIN32 */
-	ret = close(self->fd);
-#endif /* _WIN32 */
-	if(ret < 0)
-		return ret;
-		
-	self->fd = -1;
-	return 0;
-}
 
+#ifdef _WIN32
+	ret = closesocket(fd);
+#else /* _WIN32 */
+	ret = close(fd);
+#endif /* _WIN32 */
+	return ret;
+}
 
 /*
  * Function input_handler (signal)
@@ -273,7 +265,7 @@ GString *obex_get_response_message(obex_t *self, gint rsp)
  */
 void obex_deliver_event(obex_t *self, gint mode, gint event, gint cmd, gint rsp, gboolean del)
 {
-	self->eventcb(self->object, mode, event, cmd, rsp);
+	self->eventcb(self, self->object, mode, event, cmd, rsp);
 	if(del) {
 		if(self->object)	{
 			obex_object_delete(self->object);
