@@ -1,4 +1,4 @@
-#define DEBUG_TCP 1
+//#define DEBUG_TCP 1
 
 #define IRCP_DEBUG 4
 #ifdef IRCP_DEBUG

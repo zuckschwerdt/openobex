@@ -1,3 +1,7 @@
+2000-08-22  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Most server-function shall now work too.
+
 2000-08-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Client now work. Can send files and dirs to Win2K

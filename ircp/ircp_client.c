@@ -3,12 +3,23 @@
 
 #include <string.h>
 
+
+
 #include "ircp_client.h"
 #include "ircp_io.h"
 
 #include "dirtraverse.h"
-
 #include "debug.h"
+#ifdef DEBUG_TCP
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#endif
+
 
 //
 //
@@ -22,7 +33,6 @@ void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 
 	switch (event)	{
 	case OBEX_EV_PROGRESS:
-		g_print(".");
 		break;
 	case OBEX_EV_REQDONE:
 		cli->finished = TRUE;
@@ -47,7 +57,7 @@ void cli_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 gint cli_sync_request(ircp_client_t *cli, obex_object_t *object)
 {
 	gint ret;
-	DEBUG(4, G_GNUC_FUNCTION "\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	cli->finished = FALSE;
 	OBEX_Request(cli->obexhandle, object);
@@ -71,10 +81,15 @@ ircp_client_t *ircp_cli_open()
 {
 	ircp_client_t *cli;
 
-	DEBUG(4, G_GNUC_FUNCTION "\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	cli = g_malloc0(sizeof(ircp_client_t));
 
+#ifdef DEBUG_TCP
+	cli->obexhandle = OBEX_Init(OBEX_TRANS_INET, cli_obex_event, 0);
+#else
 	cli->obexhandle = OBEX_Init(OBEX_TRANS_IRDA, cli_obex_event, 0);
+#endif
+
 	if(cli->obexhandle == NULL) {
 		g_free(cli);
 		return NULL;
@@ -88,7 +103,7 @@ ircp_client_t *ircp_cli_open()
 //
 void ircp_cli_close(ircp_client_t *cli)
 {
-	DEBUG(4, G_GNUC_FUNCTION "\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	g_return_if_fail(cli != NULL);
 
 	OBEX_Cleanup(cli->obexhandle);
@@ -103,10 +118,26 @@ gint ircp_cli_connect(ircp_client_t *cli)
 	obex_object_t *object;
 	int ret;
 
+
 	DEBUG(4, G_GNUC_FUNCTION "\n");
 	g_return_val_if_fail(cli != NULL, -1);
 
+#ifdef DEBUG_TCP
+	{
+		struct sockaddr_in peer;
+		u_long inaddr;
+		if ((inaddr = inet_addr("127.0.0.1")) != INADDR_NONE) {
+			memcpy((char *) &peer.sin_addr, (char *) &inaddr,
+			      sizeof(inaddr));  
+		}
+
+		ret = OBEX_TransportConnect(cli->obexhandle, (struct sockaddr *) &peer,
+					  sizeof(struct sockaddr_in));
+	}
+		
+#else
 	ret = IrOBEX_TransportConnect(cli->obexhandle, "OBEX:IrXfer");
+#endif
 	if (ret < 0) {
 		return -1;
 	}
@@ -171,6 +202,8 @@ gint ircp_setpath(ircp_client_t *cli, gchar *name, gboolean up)
 		setpath_nohdr_data[0] = 1;
 	}
 	else {
+		setpath_nohdr_data[0] = 2;		//Tell server to create dir if it does not exist.
+
 		ucname_len = strlen(name)*2 + 2;
 		ucname = g_malloc(ucname_len);
 		if(ucname == NULL) {
@@ -200,9 +233,11 @@ gint ircp_visit(gint action, gchar *name, gchar *path, gpointer userdata)
 	switch(action) {
 	case VISIT_FILE:
 		// Strip /'s before sending file
-		remotename = strrchr(name, '/') + 1;
+		remotename = strrchr(name, '/');
 		if(remotename == NULL)
 			remotename = name;
+		else
+			remotename++;
 		ret = ircp_put_file(userdata, name, remotename);
 		break;
 

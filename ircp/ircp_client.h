@@ -17,7 +17,6 @@ ircp_client_t *ircp_cli_open();
 void ircp_cli_close(ircp_client_t *cli);
 gint ircp_cli_connect(ircp_client_t *cli);
 gint ircp_cli_disconnect(ircp_client_t *cli);
-//gint ircp_put_file(ircp_client_t *cli, gchar *localname, gchar *remotename);
 gint ircp_put(ircp_client_t *cli, gchar *name);
 	
 #endif

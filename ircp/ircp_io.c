@@ -7,6 +7,8 @@
 #include <glib.h>
 #include <openobex/obex.h>
 
+#include "debug.h"
+
 //
 // Get the filesize.
 //
@@ -103,3 +105,99 @@ err:
 		OBEX_ObjectDelete(handle, object);
 	return NULL;
 }
+
+//
+// Check for dangerous filenames (TODO: Make better)
+//
+gboolean ircp_nameok(gchar *name)
+{
+	if(name[0] == '/')
+		return FALSE;
+
+	if(strlen(name) == 3 && name[0] == '.' && name[1] == '.' && name[2] == '/')
+		return FALSE;
+
+	return TRUE;
+}
+	
+
+
+//
+// Save a file...
+//
+gint ircp_save_file(gchar *path, gchar *name, gchar *body, guint len)
+{
+	GString *diskname;
+	gint fd, ret;
+
+	//Check for dangerous filenames
+	if(ircp_nameok(name) == FALSE)
+		return -1;
+
+	diskname = g_string_new(path);
+
+	g_string_append(diskname, "/");
+	g_string_append(diskname, name);
+
+	DEBUG(4, G_GNUC_FUNCTION "() Going to save with name %s\n", diskname->str);
+
+	fd = open(diskname->str, O_RDWR | O_CREAT, DEFFILEMODE);
+
+	if ( fd < 0) {
+		ret = -1;
+		goto out;
+	}
+
+	ret = write(fd, body, len);
+	close(fd);
+
+	DEBUG( 4, G_GNUC_FUNCTION "() Wrote %s (%d bytes)\n", diskname->str, ret);
+
+out:
+	g_string_free(diskname, TRUE);
+	return ret;
+}
+
+//
+// Go to a directory. Create if not exists and create is true.
+//
+gint ircp_changedir(gchar *path, gchar *dir, gboolean create)
+{
+	GString *newpath;
+	struct stat statbuf;
+	gint ret = -1;
+
+	if(ircp_nameok(dir) == FALSE)
+		return -1;
+
+	newpath = g_string_new(path);
+	g_string_append(newpath, "/");
+	g_string_append(newpath, dir);
+
+	DEBUG(4, G_GNUC_FUNCTION "() path = %s dir = %s, create = %d\n", path, dir, create);
+	if(stat(newpath->str, &statbuf) == 0) {
+		// If this directory aleady exist we are happy
+		if(S_ISDIR(statbuf.st_mode)) {
+			DEBUG(4, G_GNUC_FUNCTION "() Using existing dir\n");
+			ret = 1;
+			goto out;
+		}
+		else  {
+			// A non-directory with this name already exist.
+			DEBUG(4, G_GNUC_FUNCTION "() A non-dir called %s already exist\n", newpath->str);
+			ret = -1;
+			goto out;
+		}
+	}
+	if(create) {
+		DEBUG(4, G_GNUC_FUNCTION "() Will try to create %s\n", newpath->str);
+		ret = mkdir(newpath->str, DEFFILEMODE);
+	}
+	else {
+		ret = -1;
+	}
+
+out:	g_string_free(newpath, TRUE);
+	return ret;
+}
+	

@@ -251,7 +251,7 @@ void ircp_srv_close(ircp_server_t *srv)
 //
 gint ircp_srv_recv(ircp_server_t *srv, gchar *inbox)
 {
-	if(OBEX_ServerRegister(srv->obexhandle, "OBEX") < 0)
+	if(OBEX_ServerRegister(srv->obexhandle, "OBEX:IrXfer") < 0)
 		return -1;
 
 	srv->origdir = inbox;
