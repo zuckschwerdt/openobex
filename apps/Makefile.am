@@ -17,6 +17,8 @@ obex_test_SOURCES = \
 	obex_test_server.c obex_test_server.h \
 	obex_test_cable.c obex_test_cable.h
 
+obex_test_LDADD = @OPENOBEX_LIBS@ @BLUETOOTH_LIBS@ libmisc.a
+
 obex_tcp_SOURCES = obex_tcp.c
 
 irxfer_SOURCES = irxfer.c
@@ -24,7 +26,7 @@ irxfer_SOURCES = irxfer.c
 irobex_palm3_SOURCES = irobex_palm3.c
 
 
-LDADD = @OPENOBEX_LIBS@ @BLUETOOTH_LIBS@ libmisc.a
+LDADD = @OPENOBEX_LIBS@ libmisc.a
 
 INCLUDES = @OPENOBEX_CFLAGS@ @BLUETOOTH_CFLAGS@
 
