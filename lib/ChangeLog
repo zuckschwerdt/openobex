@@ -2,6 +2,8 @@
 
 	* Fixed a memleak when doing IrDA-discovery.
 	* Fixed irda-check.m4 to really check for IrDA.
+	* Added check to see if SIGIO is supported.
+	  Hopefully this syuff compiles on solaris now.
 
 2000-07-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
 

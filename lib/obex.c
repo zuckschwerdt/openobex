@@ -61,6 +61,14 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	obex_net_debug = NET_DEBUG;
 #endif
 
+
+#ifndef HAVE_FASYNC
+	if(flags & OBEX_FL_ASYNC) {
+		g_message("This platform doesn't support async IO\n");
+		return NULL;
+	}
+#endif
+
 	g_return_val_if_fail(eventcb != NULL, NULL);
 
 	self = (obex_t*) g_malloc(sizeof(obex_t));
@@ -72,8 +80,10 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 
 	self->eventcb = eventcb;
 
-	if(flags & OBEX_FL_ASYNC)
+	if(flags & OBEX_FL_ASYNC) {
 		self->async = 1;
+	}
+
 
 	/* Init transport */
 	self->trans.type = transport;

@@ -22,18 +22,15 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 dnl Checks for library functions.
 IRDA_CHECK
 
-
-
-##Check if we can do async IO
+#Check if we can do async IO
 AC_CACHE_CHECK([If we can use FASYNC],am_cv_fasync_found,[
 
 	AC_TRY_COMPILE([#include <fcntl.h>],
 	[int i = FASYNC;],
 	am_cv_fasync_found=yes
-	AC_DEFINE(HAVE_FASYNC, 1),
+	AC_DEFINE(HAVE_FASYNC, 1, [Define if platform support async IO using SIGIO]),
 	am_cv_fasync_found=no)
 ])
-
 
 dnl Use -Wall if we have gcc, and use -ansi -pedantic if ansi is enabled.
 changequote(,)dnl

@@ -6,8 +6,8 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Jul 17 23:02:02 1998
- * Modified at:   Mon Nov 29 18:15:22 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * Modified at:   Thu Aug 3 22:00:00 2000
+ * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
@@ -45,17 +45,20 @@
 #include <obex_client.h>
 #include <obex_const.h>
 
+#ifdef HAVE_ASYNC
 obex_t *async_self[OBEX_MAXINSTANCE] = {NULL, }; /* Which instances wants SIGIO */
 pid_t async_pid[OBEX_MAXINSTANCE] = {0, };
+#endif
 
 /*
- * Function obex_register_async (signal)
+ * Function obex_register_async()
  *
  *    
  *
  */
 gint obex_register_async(obex_t *self, gint fd)
 {
+#ifdef HAVE_ASYNC
 	gint oflags;
 	gint i;
 	gboolean ok = FALSE;
@@ -84,6 +87,9 @@ gint obex_register_async(obex_t *self, gint fd)
 	if(!ok)
 		return -1;
 	return self->fd;
+#else
+	return -1;
+#endif
 }
 
 
@@ -124,21 +130,23 @@ gint obex_create_socket(obex_t *self, gint domain, gboolean async)
 gint obex_delete_socket(obex_t *self)
 {
 	gint ret;
-	gint i;
-	gint cnt = 0;
 
 	DEBUG(4, __FUNCTION__ "()\n");
 
-	/* Remove handle from async-array */
-	for(i=0; i<OBEX_MAXINSTANCE ;i++) {
-		if(async_self[i] == self)
-			async_self[i] = NULL;
-		if(async_self[i])
-			cnt++;
+#ifdef HAVE_ASYNC
+	if(self->async) {
+		gint i, cnt = 0;
+		/* Remove handle from async-array */
+		for(i=0; i<OBEX_MAXINSTANCE ;i++) {
+			if(async_self[i] == self)
+				async_self[i] = NULL;
+			if(async_self[i])
+				cnt++;
+		}
+		if(cnt == 0)
+			signal(SIGIO, SIG_DFL);
 	}
-	if(cnt == 0)
-		signal(SIGIO, SIG_DFL);
-
+#endif
 	if(self->fd < 0)
 		return self->fd;
 	
@@ -159,6 +167,7 @@ gint obex_delete_socket(obex_t *self)
  */
 void obex_input_handler(int signal)
 {
+#ifdef HAVE_ASYNC
 	gint i;
 	pid_t curr_pid;
 	
@@ -170,6 +179,7 @@ void obex_input_handler(int signal)
 			obex_data_indication(async_self[i], NULL, 0);
 		}
 	}
+#endif
 }
 
 /*
