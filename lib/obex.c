@@ -507,12 +507,13 @@ int OBEX_Request(obex_t *self, obex_object_t *object)
 {
 	DEBUG(4, "\n");
 
+	obex_return_val_if_fail(self != NULL, -1);
+
 	if (self->object)	{
 		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 
-	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(object != NULL, -1);
 
 	self->object = object;
@@ -910,12 +911,13 @@ int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
      	DEBUG(4, "\n");
 
+	obex_return_val_if_fail(self != NULL, -1);
+
 	if (self->object)	{
 		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 
-	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(saddr != NULL, -1);
 
 	inobex_prepare_connect(self, saddr, addrlen);
@@ -957,12 +959,12 @@ int IrOBEX_TransportConnect(obex_t *self, const char *service)
 {
      	DEBUG(4, "\n");
 
+	obex_return_val_if_fail(self != NULL, -1);
+
 	if (self->object)	{
 		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
-
-	obex_return_val_if_fail(self != NULL, -1);
 
 #ifdef HAVE_IRDA
 	irobex_prepare_connect(self, service);
@@ -1009,12 +1011,13 @@ int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t 
 {
 	DEBUG(4, "\n");
 
+	obex_return_val_if_fail(self != NULL, -1);
+
 	if (self->object)	{
 		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
 
-	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(dst != NULL, -1);
 
 #ifdef HAVE_BLUETOOTH
@@ -1039,11 +1042,12 @@ int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
 {
 	DEBUG(4, "\n");
 
+	obex_return_val_if_fail(self != NULL, -1);
+
 	if (self->object)	{
 		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
-	obex_return_val_if_fail(self != NULL, -1);
 	self->fd = rfd;
 	self->writefd = wfd;
 	self->trans.mtu = mtu ? mtu : self->mtu_tx_max;
