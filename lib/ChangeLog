@@ -2,6 +2,7 @@
 
 	* Change Bluetooth MTU to OBEX_DEFAULT_MTU
 	* Change type of RFCOMM channel to uint8_t
+	* Return static strings from obex_get_response_message()
 
 2002-10-29  Dmitry Kasatkin  <dmitry.kasatkin@nokia.com>
 

@@ -113,72 +113,51 @@ int obex_delete_socket(obex_t *self, int fd)
 /*
  * Function obex_get_last_response_message (self)
  *
- *    Return a GSting of an OBEX-response
+ *    Return a string of an OBEX-response
  *
  */
 char *obex_get_response_message(obex_t *self, int rsp)
 {
-	char *string;
-
 	obex_return_val_if_fail(self != NULL, NULL);
 
 	switch (rsp) {
 	case OBEX_RSP_CONTINUE:
-		string = strdup("Continue");
-		break;
+		return "Continue";
 	case OBEX_RSP_SWITCH_PRO:
-		string = strdup("Switching protocols");
-		break;
+		return "Switching protocols";
 	case OBEX_RSP_SUCCESS:
-		string = strdup("OK, Success");
-		break;
+		return "OK, Success";
 	case OBEX_RSP_CREATED:
-		string = strdup("Created");
-		break;
+		return "Created";
 	case OBEX_RSP_ACCEPTED:
-		string = strdup("Accepted");
-		break;	
+		return "Accepted";
 	case OBEX_RSP_NO_CONTENT:
-		string = strdup("No Content");
-		break;
+		return "No Content";
 	case OBEX_RSP_BAD_REQUEST:
-		string = strdup("Bad Request");
-		break;
+		return "Bad Request";
 	case OBEX_RSP_UNAUTHORIZED:
-		string = strdup("Unautorized");
-		break;
+		return "Unautorized";
 	case OBEX_RSP_PAYMENT_REQUIRED:
-		string = strdup("Payment required");
-		break;
+		return "Payment required";
 	case OBEX_RSP_FORBIDDEN:
-		string = strdup("Forbidden");
-		break;
+		return "Forbidden";
 	case OBEX_RSP_NOT_FOUND:
-		string = strdup("Not found");
-		break;
+		return "Not found";
 	case OBEX_RSP_METHOD_NOT_ALLOWED:
-		string = strdup("Method not allowed");
-		break;
+		return "Method not allowed";
 	case OBEX_RSP_CONFLICT:
-		string = strdup("Conflict");
-		break;
+		return "Conflict";
 	case OBEX_RSP_INTERNAL_SERVER_ERROR:
-		string = strdup("Internal server error");
-		break;
+		return "Internal server error";
 	case OBEX_RSP_NOT_IMPLEMENTED:
-		string = strdup("Not implemented!");
-		break;
+		return "Not implemented!";
 	case OBEX_RSP_DATABASE_FULL:
-		string = strdup("Database full");
-		break;
+		return "Database full";
 	case OBEX_RSP_DATABASE_LOCKED:
-		string = strdup("Database locked");
-		break;
+		return "Database locked";
 	default:
-		string = strdup("Unknown response");
-		break;
+		return "Unknown response";
 	}
-	return string;
 }
 
 /*
