@@ -132,12 +132,12 @@ int main (int argc, char *argv[])
 	gboolean cobex = FALSE, tcpobex = FALSE, r320 = FALSE;
 	obex_t *handle;
 
+	struct context global_context = {0,};
 
 #ifndef _WIN32
 
 	gchar *port;
 	obex_ctrans_t custfunc;
-	struct context global_context = {0,};
 
 	if( (argc == 2 || argc ==3) && (strcmp(argv[1], "-s") == 0 ) )
 		cobex = TRUE;

@@ -12,7 +12,7 @@ CFLAGS = -I. -I$(GLIB)
 all : \
         irobex_palm3.exe \
 		obex_tcp.exe  \
-		irobex_test.exe
+		obex_test.exe
 
 irobex_palm3_OBJECTS = \
 	irobex_palm3.obj
@@ -21,7 +21,9 @@ obex_tcp_OBJECTS = \
 	obex_tcp.obj
 
 irobex_test_OBJECTS = \
-	irobex_test.obj
+	obex_test.obj \
+	obex_test_client.obj \
+	obex_test_server.obj
 
 obex_io_OBJECTS = \
 	obex_io.obj
@@ -30,8 +32,8 @@ obex_put_common_OBJECTS = \
 	obex_put_common.obj \
 	obex_io.obj
 
-irobex_test.exe : $(irobex_test_OBJECTS) $(obex_io_OBJECTS)
-	$(CC) $(CFLAGS) $(irobex_test_OBJECTS) $(obex_io_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib $(LDFLAGS)
+obex_test.exe : $(irobex_test_OBJECTS) $(obex_io_OBJECTS)
+	$(CC) $(CFLAGS) $(irobex_test_OBJECTS) $(obex_io_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib wsock32.lib $(LDFLAGS)
 
 irobex_palm3.exe : $(irobex_palm3_OBJECTS) $(obex_put_common_OBJECTS)
 	$(CC) $(CFLAGS) $(irobex_palm3_OBJECTS) $(obex_put_common_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib $(LDFLAGS)
