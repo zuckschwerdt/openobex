@@ -1,6 +1,7 @@
 2000-11-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Removed the async support.
+	* Fixed irobex.c compilation on win32 (which Jean's patch broke).
 	* Bumped version to 0.9.7
 
 2000-11-20  Pontus Fuchs  <pontus.fuchs@tactel.se>

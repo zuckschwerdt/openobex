@@ -235,13 +235,13 @@ static gint irobex_discover_devices(obex_t *self)
 		return(-1);
 	}
 
-	/* Did we got any ? (in some rare cases, this test is true) */
+#ifndef _WIN32
+	/* Did we get any ? (in some rare cases, this test is true) */
 	if (list->len <= 0) {
 		DEBUG(1, "Didn't find any devices!\n");
 		return(-1);
 	}
 
-#ifndef _WIN32
 	/* List all Obex devices : Linux case */
 	DEBUG(1, "Discovered %d devices :\n", list->len);
 	for(i = 0; i < list->len; i++) {

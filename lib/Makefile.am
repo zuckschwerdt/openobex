@@ -31,4 +31,5 @@ EXTRA_DIST = \
 	obex.sym \
 	obex.def \
 	makefile.msc \
-	win32compat.c
+	win32compat.c \
+	windeps.dep
