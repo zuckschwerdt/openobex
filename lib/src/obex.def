@@ -2,6 +2,8 @@ EXPORTS
 OBEX_Init
 OBEX_Cleanup
 OBEX_RegisterCTransport
+OBEX_SetCustomData
+OBEX_GetCustomData
 OBEX_TransportConnect
 OBEX_TransportDisconnect
 OBEX_CustomDataFeed
@@ -23,5 +25,12 @@ OBEX_ObjectSetNonHdrData
 OBEX_ObjectSetHdrOffset
 OBEX_UnicodeToChar
 OBEX_CharToUnicode
+OBEX_ResponseToString
 OBEX_GetResponseMessage
+InOBEX_ServerRegister
+InOBEX_TransportConnect
+IrOBEX_ServerRegister
 IrOBEX_TransportConnect
+BtOBEX_ServerRegister
+BtOBEX_TransportConnect
+FdOBEX_TransportSetup
