@@ -355,11 +355,8 @@ static int do_write(int fd, GNetBuf *msg, int mtu)
 		DEBUG(1, __FUNCTION__ "(), sending %d bytes\n", size);
 
 		actual = write(fd, msg->data, size);
-		if (actual < 0) {
-			perror("send");
+		if (actual <= 0)
 			return actual;
-		} else if (actual == 0)	/* disconnect */
-			return 0;
 			
 		/* Hide sent data */
 		g_netbuf_pull(msg, size);
