@@ -21,8 +21,6 @@ OBEX_ObjectSetRsp
 OBEX_ObjectGetNonHdrData
 OBEX_ObjectSetNonHdrData
 OBEX_ObjectSetHdrOffset
-OBEX_ObjectSetUserData
-OBEX_ObjectGetUserData
 OBEX_UnicodeToChar
 OBEX_CharToUnicode
 OBEX_GetResponseMessage

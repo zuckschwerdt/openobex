@@ -326,3 +326,35 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 
 	return actual;
 }
+
+/*
+ * Function obex_cancel_request ()
+ *
+ *    Cancel an ongoing request
+ *
+ */
+gint obex_cancelrequest(obex_t *self, gboolean sendabort)
+{
+	/* If we have no ongoing request do nothing */
+	if(self->object == NULL)
+		return 0;
+
+	/* Abort request without sending abort (client)
+	   or unauthorized (server) */
+	
+	if(!sendabort) {
+		obex_object_delete(self->object);
+		self->object = NULL;
+		g_netbuf_recycle(self->tx_msg);
+		g_netbuf_recycle(self->rx_msg);
+		obex_deliver_event(self, OBEX_EV_ABORT, 0, 0, TRUE);
+		/* Since we didn't send ABORT to peer we are out of sync
+		   and need to disconnect transport immediately, so we signal
+		   link error to app */
+		obex_deliver_event(self, OBEX_EV_LINKERR, 0, 0, TRUE);
+		return 1;
+	}
+	/* Do a "nice" abort */
+	self->object->abort = TRUE;
+	return 0;
+}

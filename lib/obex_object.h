@@ -69,8 +69,8 @@ typedef struct {
 
 	gint hinted_body_len;		/* Hinted body-length or 0 */
 	gint totallen;			/* Size of all headers */
-	gpointer userdata;		/* Up to the user */
-
+        gboolean abort;			/* Request shall be aborted */
+	
 	const guint8 *s_buf;		/* Pointer to streaming data */
 	guint s_len;			/* Length of stream-data */
         guint s_offset;			/* Current offset in buf */
@@ -78,7 +78,6 @@ typedef struct {
         gboolean s_srv;			/* Deliver body as stream when server */
 
 } obex_object_t;
-
 
 
 obex_object_t *obex_object_new(void);

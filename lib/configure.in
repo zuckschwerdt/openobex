@@ -73,6 +73,7 @@ AC_OUTPUT([
 openobex.spec
 Makefile
 openobex-config
-src/Makefile],[case "$CONFIG_FILES" in
+src/Makefile
+doc/Makefile],[case "$CONFIG_FILES" in
 *openobex-config*)chmod +x openobex-config;;
 esac])

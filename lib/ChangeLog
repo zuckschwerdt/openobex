@@ -1,3 +1,9 @@
+2000-12-06  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Removed OBEX_Object(G|S)etUserData as they were not needed.
+	* Documented the API, and added a DocBook-based doc-system
+	  (actually I just copied the Linux Kernel documentation-system).
+	
 2000-12-05  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Pass timeout to handleinput when using a custom transport.

@@ -585,13 +585,13 @@ static void obex_object_receive_stream(obex_t *self, guint8 hi,
 	object->s_len = len;
 	
 	/* Notify app that data has arrived */
-	obex_deliver_event(self, OBEX_EV_STREAMFULL, 0, 0, FALSE);
+	obex_deliver_event(self, OBEX_EV_STREAMAVAIL, 0, 0, FALSE);
 	
 	/* If send send EOS to app */
 	if(hi == OBEX_HDR_BODY_END && len != 0) {
 		object->s_buf = source;
 		object->s_len = 0;
-		obex_deliver_event(self, OBEX_EV_STREAMFULL, 0, 0, FALSE);
+		obex_deliver_event(self, OBEX_EV_STREAMAVAIL, 0, 0, FALSE);
 	}
 }
 

@@ -66,7 +66,7 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 		DEBUG(4, G_GNUC_FUNCTION "()\n");
 		g_return_val_if_fail(self != NULL, -1);
 
-		// Check of we have any fd's to do select on.
+		/* Check of we have any fd's to do select on. */
 		if(self->fd < 0 && self->serverfd < 0) {
 			DEBUG(0, G_GNUC_FUNCTION "() No valid socket is open\n");
 			return -1;
@@ -75,7 +75,7 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 		time.tv_sec = timeout;
 		time.tv_usec = 0;
 
-		// Add the fd's to the set.
+		/* Add the fd's to the set. */
 		FD_ZERO(&fdset);
 		if(self->fd >= 0) {
 			FD_SET(self->fd, &fdset);
@@ -150,7 +150,6 @@ gint obex_transport_accept(obex_t *self)
 }
 
 
-
 /*
  * Function obex_transport_connect_request (self, service)
  *
@@ -184,7 +183,7 @@ gint obex_transport_connect_request(obex_t *self)
 		break;
 
 	default:
-		g_message(G_GNUC_FUNCTION "(), domain not implemented!\n");
+		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
 		break;
 	}
 	if (ret >= 0)

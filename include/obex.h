@@ -74,13 +74,11 @@ gint		OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi,
 gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
 					obex_headerdata_t *hv,
 					guint32 *hv_size);
-gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 cmd, guint8 lastcmd);
+gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 rsp, guint8 lastrsp);
 
 gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer);
-gint OBEX_ObjectSetNonHdrData(obex_object_t *object, guint8 *buffer, guint len);
+gint OBEX_ObjectSetNonHdrData(obex_object_t *object, const guint8 *buffer, guint len);
 gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset);
-void OBEX_ObjectSetUserData(obex_object_t *object, gpointer data);
-gpointer OBEX_ObjectGetUserData(obex_object_t *object);
 gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **buf);
 
 gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size);

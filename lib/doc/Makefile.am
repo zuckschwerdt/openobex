@@ -9,7 +9,7 @@ openobex.sgml: openobex.tmpl docproc ../src/obex.c
 	$(top_srcdir)/doc/docproc <$< >$@
 
 clean:
-	-$(RM) openobex.sgml openobex.dvi openobex.ps openobex.tex openobex.log openobex.aux
+	-$(RM) openobex.sgml openobex.dvi openobex.ps openobex.tex openobex.log openobex.aux openobex.pdf
 	-$(RM) -rf openobex
 	
 %.ps : %.sgml

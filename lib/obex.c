@@ -3,7 +3,7 @@
  * Filename:      obex.c
  * Version:       0.9
  * Description:   API to be used by applications wanting to use OBEX
- * Status:        Experimental.
+ * Status:        Stable.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat Apr 17 16:50:25 1999
  * CVS ID:        $Id$
@@ -52,11 +52,13 @@
 #include "irobex.h"
 #endif
 
-/*
- * Function OBEX_Init ()
+/**
+ * OBEX_Init - Initialize OBEX.
+ * @transport: %OBEX_TRANS_IRDA, %OBEX_TRANS_INET or %OBEX_TRANS_CUST
+ * @eventcb: Function pointer to your event-callback.
+ * @flags: Bitmask of flags. See obex_const.h or available flags
  *
- *    Initialize OBEX
- *
+ * Returns an OBEX handle or %NULL on error.
  */
 obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 {
@@ -70,7 +72,7 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 
 #ifdef _WIN32
 	{
-		WSADATA WSAData;	 // Contains details of the Winsocket implementation
+		WSADATA WSAData;
 	  	if (WSAStartup (MAKEWORD(2,0), &WSAData) != 0) {
 			g_message("WSAStartup failed\n");
 			return NULL;
@@ -123,11 +125,14 @@ out_err:
 	return NULL;
 }
 
-/*
- * Function OBEX_RegisterCTransport()
+/**
+ * OBEX_RegisterCTransport - Register a custom transport
+ * @self: OBEX handle
+ * @ctrans: Structure with callbacks to transport operations
+ * (see obex_const.h for details)
  *
- *    Register a custom transport.
- *
+ * Call this function directly after OBEX_Init if you are using
+ * a custom transport.
  */
 gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
 {
@@ -138,11 +143,11 @@ gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
 	return 1;
 }
 
-/*
- * Function OBEX_Cleanup (self)
+/**
+ * OBEX_Cleanup - Close down an OBEX instance
+ * @self: OBEX handle
  *
- *    Call this when your're finished using OBEX
- *
+ * Close down an OBEX instance.
  */
 void OBEX_Cleanup(obex_t *self)
 {
@@ -161,11 +166,10 @@ void OBEX_Cleanup(obex_t *self)
 }
 
 
-/*
- * Function OBEX_ObjectSetUserData()
- *
- *    Set userdata on handle
- *
+/**
+ * OBEX_SetUserData - Set userdata of an OBEX handle
+ * @self: OBEX handle
+ * @data: It's all up to you!
  */
 void OBEX_SetUserData(obex_t *self, gpointer data)
 {
@@ -173,11 +177,9 @@ void OBEX_SetUserData(obex_t *self, gpointer data)
 	self->userdata=data;
 }
 
-/*
- * Function OBEX_GetUserData()
- *
- *    Get userdata from handle
- *
+/**
+ * OBEX_GetUserData - Read the userdata from an OBEX handle
+ * @self: OBEX handle
  */
 gpointer OBEX_GetUserData(obex_t *self)
 {
@@ -185,11 +187,12 @@ gpointer OBEX_GetUserData(obex_t *self)
 	return self->userdata;
 }
 
-/*
- * Function OBEX_ServerRegister (self, service)
+/**
+ * OBEX_ServerRegister - Start listening for incoming connections
+ * @self: OBEX handle
+ * @service: Service to bind to. Only used then using IrDA transport.
  *
- *    Register server interest in OBEX
- *
+ * Returns -1 on error.
  */
 gint OBEX_ServerRegister(obex_t *self, const char *service)
 {
@@ -202,13 +205,16 @@ gint OBEX_ServerRegister(obex_t *self, const char *service)
 }
 
 
-/*
- * Function OBEX_ServerAccept (server, eventcb, data)
+/**
+ * OBEX_ServerAccept - Accept an incming connection
+ * @server: OBEX handle
+ * @eventcb: Event-callback for client (use %NULL for same as server)
+ * @data: Userdata for client (use %NULL for same as server)
  *
- *    Accept an Obex connection
- *
- * Create a new Obex instance to handle the incomming connection.
+ * Create a new OBEX instance to handle the incomming connection.
  * The old instance will continue to listen for new conenctions.
+ *
+ * Returns the client instance or %NULL for error.
  */
 obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
 {
@@ -280,11 +286,13 @@ out_err:
 }
 
 
-/*
- * Function OBEX_HandleInput (self, timeout)
+/**
+ * OBEX_HandleInput - Let OBEX do some work
+ * @self: OBEX handle
+ * @timeout: Maximum time to wait in seconds
  *
- *    Let the parser do some processing.
- *
+ * Like select() this function returns -1 on error, 0 on timeout or
+ * positive on success.
  */
 gint OBEX_HandleInput(obex_t *self, gint timeout)
 {
@@ -294,11 +302,11 @@ gint OBEX_HandleInput(obex_t *self, gint timeout)
 }
 
 
-/*
- * Function OBEX_CustomDataFeed()
- *
- *    Used to feed the parser with data when using a custom transport.
- *
+/**
+ * OBEX_CustomDataFeed - Feed OBEX with data when using a custom transport
+ * @self: OBEX handle
+ * @inputbuf: Pointer to custom data
+ * @actual: Length of buffer
  */
 gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
 {
@@ -311,10 +319,13 @@ gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
 }
 
 
-/*
- * Function OBEX_TransportConnect ()
+/**
+ * OBEX_TransportConnect - Try to connect to peer
+ * @self: OBEX handle
+ * @saddr: Address to connect to
+ * @addrlen: Length of address
  *
- *    Try to connect to peer.
+ * Returns -1 on error.
  *
  */
 gint OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
@@ -330,11 +341,9 @@ gint OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 }
 
 
-/*
- * Function OBEX_TransportDisconnect ()
- *
- *    Disconnect transport.
- *
+/**
+ * OBEX_TransportDisconnect - Disconnect transport
+ * @self: OBEX handle
  */
 gint OBEX_TransportDisconnect(obex_t *self)
 {
@@ -347,10 +356,11 @@ gint OBEX_TransportDisconnect(obex_t *self)
 
 
 /*
- * Function IrOBEX_TransportConnect ()
+ * IrOBEX_TransportConnect - Connect Irda transport
+ * @self: OBEX handle
+ * @service: IrIAS service name to connect to
  *
- *    An easier connect function to use for IrDA (IrOBEX) only
- *
+ * An easier connect function to use for IrDA (IrOBEX) only.
  */
 gint IrOBEX_TransportConnect(obex_t *self, const char *service)
 {
@@ -372,12 +382,16 @@ gint IrOBEX_TransportConnect(obex_t *self, const char *service)
 #endif /* HAVE_IRDA */
 }
 
-
-/*
- * Function OBEX_GetFD ()
+/**
+ * OBEX_GetFD - Get FD
+ * @self: OBEX handle
  *
- *    Get FD
+ * Returns the filedescriptor of the transport. Returns -1 on error.
+ * Note that if you for example have a custom transport, no fd
+ * is available.
  *
+ * The returned filehandle can be used to do select() on, before
+ * calling OBEX_HandleInput()
  */
 gint OBEX_GetFD(obex_t *self)
 {
@@ -387,15 +401,16 @@ gint OBEX_GetFD(obex_t *self)
 	return self->fd;
 }
 
-/*
- * Function OBEX_Request ()
+/**
+ * OBEX_Request - Start a request (as client)
+ * @self: OBEX handle
+ * @object: Object containing request
  *
- *    Send away a client-request.
- *
+ * Returns regative on error.
  */
 gint OBEX_Request(obex_t *self, obex_object_t *object)
 {
-	DEBUG(3, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	if (self->object)	{
 		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
@@ -413,25 +428,23 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
 }
 
 
-/*
- * Function OBEX_CancelRequest (self)
- *
- *    Cancel an ongoing tranfer
- *
+/**
+ * OBEX_CancelRequest - Cancel an ongoing operation
+ * @self: OBEX handle
  */
 gint OBEX_CancelRequest(obex_t *self)
 {
-	g_print(G_GNUC_FUNCTION "() Not implemented yet!\n");
 	g_return_val_if_fail(self != NULL, -1);
-	return -1;
+	return obex_cancelrequest(self, FALSE);
 }
 
 
-/*
- * Function OBEX_ObjectNew ()
+/**
+ * OBEX_ObjectNew - Create a new OBEX Object
+ * @self: OBEX handle
+ * @cmd: command of object
  *
- *    Create a new OBEX-object.
- *
+ * Returns a pointer to a new OBEX Object or %NULL on error.
  */
 obex_object_t *OBEX_ObjectNew(obex_t *self, guint8 cmd)
 {
@@ -453,36 +466,13 @@ obex_object_t *OBEX_ObjectNew(obex_t *self, guint8 cmd)
 	return object;
 }
 
-/*
- * Function OBEX_ObjectSetUserData()
+/**
+ * OBEX_ObjectDelete - Delete an OBEX object
+ * @self: OBEX handle
+ * @object: object to delete.
  *
- *    Set userdata on object
- *
- */
-void OBEX_ObjectSetUserData(obex_object_t *object, gpointer data)
-{
-	g_return_if_fail(object != NULL);
-	object->userdata=data;
-}
-
-/*
- * Function OBEX_ObjectGetUserData()
- *
- *    Get userdata from object
- *
- */
-gpointer OBEX_ObjectGetUserData(obex_object_t *object)
-{
-	g_return_val_if_fail(object != NULL, 0);
-	return object->userdata;
-}
-
-
-/*
- * Function OBEX_ObjectDelete ()
- *
- *    Delete an OBEX-object. Free any header attached to it.
- *
+ * Note that as soon as you have passed an object to the lib using
+ * OBEX_Request(), you shall not delete it yourself.
  */
 gint OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
 {
@@ -491,11 +481,34 @@ gint OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
 }
 
 
-/*
- * Function OBEX_ObjectAddHeader ()
+/**
+ * OBEX_ObjectAddHeader - Attach a header to an object
+ * @self: OBEX handle
+ * @object: OBEX object
+ * @hi: Header identifier
+ * @hv: Header value
+ * @hv_size: Header size
+ * @flags: See obex.h for possible values
  *
- *    Attach a header to an object.
+ * Add a new header to an object.
  *
+ * If you want all headers to fit in one packet, use the flag
+ * %OBEX_FIT_ONE_PACKET on all headers you add to an object.
+ *
+ * To stream a body add a body header with hv.bs = %NULL and set the flag
+ * %OBEX_FL_STREAM_START. You will now get %OBEX_EV_STREAMEMPTY events as
+ * soon as the the parser wants you to feed it with more data.
+ *
+ * When you get an %OBEX_EV_STREAMEMPTY event give the parser some data by
+ * adding a body-header and set the flag %OBEX_EV_STREAM_DATA. When you
+ * have no more data to send set the flag %OBEX_EV_STREAM_DATAEND instead.
+ *
+ * After adding a header you are free to do whatever you want with the buffer
+ * if you are NOT streaming. If you are streaming you may not touch the
+ * buffer until you get another %OBEX_EV_STREAMEMTPY or until the request
+ * finishes.
+ *
+ * The headers will be sent in the order you add them.
  */
 gint OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi,
 				obex_headerdata_t hv, guint32 hv_size,
@@ -506,11 +519,19 @@ gint OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi,
 }
 
 
-/*
- * Function OBEX_ObjectGetNextHeader ()
+/**
+ * OBEX_ObjectGetNextHeader - Get next available header from an object
+ * @self: OBEX handle
+ * @object: OBEX object
+ * @hi: Pointer to header identifier
+ * @hv: Pointer to hv
+ * @hv_size: Pointer to hv_size
  *
- *    Iterate through the attached headers to an object
+ * Returns 0 when no more headers are available.
  *
+ * All headers are read-only.
+ *
+ * You will get the headers in the received order.
  */
 gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
 					obex_headerdata_t *hv,
@@ -521,11 +542,23 @@ gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,
 	return obex_object_getnextheader(self, object, hi, hv, hv_size);
 }
 
-/*
- * Function OBEX_ObjectReadStream ()
+/**
+ * OBEX_ObjectReadStream - Read data from body stream
+ * @self: OBEX handle
+ * @object: OBEX object
+ * @buf: A pointer to a pointer which this function will set to a buffer which
+ * shall be read (and ONLY read) after this function returns.
  *
- *    Read data from body stream
+ * To recieve the body as a stream call this function with buf = %NULL as soon
+ * as you get an OBEX_EV_REQHINT event.
  *
+ * You will now recieve %OBEX_EV_STREAMAVAIL events when data is available
+ * for you. Call this function to get the data.
+ *
+ * Note! When receiving a stream data is not buffered so if you don't call this
+ * function when you get an %OBEX_EV_STREAMAVAIL event data will be lost.
+ *
+ * Returns the number of bytes in buffer, or 0 for end-of-stream.
  */
 gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **buf)
 {
@@ -535,23 +568,27 @@ gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **b
 }
 
 
-/*
- * Function OBEX_ObjectSetRsp ()
+/**
+ * OBEX_ObjectSetRsp - Sets the response to a received request.
+ * @self: OBEX handle
+ * @object: OBEX object
+ * @rsp: Respose code in non-last packets
+ * @lastrsp: Response code in last packet
  *
- *    Sets the response to a received request
- *
+ * Returns -1 on error.
  */
-gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 cmd, guint8 lastcmd)
+gint OBEX_ObjectSetRsp(obex_object_t *object, guint8 rsp, guint8 lastrsp)
 {
 	g_return_val_if_fail(object != NULL, -1);
-	return obex_object_setrsp(object, cmd, lastcmd);
+	return obex_object_setrsp(object, rsp, lastrsp);
 }
 
-/*
- * Function OBEX_ObjectGetNonHdrData ()
+/**
+ * OBEX_ObjectGetNonHdrData - Get any data which was before headers
+ * @object: OBEX object
+ * @buffer: Pointer to a pointer which will point to a read-only buffer
  *
- *    Get any data which was before headers.
- *
+ * Returns the size of the buffer or -1 for error.
  */
 gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer)
 {
@@ -563,13 +600,16 @@ gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer)
 	return object->rx_nonhdr_data->len;
 }
 
-/*
- * Function OBEX_ObjectSetNonHdrData ()
+/**
+ * OBEX_ObjectSetNonHdrData - Set data to send before headers
+ * @object: OBEX object
+ * @buffer: Data to send
+ * @len: Length to data
  *
- *    Attach data to send before headers (ie SETPATH)
- *
+ * Some commands (notably SetPath) send data before headers. Use this
+ * function to set this data.
  */
-gint OBEX_ObjectSetNonHdrData(obex_object_t *object, guint8 *buffer, guint len)
+gint OBEX_ObjectSetNonHdrData(obex_object_t *object, const guint8 *buffer, guint len)
 {
 	//TODO: Check that we actually can send len bytes without violating MTU
 
@@ -583,18 +623,18 @@ gint OBEX_ObjectSetNonHdrData(obex_object_t *object, guint8 *buffer, guint len)
 	if(object->tx_nonhdr_data == NULL)
 		return -1;
 
-	g_netbuf_put_data(object->tx_nonhdr_data, buffer, len);
+	g_netbuf_put_data(object->tx_nonhdr_data, (guint8 *)buffer, len);
 	return 1;
 }
 
-/*
- * Function OBEX_ObjectSetHdrOffset ()
+/**
+ * OBEX_ObjectSetHdrOffset - Set headeroffset
+ * @object: OBEX object
+ * @offset: Desired offset
  *
- *    Set the offset where to parse for headers.
- *    Call this when you get a OBEX_EV_REQHINT and you know
- *    that the command has data before the headers comes.
- *    You do NOT need to use this function on CONNECT and
- *    SETPATH, they are handled internally.
+ * Call this function when you get a OBEX_EV_REQHINT and you know that the
+ * command has data before the headers comes. You do NOT need to use this
+ * function on Connect and SetPath, they are handled automatically.
  */
 gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
 {
@@ -603,11 +643,13 @@ gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
 	return 1;
 }
 
-/*
- * Function OBEX_UnicodeToChar ()
+/**
+ * OBEX_UnicodeToChar - Simple unicode to char function.
+ * @c: Destination (char)
+ * @uc: Source (unicode)
+ * @size: Length of destination buffer
  *
- *    Simple unicode to char function. Buffers may overlap.
- *
+ * Buffers may overlap. Returns -1 on error.
  */
 gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
 {
@@ -629,11 +671,13 @@ gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
 }
 
 
-/*
- * Function OBEX_CharToUnicode ()
+/**
+ * OBEX_CharToUnicode - Simple char to unicode function.
+ * @uc: Destination (unicode)
+ * @c: Source (char)
+ * @size: Length of destination buffer
  *
- *    Simple char to unicode function. Buffers may overlap.
- *
+ * Buffers may overlap. Returns -1 on error.
  */
 gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size)
 {
@@ -658,11 +702,12 @@ gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size)
 }
 
 
-/*
- * Function OBEX_GetResponseMessage (self, rsp)
+/**
+ * OBEX_GetResponseMessage - Return a human understandable string from a response-code.
+ * @self: OBEX handle
+ * @rsp: Response code.
  *
- *    Return a human understandable string from a response-code.
- *
+ * The returned GString shall be freed by you. Returns %NULL on error.
  */
 GString* OBEX_GetResponseMessage(obex_t *self, gint rsp)
 {
