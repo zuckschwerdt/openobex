@@ -126,7 +126,7 @@ gint insert_byte_stream_header(GNetBuf *msg, guint8 opcode,
 	}
 
 	hdr->hi = opcode;
-	hdr->hl = g_htons(size+3);
+	hdr->hl = htons(size+3);
 
 	memcpy(hdr->hv, stream, size);
 	
