@@ -168,7 +168,7 @@ gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 			// We could use the "create if needed" bit that the standard describes for setpath
 			// but irftp in Win2K does not use this bit. Stupid....
 
-			if(ircp_checkdir(srv->currdir->str, name, TRUE) < 0)
+			if(ircp_checkdir(srv->currdir->str, name, CD_CREATE) < 0)
 				goto out;
 			g_string_append(srv->currdir , "/");
 			g_string_append(srv->currdir , name);
@@ -291,7 +291,7 @@ void ircp_srv_close(ircp_server_t *srv)
 //
 gint ircp_srv_recv(ircp_server_t *srv, gchar *inbox)
 {
-	if(ircp_checkdir("", inbox, FALSE) < 0) {
+	if(ircp_checkdir("", inbox, CD_ALLOWABS) < 0) {
 		srv->infocb(IRCP_EV_ERRMSG, "Specified desination directory does not exist.");
 		return -1;
 	}

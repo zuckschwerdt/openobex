@@ -8,7 +8,7 @@
 #include <openobex/obex.h>
 
 #include "debug.h"
-
+#include "ircp_io.h"
 //
 // Get the filesize.
 //
@@ -32,7 +32,15 @@ guint8* easy_readfile(const char *filename, int *file_size)
 
 	*file_size = get_filesize(filename);
 	DEBUG(4, G_GNUC_FUNCTION "()name=%s, size=%d\n", filename, *file_size);
-
+	
+	// If the filesize is 0 we have allocate a dummy-buffer, because allocating 0
+	// bytes will give back NULL and that's the same as en error,
+	if(*file_size == 0) {
+		buf = g_malloc(1);
+		return buf;
+	}
+	
+		
 	fd = open(filename, O_RDONLY, 0);
 
 	if (fd == -1) {
@@ -132,6 +140,7 @@ gint ircp_save_file(const gchar *path, const gchar *name, const gchar *body, gui
 	gint fd, ret;
 
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	
 	//Check for dangerous filenames
 	if(ircp_nameok(name) == FALSE)
 		return -1;
@@ -164,21 +173,23 @@ out:
 //
 // Go to a directory. Create if not exists and create is true.
 //
-gint ircp_checkdir(const gchar *path, const gchar *dir, gboolean create)
+gint ircp_checkdir(const gchar *path, const gchar *dir, cd_flags flags)
 {
 	GString *newpath;
 	struct stat statbuf;
 	gint ret = -1;
 
-	if(ircp_nameok(dir) == FALSE)
-		return -1;
+	if(!(flags & CD_ALLOWABS))	{
+		if(ircp_nameok(dir) == FALSE)
+			return -1;
+	}
 
 	newpath = g_string_new(path);
 	if(strcmp(path, "") != 0)
 		g_string_append(newpath, "/");
 	g_string_append(newpath, dir);
 
-	DEBUG(4, G_GNUC_FUNCTION "() path = %s dir = %s, create = %d\n", path, dir, create);
+	DEBUG(4, G_GNUC_FUNCTION "() path = %s dir = %s, flags = %d\n", path, dir, flags);
 	if(stat(newpath->str, &statbuf) == 0) {
 		// If this directory aleady exist we are done
 		if(S_ISDIR(statbuf.st_mode)) {
@@ -193,7 +204,7 @@ gint ircp_checkdir(const gchar *path, const gchar *dir, gboolean create)
 			goto out;
 		}
 	}
-	if(create) {
+	if(flags & CD_CREATE) {
 		DEBUG(4, G_GNUC_FUNCTION "() Will try to create %s\n", newpath->str);
 		ret = mkdir(newpath->str, DEFFILEMODE | S_IXGRP | S_IXUSR | S_IXOTH);
 	}

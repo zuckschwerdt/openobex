@@ -1,10 +1,16 @@
+2000-11-20  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Specifying absoulte path as inbox didn't work.
+	* Sending 0 bytes long files didn't work.
+	* Don't continue if connect fails when beeing client.
+
 2000-08-23  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* ircp is now printing status-messages while working.
 
 2000-08-22  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
-	* Most server-function shall now work too.
+	* Most server-functions shall now work too.
 
 2000-08-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
