@@ -1,3 +1,9 @@
+2002-10-16  Marcel Holtmann  <marcel@holtmann.org>
+
+	* Cleanup of autoconf/automake stuff.
+	* Fixes for the new API.
+	* Bump version number to 1.0.0
+
 2000-11-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Make sure that win32 makefiles in in archive!

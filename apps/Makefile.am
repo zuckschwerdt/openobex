@@ -1,15 +1,15 @@
-EXTRA_DIST = \
-	makefile.msc
+#
+#  $Id$
+#
 
-INCLUDES = @GLIB_CFLAGS@ @OPENOBEX_CFLAGS@
-
-LDADD = @GLIB_LIBS@ @OPENOBEX_LIBS@ libmisc.a
+noinst_LIBRARIES = libmisc.a
 
 libmisc_a_SOURCES = \
 		obex_io.c obex_io.h \
 		obex_put_common.c obex_put_common.h
 
-noinst_LIBRARIES = libmisc.a
+
+bin_PROGRAMS = irxfer obex_tcp irobex_palm3 obex_test
 
 obex_test_SOURCES = \
 	obex_test.c obex_test.h \
@@ -23,4 +23,9 @@ irxfer_SOURCES = irxfer.c
 
 irobex_palm3_SOURCES = irobex_palm3.c
 
-bin_PROGRAMS = irxfer obex_tcp irobex_palm3 obex_test
+
+LDADD = @GLIB_LIBS@ @OPENOBEX_LIBS@ libmisc.a
+
+INCLUDES = @GLIB_CFLAGS@ @OPENOBEX_CFLAGS@
+
+EXTRA_DIST = makefile.msc

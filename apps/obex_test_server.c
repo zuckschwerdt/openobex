@@ -229,13 +229,12 @@ void server_done(obex_t *handle, obex_object_t *object, gint obex_cmd, gint obex
 //
 //
 //
-void server(obex_t *handle, char *service)
+void server_do(obex_t *handle)
 {
 	struct context *gt;
 	gt = OBEX_GetUserData(handle);
 
 	gt->serverdone = FALSE;
-	OBEX_ServerRegister(handle, service);	
 	while(!gt->serverdone) {
 		if(OBEX_HandleInput(handle, 1) < 0) {
 			g_print("Error while doing OBEX_HandleInput()\n");

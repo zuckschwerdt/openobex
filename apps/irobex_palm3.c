@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 		/* We are server*/
 
 		printf("Waiting for files\n");
-		OBEX_ServerRegister(handle, "OBEX");
+		IrOBEX_ServerRegister(handle, "OBEX");
 
 		while (!finished)
 			OBEX_HandleInput(handle, 1);

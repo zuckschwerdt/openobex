@@ -260,7 +260,27 @@ int main (int argc, char *argv[])
 				disconnect_client(handle);
 			break;
 			case 's':
-				server(handle, IR_SERVICE);
+				/* First register server */
+				if(tcpobex) {
+					if(InOBEX_ServerRegister(handle)) {
+						g_print("Server register error!\n");
+						break;
+					}
+				}
+				if(cobex) {
+					if(OBEX_ServerRegister(handle, (void*) 1, 0) < 0) {
+						g_print("Server register error!\n");
+						break;
+					}
+				}
+				else {
+					if(IrOBEX_ServerRegister(handle, IR_SERVICE) < 0)	{
+						g_print("Server register error!\n");
+						break;
+					}
+				}
+				/* No process server events */
+				server_do(handle);
 			break;
 			default:
 				printf("Unknown command %s\n", cmd);

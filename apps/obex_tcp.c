@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
 	if (argc == 1)	{
 		printf("Waiting for files\n");
-		ret = OBEX_ServerRegister(handle, "OBEX");
+		ret = InOBEX_ServerRegister(handle);
 		if(ret < 0)
 			exit(ret);
 

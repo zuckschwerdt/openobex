@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 	if (argc == 1) {
 		/* We are server */
 		printf("Waiting for files\n");
-		OBEX_ServerRegister(handle, "OBEX:IrXfer");
+		IrOBEX_ServerRegister(handle, "OBEX:IrXfer");
 
 		while (!finished) {
 			OBEX_HandleInput(handle, 1);
