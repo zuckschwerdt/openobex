@@ -81,7 +81,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		/* Hint app that something is about to come so that
 		   the app can deny a PUT-like request early, or
 		   set the header-offset */
-		obex_deliver_event(self, OBEX_SERVER, OBEX_EV_REQHINT, cmd, 0, FALSE);
+		obex_deliver_event(self, OBEX_EV_REQHINT, cmd, 0, FALSE);
 						
 		/* Some commands needs special treatment (data outside headers) */
 		switch(cmd)	{
@@ -90,7 +90,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			/* Connect needs some extra special treatment */
 			if(obex_parse_connect_header(self, msg) < 0) {
 				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-				obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				return -1;
 			}
 			self->object->headeroffset = 4;
@@ -110,7 +110,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		/* Abort? */
 		if(cmd == OBEX_CMD_ABORT) {
 			DEBUG(1, G_GNUC_FUNCTION "() Got OBEX_ABORT request!\n");
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
+			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			obex_response_request(self, OBEX_RSP_SUCCESS);
 			return 0;		
 		}
@@ -120,24 +120,24 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			/* The cmd-field of this packet is not the
 			   same as int the first fragment. Bail out! */
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PARSEERR, self->object->opcode, cmd, TRUE);
+			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, cmd, TRUE);
 			return -1;
 		}
 		
 		/* Get the headers... */
 		if(obex_object_receive(self->object, msg) < 0)	{
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			return -1;
 		}
 		
 		if(!final) {
 			if(obex_object_send(self, self->object, FALSE) < 0) {
-				obex_deliver_event(self, OBEX_SERVER, OBEX_EV_LINKERR, cmd, 0, TRUE);
+				obex_deliver_event(self, OBEX_EV_LINKERR, cmd, 0, TRUE);
 				return -1;
 			}			
 			else {
-				obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PROGRESS, cmd, 0, FALSE);
+				obex_deliver_event(self, OBEX_EV_PROGRESS, cmd, 0, FALSE);
 			}
 			break; /* Stay in this state if not final */
 		}
@@ -150,7 +150,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			/* Tell the app that a whole request has arrived. While
 			   this event is delivered the app should append the
 			   headers that should be in the response */
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_REQ, cmd, 0, FALSE);
+			obex_deliver_event(self, OBEX_EV_REQ, cmd, 0, FALSE);
 			self->state = MODE_SRV | STATE_SEND;
 		}
 		/* Note the conditional fallthrough! */
@@ -163,24 +163,24 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		if(cmd == OBEX_CMD_ABORT) {
 			DEBUG(1, G_GNUC_FUNCTION "() Got OBEX_ABORT request!\n");
 			obex_response_request(self, OBEX_RSP_SUCCESS);
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
+			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			return 0;		
 		}
 		
 		if(request->len < 3) {
 			/* Hmmm, we got some data while sending. This is no good! */
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PARSEERR, cmd, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_PARSEERR, cmd, 0, TRUE);
 		}
 				
 		ret = obex_object_send(self, self->object, TRUE);
 		if(ret == 0) {
 			/* Made some progress */
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PROGRESS, cmd, 0, FALSE);
+			obex_deliver_event(self, OBEX_EV_PROGRESS, cmd, 0, FALSE);
 		}
 		else if(ret < 0) {
 			/* Error sending response */
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_LINKERR, cmd, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_LINKERR, cmd, 0, TRUE);
 			return -1;
 		}
 		else {
@@ -189,7 +189,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 				DEBUG(2, G_GNUC_FUNCTION "() CMD_DISCONNECT done. Resetting MTU!\n");
 				self->mtu_tx = OBEX_MINIMUM_MTU;
 			}
-			obex_deliver_event(self, OBEX_SERVER, OBEX_EV_REQDONE, cmd, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_REQDONE, cmd, 0, TRUE);
  			self->state = MODE_SRV | STATE_IDLE;
 		}
 		break;
@@ -197,7 +197,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 	default:
 		DEBUG(0, G_GNUC_FUNCTION "() Unknown state\n");
 		obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-		obex_deliver_event(self, OBEX_SERVER, OBEX_EV_PARSEERR, cmd, 0, TRUE);
+		obex_deliver_event(self, OBEX_EV_PARSEERR, cmd, 0, TRUE);
 		return -1;
 	}
 	return 0;

@@ -8,6 +8,7 @@
  * Created at:    Mon Jul 20 22:28:23 1998
  * CVS ID:        $Id$
  * 
+ *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *     Copyright (c) 1998, 1999, 2000 Dag Brattli, All Rights Reserved.
  *      
  *     This library is free software; you can redistribute it and/or
@@ -48,12 +49,12 @@ typedef struct obex obex_t;
 
 /* use 0 for none, 1 for sendbuff, 2 for receivebuff and 3 for both */
 #ifndef DEBUG_DUMPBUFFERS
-//#define DEBUG_DUMPBUFFERS 3
+#define DEBUG_DUMPBUFFERS 0
 #endif
 
 /* use 0 for production, 1 for verification, >2 for debug */
 #ifndef OBEX_DEBUG
-#define OBEX_DEBUG 4
+#define OBEX_DEBUG 0
 unsigned int obex_debug;
 #endif
 
@@ -116,7 +117,7 @@ struct obex {
 gint obex_create_socket(obex_t *self, gint domain);
 gint obex_delete_socket(obex_t *self, gint fd);
 
-void obex_deliver_event(obex_t *self, gint mode, gint event, gint cmd, gint rsp, gboolean del);
+void obex_deliver_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean del);
 gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen);
 
 void obex_response_request(obex_t *self, guint8 opcode);

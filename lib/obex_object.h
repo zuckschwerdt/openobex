@@ -38,12 +38,21 @@
 reallocated every OBEX_OBJECT_ALLOCATIONTRESHOLD bytes */
 #define OBEX_OBJECT_ALLOCATIONTRESHOLD 10240
 
+struct obex_header_element {
+	GNetBuf *buf;
+	guint8 hi;
+	guint length;
+	guint offset;
+	gboolean body_touched;
+	gboolean stream;
+};
+
 typedef struct {
         time_t time;
 
 	GSList *tx_headerq;		/* List of headers to transmit*/
 	GSList *rx_headerq;		/* List of received headers */
-	GSList *rx_lasthdr;		/* Last read element */
+	GSList *rx_headerq_rm;		/* List of recieved header already read by the app */
 	GNetBuf *rx_body;		/* The rx body header need some extra help */
 	GNetBuf *tx_nonhdr_data;	/* Data outside of headers (like CONNECT and SETPATH) */
 	GNetBuf *rx_nonhdr_data;	/* -||- */
@@ -62,15 +71,14 @@ typedef struct {
 	gint totallen;			/* Size of all headers */
 	gpointer userdata;		/* Up to the user */
 
+	const guint8 *s_buf;		/* Pointer to streaming data */
+	guint s_len;			/* Length of stream-data */
+        guint s_offset;			/* Current offset in buf */
+        gboolean s_stop;		/* If true we shall ask for no more data */
+
 } obex_object_t;
 
-struct obex_header_element {
-	GNetBuf *buf;
-	guint8 hi;
-	guint length;
-	guint offset;
-	gboolean body_touched;
-};
+
 
 obex_object_t *obex_object_new(void);
 gint obex_object_delete(obex_object_t *object);

@@ -166,9 +166,13 @@ GString *obex_get_response_message(obex_t *self, gint rsp)
  *    Deliver an event to app.
  *
  */
-void obex_deliver_event(obex_t *self, gint mode, gint event, gint cmd, gint rsp, gboolean del)
+void obex_deliver_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean del)
 {
-	self->eventcb(self, self->object, mode, event, cmd, rsp);
+	if(self->state & MODE_SRV)
+		self->eventcb(self, self->object, OBEX_SERVER, event, cmd, rsp);
+	else
+		self->eventcb(self, self->object, OBEX_CLIENT, event, cmd, rsp);
+	
 	if(del == TRUE && self->object != NULL) {
 		obex_object_delete(self->object);
 		self->object = NULL;
@@ -234,64 +238,58 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	GNetBuf *msg;
 	gint final;
 	gint actual = 0;
-	guint8 opcode;
 	guint size;
-
+	
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(self != NULL, -1);
 
 	msg = self->rx_msg;
+	
+	/* First we need 3 bytes to be able to know how much data to read */
 	if(msg->len < 3)  {
-		// We must have 3 bytes to be able to know how
-		// much to read.
-		actual = obex_transport_read(self, buf, 3 - (msg->len));
-
-		DEBUG(4, G_GNUC_FUNCTION "() got %d\n", actual);
+		actual = obex_transport_read(self, 3 - (msg->len), buf, buflen);
+		
+		DEBUG(4, G_GNUC_FUNCTION "() Got %d bytes\n", actual);
 
 		/* Check if we are still connected */
 		if (actual <= 0)	{
-			obex_deliver_event(self, 0, OBEX_EV_LINKERR, 0, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_LINKERR, 0, 0, TRUE);
 			return actual;
 		}
 		buf += actual;
+		buflen -= actual;
 		g_netbuf_put(msg, actual);
 	}
 
+	/* If we have 3 bytes data we can decide how big the packet is */
 	if(msg->len >= 3) {
-		// We shall now read hdr->len and bytes exactly,
-		// otherwise we will confuse the parser.
-
 		hdr = (obex_common_hdr_t *) msg->data;
+		size = ntohs(hdr->len);
 
 		actual = 0;
 		if(msg->len != (gint) ntohs(hdr->len)) {
 
-			actual = obex_transport_read(self, buf,
-				ntohs(hdr->len) - msg->len);
+			actual = obex_transport_read(self, size - msg->len, buf,
+				buflen);
 
 			/* Check if we are still connected */
 			if (actual <= 0)	{
-				obex_deliver_event(self, 0, OBEX_EV_LINKERR, 0, 0, TRUE);
+				obex_deliver_event(self, OBEX_EV_LINKERR, 0, 0, TRUE);
 				return actual;
 			}
 		}
 	}
+        else {
+		/* Wait until we have at least 3 bytes data */
+		DEBUG(3, G_GNUC_FUNCTION "() Need at least 3 bytes got only %d!\n", msg->len);
+		return actual;
+        }
 
-
-	DEBUG(1, G_GNUC_FUNCTION "(), got %d bytes\n", actual);
 
 	/* New data has been inserted at the end of message */
 	g_netbuf_put(msg, actual);
-	DEBUG(4, G_GNUC_FUNCTION "(), msg len=%d\n", msg->len);
-
-	actual = msg->len;
-
-	/* We must have at least 3 bytes of a package to know the size */
-	if(actual < 3)	{
-		DEBUG(3, G_GNUC_FUNCTION "(), Need MUCH more data, len=%d!\n", msg->len);
-		return actual;
-	}	
+	DEBUG(1, G_GNUC_FUNCTION "() Got %d bytes msg len=%d\n", actual, msg->len);
 
 #if DEBUG_DUMPBUFFERS & 2
 	g_netbuf_print(msg);
@@ -303,9 +301,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	 * we will then need to read more from the socket.  
 	 */
 
-	hdr = (obex_common_hdr_t *) msg->data;
-
-	size = ntohs(hdr->len);
+	/* Make sure we have a whole packet */
 	if (size > msg->len) {
 		DEBUG(3, G_GNUC_FUNCTION "() Need more data, size=%d, len=%d!\n",
 		      size, msg->len);
@@ -318,11 +314,11 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	g_netbuf_print(msg);
 #endif
 
+	actual = msg->len;
 	final = hdr->opcode & OBEX_FINAL; /* Extract final bit */
 
 	/* Dispatch to the mode we are in */
 	if(self->state & MODE_SRV) {
-		opcode = hdr->opcode & ~OBEX_FINAL; /* Remove final bit */
 		obex_server(self, msg, final);
 		g_netbuf_recycle(msg);
 		

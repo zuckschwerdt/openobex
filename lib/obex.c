@@ -79,10 +79,8 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 #endif
 
 	self = g_new0(obex_t, 1);
-	if (!self) {
-		/* perror(G_GNUC_FUNCTION "()"); */
+	if (self == NULL)
 		return NULL;
-	}
 
 	self->eventcb = eventcb;
 
@@ -100,13 +98,11 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	/* Allocate message buffers */
 	self->rx_msg = g_netbuf_new(OBEX_DEFAULT_MTU);
 	if (self->rx_msg == NULL)
-		return NULL;
+		goto out_err;
 
 	self->tx_msg = g_netbuf_new(OBEX_DEFAULT_MTU);
-	if (self->tx_msg == NULL) {
-		g_netbuf_free(self->rx_msg);
-		return NULL;
-	}
+	if (self->tx_msg == NULL)
+		goto out_err;
 
 	self->mtu_rx = OBEX_DEFAULT_MTU;
 	self->mtu_tx = OBEX_MINIMUM_MTU;
@@ -117,6 +113,14 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 #endif
 
 	return self;
+
+out_err:
+	if (self->tx_msg != NULL)
+		g_netbuf_free(self->tx_msg);
+	if (self->rx_msg != NULL)
+		g_netbuf_free(self->rx_msg);
+	g_free(self);
+	return NULL;
 }
 
 /*
@@ -199,7 +203,7 @@ gint OBEX_ServerRegister(obex_t *self, const char *service)
 
 
 /*
- * Function OBEX_ServerAccept (self, eventcb, data)
+ * Function OBEX_ServerAccept (server, eventcb, data)
  *
  *    Accept an Obex connection
  *
@@ -224,18 +228,16 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
 		return(NULL);
 
 	/* Allocate new instance */
-	self = (obex_t*) g_malloc(sizeof(obex_t));
-	if (!self) {
-		/* perror(G_GNUC_FUNCTION "()"); */
+	self =  g_new0(obex_t, 1);
+	if (self == NULL)
 		return(NULL);
-	}
-	memset(self, 0, sizeof(obex_t));
 
 	/* Set callback and callback data as needed */
 	if(eventcb != NULL)
 		self->eventcb = eventcb;
 	else
 		self->eventcb = server->eventcb;
+	
 	if(data != NULL)
 		self->userdata = data;
 	else
@@ -253,28 +255,35 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
 	/* Allocate message buffers */
 	self->rx_msg = g_netbuf_new(self->mtu_rx);
 	if (self->rx_msg == NULL)
-		return NULL;
+		goto out_err;
 
 	self->tx_msg = g_netbuf_new(self->mtu_tx);
-	if (self->tx_msg == NULL) {
-		g_netbuf_free(self->rx_msg);
-		return NULL;
-	}
+	if (self->tx_msg == NULL)
+		goto out_err;
 
 	/* Now, that's the interesting bit !
 	 * We split the sockets apart, one for each instance */
 	self->fd = server->fd;
 	self->serverfd = -1;
 	server->fd = -1;
+        self->state = MODE_SRV | STATE_IDLE;
 
 	return self;
+
+out_err:
+	if (self->tx_msg != NULL)
+		g_netbuf_free(self->tx_msg);
+	if (self->rx_msg != NULL)
+		g_netbuf_free(self->rx_msg);
+	g_free(self);
+	return NULL;
 }
 
 
 /*
  * Function OBEX_HandleInput (self, timeout)
  *
- *    Used when the client or server is working in synchronous mode.
+ *    Let the parser do some processing.
  *
  */
 gint OBEX_HandleInput(obex_t *self, gint timeout)
@@ -288,7 +297,7 @@ gint OBEX_HandleInput(obex_t *self, gint timeout)
 /*
  * Function OBEX_CustomDataFeed()
  *
- *    Used to feed the OBEX-lib with data when using a custom transport.
+ *    Used to feed the parser with data when using a custom transport.
  *
  */
 gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
@@ -348,7 +357,7 @@ gint IrOBEX_TransportConnect(obex_t *self, const char *service)
      	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	if (self->object)	{
-		DEBUG(3, G_GNUC_FUNCTION "() We are busy. Bail out...\n");
+		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
 		return -EBUSY;
 	}
 
@@ -389,7 +398,7 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
 	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	if (self->object)	{
-		DEBUG(3, G_GNUC_FUNCTION "() We are busy. Bail out...\n");
+		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
 		return -EBUSY;
 	}
 
@@ -412,7 +421,7 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
  */
 gint OBEX_CancelRequest(obex_t *self)
 {
-	g_print(G_GNUC_FUNCTION "(), not implemented yet!\n");
+	g_print(G_GNUC_FUNCTION "() Not implemented yet!\n");
 	g_return_val_if_fail(self != NULL, -1);
 	return -1;
 }
@@ -544,12 +553,12 @@ gint OBEX_ObjectGetNonHdrData(obex_object_t *object, guint8 **buffer)
 /*
  * Function OBEX_ObjectSetNonHdrData ()
  *
- *    Set data to send before headers (ie SETPATH)
+ *    Attach data to send before headers (ie SETPATH)
  *
  */
 gint OBEX_ObjectSetNonHdrData(obex_object_t *object, guint8 *buffer, guint len)
 {
-//TODO: Check that we actually can send len bytes without violating MTU
+	//TODO: Check that we actually can send len bytes without violating MTU
 
 	g_return_val_if_fail(object != NULL, -1);
 	g_return_val_if_fail(buffer != NULL, -1);
@@ -558,7 +567,7 @@ gint OBEX_ObjectSetNonHdrData(obex_object_t *object, guint8 *buffer, guint len)
 		return -1;
 
 	object->tx_nonhdr_data = g_netbuf_new(len);
-	if(!object->tx_nonhdr_data)
+	if(object->tx_nonhdr_data == NULL)
 		return -1;
 
 	g_netbuf_put_data(object->tx_nonhdr_data, buffer, len);
@@ -589,15 +598,20 @@ gint OBEX_ObjectSetHdrOffset(obex_object_t *object, guint offset)
  */
 gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
 {
-	//FIXME: Check so that buffer is big enough
-	int n = 0;
+	gint n;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
-
+		
 	g_return_val_if_fail(uc != NULL, -1);
 	g_return_val_if_fail(c != NULL, -1);
 
-	while ((c[n] = uc[n*2+1]))
-		n++;
+	// Make sure buffer is big enough!
+	for(n = 0; uc[n*2+1] != 0; n++);
+	g_return_val_if_fail(n < size, -1);
+
+	for(n = 0; uc[n*2+1] != 0; n++)
+		c[n] = uc[n*2+1];
+	c[n] = 0;
+	
 	return 0;
 }
 
@@ -610,7 +624,7 @@ gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
  */
 gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size)
 {
-	int len, n;
+	gint len, n;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	g_return_val_if_fail(uc != NULL, -1);

@@ -105,8 +105,7 @@ gint obex_transport_handle_input(obex_t *self, gint timeout)
 
 			/* Tell the app to perform the OBEX_Accept() */
 			if(self->keepserver)
-				obex_deliver_event(self, OBEX_SERVER,
-						   OBEX_EV_ACCEPTHINT,
+				obex_deliver_event(self, OBEX_EV_ACCEPTHINT,
 						   0, 0, FALSE);
 			/* Otherwise, just disconnect the server */
 			if((ret >= 0) && (! self->keepserver)) {
@@ -281,7 +280,7 @@ void obex_transport_disconnect_server(obex_t *self)
 		break;	
 	case OBEX_TRANS_CUST:
 		DEBUG(4, G_GNUC_FUNCTION "() Custom disconnect\n");
-		/* Fallback for now... */
+		break;
 	default:
 		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
 		break;
@@ -344,23 +343,29 @@ gint obex_transport_write(obex_t *self, GNetBuf *msg)
  *    Do the reading
  *
  */
-gint obex_transport_read(obex_t *self, guint8 *buf, gint buflen)
+gint obex_transport_read(obex_t *self, gint max, guint8 *buf, gint buflen)
 {
 	gint actual = -1;
 	GNetBuf *msg = self->rx_msg;
 
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
+	DEBUG(4, G_GNUC_FUNCTION "() Request to read max %d bytes\n", max);
 
 	switch(self->trans.type)	{
 #ifdef HAVE_IRDA
 	case OBEX_TRANS_IRDA:
 #endif /*HAVE_IRDA*/
 	case OBEX_TRANS_INET:
-		actual = recv(self->fd, msg->tail, buflen, 0);
+		actual = recv(self->fd, msg->tail, max, 0);
 		break;
 	case OBEX_TRANS_CUST:
-		memcpy(msg->tail, buf, buflen);
-		actual = buflen;
+		if(buflen > max) {
+			memcpy(msg->tail, buf, max);
+			actual = max;
+		}
+		else {
+			memcpy(msg->tail, buf, buflen);
+			actual = buflen;
+		}
 		break;
 	default:
 		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");

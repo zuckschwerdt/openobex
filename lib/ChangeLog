@@ -1,3 +1,16 @@
+2000-12-04  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Added streaming support when sending objects.
+
+2000-12-02  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* obex_data_indication was broken and didn't work correctly 
+	  with custom transport.
+
+2000-12-01  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Minor cleanups to obex.c
+
 2000-11-30  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Made obex_object_send a bit more readable

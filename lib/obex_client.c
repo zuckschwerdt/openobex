@@ -64,14 +64,14 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		/* Any errors from peer? Win2k will send RSP_SUCCESS after
 		   every fragment sent so we have to accept that too.*/
 		if(rsp != OBEX_RSP_SUCCESS && rsp != OBEX_RSP_CONTINUE) {
-			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
+			obex_deliver_event(self, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
 			return 0;		
 		}
 				
 		if(response->len < 3) {
 			/* Hmmm, we got some data while sending. This is no good! */
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PARSEERR, rsp, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_PARSEERR, rsp, 0, TRUE);
 		}
 		// No break here!! Fallthrough	
 	
@@ -82,12 +82,12 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		ret = obex_object_send(self, self->object, TRUE);
 		if(ret < 0) {
 			/* Error while sending */
-			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
 			self->state = MODE_CLI | STATE_IDLE;
 		}
 		else if (ret == 0) {
 			/* Some progress made */			
-			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);
+			obex_deliver_event(self, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);
                 	self->state = MODE_CLI | STATE_SEND;
 		}
                 else {
@@ -104,7 +104,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		if(self->object->opcode == OBEX_CMD_CONNECT)	{
 			DEBUG(2, G_GNUC_FUNCTION "() We excpect a connect-rsp\n");
 			if(obex_parse_connect_header(self, msg) < 0)	{
-				obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				self->state = MODE_SRV | STATE_IDLE;
 				return -1;
 			}
@@ -119,7 +119,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 
 		/* Recieve any headers */
 		if(obex_object_receive(self->object, msg) < 0)	{
-			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			self->state = MODE_SRV | STATE_IDLE;
 			return -1;
 		}
@@ -128,21 +128,21 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		if(rsp == OBEX_RSP_CONTINUE) {
 			DEBUG(3, G_GNUC_FUNCTION "() Continue...\n");
 			if(obex_object_send(self, self->object, 1) < 0)
-				obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
+				obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
 			else
-				obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);
+				obex_deliver_event(self, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);
 		}
 		else	{
 			/* Notify app that client-operation is done! */
 			DEBUG(3, G_GNUC_FUNCTION "() Done! Rsp=%02x!\n", rsp);
-			obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
+			obex_deliver_event(self, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
 			self->state = MODE_SRV | STATE_IDLE;
 		}
 		break;
        	
        	default:
 		DEBUG(0, G_GNUC_FUNCTION "() Unknown state\n");		
-		obex_deliver_event(self, OBEX_CLIENT, OBEX_EV_PARSEERR, rsp, 0, TRUE);
+		obex_deliver_event(self, OBEX_EV_PARSEERR, rsp, 0, TRUE);
 		return -1;
 	}
 

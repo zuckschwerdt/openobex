@@ -50,14 +50,16 @@ typedef struct {
 #define	OBEX_CLIENT		0
 #define	OBEX_SERVER		1
 
+/* Possible events */
 #define OBEX_EV_PROGRESS	0	/* Progress has been made */
-#define OBEX_EV_REQHINT		1
-#define OBEX_EV_REQ		2
+#define OBEX_EV_REQHINT		1	/* An incoming request is about to come */
+#define OBEX_EV_REQ		2	/* An incoming request has arrived */
 #define OBEX_EV_REQDONE		3	/* Request has finished */
 #define OBEX_EV_LINKERR		4	/* Link has been disconnected */
 #define OBEX_EV_PARSEERR	5	/* Malformed data encountered */
 #define OBEX_EV_ACCEPTHINT	6	/* Connection accepted */
-#define OBEX_EV_ABORT		6	/* Request was aborted */
+#define OBEX_EV_ABORT		7	/* Request was aborted */
+#define OBEX_EV_STREAMEMPTY	8	/* Need to feed more data in streaming operation */
 
 /* For OBEX_Init() */
 #define OBEX_FL_KEEPSERVER	0x02	/* Keep the server alive */
@@ -65,8 +67,12 @@ typedef struct {
 #define OBEX_FL_FILTERIAS	0x08	/* Filter devices based on IAS entry */
 
 /* For OBEX_ObjectAddHeader */
-#define OBEX_FL_FIT_ONE_PACKET	0x01
+#define OBEX_FL_FIT_ONE_PACKET	0x01	/* This header must fit in one packet */
+#define OBEX_FL_STREAM_START	0x02	/* Start of streaming body */
+#define OBEX_FL_STREAM_DATA	0x04	/* Body-stream data */
+#define OBEX_FL_STREAM_DATAEND	0x08	/* Body stream last data */
 
+/* Transports */
 #define OBEX_TRANS_IRDA		1
 #define OBEX_TRANS_INET		2
 #define OBEX_TRANS_CUST		3
@@ -75,8 +81,8 @@ typedef struct {
 #define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */
 #define OBEX_HDR_NAME		0x01 /* Name of the object */
 #define OBEX_HDR_TYPE		0x42 /* Type of the object */
-#define OBEX_HDR_TIME		0x44 /* Last modification of object */
-#define OBEX_HDR_TIME2		0xC4 /* This value is also allowed for time */
+#define OBEX_HDR_TIME		0x44 /* Last modification time of (ISO8601) */
+#define OBEX_HDR_TIME2		0xC4 /* Deprecated use HDR_TIME instead */
 #define OBEX_HDR_LENGTH		0xc3 /* Total lenght of object */
 #define OBEX_HDR_DESCRIPTION	0x05 /* Description of object */
 #define OBEX_HDR_TARGET		0x46 /* Identifies the target for the object */
@@ -86,7 +92,7 @@ typedef struct {
 #define OBEX_HDR_APPARAM	0x4c /* Application parameters */
 #define OBEX_HDR_AUTHCHAL	0x4d /* Authentication challenge */
 #define OBEX_HDR_AUTHRESP	0x4e /* Authentication response */
-#define OBEX_HDR_OBJCLASS	0x4e /* OBEX Object class of object */
+#define OBEX_HDR_OBJCLASS	0x4f /* OBEX Object class of object */
 #define OBEX_HDR_CONNECTION	0xcb /* Connection identifier */
 
 /* Commands */
