@@ -83,7 +83,7 @@ while test $# -gt 0; do
 done
 
 if $cflags; then
-    all_flags="$the_flags"
+    all_flags="$the_flags -I$includedir"
 fi
 
 if $libs; then
