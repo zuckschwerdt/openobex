@@ -1,3 +1,8 @@
+2000-08-09  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Some more win32 fixes. irobex_test.c now compiles.
+	* Added the win32 makefiles that I had forgotten.
+
 2000-08-06  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Lots of small win32 fixes.

@@ -1,0 +1,54 @@
+GLIB=c:\pf\glib-1.2.8
+GLIB_VER=1.2
+OBEX=c:\pf\projekt\openobex\lib\src
+OBEX_VER=0.9
+
+CC = cl -G5 -GF -Ox -W3 -MD -nologo
+LDFLAGS = /link
+INSTALL = copy
+
+CFLAGS = -I. -I$(GLIB)
+
+all : \
+        irobex_palm3.exe \
+		obex_tcp.exe  \
+		irobex_test.exe
+
+irobex_palm3_OBJECTS = \
+	irobex_palm3.obj
+
+obex_tcp_OBJECTS = \
+	obex_tcp.obj
+
+irobex_test_OBJECTS = \
+	irobex_test.obj
+
+obex_io_OBJECTS = \
+	obex_io.obj
+
+obex_put_common_OBJECTS = \
+	obex_put_common.obj \
+	obex_io.obj
+
+irobex_test.exe : $(irobex_test_OBJECTS) $(obex_io_OBJECTS)
+	$(CC) $(CFLAGS) $(irobex_test_OBJECTS) $(obex_io_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib $(LDFLAGS)
+
+irobex_palm3.exe : $(irobex_palm3_OBJECTS) $(obex_put_common_OBJECTS)
+	$(CC) $(CFLAGS) $(irobex_palm3_OBJECTS) $(obex_put_common_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib $(LDFLAGS)
+
+obex_tcp.exe : $(obex_tcp_OBJECTS) $(obex_put_common_OBJECTS)
+	$(CC) $(CFLAGS) $(obex_tcp_OBJECTS) $(obex_put_common_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib wsock32.lib $(LDFLAGS)
+
+clean:
+	-@del *.exe
+	-@del *.obj
+	-@del *.dll
+	-@del *.lib
+	-@del *.err
+	-@del *.map
+	-@del *.sym
+	-@del *.exp
+	-@del *.lk1
+	-@del *.mk1
+	-@del *.pdb
+	-@del *.ilk
