@@ -31,9 +31,17 @@
 #ifndef OBEX_TEST_CABLE_H
 #define OBEX_TEST_CABLE_H
 
+//#define CABLE_DEBUG 1
+
 #include <glib.h>
 #include <termios.h>
 #include <openobex/obex.h>
+
+#ifdef CABLE_DEBUG
+#define CDEBUG(args...) g_print(G_GNUC_FUNCTION "() " args)
+#else
+#define CDEBUG(args...)
+#endif
 
 struct cobex_context
 {
@@ -47,15 +55,12 @@ struct cobex_context
 /* User function */
 struct cobex_context *cobex_open(const gchar *port, gboolean r320);
 void cobex_close(struct cobex_context *gt);
-int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen);
+gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint rspbuflen, gint timeout);
 
 /* Callbacks */
 gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout);
 gint cobex_write(obex_t *self, gpointer userdata, guint8 *buffer, gint length);
 gint cobex_connect(obex_t *handle, gpointer userdata);
 gint cobex_disconnect(obex_t *handle, gpointer userdata);
-
-/* Internally only */
-void cobex_cleanup(struct cobex_context *gt, gboolean force);
 
 #endif

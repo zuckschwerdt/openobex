@@ -16,6 +16,7 @@ OBEX_ObjectNew
 OBEX_ObjectDelete
 OBEX_ObjectAddHeader
 OBEX_ObjectGetNextHeader
+OBEX_ObjectReadStream
 OBEX_ObjectSetRsp
 OBEX_ObjectGetNonHdrData
 OBEX_ObjectSetNonHdrData

@@ -535,9 +535,6 @@ gint OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const guint8 **b
 }
 
 
-
-
-
 /*
  * Function OBEX_ObjectSetRsp ()
  *

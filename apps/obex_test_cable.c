@@ -1,7 +1,7 @@
 /*********************************************************************
  *                
  * Filename:      obex_test_cable.c
- * Version:       0.4
+ * Version:       0.6
  * Description:   OBEX over a serial port in Linux. 
  *                Can be used with an Ericsson R320s phone.
  * Status:        Experimental.
@@ -29,7 +29,6 @@
  *     
  ********************************************************************/
 
-
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
@@ -43,15 +42,20 @@
 #include <openobex/obex.h>
 #include "obex_test_cable.h"
 
+static void cobex_cleanup(struct cobex_context *gt, gboolean force);
+
 //
-// Do an AT-command.
+// Send an AT-command and return back one line of answer if any.
+// To read a line without sending anything set cmd as NULL
+// (this function should be rewritten!)
 //
-int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
+gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint rspbuflen, gint timeout)
 {
 	fd_set ttyset;
 	struct timeval tv;
-
-	char *answer;
+	gint fd;
+	
+	char *answer = NULL;
 	char *answer_end = NULL;
 	unsigned int answer_size;
 
@@ -59,23 +63,28 @@ int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 	int actual;
 	int total = 0;
 	int done = 0;
-	int cmdlen;
-
-	cmdlen = strlen(cmd);
-
+	
+	CDEBUG("");
+	
+	fd = gt->ttyfd;
 	rspbuf[0] = 0;
-/*	printf("Sending %d: %s\n", cmdlen, cmd); */
 
-	// Write command
-	if(write(fd, cmd, cmdlen) < cmdlen)	{
-		perror("Error writing to port");
-		return -1;
+	if(cmd != NULL) {
+		// Write command
+		gint cmdlen;
+		
+		cmdlen = strlen(cmd);
+		CDEBUG("Sending command %s\n", cmd\);		
+		if(write(fd, cmd, cmdlen) < cmdlen)	{
+			perror("Error writing to port");
+			return -1;
+		}
 	}
-
+	
 	while(!done)	{
 		FD_ZERO(&ttyset);
 		FD_SET(fd, &ttyset);
-		tv.tv_sec = 2;
+		tv.tv_sec = timeout;
 		tv.tv_usec = 0;
 		if(select(fd+1, &ttyset, NULL, NULL, &tv))	{
 			actual = read(fd, &tmpbuf[total], sizeof(tmpbuf) - total);
@@ -85,7 +94,7 @@ int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 
 //			printf("tmpbuf=%d: %s\n", total, tmpbuf);
 
-			// Answer not found within 100 bytes. Cancel
+			/* Answer didn't come within the length of the buffer. Cancel! */
 			if(total == sizeof(tmpbuf))
 				return -1;
 
@@ -98,7 +107,8 @@ int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 			}
 		}
 		else	{
-			// Anser didn't come in time. Cancel
+			/* Anser didn't come in time. Cancel */
+			CDEBUG("Timeout waiting for answer\n");
 			return -1;
 		}
 	}
@@ -135,11 +145,11 @@ int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen)
 //
 // Open serial port and if we are using an r320, set it in OBEX-mode.
 //
-gint cobex_init(struct cobex_context *gt)
+static gint cobex_init(struct cobex_context *gt)
 {
 	char rspbuf[200];
 
-	printf(__FUNCTION__ "()\n");
+	CDEBUG("\n");
 
 	if( (gt->ttyfd = open(gt->portname, O_RDWR | O_NONBLOCK | O_NOCTTY, 0)) < 0 )	{
 		perror("Can' t open tty");
@@ -159,8 +169,8 @@ gint cobex_init(struct cobex_context *gt)
 		return 1;
 
 	// Set up R320s phone in OBEX mode.
-	if(cobex_do_at_cmd(gt->ttyfd, "ATZ\r\n", rspbuf, sizeof(rspbuf)) < 0)	{
-		printf("Comm-error\n");
+	if(cobex_do_at_cmd(gt, "ATZ\r", rspbuf, sizeof(rspbuf), 1) < 0)	{
+		printf("Comm-error sending ATZ\n");
 		goto err;
 	}
 
@@ -169,8 +179,8 @@ gint cobex_init(struct cobex_context *gt)
 		goto err;
 	}
 
-	if(cobex_do_at_cmd(gt->ttyfd, "AT*EOBEX\r\n", rspbuf, sizeof(rspbuf)) < 0)	{
-		printf("Comm-error\n");
+	if(cobex_do_at_cmd(gt, "AT*EOBEX\r", rspbuf, sizeof(rspbuf), 1) < 0)	{
+		printf("Comm-error sending AT*EOBEX\n");
 		goto err;
 	}
 	if(strcasecmp("CONNECT", rspbuf) != 0)	{
@@ -186,29 +196,30 @@ err:
 //
 // Close down. If force is TRUE. Try to break out of OBEX-mode.
 //
-void cobex_cleanup(struct cobex_context *gt, gboolean force)
+static void cobex_cleanup(struct cobex_context *gt, gboolean force)
 {
 	if(force)	{
 		// Send a break to get out of OBEX-mode
 		if(ioctl(gt->ttyfd, TCSBRKP, 0) < 0)	{
 			printf("Unable to send break!\n");
 		}
-		sleep(1);
 	}
 	close(gt->ttyfd);
 	gt->ttyfd = -1;
 }
 
 //
-// Set up cable OBEX. if r320 is true we will do some magic
-// AT-commands that puts an R320s phone in OBEX mode at connect-time.
+// Open up cable OBEX
 //
 struct cobex_context * cobex_open(const gchar *port, gboolean r320)
 {
 	struct cobex_context *gt;
-	gt = g_malloc0(sizeof(struct cobex_context));
+	
+	CDEBUG("");
+	gt = g_new0(struct cobex_context, 1);
 	if (gt == NULL)
 		return NULL;
+	
 	gt->ttyfd = -1;
 	gt->portname = port;
 	gt->r320 = r320;
@@ -229,16 +240,14 @@ void cobex_close(struct cobex_context *gt)
 //
 gint cobex_connect(obex_t *handle, gpointer userdata)
 {
-//	struct context *gt_main;
 	struct cobex_context *gt;
 
-	printf(G_GNUC_FUNCTION "()\n");
+	CDEBUG("\n");
 	
-//	gt_main = OBEX_GetUserData(handle);
 	gt = userdata;
 
 	if(gt->ttyfd >= 0)	{
-		printf(G_GNUC_FUNCTION "() fd already exist. Using it\n");
+		CDEBUG("fd already exist. Using it\n");
 		return 1;
 
 	}
@@ -252,11 +261,22 @@ gint cobex_connect(obex_t *handle, gpointer userdata)
 //
 gint cobex_disconnect(obex_t *handle, gpointer userdata)
 {
+	gchar rspbuf[20];
 	struct cobex_context *gt;
 
-	printf(G_GNUC_FUNCTION "()\n");
+	CDEBUG("\n");
 	gt = userdata;
 
+	/* The R320 will send back OK after OBEX disconnect */
+	if(gt->r320) {
+		CDEBUG("R320!!!\n");
+		if(cobex_do_at_cmd(gt, NULL, rspbuf, sizeof(rspbuf), 1) < 0)
+			g_print("Comm-error waiting for OK after disconnect\n");
+		else if(strcasecmp(rspbuf, "OK") != 0)
+			g_print("Excpected OK after OBEX diconnect got %s\n", rspbuf);
+	
+	}
+	
 	cobex_cleanup(gt, FALSE);
 	return 1;
 }
@@ -267,13 +287,12 @@ gint cobex_disconnect(obex_t *handle, gpointer userdata)
 gint cobex_write(obex_t *handle, gpointer userdata, guint8 *buffer, gint length)
 {
 	struct cobex_context *gt;
-	int actual;
+	gint actual;
 
-	printf(G_GNUC_FUNCTION "()\n");
+	CDEBUG("");
 	gt = userdata;
-
 	actual = write(gt->ttyfd, buffer, length);
-	g_print(G_GNUC_FUNCTION "() Wrote %d bytes (expected %d)\n", actual, length);
+	CDEBUG("Wrote %d bytes (expected %d)\n", actual, length);
 	return actual;
 }
 
@@ -288,8 +307,13 @@ gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout)
 	fd_set fdset;
         gint ret;
 	
-	printf(G_GNUC_FUNCTION "()\n");
+	CDEBUG("\n");
+
 	gt = userdata;
+	
+	/* Return if no fd */
+	if(gt->ttyfd < 0)
+		return -1;
 
 	time.tv_sec = timeout;
 	time.tv_usec = 0;
@@ -302,12 +326,12 @@ gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout)
 	/* Check if this is a timeout (0) or error (-1) */
 	if (ret < 1) {
 		return ret;
-		printf(G_GNUC_FUNCTION "() Timeout or error (%d)\n", ret);
+		CDEBUG("Timeout or error (%d)\n", ret);
 	}
 	actual = read(gt->ttyfd, &gt->inputbuf, sizeof(gt->inputbuf));
 	if(actual <= 0)
 		return actual;
-	g_print(__FUNCTION__ "() Read %d bytes\n", actual);
+	CDEBUG("Read %d bytes\n", actual);
 	OBEX_CustomDataFeed(handle, gt->inputbuf, actual);
 	return actual;
 }
