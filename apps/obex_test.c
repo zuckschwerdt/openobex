@@ -47,6 +47,8 @@
 #include "obex_test_cable.h"
 #endif
 
+#define IR_SERVICE "OBEX"
+
 //
 // Called by the obex-layer when some event occurs.
 //
@@ -239,7 +241,7 @@ int main (int argc, char *argv[])
 					}
 				}
 				else {
-					if(IrOBEX_TransportConnect(handle, "OBEX:test") < 0)	{
+					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0)	{
 						g_print("Transport connect error!\n");
 						break;
 					}
@@ -251,7 +253,7 @@ int main (int argc, char *argv[])
 				disconnect_client(handle);
 			break;
 			case 's':
-				server(handle, "OBEX:test");
+				server(handle, IR_SERVICE);
 			break;
 			default:
 				printf("Unknown command %s\n", cmd);

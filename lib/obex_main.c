@@ -346,7 +346,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	obex_common_hdr_t *hdr;
 	GNetBuf *msg;
 	gint final;
-	gint actual;
+	gint actual = 0;
 	guint8 opcode;
 	guint size;
 
@@ -355,24 +355,62 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	g_return_val_if_fail(self != NULL, -1);
 
 
-	actual = obex_transport_read(self, buf, buflen);
 	msg = self->rx_msg;
+	if(msg->len < 3)  {
+		DEBUG(4, G_GNUC_FUNCTION "() Have few bytes %d\n",
+			msg->len);
+		// We must have 3 bytes to be able to know how
+		// much to read.
+		actual = obex_transport_read(self, buf, 3 - (msg->len));
+
+		DEBUG(4, G_GNUC_FUNCTION "() got %d\n", actual);
+
+		/* Check if we are still connected */
+		if (actual <= 0)	{
+			obex_deliver_event(self, 0, OBEX_EV_LINKERR, 0, 0, TRUE);
+			return actual;
+		}
+	
+		g_netbuf_put(msg, actual);
+	}
+
+
+	if(msg->len >= 3) {
+		// We shall now read hdr->len and bytes exactly,
+		// otherwise we will confuse the parser.
+
+		hdr = (obex_common_hdr_t *) msg->data;
+
+
+		actual = 0;
+		if(msg->len != (gint) ntohs(hdr->len)) {
+			DEBUG(4, G_GNUC_FUNCTION "() Getting more\n");
+
+			actual = obex_transport_read(self, buf,
+				ntohs(hdr->len) - msg->len);
+
+
+			/* Check if we are still connected */
+			if (actual <= 0)	{
+				obex_deliver_event(self, 0, OBEX_EV_LINKERR, 0, 0, TRUE);
+				return actual;
+			}
+
+		}
+
+	}
+
 
 	DEBUG(1, G_GNUC_FUNCTION "(), got %d bytes\n", actual);
 
-	/* Check if we are still connected */
-	if (actual <= 0)	{
-		obex_deliver_event(self, 0, OBEX_EV_LINKERR, 0, 0, TRUE);
-		return actual;
-	}
+
 	/* New data has been inserted at the end of message */
 	g_netbuf_put(msg, actual);
 	DEBUG(4, G_GNUC_FUNCTION "(), msg len=%d\n", msg->len);
 
-	hdr = (obex_common_hdr_t *) msg->data;
 
 	/* We must have at least 3 bytes of a package to know the size */
-	if(actual < 3)	{
+	if(msg->len < 3)	{
 		DEBUG(3, G_GNUC_FUNCTION "(), Need MUCH more data, len=%d!\n", msg->len);
 		return actual;
 	}	
@@ -387,7 +425,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	 * we will then need to read more from the socket.  
 	 */
 
-	DEBUG(4,G_GNUC_FUNCTION "() hdr->len = %04x\n", hdr->len);
+	hdr = (obex_common_hdr_t *) msg->data;
 
 	size = ntohs(hdr->len);
 	if (size > msg->len) {

@@ -316,7 +316,7 @@ gint obex_transport_read(obex_t *self, guint8 *buf, gint buflen)
 	case OBEX_TRANS_IRDA:
 #endif /*HAVE_IRDA*/
 	case OBEX_TRANS_INET:
-		actual = recv(self->fd, msg->tail, g_netbuf_tailroom(msg), 0);
+		actual = recv(self->fd, msg->tail, buflen, 0);
 		break;
 	case OBEX_TRANS_CUST:
 		memcpy(msg->tail, buf, buflen);
