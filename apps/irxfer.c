@@ -7,7 +7,7 @@
  * Author:        Fons Botman (budely@tref.nl)
  * Created at:    Sat May 15 11:19:34 CEST 1999
  * 
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999, 2000 Fons Botman, All Rights Reserved.
  *     
  *     This program is free software; you can redistribute it and/or 
  *     modify it under the terms of the GNU General Public License as 
@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <obex/obex.h>
+#include <openobex/obex.h>
 #include "obex_put_common.h"
 #include "obex_io.h"
 

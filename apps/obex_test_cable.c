@@ -40,7 +40,7 @@
 #include <termios.h>
 
 #include <glib.h>
-#include <obex/obex.h>
+#include <openobex/obex.h>
 #include "obex_test_cable.h"
 
 //

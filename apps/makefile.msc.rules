@@ -4,7 +4,7 @@ GLIB_VER=1.2
 OBEX=..\..\lib\src
 OBEX_VER=0.9
 
-#Dont edit
+#Don't edit
 CC = cl -G5 -GF -Ox -W3 -MD -nologo
 LDFLAGS = /link
 INSTALL = copy

@@ -27,7 +27,7 @@
  */
 
 #include <stdio.h>
-#include <obex/obex.h>
+#include <openobex/obex.h>
 #include <glib.h>
 
 #if _WIN32

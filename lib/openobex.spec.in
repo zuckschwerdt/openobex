@@ -20,7 +20,7 @@ Open OBEX shared c-library
 
 %changelog
 
-* Thu May 18 2000 Pontus Fuchs <pontus@tactel.se>
+* Thu May 18 2000 Pontus Fuchs <pontus.fuchs@tactel.se>
 - Initial RPM
 
 %prep
@@ -47,7 +47,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 
 %{prefix}/lib/libopenobex*
-%{prefix}/include/obex/
+%{prefix}/include/openobex/
 %{prefix}/bin/openobex-config
+%{prefix}/share/aclocal/openobex.m4
 
 %doc AUTHORS COPYING ChangeLog NEWS README

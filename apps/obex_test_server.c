@@ -27,7 +27,7 @@
  */
 
 #include <stdio.h>
-#include <obex/obex.h>
+#include <openobex/obex.h>
 
 #include <stdlib.h>
 #include <fcntl.h>

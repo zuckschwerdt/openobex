@@ -2,7 +2,7 @@ lib_LTLIBRARIES = libopenobex.la
 
 INCLUDES = @GLIB_CFLAGS@ -I.
 
-libopenobexincludedir = $(includedir)/obex
+libopenobexincludedir = $(includedir)/openobex
 
 libopenobex_la_LDFLAGS = \
         -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
@@ -10,9 +10,9 @@ libopenobex_la_LDFLAGS = \
 	-export-symbols obex.sym
 
 libopenobex_la_SOURCES = \
+	obex.c \
 	obex_main.c obex_main.h \
 	obex_connect.c obex_connect.h \
-	obex.c \
 	obex_header.c obex_header.h \
 	obex_object.c obex_object.h \
 	obex_transport.c obex_transport.h \
@@ -32,4 +32,3 @@ EXTRA_DIST = \
 	obex.def \
 	makefile.msc \
 	win32compat.c
-

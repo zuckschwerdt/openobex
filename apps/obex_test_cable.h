@@ -27,12 +27,13 @@
  *     MA  02111-1307  USA
  *     
  ********************************************************************/
+
 #ifndef OBEX_TEST_CABLE_H
 #define OBEX_TEST_CABLE_H
 
 #include <glib.h>
 #include <termios.h>
-#include <obex/obex.h>
+#include <openobex/obex.h>
 
 struct cobex_context
 {

@@ -42,8 +42,7 @@
 #include <string.h>
 
 #include <glib.h>
-#include <obex/obex.h>
-#include <obex/obex_const.h>
+#include <openobex/obex.h>
 
 #include "obex_io.h"
 
