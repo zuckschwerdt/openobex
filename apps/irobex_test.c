@@ -28,60 +28,44 @@
  *     
  ********************************************************************/
 
-
-
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <string.h>
 
 #include <obex/obex.h>
+#include "obex_io.h"
 
-#ifndef AF_IRDA
-#define AF_IRDA 23
-#endif /* AF_IRDA */
-
+#ifndef _WIN32
 #include "cobex_R320.h"
+#endif
 
 obex_t *handle;
 gchar req_name[200];
+gboolean finished = FALSE;;
+
+#define IOMODE 0	/* 0 for sync, 1 for async */
 
 /*
- * Function safe_save_file (gchar *name, guint8 *buf, gint len)
+ * Function waitsync ()
  *
- * First remove path and add "/tmp/". Then save.
+ * Wait for an obex command to finish.
  *
  */
-gint safe_save_file(gchar *name, guint8 *buf, gint len)
+void syncwait()
 {
-	gchar *s;
-	gchar filename[255];
-	gint fd;
-	gint actual;
+	while(!finished)
+		OBEX_HandleInput(handle, 1);
 
-	sprintf( filename, "/tmp/irobex-test-");
-	s = rindex(name, '/');
-	if (s == NULL)
-		s = name;
-	else
-		s++;
-
-	strncat(filename, s, 250);
-	fd = open(filename, O_RDWR | O_CREAT, DEFFILEMODE);
-	if ( fd < 0) {
-		perror( filename);
-		return -1;
-	}
-	
-	actual = write(fd, buf, len);
-	close(fd);
-
-	g_print( "irobex_test: wrote %s (%d bytes)\n", filename, actual);
-
-	return actual;
+	finished = FALSE;
 }
+
 
 /*
  * Function client_done ()
@@ -100,23 +84,25 @@ void client_done(obex_object_t *object, gint obex_cmd, gint obex_rsp)
 	guint8 *nonhdrdata;
 	gint body_len;
 
-	g_print(__FUNCTION__ "()\n");
+	g_print(G_GNUC_FUNCTION "()\n");
 
+#ifndef _WIN32
 	if(obex_rsp != OBEX_RSP_SUCCESS)	{
 		err = OBEX_GetResponseMessage(handle, obex_rsp);
-		g_print(__FUNCTION__ "() Operation failed %s (%02x)\n", err->str, obex_rsp);
+		g_print(G_GNUC_FUNCTION "() Operation failed %s (%02x)\n", err->str, obex_rsp);
 		g_string_free(err, TRUE);
 	}
+#endif
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_BODY)	{
-		g_print(__FUNCTION__ "() Found body\n");
+		g_print(G_GNUC_FUNCTION "() Found body\n");
 			body = hv.bs;
 			body_len = hlen;
 			break;
 		}
 		else	{
-			g_print(__FUNCTION__ "() Skipped header %02x\n", hi);
+			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
 		}
 	}
 
@@ -158,17 +144,17 @@ void put_server(obex_object_t *object)
 	gchar *name = NULL;
 	gchar *namebuf = NULL;
 
-	g_print(__FUNCTION__ "()\n");
+	g_print(G_GNUC_FUNCTION "()\n");
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_BODY:
-			g_print(__FUNCTION__ "() Found body\n");
+			g_print(G_GNUC_FUNCTION "() Found body\n");
 			body = hv.bs;
 			body_len = hlen;
 			break;
 		case OBEX_HDR_NAME:
-			g_print(__FUNCTION__ "() Found name\n");
+			g_print(G_GNUC_FUNCTION "() Found name\n");
 			if( (namebuf = g_malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
 				name = namebuf;
@@ -176,7 +162,7 @@ void put_server(obex_object_t *object)
 			break;
 		
 		default:
-			g_print(__FUNCTION__ "() Skipped header %02x\n", hi);
+			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
 		}
 	}
 	if(!body)	{
@@ -196,23 +182,23 @@ void put_server(obex_object_t *object)
 void get_server(obex_object_t *object)
 {
 	guint8 *buf;
-	struct stat statbuf;
 	gint fd;
 	gint actual;
 
 	obex_headerdata_t hv;
 	guint8 hi;
 	gint hlen;
+	gint filesize;
 
 	gchar *name = NULL;
 	gchar *namebuf = NULL;
 
-	g_print(__FUNCTION__ "()\n");
+	g_print(G_GNUC_FUNCTION "()\n");
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_NAME:
-			g_print(__FUNCTION__ "() Found name\n");
+			g_print(G_GNUC_FUNCTION "() Found name\n");
 			if( (namebuf = g_malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
 				name = namebuf;
@@ -220,16 +206,16 @@ void get_server(obex_object_t *object)
 			break;
 		
 		default:
-			g_print(__FUNCTION__ "() Skipped header %02x\n", hi);
+			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
 		}
 	}
 
 	if(!name)	{
-		g_print(__FUNCTION__ "() Got a GET without a name-header!\n");
+		g_print(G_GNUC_FUNCTION "() Got a GET without a name-header!\n");
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_FOUND, OBEX_RSP_NOT_FOUND);
 		return;
 	}
-	g_print(__FUNCTION__ "() Got a request for %s\n", name);
+	g_print(G_GNUC_FUNCTION "() Got a request for %s\n", name);
 
 	fd = open(name, O_RDONLY);
 	if( fd < 0)	{
@@ -238,22 +224,25 @@ void get_server(obex_object_t *object)
 		return;
 	}
 
-	if(fstat( fd, &statbuf)	< 0)	{
-		close(fd);
-		OBEX_ObjectSetRsp(object, OBEX_RSP_INTERNAL_SERVER_ERROR, OBEX_RSP_INTERNAL_SERVER_ERROR);
-		return;
-	}	
-
-	if(! (buf = g_malloc(statbuf.st_size)) )	{
+	filesize = get_filesize(name);
+	if(filesize < 0) {
 		close(fd);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_INTERNAL_SERVER_ERROR, OBEX_RSP_INTERNAL_SERVER_ERROR);
 		return;
 	}
 
-	actual = read(fd, buf, statbuf.st_size);
+	if(! (buf = g_malloc(filesize)) )	{
+		close(fd);
+		OBEX_ObjectSetRsp(object, OBEX_RSP_INTERNAL_SERVER_ERROR, OBEX_RSP_INTERNAL_SERVER_ERROR);
+		return;
+	}
+
+	actual = read(fd, buf, filesize);
 	OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, (obex_headerdata_t) buf, actual, 0);
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, (obex_headerdata_t) (guint32) statbuf.st_size, sizeof(guint32), 0);
+	hv.bs = buf;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, hv, actual, 0);
+	hv.bq4 = filesize;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hv, sizeof(guint32), 0);
 	close(fd);
 	g_free(buf);
 	return;
@@ -270,7 +259,7 @@ void connect_server(obex_object_t *object)
 
 	guint8 *who;
 	gint who_len;
-	g_print(__FUNCTION__ "()\n");
+	g_print(G_GNUC_FUNCTION "()\n");
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_WHO)	{
@@ -278,7 +267,7 @@ void connect_server(obex_object_t *object)
 			who_len = hlen;
 		}
 		else	{
-			g_print(__FUNCTION__ "() Skipped header %02x\n", hi);
+			g_print(G_GNUC_FUNCTION "() Skipped header %02x\n", hi);
 		}
 	}
 	if (who_len == 6)	{
@@ -318,7 +307,7 @@ void server_request(obex_object_t *object, gint event, gint cmd)
 		OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 		break;
 	default:
-		g_print(__FUNCTION__ "() Denied %02x request\n", cmd);
+		g_print(G_GNUC_FUNCTION "() Denied %02x request\n", cmd);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
 		break;
 	}
@@ -349,10 +338,11 @@ void obex_event(obex_object_t *object, gint mode, gint event, gint obex_cmd, gin
 				OBEX_TransportDisconnect(handle);
 				break;
 			default:
-				g_print(__FUNCTION__ "() Command (%02x) has now finished\n", obex_cmd);
+				g_print(G_GNUC_FUNCTION "() Command (%02x) has now finished\n", obex_cmd);
 				break;
 			}
 		}
+		finished = TRUE;
 		break;
 	case OBEX_EV_REQHINT:
 		OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);	//Dirty...
@@ -363,6 +353,7 @@ void obex_event(obex_object_t *object, gint mode, gint event, gint obex_cmd, gin
 	case OBEX_EV_LINKERR:
 		g_print("Link broken!\n");
 		OBEX_TransportDisconnect(handle);
+		finished = TRUE;
 		break;
 	default:
 		g_print("Unknown event!\n");
@@ -380,10 +371,11 @@ void put_client(void)
 	gchar lname[200];
 	gchar rname[200];
 	guint rname_size;
+	obex_headerdata_t hd;
 	
- 	int fd;
+	int filesize;
+	int fd;
 	int actual;
-	struct stat statbuf;
 
 	printf("PUT file (local, remote)> ");
 	scanf("%s %s", lname, rname);
@@ -394,29 +386,32 @@ void put_client(void)
 		return;
 	}
 	
-	/*  Need to know the file length */
-	fstat(fd, &statbuf);
+	filesize = get_filesize(lname);
 
-	if(! (buf = g_malloc(statbuf.st_size)) )	{
+	if(! (buf = g_malloc(filesize)) )	{
 		close(fd);
 		return;
 	}
-	actual = read(fd, buf, statbuf.st_size);
+	actual = read(fd, buf, filesize);
 
 	/* Build object */
 	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
 	
 	rname_size = OBEX_CharToUnicode(rname, rname, sizeof(rname));
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, (obex_headerdata_t) (guint32) statbuf.st_size,
-				4, 0);
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, (obex_headerdata_t) (guint8*) &rname,
-				rname_size, 0);
+	hd.bq4 = filesize;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hd, 4, 0);
 
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, (obex_headerdata_t) buf, actual, 0);
+	hd.bs = rname;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd, rname_size, 0);
+
+	hd.bs = buf;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, hd, actual, 0);
+
 	close(fd); 
 	g_free(buf);
 
  	OBEX_Request(handle, object);
+	syncwait();
 }
 
 /* Do a GET of some file as a client. */
@@ -425,6 +420,7 @@ void get_client()
 	obex_object_t *object;
 	char rname[200];
 	gint rname_size;
+	obex_headerdata_t hd;
 
 	printf("GET File> ");
 	scanf("%s", req_name);
@@ -436,16 +432,19 @@ void get_client()
 
 	rname_size = OBEX_CharToUnicode(rname, req_name, sizeof(rname));
 
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, (obex_headerdata_t) (guint8*) rname,
+	hd.bs = rname;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd,
 				rname_size, OBEX_FL_FIT_ONE_PACKET);
 
 	OBEX_Request(handle, object);
+	syncwait();
 }
 
 /* Do a connect. Throw in a WHO-header which says Linux\0 */
 void connect_client()
 {
 	obex_object_t *object;
+	obex_headerdata_t hd;
 
 //	guint8 longstring[245] = {0,};
 
@@ -460,8 +459,9 @@ void connect_client()
 		return;
 	}
 
+	hd.bs = "Linux";
 	if(OBEX_ObjectAddHeader(handle, object, OBEX_HDR_WHO,
-				(obex_headerdata_t) (guint8*) "Linux", 6,
+				hd, 6,
 				OBEX_FL_FIT_ONE_PACKET) < 0)	{
 //	if(OBEX_ObjectAddHeader(handle, object, OBEX_HDR_WHO,
 //				(obex_headerdata_t) (guint8*) longstring, sizeof(longstring),
@@ -471,6 +471,7 @@ void connect_client()
 		return;
 	}
 	OBEX_Request(handle, object);
+	syncwait();
 }
 
 /* Do a Disconnect */
@@ -485,6 +486,7 @@ void disconnect_client()
 
 
 	OBEX_Request(handle, object);
+	syncwait();
 }
 
 void setpath_client()
@@ -493,7 +495,7 @@ void setpath_client()
 	obex_object_t *object;
 	char path[200];
 	gint path_size;
-
+	obex_headerdata_t hd;
 
 	printf("SETPATH> ");
 	scanf("%s", path);
@@ -505,11 +507,13 @@ void setpath_client()
 
 	path_size = OBEX_CharToUnicode(path, path, sizeof(path));
 
-	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, (obex_headerdata_t) (guint8*) path,
+	hd.bs = path;
+	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd,
 				path_size, OBEX_FL_FIT_ONE_PACKET);
 
 	OBEX_ObjectSetNonHdrData(object, setpath_data, 2);
 	OBEX_Request(handle, object);
+	syncwait();
 }
 
 
@@ -522,10 +526,13 @@ int main (int argc, char *argv[])
 
 	obex_ctrans_t custfunc;
 
+#ifndef _WIN32
 	if( (argc == 2) && (strcmp(argv[1], "cable") == 0 ) )
 		cobex = TRUE;
+#endif
 
 	if(cobex)	{
+#ifndef _WIN32
 		g_print("Do the cable-OBEX!\n");
 		if(! (handle = OBEX_Init(OBEX_TRANS_CUST, obex_event, 0)))	{
 			perror( "OBEX_Init failed");
@@ -539,9 +546,10 @@ int main (int argc, char *argv[])
 		if(OBEX_RegisterCTransport(handle, &custfunc) < 0)	{
 			g_print("Custom transport callback-registration failed\n");
 		}
+#endif
 	}
 	else	{
-		if(! (handle = OBEX_Init(OBEX_TRANS_IRDA, obex_event, OBEX_FL_ASYNC)))	{
+		if(! (handle = OBEX_Init(OBEX_TRANS_IRDA, obex_event, IOMODE)))	{
 			perror( "OBEX_Init failed");
 			exit(0);
 		}

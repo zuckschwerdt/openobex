@@ -39,17 +39,17 @@ CFLAGS = $(RPM_OPT_FLAGS) -Wall $(INCLUDES)
 
 all: $(EXECS)
 
-irobex_test: irobex_test.o cobex_R320.o
-	$(CC) $(CFLAGS) -o irobex_test irobex_test.o cobex_R320.o $(LIBPATH) $(LIBRARIES)
+irobex_test: irobex_test.o cobex_R320.o obex_io.o
+	$(CC) $(CFLAGS) -o irobex_test irobex_test.o cobex_R320.o obex_io.o $(LIBPATH) $(LIBRARIES)
 
-irobex_palm3: irobex_palm3.o obex_put_common.o
-	$(CC) $(CFLAGS) -o irobex_palm3 irobex_palm3.o obex_put_common.o $(LIBPATH) $(LIBRARIES)
+irobex_palm3: irobex_palm3.o obex_put_common.o obex_io.o
+	$(CC) $(CFLAGS) -o irobex_palm3 irobex_palm3.o obex_put_common.o obex_io.o $(LIBPATH) $(LIBRARIES)
 
-obex_tcp: obex_tcp.o obex_put_common.o
-	$(CC) $(CFLAGS) -o obex_tcp obex_tcp.o obex_put_common.o $(LIBPATH) $(LIBRARIES)
+obex_tcp: obex_tcp.o obex_put_common.o obex_io.o
+	$(CC) $(CFLAGS) -o obex_tcp obex_tcp.o obex_put_common.o obex_io.o $(LIBPATH) $(LIBRARIES)
 
-irxfer: irxfer.o obex_put_common.o
-	$(CC) $(CFLAGS) -o irxfer irxfer.o obex_put_common.o $(LIBPATH) $(LIBRARIES)
+irxfer: irxfer.o obex_put_common.o obex_io.o
+	$(CC) $(CFLAGS) -o irxfer irxfer.o obex_put_common.o obex_io.o $(LIBPATH) $(LIBRARIES)
 
 
 .c.o:
