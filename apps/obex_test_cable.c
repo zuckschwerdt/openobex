@@ -280,14 +280,30 @@ gint cobex_write(obex_t *handle, gpointer userdata, guint8 *buffer, gint length)
 //
 // Called when more data is needed.
 //
-gint cobex_handle_input(obex_t *handle, gpointer userdata)
+gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout)
 {
-	int actual;
+	gint actual;
 	struct cobex_context *gt;
-
-//	printf(G_GNUC_FUNCTION "()\n");
+	struct timeval time;
+	fd_set fdset;
+        gint ret;
+	
+	printf(G_GNUC_FUNCTION "()\n");
 	gt = userdata;
 
+	time.tv_sec = timeout;
+	time.tv_usec = 0;
+
+	FD_ZERO(&fdset);
+	FD_SET(gt->ttyfd, &fdset);
+
+	ret = select(gt->ttyfd+1, &fdset, NULL, NULL, &time);
+	
+	/* Check if this is a timeout (0) or error (-1) */
+	if (ret < 1) {
+		return ret;
+		printf(G_GNUC_FUNCTION "() Timeout or error (%d)\n", ret);
+	}
 	actual = read(gt->ttyfd, &gt->inputbuf, sizeof(gt->inputbuf));
 	if(actual <= 0)
 		return actual;

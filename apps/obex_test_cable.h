@@ -50,7 +50,7 @@ void cobex_close(struct cobex_context *gt);
 int cobex_do_at_cmd(int fd, char *cmd, char *rspbuf, int rspbuflen);
 
 /* Callbacks */
-gint cobex_handle_input(obex_t *handle, gpointer userdata);
+gint cobex_handle_input(obex_t *handle, gpointer userdata, gint timeout);
 gint cobex_write(obex_t *self, gpointer userdata, guint8 *buffer, gint length);
 gint cobex_connect(obex_t *handle, gpointer userdata);
 gint cobex_disconnect(obex_t *handle, gpointer userdata);

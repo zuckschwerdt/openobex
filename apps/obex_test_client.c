@@ -40,11 +40,18 @@
 void syncwait(obex_t *handle)
 {
 	struct context *gt;
+	gint ret;
+	
 	gt = OBEX_GetUserData(handle);
 
 	while(!gt->clientdone) {
-		if(OBEX_HandleInput(handle, 1) < 0) {
+		ret = OBEX_HandleInput(handle, 20);
+		if(ret < 0) {
 			g_print("Error while doing OBEX_HandleInput()\n");
+			break;
+		}
+		if(ret == 0) {
+			g_print("Timeout waiting for data\n");
 			break;
 		}
 	}
