@@ -31,7 +31,7 @@
 #ifndef OBEX_TEST_CABLE_H
 #define OBEX_TEST_CABLE_H
 
-//#define CABLE_DEBUG 1
+#define CABLE_DEBUG 1
 
 #include <glib.h>
 #include <termios.h>

@@ -64,7 +64,7 @@ gint cobex_do_at_cmd(struct cobex_context *gt, gchar *cmd, gchar *rspbuf, gint r
 	int total = 0;
 	int done = 0;
 	
-	CDEBUG("");
+	CDEBUG("\n");
 	
 	fd = gt->ttyfd;
 	rspbuf[0] = 0;
@@ -215,7 +215,7 @@ struct cobex_context * cobex_open(const gchar *port, gboolean r320)
 {
 	struct cobex_context *gt;
 	
-	CDEBUG("");
+	CDEBUG("\n");
 	gt = g_new0(struct cobex_context, 1);
 	if (gt == NULL)
 		return NULL;
@@ -289,7 +289,7 @@ gint cobex_write(obex_t *handle, gpointer userdata, guint8 *buffer, gint length)
 	struct cobex_context *gt;
 	gint actual;
 
-	CDEBUG("");
+	CDEBUG("\n");
 	gt = userdata;
 	actual = write(gt->ttyfd, buffer, length);
 	CDEBUG("Wrote %d bytes (expected %d)\n", actual, length);

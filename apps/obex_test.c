@@ -226,7 +226,7 @@ int main (int argc, char *argv[])
 				end=1;
 			break;
 			case 'g':
-				get_client(handle);
+				get_client(handle, &global_context);
 			break;
 			case 't':
 				setpath_client(handle);

@@ -6,9 +6,8 @@
  * Status:        Experimental.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Sun Aug 13 03:00:28 PM CEST 2000
- * Modified at:   Sun Aug 13 03:00:33 PM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
- * 
+ * CVS ID:        $Id$
+ *
  *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -78,7 +77,7 @@ void client_done(obex_t *handle, obex_object_t *object, gint obex_cmd, gint obex
 		put_client_done(handle, object, obex_rsp);
 		break;
 	case OBEX_CMD_GET:
-		get_client_done(handle, object, obex_rsp);
+		get_client_done(handle, object, obex_rsp, gt->get_name);
 		break;
 	case OBEX_CMD_SETPATH:
 		setpath_client_done(handle, object, obex_rsp);
@@ -216,7 +215,7 @@ void put_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
 //
 //
 //
-void get_client(obex_t *handle)
+void get_client(obex_t *handle, struct context *gt)
 {
 	obex_object_t *object;
 	gchar rname[200];
@@ -238,10 +237,9 @@ void get_client(obex_t *handle)
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd,
 				rname_size, OBEX_FL_FIT_ONE_PACKET);
 
-	// Set the userdata of this object to the name so we know the name when the request
-	// is ready in get_client_done!
-
-	OBEX_ObjectSetUserData(object, req_name);
+	/* Remember the name of the file we are getting so we can save
+	   it when we get the response */
+	gt->get_name = req_name;
 	OBEX_Request(handle, object);
 	syncwait(handle);
 }
@@ -249,13 +247,12 @@ void get_client(obex_t *handle)
 //
 //
 //
-void get_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
+void get_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp, gchar *name)
 {
 	obex_headerdata_t hv;
 	guint8 hi;
 	gint hlen;
 
-	gchar *req_name;
 	const guint8 *body = NULL;
 	gint body_len = 0;
 
@@ -263,10 +260,6 @@ void get_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
 		g_print("GET failed 0x%02x!\n", obex_rsp);
 		return;
 	}
-
-
-	// Fetch the name set by get_client()
-	req_name = OBEX_ObjectGetUserData(object);
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_BODY)	{
@@ -286,7 +279,7 @@ void get_client_done(obex_t *handle, obex_object_t *object, gint obex_rsp)
 		return;
 	}	
 	g_print("GET successful!\n");
-	safe_save_file(req_name, body, body_len);
+	safe_save_file(name, body, body_len);
 }
 	
 
