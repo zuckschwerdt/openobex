@@ -335,7 +335,6 @@ gint OBEX_CustomDataFeed(obex_t *self, guint8 *inputbuf, gint actual)
  * @addrlen: Length of address
  *
  * Returns -1 on error.
- *
  */
 gint OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
@@ -683,7 +682,6 @@ gint OBEX_UnicodeToChar(guint8 *c, const guint8 *uc, gint size)
 	return 0;
 }
 
-
 /**
  * OBEX_CharToUnicode - Simple char to unicode function.
  * @uc: Destination (unicode)
@@ -713,7 +711,6 @@ gint OBEX_CharToUnicode(guint8 *uc, const guint8 *c, gint size)
 
 	return (len*2)+2 ;
 }
-
 
 /**
  * OBEX_GetResponseMessage - Return a human understandable string from a response-code.
