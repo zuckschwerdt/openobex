@@ -1,7 +1,5 @@
 #Edit these to match your system
-GLIB=c:\pf\glib-1.2.8
 GLIB_VER=1.2
-OBEX=..\..\lib\src
 OBEX_VER=0.9
 
 #Don't edit
@@ -9,4 +7,4 @@ CC = cl -G5 -GF -Ox -W3 -MD -nologo
 LDFLAGS = /link
 INSTALL = copy
 
-CFLAGS = -I. -I$(GLIB)
+CFLAGS = -I.

@@ -1,3 +1,7 @@
+2000-08-21  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* Fixes to win32 makefiles.
+
 2000-08-20  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Created openobex.m4.

@@ -1,9 +1,9 @@
 !include ..\makefile.msc.rules
 
 all : \
+		obex_test.exe \
         irobex_palm3.exe \
-		obex_tcp.exe  \
-		obex_test.exe
+		obex_tcp.exe
 
 irobex_palm3_OBJECTS = \
 	irobex_palm3.obj
@@ -24,13 +24,13 @@ obex_put_common_OBJECTS = \
 	obex_io.obj
 
 obex_test.exe : $(irobex_test_OBJECTS) $(obex_io_OBJECTS)
-	$(CC) $(CFLAGS) $(irobex_test_OBJECTS) $(obex_io_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib wsock32.lib $(LDFLAGS)
+	$(CC) $(CFLAGS) $(irobex_test_OBJECTS) $(obex_io_OBJECTS) openobex-$(OBEX_VER).lib glib-$(GLIB_VER).lib wsock32.lib $(LDFLAGS)
 
 irobex_palm3.exe : $(irobex_palm3_OBJECTS) $(obex_put_common_OBJECTS)
-	$(CC) $(CFLAGS) $(irobex_palm3_OBJECTS) $(obex_put_common_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib $(LDFLAGS)
+	$(CC) $(CFLAGS) $(irobex_palm3_OBJECTS) $(obex_put_common_OBJECTS) openobex-$(OBEX_VER).lib glib-$(GLIB_VER).lib $(LDFLAGS)
 
 obex_tcp.exe : $(obex_tcp_OBJECTS) $(obex_put_common_OBJECTS)
-	$(CC) $(CFLAGS) $(obex_tcp_OBJECTS) $(obex_put_common_OBJECTS) $(OBEX)\openobex-$(OBEX_VER).lib $(GLIB)\glib-$(GLIB_VER).lib wsock32.lib $(LDFLAGS)
+	$(CC) $(CFLAGS) $(obex_tcp_OBJECTS) $(obex_put_common_OBJECTS) openobex-$(OBEX_VER).lib glib-$(GLIB_VER).lib wsock32.lib $(LDFLAGS)
 
 clean:
 	-@del *.exe

@@ -33,7 +33,7 @@ obex_OBJECTS = \
 	win32compat.obj
 
 openobex-$(OBEX_VER).dll : $(obex_OBJECTS) $(obex_HEADERS) obex.def
-	$(CC) $(CFLAGS) -LD -Feopenobex-$(OBEX_VER).dll $(obex_OBJECTS) user32.lib advapi32.lib wsock32.lib $(GLIB)\glib-$(GLIB_VER).lib $(LDFLAGS) /def:obex.def
+	$(CC) $(CFLAGS) -LD -Feopenobex-$(OBEX_VER).dll $(obex_OBJECTS) user32.lib advapi32.lib wsock32.lib glib-$(GLIB_VER).lib $(LDFLAGS) /def:obex.def
 
 clean:
 	-@del *.obj
