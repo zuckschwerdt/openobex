@@ -337,7 +337,7 @@ int obex_cancelrequest(obex_t *self, int nice)
 		return 0;
 
 	/* Abort request without sending abort */
-	if(!nice) {
+	if (!nice) {
 		/* Deliver event will delete the object */
 		obex_deliver_event(self, OBEX_EV_ABORT, 0, 0, TRUE);
 		g_netbuf_recycle(self->tx_msg);
@@ -347,10 +347,25 @@ int obex_cancelrequest(obex_t *self, int nice)
 		   link error to app */
 		obex_deliver_event(self, OBEX_EV_LINKERR, 0, 0, FALSE);
 		return 1;
+	} else {
+		obex_object_t *object;
+
+		object = obex_object_new();
+		if (object == NULL)
+			return -1;
+
+		obex_object_setcmd(object, OBEX_CMD_ABORT, OBEX_CMD_ABORT);
+
+		if (obex_object_send(self, object, TRUE, TRUE) < 0) {
+			obex_object_delete(object);
+			return -1;
+		}
+
+		obex_object_delete(object);
+
+		self->object->abort = TRUE;
+		self->state = STATE_REC;
+
+		return 0;
 	}
-	
-	/* Do a "nice" abort */
-	DEBUG(4, "Nice abort not implemented yet!!\n");
-	self->object->abort = TRUE;
-	return 0;
 }
