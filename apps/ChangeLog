@@ -2,6 +2,7 @@
 
 	* Remove GLib dependencies.
 	* Remove default prefix statement.
+	* Replace OBEX_TRANS_CUST with OBEX_TRANS_CUSTOM.
 
 2002-10-25  Marcel Holtmann  <marcel@holtmann.org>
 

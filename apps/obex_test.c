@@ -188,7 +188,7 @@ int main (int argc, char *argv[])
 			return -1;
 		}
 
-		if(! (handle = OBEX_Init(OBEX_TRANS_CUST, obex_event, 0)))	{
+		if(! (handle = OBEX_Init(OBEX_TRANS_CUSTOM, obex_event, 0)))	{
 			perror( "OBEX_Init failed");
 			return -1;
 		}
