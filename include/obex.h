@@ -32,7 +32,9 @@
 
 #include <stdint.h>
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <winsock.h>
+#else
 #include <sys/socket.h>
 #endif
 
