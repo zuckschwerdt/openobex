@@ -40,7 +40,9 @@
 #define OBEX_INT         0xc0
 
 #ifdef _WIN32
+#ifndef PACKED
 #define PACKED
+#endif
 #else
 #define PACKED __attribute__((packed))
 #endif
