@@ -11,7 +11,6 @@ Group:       Libraries
 Source:      ftp://download.sourceforge.net/pub/sourceforge/openobex/openobex-%{version}.tar.gz
 BuildRoot:   %{_tmppath}/%{name}-%{PACKAGE_VERSION}-root
 URL:         http://openobex.sourceforge.net/
-Requires:    glib >= 1.2.0
 
 %description
 Open OBEX shared c-library
