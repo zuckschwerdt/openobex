@@ -111,6 +111,7 @@ err:
 //
 gboolean ircp_nameok(gchar *name)
 {
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	if(name[0] == '/')
 		return FALSE;
 
@@ -130,13 +131,15 @@ gint ircp_save_file(gchar *path, gchar *name, gchar *body, guint len)
 	GString *diskname;
 	gint fd, ret;
 
+	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	//Check for dangerous filenames
 	if(ircp_nameok(name) == FALSE)
 		return -1;
 
 	diskname = g_string_new(path);
 
-	g_string_append(diskname, "/");
+	if(diskname->len > 0)
+		g_string_append(diskname, "/");
 	g_string_append(diskname, name);
 
 	DEBUG(4, G_GNUC_FUNCTION "() Going to save with name %s\n", diskname->str);
@@ -191,7 +194,7 @@ gint ircp_changedir(gchar *path, gchar *dir, gboolean create)
 	}
 	if(create) {
 		DEBUG(4, G_GNUC_FUNCTION "() Will try to create %s\n", newpath->str);
-		ret = mkdir(newpath->str, DEFFILEMODE);
+		ret = mkdir(newpath->str, DEFFILEMODE | S_IXGRP | S_IXUSR | S_IXOTH);
 	}
 	else {
 		ret = -1;

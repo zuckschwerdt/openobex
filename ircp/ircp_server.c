@@ -21,7 +21,7 @@ void srv_obex_event(obex_t *handle, obex_object_t *object, gint mode, gint event
 	case OBEX_EV_PROGRESS:
 		break;
 	case OBEX_EV_REQ:
-//		DEBUG(4, G_GNUC_FUNCTION "() Incoming request %02x, %d\n", obex_cmd, OBEX_CMD_SETPATH);
+		DEBUG(4, G_GNUC_FUNCTION "() Incoming request %02x, %d\n", obex_cmd, OBEX_CMD_SETPATH);
 		if(obex_cmd == OBEX_CMD_PUT)
 			ret = ircp_srv_got_file(srv, object);
 		else if(obex_cmd == OBEX_CMD_SETPATH)
@@ -148,7 +148,10 @@ gint ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 		}
 		else {
 			DEBUG(4, G_GNUC_FUNCTION "() Going down to %s\n", name);
-			if(ircp_changedir(srv->currdir->str, name, nonhdr_data[0] & 2) < 0)
+			// We could use the "create if needed" bit that the standard describes for setpath
+			// but irftp in Win2K does not use this bit. Stupid....
+
+			if(ircp_changedir(srv->currdir->str, name, TRUE) < 0)
 				goto out;
 			g_string_append(srv->currdir , "/");
 			g_string_append(srv->currdir , name);
