@@ -6,7 +6,7 @@
  * Status:        Experimental.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon May 08 15:03:03 2000
- * Modified at:   Sun Aug 13 09:05:39 PM CEST 2000
+ * Modified at:   Tue Nov 21 19:21:00 PM CEST 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
@@ -60,7 +60,6 @@ typedef struct {
 #define OBEX_EV_ACCEPTHINT	6	/* Connection accepted */
 
 /* For OBEX_Init() */
-#define OBEX_FL_ASYNC		0x01
 #define OBEX_FL_KEEPSERVER	0x02	/* Keep the server alive */
 #define OBEX_FL_FILTERHINT	0x04	/* Filter devices based on hint bit */
 #define OBEX_FL_FILTERIAS	0x08	/* Filter devices based on IAS entry */

@@ -1,3 +1,6 @@
+EXTRA_DIST = \
+	makefile.msc
+
 INCLUDES = @GLIB_CFLAGS@ @OPENOBEX_CFLAGS@
 
 LDADD = @GLIB_LIBS@ @OPENOBEX_LIBS@ libmisc.a

@@ -4,6 +4,7 @@ OBEX_RegisterCTransport
 OBEX_TransportConnect
 OBEX_TransportDisconnect
 OBEX_CustomDataFeed
+OBEX_GetFD
 OBEX_HandleInput
 OBEX_ServerRegister
 OBEX_Request

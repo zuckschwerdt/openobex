@@ -53,7 +53,7 @@ gint inobex_listen(obex_t *self, const char *service)
 {
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
-	self->serverfd = obex_create_socket(self, AF_INET, FALSE);
+	self->serverfd = obex_create_socket(self, AF_INET);
 	if(self->serverfd < 0) {
 		DEBUG(0, G_GNUC_FUNCTION "() Cannot create server-socket\n");
 		return -1;
@@ -100,10 +100,6 @@ gint inobex_accept(obex_t *self)
 
 	/* Just use the default MTU for now */
 	self->trans.mtu = OBEX_DEFAULT_MTU;
-
-	if(self->async)	{
-		obex_register_async(self, self->fd);
-	}
 	return 1;
 }
 	
@@ -119,7 +115,7 @@ gint inobex_connect_request(obex_t *self)
 	guchar *addr;
 	gint ret;
 
-	self->fd = obex_create_socket(self, AF_INET, 0);
+	self->fd = obex_create_socket(self, AF_INET);
 	if(self->fd < 0)
 		return -1;
 
@@ -144,10 +140,6 @@ gint inobex_connect_request(obex_t *self)
 
 	self->trans.mtu = OBEX_DEFAULT_MTU;
 	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", self->trans.mtu);
-
-	if(self->async)	{
-		obex_register_async(self, self->fd);
-	}
 
 	return ret;
 }

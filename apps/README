@@ -12,4 +12,5 @@ Then you do the usual:
 To build on win32 you need to edit makefile.msc.rules.
 To compile using VC6:
 
+# copy config.h.win32 config.h
 # nmake -f makefile.msc

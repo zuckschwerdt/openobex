@@ -11,6 +11,3 @@
 
 /* Define if system supports IrDA */
 #define HAVE_IRDA 1
-
-/* Define if platform support async IO using SIGIO */
-/* #undef HAVE_FASYNC */

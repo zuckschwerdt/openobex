@@ -85,7 +85,7 @@ gint irobex_listen(obex_t *self, const char *service)
 {
 	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
-	self->serverfd = obex_create_socket(self, AF_IRDA, FALSE);
+	self->serverfd = obex_create_socket(self, AF_IRDA);
 	if(self->serverfd < 0) {
 		DEBUG(0, G_GNUC_FUNCTION "() Error creating socket\n");
 		return -1;
@@ -169,14 +169,6 @@ gint irobex_accept(obex_t *self)
 		return -1;
 	}
 
-	if(self->async) {
-		if(obex_register_async(self, self->fd) < 0)	{
-			obex_delete_socket(self, self->fd);
-			self->fd = -1;
-			return -1;
-		}
-	}
-
 #ifndef _WIN32
 	/* Check what the IrLAP data size is */
 	if (getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE, (void *) &mtu, 
@@ -196,7 +188,7 @@ gint irobex_accept(obex_t *self)
 #define DISC_BUF_LEN	sizeof(struct irda_device_list) + \
 			sizeof(struct irda_device_info) * (MAX_DEVICES)
 /*
- * Function echo_discover_devices (self)
+ * Function irobex_discover_devices (self)
  *
  *    Try to discover some remote device(s) that we can connect to
  *
@@ -393,7 +385,7 @@ gint irobex_connect_request(obex_t *self)
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	if(self->fd < 0)	{
-		self->fd = obex_create_socket(self, AF_IRDA, self->async);
+		self->fd = obex_create_socket(self, AF_IRDA);
 		if(self->fd < 0)
 			return -1;
 	}
@@ -412,7 +404,6 @@ gint irobex_connect_request(obex_t *self)
 	}
 
 #ifndef _WIN32
-
 	/* Check what the IrLAP data size is */
 	ret = getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE, 
 			 (void *) &mtu, &len);

@@ -1,12 +1,12 @@
 /*********************************************************************
  *                
  * Filename:      obex.h
- * Version:       0.9.6
+ * Version:       0.9.7
  * Description:   OBEX API
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:02:42 1999
- * Modified at:   Sun Aug 13 09:10:19 PM CEST 2000
+ * Modified at:   Tue Nov 21 19:20:00 PM CEST 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.

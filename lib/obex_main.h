@@ -6,7 +6,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Mon Jul 20 22:28:23 1998
- * Modified at:   Sat Aug 12 11:35:28 PM CEST 2000
+ * Modified at:   Tue Nov 21 19:25:28 PM CEST 2000
  * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
  * 
  *     Copyright (c) 1998, 1999, 2000 Dag Brattli, All Rights Reserved.
@@ -80,8 +80,6 @@ void DEBUG(unsigned int n, ...);
 #define OBEX_CMD	1
 #define OBEX_RSP	0
 
-#define OBEX_MAXINSTANCE 16
-
 // Note that this one is also defined in obex.h
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
 
@@ -92,7 +90,6 @@ struct obex {
 	gint fd;			/* Socket descriptor */
 	gint serverfd;
 
-	gboolean async;
 	gboolean keepserver;		/* Keep server alive */
 	gboolean filterhint;		/* Filter devices based on hint bits */
 	gboolean filterias;		/* Filter devices based on IAS entry */
@@ -111,8 +108,7 @@ struct obex {
 	gpointer userdata;		/* For user */
 };
 
-gint obex_register_async(obex_t *self, gint fd);
-gint obex_create_socket(obex_t *self, gint domain, gboolean async);
+gint obex_create_socket(obex_t *self, gint domain);
 gint obex_delete_socket(obex_t *self, gint fd);
 
 void obex_deliver_event(obex_t *self, gint mode, gint event, gint cmd, gint rsp, gboolean del);
@@ -124,7 +120,5 @@ gint obex_data_request(obex_t *self, GNetBuf *msg, gint opcode,
 void obex_response_request(obex_t *self, guint8 opcode);
 
 GString *obex_get_response_message(obex_t *self, gint rsp);
-
-extern obex_t *async_self[OBEX_MAXINSTANCE];
 
 #endif

@@ -66,13 +66,6 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	obex_debug = OBEX_DEBUG;
 #endif
 
-#ifndef HAVE_FASYNC
-	if(flags & OBEX_FL_ASYNC) {
-		g_message("This platform doesn't support async IO\n");
-		return NULL;
-	}
-#endif
-
 	g_return_val_if_fail(eventcb != NULL, NULL);
 
 #ifdef _WIN32
@@ -94,9 +87,6 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 
 	self->eventcb = eventcb;
 
-	if(flags & OBEX_FL_ASYNC) {
-		self->async = 1;
-	}
 	self->keepserver = (flags & OBEX_FL_KEEPSERVER) ? TRUE : FALSE;
 	self->filterhint = (flags & OBEX_FL_FILTERHINT) ? TRUE : FALSE;
 	self->filterias  = (flags & OBEX_FL_FILTERIAS ) ? TRUE : FALSE;
@@ -251,7 +241,6 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
 	else
 		self->userdata = server->userdata;
 
-	self->async = server->async;
 	self->keepserver = server->keepserver;
 
 	/* Copy transport data */

@@ -22,22 +22,6 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 dnl Checks for library functions.
 IRDA_CHECK
 
-
-#Check if we can do async IO
-AC_CACHE_CHECK([If we can use FASYNC],am_cv_fasync_found,[
-
-	AC_TRY_COMPILE([#include <fcntl.h>],
-	[int i = FASYNC;],
-	am_cv_fasync_found=yes,
-	am_cv_fasync_found=no)
-])
-
-
-if test $am_cv_fasync_found = yes; then
-	AC_DEFINE(HAVE_FASYNC, 1, [Define if platform support async IO using SIGIO])
-fi
-
-
 dnl Use -Wall if we have gcc, and use -ansi -pedantic if ansi is enabled.
 changequote(,)dnl
 if test "x$GCC" = "xyes"; then
@@ -62,9 +46,9 @@ changequote([,])dnl
 
 OBEX_MAJOR_VERSION=0
 OBEX_MINOR_VERSION=9
-OBEX_MICRO_VERSION=6
-OBEX_INTERFACE_AGE=6
-OBEX_BINARY_AGE=6
+OBEX_MICRO_VERSION=7
+OBEX_INTERFACE_AGE=7
+OBEX_BINARY_AGE=7
 OBEX_VERSION=$OBEX_MAJOR_VERSION.$OBEX_MINOR_VERSION.$OBEX_MICRO_VERSION
 
 AC_SUBST(OBEX_VERSION)

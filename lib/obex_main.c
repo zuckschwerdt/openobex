@@ -36,7 +36,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <signal.h>
+//#include <signal.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -50,77 +50,6 @@
 #include "obex_client.h"
 #include "obex_const.h"
 
-#ifdef HAVE_FASYNC
-obex_t *async_self[OBEX_MAXINSTANCE] = {NULL, }; /* Which instances wants SIGIO */
-pid_t async_pid[OBEX_MAXINSTANCE] = {0, };
-#endif
-
-
-/*
- * Function input_handler (signal)
- *
- *    Called by SIGIO and is used then the OBEX library is in asyncronous mode
- *
- */
-static void obex_input_handler(int signal)
-{
-#ifdef HAVE_FASYNC
-	gint i;
-	pid_t curr_pid;
-	
-	DEBUG(4, G_GNUC_FUNCTION "() Got some input!\n");
-	curr_pid = getpid();
-
-	for(i=0; i<OBEX_MAXINSTANCE ;i++) {
-		if( (async_self[i]) && (async_pid[i] == curr_pid) )	{
-			obex_data_indication(async_self[i], NULL, 0);
-		}
-	}
-#endif
-}
-
-/*
- * Function obex_register_async()
- *
- *    
- *
- */
-gint obex_register_async(obex_t *self, gint fd)
-{
-#ifdef HAVE_FASYNC
-	gint oflags;
-	gint i;
-	gboolean ok = FALSE;
-	pid_t curr_pid;
-
-	DEBUG(4, G_GNUC_FUNCTION "()\n");
-	curr_pid = getpid();
-
-	/* Register for asynchronous notification */
-	signal(SIGIO, &obex_input_handler);
-	fcntl(fd, F_SETOWN, getpid());
-	oflags = fcntl(0, F_GETFL);
-	if (fcntl(fd, F_SETFL, oflags | FASYNC) < 0) {
-		return -1;
-	}
-
-	/* Insert handler in async-array */
-	for(i=0; i<OBEX_MAXINSTANCE ;i++) {
-		if(async_self[i] == NULL) {
-			async_self[i] = self;
-			async_pid[i] = curr_pid;
-			ok = TRUE;
-			break;
-		}
-	}
-	if(!ok)
-		return -1;
-	return self->fd;
-#else
-	return -1;
-#endif
-}
-
 
 /*
  * Function obex_create_socket()
@@ -128,24 +57,12 @@ gint obex_register_async(obex_t *self, gint fd)
  *    Create socket if needed.
  *
  */
-gint obex_create_socket(obex_t *self, gint domain, gboolean async)
+gint obex_create_socket(obex_t *self, gint domain)
 {
 	gint fd;
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
 	fd = socket(domain, SOCK_STREAM, 0);
-	if(fd < 0)
-		return fd;
-
-#ifdef HAVE_FASYNC
-	if(async) {
-		if(obex_register_async(self, fd) < 0)	{
-			close(fd);
-			fd = -1;
-			return -1;
-		}
-	}
-#endif
 	return fd;
 }
 
@@ -163,21 +80,6 @@ gint obex_delete_socket(obex_t *self, gint fd)
 
 	if(fd < 0)
 		return fd;
-
-#ifdef HAVE_FASYNC
-	if(self->async) {
-		gint i, cnt = 0;
-		/* Remove handle from async-array */
-		for(i=0; i<OBEX_MAXINSTANCE ;i++) {
-			if(async_self[i] == self)
-				async_self[i] = NULL;
-			if(async_self[i])
-				cnt++;
-		}
-		if(cnt == 0)
-			signal(SIGIO, SIG_DFL);
-	}
-#endif
 
 #ifdef _WIN32
 	ret = closesocket(fd);
