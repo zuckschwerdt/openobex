@@ -2,12 +2,11 @@
  *                
  * Filename:      inobex.c
  * Version:       
- * Description:   
+ * Description:   InOBEX, Inet transport for OBEX.
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat Apr 17 16:50:35 1999
- * Modified at:   Sun Aug 13 02:10:12 PM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:	  $Id$
  * 
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     

@@ -6,8 +6,7 @@
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Sat May  1 20:15:04 1999
- * Modified at:   Tue Aug 29 03:11:37 PM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:        $Id$
  * 
  *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
  *     

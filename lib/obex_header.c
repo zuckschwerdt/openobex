@@ -6,10 +6,9 @@
  * Status:        Stable.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Sun Mar 21 14:00:03 1999
- * Modified at:   Tue Nov 16 19:23:51 1999
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:        $Id$
  * 
- *     Copyright (c) 1999 Pontus Fuchs, All Rights Reserved.
+ *     Copyright (c) 1999-2000 Pontus Fuchs, All Rights Reserved.
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or

@@ -6,10 +6,9 @@
  * Status:        Experimental.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Sun Aug 06 10:22:00 2000
- * Modified at:   Sun Aug 06 10:22:00 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:        $Id$
  *
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public

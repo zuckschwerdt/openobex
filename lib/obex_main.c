@@ -1,16 +1,15 @@
 /*********************************************************************
  *                
  * Filename:      obex_main.c
- * Version:       0.8
+ * Version:       0.9
  * Description:   Implementation of the Object Exchange Protocol OBEX
  * Status:        Experimental.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Jul 17 23:02:02 1998
- * Modified at:   Thu Nov 30 13:58:00 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:        $Id$
  * 
- *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
+ *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public

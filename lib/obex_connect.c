@@ -1,14 +1,14 @@
 /*********************************************************************
  *                
  * Filename:      obex_connect.c
- * Version:       0.5
- * Description:   
- * Status:        Experimental.
+ * Version:       0.9
+ * Description:   Parse and create connect-command.
+ * Status:        Stable
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Wed May  5 11:53:44 1999
- * Modified at:   Sun Dec  5 15:36:12 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * CVS ID:        $Id$
  * 
+ *     Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
  *     Copyright (c) 1999 Dag Brattli, All Rights Reserved.
  *     
  *     This library is free software; you can redistribute it and/or
