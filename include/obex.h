@@ -49,7 +49,7 @@ typedef void* obex_t;
 typedef void* obex_object_t;
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 // This is to workaround compilation without Bluetooth support. - Jean II
-#ifndef AF_BLUETOOTH
+#ifndef SOL_RFCOMM
 typedef char* bdaddr_t;
 #endif
 
