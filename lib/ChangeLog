@@ -1,3 +1,8 @@
+2004-03-06  Christian W. Zuckschwerdt  <zany@triq.net>
+
+	* Portability fixes, mainly replacing stdint.h with inttypes.h
+	  (needed for e.g. solaris; ISO C99 says inttypes.h includes stdint.h)
+	
 2003-10-01  Marcel Holtmann  <marcel@holtmann.org>
 
 	* Add COPYING.LIB for LGPL stuff
