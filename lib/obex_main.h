@@ -124,6 +124,7 @@ struct obex {
 
 	int fd;			/* Socket descriptor */
 	int serverfd;
+	int writefd;		/* write descriptor - only OBEX_TRANS_FD */
         unsigned int state;
 	
 	int keepserver;		/* Keep server alive */

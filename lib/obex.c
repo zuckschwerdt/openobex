@@ -114,6 +114,7 @@ obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 	self->filterias  = (flags & OBEX_FL_FILTERIAS ) ? TRUE : FALSE;
 	self->fd = -1;
 	self->serverfd = -1;
+	self->writefd = -1;
         self->state = MODE_SRV | STATE_IDLE;
 	
 	/* Init transport */
@@ -331,7 +332,7 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
 
 	/* We can accept only if both the server and the connection socket
 	 * are active */
-	if((server->fd <= 0) || (server->serverfd <= 0))
+	if((server->fd < 0) || (server->serverfd < 0))
 		return(NULL);
 
 	/* If we have started receiving something, it's too late... */
@@ -379,6 +380,7 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
 	 * We split the sockets apart, one for each instance */
 	self->fd = server->fd;
 	self->serverfd = -1;
+	self->writefd = -1;
 	server->fd = -1;
         self->state = MODE_SRV | STATE_IDLE;
 
@@ -979,3 +981,27 @@ int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int chan
 	return -ESOCKTNOSUPPORT;
 #endif /* HAVE_BLUETOOTH */
 }
+
+/*
+ * FdOBEX_TransportSetup - setup descriptors for OBEX_TRANS_FD transport
+ * 
+ *  @self: OBEX handle
+ *  @rfd: descriptor to read
+ *  @wfd: descriptor to write
+ *  @mtu: transport mtu: 0 - default
+ */
+int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
+{
+	DEBUG(4, __FUNCTION__ "()\n");
+
+	if (self->object)	{
+		DEBUG(1, __FUNCTION__ "() We are busy.\n");
+		return -EBUSY;
+	}
+	obex_return_val_if_fail(self != NULL, -1);
+	self->fd = rfd;
+	self->writefd = wfd;
+	self->trans.mtu = mtu ? mtu : self->mtu_tx_max;
+	return obex_transport_connect_request(self);
+}
+

@@ -152,6 +152,10 @@ int obex_transport_accept(obex_t *self)
 		ret = btobex_accept(self);
 		break;
 #endif /*HAVE_BLUETOOTH*/
+	case OBEX_TRANS_FD:
+		/* no real accept on a file */
+		ret = 0;
+		break;
 
 	default:
 		DEBUG(4, __FUNCTION__ "(), domain not implemented!\n");
@@ -170,7 +174,6 @@ int obex_transport_accept(obex_t *self)
 int obex_transport_connect_request(obex_t *self)
 {
 	int ret = -1;
-
 
 	if(self->trans.connected)
 		return 1;
@@ -197,6 +200,11 @@ int obex_transport_connect_request(obex_t *self)
 		ret = btobex_connect_request(self);
 		break;
 #endif /*HAVE_BLUETOOTH*/
+	case OBEX_TRANS_FD:
+		/* no real connect on the file */
+		if (self->fd >= 0 && self->writefd >= 0)
+			ret = 0;
+		break;
 
 	default:
 		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
@@ -238,6 +246,10 @@ void obex_transport_disconnect_request(obex_t *self)
 		btobex_disconnect_request(self);
 		break;
 #endif /*HAVE_BLUETOOTH*/
+	case OBEX_TRANS_FD:
+		/* no real disconnect on a file */
+		self->fd = self->writefd = -1;
+		break;
 	default:
 		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
 		break;
@@ -276,6 +288,10 @@ int obex_transport_listen(obex_t *self)
 		ret = btobex_listen(self);
 		break;
 #endif /*HAVE_BLUETOOTH*/
+	case OBEX_TRANS_FD:
+		/* no real listen on the file */
+		ret = 0;
+		break;
 	default:
 		DEBUG(4, __FUNCTION__ "() Transport %d not implemented!\n",
 			  self->trans.type);
@@ -313,10 +329,42 @@ void obex_transport_disconnect_server(obex_t *self)
 		btobex_disconnect_server(self);
 		break;
 #endif /*HAVE_BLUETOOTH*/
+	case OBEX_TRANS_FD:
+		/* no real server on a file */;
+		break;
 	default:
 		DEBUG(4, __FUNCTION__ "() Transport not implemented!\n");
 		break;
 	}
+}
+
+/*
+ * does fragmented write
+ */
+static int do_write(int fd, GNetBuf *msg, int mtu)
+{
+	int actual = -1;
+	int size;
+
+	/* Send and fragment if necessary  */
+	while (msg->len) {
+		if (msg->len > mtu)
+			size = mtu;
+		else
+			size = msg->len;
+		DEBUG(1, __FUNCTION__ "(), sending %d bytes\n", size);
+
+		actual = write(fd, msg->data, size);
+		if (actual < 0) {
+			perror("send");
+			return actual;
+		} else if (actual == 0)	/* disconnect */
+			return 0;
+			
+		/* Hide sent data */
+		g_netbuf_pull(msg, size);
+	}
+	return actual;
 }
 
 /*
@@ -328,7 +376,6 @@ void obex_transport_disconnect_server(obex_t *self)
 int obex_transport_write(obex_t *self, GNetBuf *msg)
 {
 	int actual = -1;
-	int size;
 
 	DEBUG(4, __FUNCTION__ "()\n");
 
@@ -340,23 +387,10 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 	case OBEX_TRANS_BLUETOOTH:
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
-		/* Send and fragment if necessary  */
-		while (msg->len) {
-			if (msg->len > self->trans.mtu)
-				size = self->trans.mtu;
-			else
-				size = msg->len;
-			DEBUG(1, __FUNCTION__ "(), sending %d bytes\n", size);
-
-			actual = send(self->fd, msg->data, size, 0);
-
-			if (actual != size) {
-				perror("send");
-				return actual;
-			}
-			/* Hide sent data */
-			g_netbuf_pull(msg, size);
-		}
+		actual = do_write(self->fd, msg, self->trans.mtu);
+		break;
+	case OBEX_TRANS_FD:
+		actual = do_write(self->writefd, msg, self->trans.mtu);
 		break;
 	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, __FUNCTION__ "() Custom write\n");
@@ -393,7 +427,8 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	case OBEX_TRANS_BLUETOOTH:
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
-		actual = recv(self->fd, msg->tail, max, 0);
+	case OBEX_TRANS_FD:
+		actual = read(self->fd, msg->tail, max);
 		break;
 	case OBEX_TRANS_CUSTOM:
 		if(buflen > max) {

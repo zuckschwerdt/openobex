@@ -117,4 +117,9 @@ char* OBEX_GetResponseMessage(obex_t *self, int rsp);
  int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, int channel);
  int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, int channel);
 
+/*
+ * OBEX File API
+ */
+int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu);
+
 #endif

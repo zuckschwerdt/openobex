@@ -80,6 +80,7 @@ typedef struct {
 #define OBEX_TRANS_CUST		3	/* Fixme: This will go away in future */
 #define OBEX_TRANS_CUSTOM	3
 #define OBEX_TRANS_BLUETOOTH	4
+#define OBEX_TRANS_FD		5
 
 /* Standard headers */
 #define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */
