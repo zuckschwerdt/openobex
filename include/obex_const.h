@@ -2,12 +2,11 @@
  *                
  * Filename:      obex_const.h
  * Version:       
- * Description:   Lots of constants and some typedefs for obex.
- * Status:        Experimental.
+ * Description:   Lots of constants and some typedefs for OpenOBEX.
+ * Status:        Stable.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon May 08 15:03:03 2000
- * Modified at:   Tue Nov 21 19:21:00 PM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:        $Id$
  * 
  *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
  *      

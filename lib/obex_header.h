@@ -7,8 +7,7 @@
  * Status:        Stable.
  * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
  * Created at:    Mon Mar  1 10:30:54 1999
- * Modified at:   Mon Aug 28 11:09:26 AM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:        $Id$
  * 
  *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
  *     

@@ -1,13 +1,12 @@
 /*********************************************************************
  *                
  * Filename:      obex_object.h
- * Version:       0.8
+ * Version:       0.9
  * Description:   
  * Status:        Stable.
  * Author:        Dag Brattli <dagb@cs.uit.no>
  * Created at:    Fri Apr 23 14:05:28 1999
- * Modified at:   Thu Nov 30 14:25:00 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
+ * CVS ID:        $Id$
  * 
  *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
  *     Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.

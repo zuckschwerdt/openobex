@@ -3,13 +3,12 @@
  * Filename:      obex_client.h
  * Version:	  
  * Description:   
- * Status:        Experimental.
+ * Status:        Stable.
  * Author:        Pontus Fuchs <pontus@tactel.se>
  * Created at:    Thu Nov 11 20:58:00 1999
- * Modified at:   Tue Nov 16 19:26:39 1999
- * Modified by:   Pontus Fuchs <pontus@tactel.se>
+ * CVS ID:        $Id$
  * 
- *     Copyright (c) 1998-1999 Dag Brattli, All Rights Reserved.
+ *     Copyright (c) 1999-2000 Pontus Fuchs, All Rights Reserved.
  *      
  *     This library is free software; you can redistribute it and/or
  *     modify it under the terms of the GNU Lesser General Public
@@ -31,7 +30,6 @@
 #ifndef OBEX_CLIENT_H
 #define OBEX_CLIENT_H
 
-//void obex_client_event(obex_t *self, gint event, gint cmd, gint rsp, gboolean del);
 gint obex_client(obex_t *self, GNetBuf *msg, gint final);
 
 #endif
