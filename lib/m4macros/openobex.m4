@@ -1,5 +1,6 @@
 dnl Check for openobex library
 dnl Written by Pontus Fuchs 2000-08-18
+dnl Version checking fixed by Christian W. Zuckschwerdt 2002-10-17
 
 AC_DEFUN([AM_PATH_OPENOBEX], [
 	AC_PATH_PROG(OPENOBEX_CONFIG, openobex-config, no)
@@ -31,8 +32,14 @@ AC_DEFUN([AM_PATH_OPENOBEX], [
 		sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
 
 
-	if test $obex_req_major_version -le $obex_config_major_version ; then
-		if test $obex_req_minor_version -le $obex_config_minor_version ; then
+	if test $obex_req_major_version -lt $obex_config_major_version ; then
+       		obex_config_version_ok="yes"
+       	fi
+	if test $obex_req_major_version -eq $obex_config_major_version ; then
+		if test $obex_req_minor_version -lt $obex_config_minor_version ; then
+       			obex_config_version_ok="yes"
+	       	fi
+		if test $obex_req_minor_version -eq $obex_config_minor_version ; then
 			if test $obex_req_micro_version -le $obex_config_micro_version ; then
 				obex_config_version_ok="yes"
 			fi
