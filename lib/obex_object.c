@@ -235,7 +235,7 @@ gint obex_object_addheader(obex_t *self, obex_object_t *object, guint8 hi,
  */
 static gint obex_object_send_body(obex_object_t *object,
 				struct obex_header_element *h,
-				GNetBuf *txmsg, gint tx_left)
+				GNetBuf *txmsg, guint tx_left)
 {
 	struct obex_byte_stream_hdr *body_txh;
         guint actual;
