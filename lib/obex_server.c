@@ -109,7 +109,7 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 	
 	case STATE_REC:
 		DEBUG(4, G_GNUC_FUNCTION "() STATE_REC\n");
-		/* In progress of recieving a request */
+		/* In progress of receiving a request */
 		
 		/* Abort? */
 		if(cmd == OBEX_CMD_ABORT) {
@@ -174,11 +174,39 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 		}
 		
 		if(len > 3) {
-			DEBUG(0, G_GNUC_FUNCTION "() STATE_SEND Didn't excpect data from peer (%d)\n", len);
-			/* Hmmm, we got some data while sending. This is no good! */
-			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-			obex_deliver_event(self, OBEX_EV_PARSEERR, cmd, 0, TRUE);
-			return 0;
+			DEBUG(1, G_GNUC_FUNCTION "() STATE_SEND Didn't expect data from peer (%d)\n", len);
+			//g_netbuf_print(msg);
+			/* At this point, we are in the middle of sending
+			 * our response to the client, and it is still
+			 * sending us some data ! This break the whole
+			 * Request/Response model of HTTP !
+			 * Most often, the client is sending some out of band
+			 * progress information for a GET.
+			 * This is the way we will handle that :
+			 * Save this header in our Rx header list. We can have
+			 * duplicated header, so no problem...
+			 * The user has already parsed headers, so will most
+			 * likely ignore those new headers.
+			 * User can check the header in the next EV_PROGRESS,
+			 * doing so will hide the header (until reparse).
+			 * If not, header can be parsed at 'final'.
+			 * Don't send any additional event to the app to not
+			 * break compatibility and because app can just check
+			 * this condition itself...
+			 * No headeroffset needed because 'connect' is
+			 * single packet (or we deny it).
+			 * Jean II */
+			if((cmd == OBEX_CMD_CONNECT) ||
+			   (obex_object_receive(self, msg) < 0))	{
+				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
+				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+				return -1;
+			}
+			obex_deliver_event(self, OBEX_EV_UNEXPECTED, self->object->opcode, 0, FALSE);
+			/* Note : we may want to get rid of received header,
+			 * however they are mixed with legitimate headers,
+			 * and the user may expect to consult them later.
+			 * So, leave them here (== overhead). Jean II */
 		}
 				
 		/* As a server, the final bit is always SET, and the

@@ -61,6 +61,7 @@ typedef struct {
 #define OBEX_EV_ABORT		7	/* Request was aborted */
 #define OBEX_EV_STREAMEMPTY	8	/* Need to feed more data when sending a stream */
 #define OBEX_EV_STREAMAVAIL	9	/* Time to pick up data when receiving a stream */
+#define OBEX_EV_UNEXPECTED	10	/* Unexpected data, not fatal */
 
 /* For OBEX_Init() */
 #define OBEX_FL_KEEPSERVER	0x02	/* Keep the server alive */

@@ -71,11 +71,38 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		}
 				
 		if(ntohs(response->len) > 3) {
-			DEBUG(0, G_GNUC_FUNCTION "() STATE_SEND. Didn't excpect data from peer (%d)\n", ntohs(response->len));
-			g_netbuf_print(msg);
-			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-			obex_deliver_event(self, OBEX_EV_PARSEERR, rsp, 0, TRUE);
-			return 0;
+			DEBUG(1, G_GNUC_FUNCTION "() STATE_SEND. Didn't excpect data from peer (%d)\n", ntohs(response->len));
+			//g_netbuf_print(msg);
+			/* At this point, we are in the middle of sending
+			 * our request to the server, and it is already
+			 * sending us some data ! This break the whole
+			 * Request/Response model of HTTP !
+			 * Most often, the server is sending some out of band
+			 * progress information for a PUT.
+			 * This is the way we will handle that :
+			 * Save this header in our Rx header list. We can have
+			 * duplicated header, so no problem...
+			 * User can check the header in the next EV_PROGRESS,
+			 * doing so will hide the header (until reparse).
+			 * If not, header will be parsed at 'final', or just
+			 * ignored (common case for PUT).
+			 * Don't send any additional event to the app to not
+			 * break compatibility and because app can just check
+			 * this condition itself...
+			 * No headeroffset needed because 'connect' is
+			 * single packet (or we deny it).
+			 * Jean II */
+			if((self->object->opcode == OBEX_CMD_CONNECT) ||
+			   (obex_object_receive(self, msg) < 0))	{
+				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+				self->state = MODE_SRV | STATE_IDLE;
+				return -1;
+			}
+			obex_deliver_event(self, OBEX_EV_UNEXPECTED, self->object->opcode, 0, FALSE);
+			/* Note : we may want to get rid of received header,
+			 * however they are mixed with legitimate headers,
+			 * and the user may expect to consult them later.
+			 * So, leave them here (== overhead). Jean II */
 		}
 		// No break here!! Fallthrough	
 	
@@ -97,16 +124,17 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
                 else {
                 	/* Sending of object finished.. */
                 	self->state = MODE_CLI | STATE_REC;
+			// Should we deliver a EV_PROGRESS here ? Jean II
                 }
 		break;
 			
 	case STATE_REC:
-		/* Recieving answer of request */
+		/* Receiving answer of request */
 		DEBUG(4, G_GNUC_FUNCTION "() STATE_REC\n");
 		
 		/* Response of a CMD_CONNECT needs some special treatment.*/
 		if(self->object->opcode == OBEX_CMD_CONNECT)	{
-			DEBUG(2, G_GNUC_FUNCTION "() We excpect a connect-rsp\n");
+			DEBUG(2, G_GNUC_FUNCTION "() We expect a connect-rsp\n");
 			if(obex_parse_connect_header(self, msg) < 0)	{
 				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				self->state = MODE_SRV | STATE_IDLE;
@@ -121,7 +149,7 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 			self->mtu_tx = OBEX_MINIMUM_MTU;
 		}
 
-		/* Recieve any headers */
+		/* Receive any headers */
 		if(obex_object_receive(self, msg) < 0)	{
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			self->state = MODE_SRV | STATE_IDLE;

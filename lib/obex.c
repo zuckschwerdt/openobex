@@ -276,6 +276,13 @@ gint OBEX_SetTransportMTU(obex_t *self, guint16 mtu_rx, guint16 mtu_tx_max)
  * @saddr: Local address to bind to
  * @addrlen: Length of address
  *
+ * Bind a server socket to an Obex service. Common transport have
+ * specialised version of this function.
+ * Note : between 0.9.8 and 0.10.0, the prototype of this function
+ * changed to make it generic. If you want your code to work across
+ * new and old version of OpenObex, you may use #ifdef OBEX_MAXIMUM_MTU
+ * to test the Obex version.
+ *
  * Returns -1 on error.
  */
 gint OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
