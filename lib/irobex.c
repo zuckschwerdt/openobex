@@ -80,7 +80,6 @@ void irobex_prepare_connect(obex_t *self, char *service)
  */
 gint irobex_listen(obex_t *self, char *service)
 {
-#ifndef _WIN32
 	DEBUG(3, G_GNUC_FUNCTION "()\n");
 
 	self->serverfd = obex_create_socket(self, AF_IRDA, FALSE);
@@ -97,32 +96,30 @@ gint irobex_listen(obex_t *self, char *service)
 	else
 		strncpy(self->trans.self.irda.sir_name, service, 25);
 
+
+#ifndef _WIN32
 	self->trans.self.irda.sir_lsap_sel = LSAP_ANY;
-	
+#endif /* _WIN32 */
+
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.irda, 
 		 sizeof(struct sockaddr_irda)))
 	{
-		DEBUG(0, __FUNCTION__ "() Error doing bind\n");
+		DEBUG(0, G_GNUC_FUNCTION "() Error doing bind\n");
 		goto out_freesock;
 	}
 
 	if (listen(self->serverfd, 1)) {
-		DEBUG(0, __FUNCTION__ "() Error doing listen\n");
+		DEBUG(0, G_GNUC_FUNCTION "() Error doing listen\n");
 		goto out_freesock;
 	}
 
-	DEBUG(4, __FUNCTION__ "() We are now listening for connections\n");
+	DEBUG(4, G_GNUC_FUNCTION "() We are now listening for connections\n");
 	return 1;
 
 out_freesock:
 	obex_delete_socket(self, self->serverfd);
 	self->serverfd = -1;
 	return -1;
-
-#else /* _WIN32 */
-	g_message("Not supported on WIN32 (yet)...\n");
-	return -1;
-#endif /* _WIN32 */
 }
 
 /*
@@ -133,7 +130,6 @@ out_freesock:
  */
 gint irobex_accept(obex_t *self)
 {
-#ifndef _WIN32
 	int addrlen = sizeof(struct sockaddr_irda);
 	int mtu;
 	int len = sizeof(int);
@@ -158,6 +154,7 @@ gint irobex_accept(obex_t *self)
 		}
 	}
 
+#ifndef _WIN32
 	/* Check what the IrLAP data size is */
 	if (getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE, (void *) &mtu, 
 		       &len)) 
@@ -166,9 +163,10 @@ gint irobex_accept(obex_t *self)
 	}
 	self->trans.mtu = mtu;
 	DEBUG(3, G_GNUC_FUNCTION "(), transport mtu=%d\n", mtu);
-
+#else
+	self->trans.mtu = OBEX_DEFAULT_MTU;
+#endif /* _WIN32 */
 	return 0;
-#endif
 }
 	
 /*

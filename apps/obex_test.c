@@ -239,7 +239,7 @@ int main (int argc, char *argv[])
 					}
 				}
 				else {
-					if(IrOBEX_TransportConnect(handle, "OBEX") < 0)	{
+					if(IrOBEX_TransportConnect(handle, "OBEX:test") < 0)	{
 						g_print("Transport connect error!\n");
 						break;
 					}
@@ -251,7 +251,7 @@ int main (int argc, char *argv[])
 				disconnect_client(handle);
 			break;
 			case 's':
-				server(handle);
+				server(handle, "OBEX:test");
 			break;
 			default:
 				printf("Unknown command %s\n", cmd);
@@ -264,4 +264,3 @@ int main (int argc, char *argv[])
 
 	return 0;
 }
-
