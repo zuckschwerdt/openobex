@@ -145,6 +145,7 @@ gint ircp_cli_connect(ircp_client_t *cli)
 	ret = IrOBEX_TransportConnect(cli->obexhandle, "OBEX:IrXfer");
 #endif
 	if (ret < 0) {
+		cli->infocb(IRCP_EV_ERR, "");
 		return -1;
 	}
 

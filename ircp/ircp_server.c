@@ -194,7 +194,7 @@ gint ircp_srv_got_file(ircp_server_t *srv, obex_object_t *object)
 	obex_headerdata_t hv;
 	guint8 hi;
 	gint hlen;
-	guint8 *body = NULL;
+	const guint8 *body = NULL;
 	gint body_len = 0;
 	gchar *name = NULL;
 	int ret = -1;

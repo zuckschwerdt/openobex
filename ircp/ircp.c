@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 		if(argc >= 3)
 			inbox = argv[2];
 		else
-			inbox = "";
+			inbox = ".";
 
 		ircp_srv_recv(srv, inbox);
 

@@ -12,7 +12,7 @@
 //
 // Get the filesize.
 //
-gint get_filesize(char *filename)
+static gint get_filesize(const char *filename)
 {
 	struct stat stats;
 
@@ -24,7 +24,7 @@ gint get_filesize(char *filename)
 //
 // Read a file and alloc a buffer for it
 //
-guint8* easy_readfile(char *filename, int *file_size)
+guint8* easy_readfile(const char *filename, int *file_size)
 {
 	int actual;
 	int fd;
@@ -54,7 +54,7 @@ guint8* easy_readfile(char *filename, int *file_size)
 //
 //
 //
-obex_object_t *build_object_from_file(obex_t *handle, gchar *localname, gchar *remotename)
+obex_object_t *build_object_from_file(obex_t *handle, const gchar *localname, const gchar *remotename)
 {
 	obex_object_t *object = NULL;
 	obex_headerdata_t hdd;
@@ -109,7 +109,7 @@ err:
 //
 // Check for dangerous filenames (TODO: Make better)
 //
-gboolean ircp_nameok(gchar *name)
+static gboolean ircp_nameok(const gchar *name)
 {
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 	if(name[0] == '/')
@@ -126,7 +126,7 @@ gboolean ircp_nameok(gchar *name)
 //
 // Save a file...
 //
-gint ircp_save_file(gchar *path, gchar *name, gchar *body, guint len)
+gint ircp_save_file(const gchar *path, const gchar *name, const gchar *body, guint len)
 {
 	GString *diskname;
 	gint fd, ret;
@@ -164,7 +164,7 @@ out:
 //
 // Go to a directory. Create if not exists and create is true.
 //
-gint ircp_checkdir(gchar *path, gchar *dir, gboolean create)
+gint ircp_checkdir(const gchar *path, const gchar *dir, gboolean create)
 {
 	GString *newpath;
 	struct stat statbuf;
