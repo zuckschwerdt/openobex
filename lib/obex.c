@@ -765,9 +765,9 @@ int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset)
  * OBEX_UnicodeToChar - Simple unicode to char function.
  * @c: Destination (char)
  * @uc: Source (unicode)
- * @size: Length of destination buffer
+ * @size: Length of destination buffer, at least half the size of source
  *
- * Buffers may overlap. Returns -1 on error.
+ * Buffers may not overlap. Returns -1 on error.
  */
 int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
 {
@@ -792,9 +792,9 @@ int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
  * OBEX_CharToUnicode - Simple char to unicode function.
  * @uc: Destination (unicode)
  * @c: Source (char)
- * @size: Length of destination buffer
+ * @size: Length of destination buffer, at least twice the size of source
  *
- * Buffers may overlap. Returns -1 on error.
+ * Buffers may not overlap. Returns -1 on error.
  */
 int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
 {
@@ -805,7 +805,7 @@ int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
 	obex_return_val_if_fail(c != NULL, -1);
 
 	len = n = strlen(c);
-	obex_return_val_if_fail( (n*2 < size), -1);
+	obex_return_val_if_fail(n*2+2 <= size, -1);
 
 	uc[n*2+1] = 0;
 	uc[n*2] = 0;
