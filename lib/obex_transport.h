@@ -76,7 +76,7 @@ int obex_transport_write(obex_t *self, GNetBuf *msg);
 int obex_transport_read(obex_t *self, int count, uint8_t *buf, int buflen);
 
 
-#endif OBEX_TRANSPORT_H
+#endif /* OBEX_TRANSPORT_H */
 
 
 
