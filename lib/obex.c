@@ -300,12 +300,14 @@ gint IrOBEX_TransportConnect(obex_t *self, const char *service)
 /*
  * Function OBEX_GetFD ()
  *
- *    Get FD 
+ *    Get FD
  *
  */
 gint OBEX_GetFD(obex_t *self)
 {
 	g_return_val_if_fail(self != NULL, -1);
+	if(self->fd == -1)
+		return self->serverfd;
 	return self->fd;
 }
 
@@ -433,7 +435,7 @@ gint OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, guint8 hi,
 /*
  * Function OBEX_ObjectGetNextHeader ()
  *
- *    Iterate through the attached to an object
+ *    Iterate through the attached headers to an object
  *
  */
 gint OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, guint8 *hi,

@@ -49,7 +49,7 @@ typedef struct obex obex_t;
 
 /* use 0 for none, 1 for sendbuff, 2 for receivebuff and 3 for both */
 #ifndef DEBUG_DUMPBUFFERS
-#define DEBUG_DUMPBUFFERS 0
+//#define DEBUG_DUMPBUFFERS 3
 #endif
 
 /* use 0 for production, 1 for verification, >2 for debug */

@@ -369,6 +369,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 			obex_deliver_event(self, 0, OBEX_EV_LINKERR, 0, 0, TRUE);
 			return actual;
 		}
+		buf += actual;
 		g_netbuf_put(msg, actual);
 	}
 
