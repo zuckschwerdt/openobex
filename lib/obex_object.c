@@ -577,12 +577,25 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 			}
 
 			if( (element = g_malloc0(sizeof(struct obex_header_element)) ) ) {
-				if( (element->buf = g_netbuf_new(len)) )	{
-					DEBUG(4, G_GNUC_FUNCTION "() Copying %d bytes\n", len);
-					element->length = len;
-					element->hi = hi;
-					g_netbuf_put_data(element->buf, source, len);
+				element->length = len;
+				element->hi = hi;
 
+				// If we get an emtpy we have to deal with it...
+				// This might not be an optimal way, but it works.
+				if(len == 0) {
+					DEBUG(4, G_GNUC_FUNCTION "() Got empty header. Allocating dummy buffer anyway\n");
+					element->buf = g_netbuf_new(1);
+				}
+					
+				else {
+					element->buf = g_netbuf_new(len);
+					if(element->buf) {
+						DEBUG(4, G_GNUC_FUNCTION "() Copying %d bytes\n", len);
+						g_netbuf_put_data(element->buf, source, len);
+					}
+				}
+
+				if(element->buf) {
 					/* Add element to rx-list */
 					object->rx_headerq = g_slist_append(object->rx_headerq, element);
 					object->rx_lasthdr = object->rx_headerq;

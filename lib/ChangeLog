@@ -1,3 +1,9 @@
+2000-10-16  Pontus Fuchs  <pontus.fuchs@tactel.se>
+
+	* obex_object.c: When a header with 0 length was received 
+	  obex_object_receive tried to allocate a zero-length netbuf, 
+	  which ofcourse failed causing the transfer to be aborted.
+
 2000-08-29  Pontus Fuchs  <pontus.fuchs@tactel.se>
 
 	* Minor fix to obex_main.c which prevented 
