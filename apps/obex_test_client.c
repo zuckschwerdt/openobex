@@ -349,7 +349,6 @@ void get_client(obex_t *handle, struct context *gt)
 	gt->get_name = req_name;
 	OBEX_Request(handle, object);
 	syncwait(handle);
-	printf("Leaving PUT\n");
 }
 
 //
