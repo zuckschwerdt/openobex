@@ -35,6 +35,7 @@
  ********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -46,6 +47,7 @@
 
 obex_t *handle = NULL;
 volatile int finished = FALSE;
+extern int last_rsp;
 
 /*
  * Function main (argc, )
@@ -56,10 +58,10 @@ volatile int finished = FALSE;
 int main(int argc, char *argv[])
 {
 	obex_object_t *object;
-	int ret;
+	int ret, exitval = EXIT_SUCCESS;
 
 	printf("Send and receive files to Palm3\n");
-	if ((argc < 1) || (argc > 2) )	{
+	if ((argc < 1) || (argc > 2))	{
 		printf ("Usage: %s [name]\n", argv[0]); 
 		return -1;
 	}
@@ -81,24 +83,32 @@ int main(int argc, char *argv[])
 		ret = IrOBEX_TransportConnect(handle, "OBEX");
 		if (ret < 0) {
 			printf("Sorry, unable to connect!\n");
-			return ret;
+			return EXIT_FAILURE;
 		}
 
 		object = OBEX_ObjectNew(handle, OBEX_CMD_CONNECT);
 		ret = do_sync_request(handle, object, FALSE);
-
-		if( (object = build_object_from_file(handle, argv[1])) )	{
+		if ((last_rsp != OBEX_RSP_SUCCESS) || (ret < 0)) {
+			printf("Sorry, unable to connect!\n");
+			return EXIT_FAILURE;
+		}
+		if ((object = build_object_from_file(handle, argv[1])))	{
 			ret = do_sync_request(handle, object, FALSE);
-		}
-		else	{
-			perror("PUT failed");
-		}
+			if ((last_rsp != OBEX_RSP_SUCCESS) || (ret < 0))
+				exitval = EXIT_FAILURE;
+		} else
+			exitval = EXIT_FAILURE;
 
 		object = OBEX_ObjectNew(handle, OBEX_CMD_DISCONNECT);
 		ret = do_sync_request(handle, object, FALSE);
+		if ((last_rsp != OBEX_RSP_SUCCESS) || (ret < 0))
+			exitval = EXIT_FAILURE;
 
-		printf("PUT successful\n");
+		if (exitval == EXIT_SUCCESS)
+			printf("PUT successful\n");
+		else
+			printf("PUT failed\n");
 	}
 //	sleep(1);
-	return 0;
+	return exitval;
 }
