@@ -42,7 +42,6 @@
 #include <glib.h>
 #include <obex/obex.h>
 #include "obex_test_cable.h"
-#include "obex_test.h"
 
 //
 // Do an AT-command.

@@ -30,7 +30,9 @@
 #ifndef OBEX_TEST_CABLE_H
 #define OBEX_TEST_CABLE_H
 
+#include <glib.h>
 #include <termios.h>
+#include <obex/obex.h>
 
 struct cobex_context
 {
