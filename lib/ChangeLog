@@ -2,6 +2,7 @@
 
 	* Add COPYING.LIB for LGPL stuff
 	* Don't auto generate openobex.spec
+	* Bump version number to 1.0.1
 
 2002-12-18  Marcel Holtmann  <marcel@holtmann.org>
 

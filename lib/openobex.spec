@@ -1,5 +1,5 @@
 #
-# spec file for package OpenOBEX (Version 1.0.0)
+# spec file for package OpenOBEX (Version 1.0.1)
 # 
 
 Summary:     Library for using OBEX
