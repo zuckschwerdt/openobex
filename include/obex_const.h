@@ -58,9 +58,9 @@ typedef struct {
 #define OBEX_EV_LINKERR		4	/* Link has been disconnected */
 #define OBEX_EV_PARSEERR	5	/* Malformed data encountered */
 
-#define OBEX_VERSION		0x11      /* Version 1.1 */
-#define OBEX_DEFAULT_MTU	1024
-#define OBEX_MINIMUM_MTU	255      
+// #define OBEX_VERSION		0x11      /* Version 1.1 */
+// #define OBEX_DEFAULT_MTU	1024
+// #define OBEX_MINIMUM_MTU	255      
 
 /* For OBEX_Init() */
 #define OBEX_FL_ASYNC		0x01

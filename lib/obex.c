@@ -62,8 +62,8 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 {
 	obex_t *self;
 
-#ifdef NET_DEBUG
-	obex_net_debug = NET_DEBUG;
+#ifdef OBEX_DEBUG
+	obex_net_debug = OBEX_DEBUG;
 #endif
 
 #ifndef HAVE_FASYNC
