@@ -116,7 +116,9 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			DEBUG(1, G_GNUC_FUNCTION "() Got OBEX_ABORT request!\n");
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			obex_response_request(self, OBEX_RSP_SUCCESS);
-			return 0;		
+			/* This is not an Obex error, it is just that the peer
+			 * aborted the request, so return 0 - Jean II */
+			return 0;
 		}
 		
 		/* Sanity check */
@@ -170,6 +172,8 @@ gint obex_server(obex_t *self, GNetBuf *msg, gint final)
 			DEBUG(1, G_GNUC_FUNCTION "() Got OBEX_ABORT request!\n");
 			obex_response_request(self, OBEX_RSP_SUCCESS);
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
+			/* This is not an Obex error, it is just that the peer
+			 * aborted the request, so return 0 - Jean II */
 			return 0;		
 		}
 		

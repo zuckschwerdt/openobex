@@ -257,6 +257,7 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 	gint final;
 	gint actual = 0;
 	guint size;
+	gint ret;
 	
 	DEBUG(4, G_GNUC_FUNCTION "()\n");
 
@@ -331,15 +332,17 @@ gint obex_data_indication(obex_t *self, guint8 *buf, gint buflen)
 
 	/* Dispatch to the mode we are in */
 	if(self->state & MODE_SRV) {
-		obex_server(self, msg, final);
+		ret = obex_server(self, msg, final);
 		g_netbuf_recycle(msg);
 		
 	}
 	else	{
-		obex_client(self, msg, final);
+		ret = obex_client(self, msg, final);
 		g_netbuf_recycle(msg);
 	}
-
+	/* Check parse errors */
+	if(ret < 0)
+		actual = ret;
 	return actual;
 }
 

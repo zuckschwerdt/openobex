@@ -513,8 +513,7 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
 	self->object = object;
         self->state = STATE_START | MODE_CLI;
 	
-	obex_client(self, NULL, 0);
-	return 0;
+	return obex_client(self, NULL, 0);
 }
 
 

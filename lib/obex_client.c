@@ -66,8 +66,11 @@ gint obex_client(obex_t *self, GNetBuf *msg, gint final)
 		/* Any errors from peer? Win2k will send RSP_SUCCESS after
 		   every fragment sent so we have to accept that too.*/
 		if(rsp != OBEX_RSP_SUCCESS && rsp != OBEX_RSP_CONTINUE) {
+			DEBUG(0, G_GNUC_FUNCTION "() STATE_SEND. request not accepted.\n");
 			obex_deliver_event(self, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
-			return 0;		
+			/* This is not an Obex error, it is just that the peer
+			 * doesn't accept the request, so return 0 - Jean II */
+			return 0;
 		}
 				
 		if(ntohs(response->len) > 3) {

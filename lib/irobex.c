@@ -62,6 +62,28 @@
 
 
 /*
+ * Function irobex_no_addr (addr)
+ *
+ *    Check if the address is not valid for connection
+ *
+ */
+static inline int irobex_no_addr(struct sockaddr_irda *addr)
+{
+#ifndef _WIN32
+	return((addr->sir_addr == 0x0) || (addr->sir_addr == 0xFFFFFFFF));
+#else
+	return( ((addr->irdaDeviceID[0] == 0x00) &&
+		 (addr->irdaDeviceID[1] == 0x00) &&
+		 (addr->irdaDeviceID[2] == 0x00) &&
+		 (addr->irdaDeviceID[3] == 0x00)) ||
+		((addr->irdaDeviceID[0] == 0xFF) &&
+		 (addr->irdaDeviceID[1] == 0xFF) &&
+		 (addr->irdaDeviceID[2] == 0xFF) &&
+		 (addr->irdaDeviceID[3] == 0xFF)) );
+#endif /* _WIN32 */
+}
+
+/*
  * Function irobex_prepare_connect (self, service)
  *
  *    Prepare for IR-connect
@@ -314,73 +336,6 @@ static gint irobex_discover_devices(obex_t *self)
 	return(ret);
 }
 
-#if 0
-/* Deprecated by the above function. */
-/*
- * Function irobex_discover_devices (fd)
- *
- *    Try to discover some remote device(s) that we can connect to
- *
- */
-static gint irobex_discover_devices(obex_t *self)
-{
-	struct irda_device_list *list;
-	unsigned char *buf;
-	int len;
-	int i, ret = -1;
-
-	len = sizeof(struct irda_device_list) -
-		sizeof(struct irda_device_info) +
-		sizeof(struct irda_device_info) * MAX_DEVICES;
-
-	buf = g_malloc(len);
-	if(buf == NULL)
-		return -1;
-
-	list = (struct irda_device_list *) buf;
-	
-	if (getsockopt(self->fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
-		g_free(buf);
-		return -1;
-	}
-
-
-#ifndef _WIN32
-	if (len > 0) {
-		DEBUG(1, "Discovered: (list len=%d)\n", list->len);
-
-		for (i=0;i<list->len;i++) {
-			DEBUG(1, "  name:  %s\n", list->dev[i].info);
-			DEBUG(1, "  daddr: %08x\n", list->dev[i].daddr);
-			DEBUG(1, "  saddr: %08x\n", list->dev[i].saddr);
-			DEBUG(1, "\n");
-			
-			self->trans.peer.irda.sir_addr = list->dev[i].daddr;
-			self->trans.self.irda.sir_addr = list->dev[i].saddr;
-			ret = 0;
-		}
-	}
-#else
-	if (len > 0) {
-		DEBUG(1, "Discovered: (list len=%d)\n", list->numDevice);
-
-		for (i=0; i<(int)list->numDevice; i++) {
-			DEBUG(1, "  name:  %s\n", list->Device[i].irdaDeviceName);
-			DEBUG(1, "  daddr: %08x\n", list->Device[i].irdaDeviceID);
-			memcpy(&self->trans.peer.irda.irdaDeviceID[0], &list->Device[i].irdaDeviceID[0], 4);
-			ret = 0;
-		}
-	}
-
-#endif /* _WIN32 */
-
-	if(ret <  0)
-		DEBUG(1, G_GNUC_FUNCTION "(), didn't find any OBEX devices!\n");
-	g_free(buf);
-	return ret;
-}
-#endif /* 0 */
-
 /*
  * Function irobex_irda_connect_request (self)
  *
@@ -401,10 +356,15 @@ gint irobex_connect_request(obex_t *self)
 			return -1;
 	}
 
-	ret = irobex_discover_devices(self);
-	if (ret < 0)	{
-		DEBUG(1, G_GNUC_FUNCTION "() No devices in range\n");
-		goto out_freesock;
+	/* Check if the application did supply a valid address.
+	 * You need to use OBEX_TransportConnect() for that. Jean II */
+	if(irobex_no_addr(&self->trans.peer.irda)) {
+		/* Nope. Go find one... */
+		ret = irobex_discover_devices(self);
+		if (ret < 0)	{
+			DEBUG(1, G_GNUC_FUNCTION "() No devices in range\n");
+			goto out_freesock;
+		}
 	}
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.irda,

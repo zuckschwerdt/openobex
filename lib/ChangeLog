@@ -2,6 +2,7 @@
 
 	* Fix workaround for compilation without Bluetooth support.
 	* Add support for DEBUG and DUMP.
+	* Disable IrDA discovery if a valid IrDA address is supplied.
 
 2002-10-16  Marcel Holtmann  <marcel@holtmann.org>
 
