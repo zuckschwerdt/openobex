@@ -126,4 +126,16 @@ typedef struct {
 #define OBEX_RSP_DATABASE_FULL		0x60
 #define OBEX_RSP_DATABASE_LOCKED	0x61
 
+/* Min, Max and default transport MTU */
+#define OBEX_DEFAULT_MTU	1024
+#define OBEX_MINIMUM_MTU	255      
+#define OBEX_MAXIMUM_MTU	32768
+/* In theory max MTU is (64k-1), but that's quite big. */
+
+/* Optimum MTU for various transport (optimum for throughput).
+ * The user/application has to set them via OBEX_SetTransportMTU().
+ * If you are worried about safety or latency, stick with the current
+ * default... - Jean II */
+#define OBEX_IRDA_OPT_MTU	(7 * 2039)	/* 7 IrLAP frames */
+
 #endif

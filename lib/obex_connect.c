@@ -101,10 +101,11 @@ gint obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 
 		DEBUG(1, G_GNUC_FUNCTION "version=%02x\n", version);
 
-		if(mtu < OBEX_DEFAULT_MTU)
+		/* Limit to some reasonable value (usually OBEX_DEFAULT_MTU) */
+		if(mtu < self->mtu_tx_max)
 			self->mtu_tx = mtu;
 		else
-			self->mtu_tx = OBEX_DEFAULT_MTU;
+			self->mtu_tx = self->mtu_tx_max;
 
 		DEBUG(1, G_GNUC_FUNCTION "() requested MTU=%02x, used MTU=%02x\n", mtu, self->mtu_tx);
 		return 1;

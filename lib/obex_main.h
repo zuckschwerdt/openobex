@@ -73,8 +73,6 @@ void DEBUG(unsigned int n, ...);
 #endif /* _WIN32 */
 
 #define OBEX_VERSION		0x11      /* Version 1.1 */
-#define OBEX_DEFAULT_MTU	1024
-#define OBEX_MINIMUM_MTU	255      
 
 // Note that this one is also defined in obex.h
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, gint mode, gint event, gint obex_cmd, gint obex_rsp);
@@ -93,6 +91,7 @@ enum
 struct obex {
 	guint16 mtu_tx;			/* Maximum OBEX TX packet size */
         guint16 mtu_rx;			/* Maximum OBEX RX packet size */
+	guint16 mtu_tx_max;		/* Maximum TX we can accept */
 
 	gint fd;			/* Socket descriptor */
 	gint serverfd;

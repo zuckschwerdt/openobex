@@ -90,8 +90,8 @@ gint inobex_listen(obex_t *self)
 		return -1;
 	}
 
-	printf("TCP/IP listen %d %X\n", self->trans.self.inet.sin_port,
-	       self->trans.self.inet.sin_addr.s_addr);
+	//printf("TCP/IP listen %d %X\n", self->trans.self.inet.sin_port,
+	//       self->trans.self.inet.sin_addr.s_addr);
 	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.inet,
 		 sizeof(struct sockaddr_in))) 
 	{

@@ -117,6 +117,8 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	self->trans.connected = FALSE;
 
 	/* Allocate message buffers */
+	/* It's safe to allocate them smaller than OBEX_MAXIMUM_MTU
+	 * because netbuf will realloc data as needed. - Jean II */
 	self->rx_msg = g_netbuf_new(OBEX_DEFAULT_MTU);
 	if (self->rx_msg == NULL)
 		goto out_err;
@@ -125,8 +127,12 @@ obex_t *OBEX_Init(gint transport, obex_event_t eventcb, guint flags)
 	if (self->tx_msg == NULL)
 		goto out_err;
 
+	/* Safe values.
+	 * Both self->mtu_rx and self->mtu_tx_max can be increased by app
+	 * self->mtu_tx will be whatever the other end sneds us - Jean II */
 	self->mtu_rx = OBEX_DEFAULT_MTU;
 	self->mtu_tx = OBEX_MINIMUM_MTU;
+	self->mtu_tx_max = OBEX_DEFAULT_MTU;
 
 #ifndef _WIN32
 	/* Ignore SIGPIPE. Otherwise send() will raise it and the app will quit */
@@ -227,6 +233,44 @@ void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data)
 }
 
 /**
+ * OBEX_SetTransportMTU - Set MTU to be used for receive and transmit
+ * @self: OBEX handle
+ * @mtu_rx: maximum receive transport packet size
+ * @mtu_tx_max: maximum transmit transport packet size negociated
+ *
+ * Changing those values can increase the performance of the underlying
+ * transport, but will increase memory consumption and latency (especially
+ * abort latency), and may trigger bugs in buggy transport.
+ * This need to be set *before* establishing the connection.
+ *
+ * Returns -1 on error.
+ */
+gint OBEX_SetTransportMTU(obex_t *self, guint16 mtu_rx, guint16 mtu_tx_max)
+{
+	g_return_val_if_fail(self != NULL, -EFAULT);
+	if (self->object)	{
+		DEBUG(1, G_GNUC_FUNCTION "() We are busy.\n");
+		return -EBUSY;
+	}
+	if((mtu_rx < OBEX_MINIMUM_MTU) || (mtu_rx > OBEX_MAXIMUM_MTU))
+		return -E2BIG;
+	if((mtu_tx_max < OBEX_MINIMUM_MTU) || (mtu_tx_max > OBEX_MAXIMUM_MTU))
+		return -E2BIG;
+
+	/* Change MTUs */
+	self->mtu_rx = mtu_rx;
+	self->mtu_tx_max = mtu_tx_max;
+	/* Reallocate transport buffers */
+	self->rx_msg = g_netbuf_realloc(self->rx_msg, self->mtu_rx);
+	if (self->rx_msg == NULL)
+		return -ENOMEM;
+	self->tx_msg = g_netbuf_realloc(self->tx_msg, self->mtu_tx_max);
+	if (self->tx_msg == NULL)
+		return -ENOMEM;
+	return 0;
+}
+
+/**
  * OBEX_ServerRegister - Start listening for incoming connections
  * @self: OBEX handle
  * @saddr: Local address to bind to
@@ -307,13 +351,15 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, gpointer data)
 
 	self->mtu_rx = server->mtu_rx;
 	self->mtu_tx = server->mtu_tx;
+	self->mtu_tx_max = server->mtu_tx_max;
 
 	/* Allocate message buffers */
 	self->rx_msg = g_netbuf_new(self->mtu_rx);
 	if (self->rx_msg == NULL)
 		goto out_err;
 
-	self->tx_msg = g_netbuf_new(self->mtu_tx);
+	/* Note : mtu_tx not yet negociated, so let's be safe here - Jean II */
+	self->tx_msg = g_netbuf_new(self->mtu_tx_max);
 	if (self->tx_msg == NULL)
 		goto out_err;
 
@@ -859,7 +905,6 @@ gint IrOBEX_TransportConnect(obex_t *self, const char *service)
 	}
 
 	g_return_val_if_fail(self != NULL, -1);
-	g_return_val_if_fail(service != NULL, -1);
 
 #ifdef HAVE_IRDA
 	irobex_prepare_connect(self, service);

@@ -277,7 +277,8 @@ gint obex_transport_listen(obex_t *self)
 		break;
 #endif /*HAVE_BLUETOOTH*/
 	default:
-		g_message(G_GNUC_FUNCTION "() Transport not implemented!\n");
+		g_message(G_GNUC_FUNCTION "() Transport %d not implemented!\n",
+			  self->trans.type);
 		break;
 	}
 	return ret;

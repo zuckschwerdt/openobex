@@ -55,6 +55,7 @@ void    OBEX_Cleanup(obex_t *self);
 void OBEX_SetUserData(obex_t *self, gpointer data);
 gpointer OBEX_GetUserData(obex_t *self);
 void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, gpointer data);
+gint OBEX_SetTransportMTU(obex_t *self, guint16 mtu_rx, guint16 mtu_tx_max);
 gint OBEX_GetFD(obex_t *self);
 
 gint OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans);
