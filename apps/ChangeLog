@@ -1,3 +1,7 @@
+2002-10-23  Marcel Holtmann  <marcel@holtmann.org>
+
+	* Add streaming support and push command.
+
 2002-10-16  Marcel Holtmann  <marcel@holtmann.org>
 
 	* Cleanup of autoconf/automake stuff.
