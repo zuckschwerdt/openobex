@@ -206,9 +206,9 @@ gint OBEX_ServerRegister(obex_t *self, const char *service)
 
 
 /**
- * OBEX_ServerAccept - Accept an incming connection
+ * OBEX_ServerAccept - Accept an incoming connection
  * @server: OBEX handle
- * @eventcb: Event-callback for client (use %NULL for same as server)
+ * @eventcb: Event callback for client (use %NULL for same as server)
  * @data: Userdata for client (use %NULL for same as server)
  *
  * Create a new OBEX instance to handle the incomming connection.
@@ -431,8 +431,8 @@ gint OBEX_Request(obex_t *self, obex_object_t *object)
 /**
  * OBEX_CancelRequest - Cancel an ongoing operation
  * @self: OBEX handle
- * @nice: If true an OBEX Abort will be send if client
- *        or OBEX_RSP_UNAUTHORIZED as reponse if server.
+ * @nice: If true an OBEX Abort will be sent if beeing client
+ *        or OBEX_RSP_UNAUTHORIZED as reponse if beeing server.
  *
  *
  */
@@ -497,7 +497,7 @@ gint OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
  * Add a new header to an object.
  *
  * If you want all headers to fit in one packet, use the flag
- * %OBEX_FIT_ONE_PACKET on all headers you add to an object.
+ * %OBEX_FL_FIT_ONE_PACKET on all headers you add to an object.
  *
  * To stream a body add a body header with hv.bs = %NULL and set the flag
  * %OBEX_FL_STREAM_START. You will now get %OBEX_EV_STREAMEMPTY events as
