@@ -586,7 +586,6 @@ gint obex_object_receive(obex_object_t *object, GNetBuf *msg)
 					DEBUG(4, G_GNUC_FUNCTION "() Got empty header. Allocating dummy buffer anyway\n");
 					element->buf = g_netbuf_new(1);
 				}
-					
 				else {
 					element->buf = g_netbuf_new(len);
 					if(element->buf) {
