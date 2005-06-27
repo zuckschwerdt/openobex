@@ -549,6 +549,8 @@ obex_object_t *OBEX_ObjectNew(obex_t *self, uint8_t cmd)
 {
 	obex_object_t *object;
 
+	obex_return_val_if_fail(self != NULL, -1);
+
 	object = obex_object_new();
 	if(object == NULL)
 		return NULL;
@@ -613,6 +615,7 @@ int OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, uint8_t hi,
 				obex_headerdata_t hv, uint32_t hv_size,
 				unsigned int flags)
 {
+	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_addheader(self, object, hi, hv, hv_size, flags);
 }
