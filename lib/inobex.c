@@ -149,7 +149,8 @@ int inobex_connect_request(obex_t *self)
 
 	/* Set these just in case */
 	self->trans.peer.inet.sin_family = AF_INET;
-	self->trans.peer.inet.sin_port = htons(OBEX_PORT);
+	if (self->trans.peer.inet.sin_port == 0)
+		self->trans.peer.inet.sin_port = htons(OBEX_PORT);
 
 	addr = (char *) &self->trans.peer.inet.sin_addr.s_addr;
 
