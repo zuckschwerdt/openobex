@@ -174,8 +174,12 @@ int obex_client(obex_t *self, GNetBuf *msg, int final)
 		} else {
 			/* Notify app that client-operation is done! */
 			DEBUG(3, "Done! Rsp=%02x!\n", rsp);
-			if (self->object->abort)
-				obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, rsp, TRUE);
+			if (self->object->abort) {
+				if (rsp == OBEX_RSP_SUCCESS)
+					obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, rsp, TRUE);
+				else
+					obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, rsp, TRUE);
+			}
 			else
 				obex_deliver_event(self, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
 			self->state = MODE_SRV | STATE_IDLE;
