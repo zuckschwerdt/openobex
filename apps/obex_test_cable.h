@@ -38,7 +38,7 @@
 #include <openobex/obex.h>
 
 #ifdef CABLE_DEBUG
-#define CDEBUG(args...) printf(__FUNCTION__ "() " args)
+#define CDEBUG(format, args...) printf("%s(): " format, __FUNCTION__ , ##args)
 #else
 #define CDEBUG(args...)
 #endif

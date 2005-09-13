@@ -54,17 +54,17 @@ void put_server(obex_t *handle, obex_object_t *object)
 	char *name = NULL;
 	char *namebuf = NULL;
 
-	printf(__FUNCTION__ "()\n");
+	printf("%s()\n", __FUNCTION__);
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_BODY:
-			printf(__FUNCTION__ "() Found body\n");
+			printf("%s() Found body\n", __FUNCTION__);
 			body = hv.bs;
 			body_len = hlen;
 			break;
 		case OBEX_HDR_NAME:
-			printf(__FUNCTION__ "() Found name\n");
+			printf("%s() Found name\n", __FUNCTION__);
 			if( (namebuf = malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
 				name = namebuf;
@@ -72,7 +72,7 @@ void put_server(obex_t *handle, obex_object_t *object)
 			break;
 		
 		default:
-			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
+			printf("%s() Skipped header %02x\n", __FUNCTION__, hi);
 		}
 	}
 	if(!body)	{
@@ -103,12 +103,12 @@ void get_server(obex_t *handle, obex_object_t *object)
 	char *name = NULL;
 	char *namebuf = NULL;
 
-	printf(__FUNCTION__ "()\n");
+	printf("%s()\n", __FUNCTION__);
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_NAME:
-			printf(__FUNCTION__ "() Found name\n");
+			printf("%s() Found name\n", __FUNCTION__);
 			if( (namebuf = malloc(hlen / 2)))	{
 				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
 				name = namebuf;
@@ -116,16 +116,16 @@ void get_server(obex_t *handle, obex_object_t *object)
 			break;
 		
 		default:
-			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
+			printf("%s() Skipped header %02x\n", __FUNCTION__, hi);
 		}
 	}
 
 	if(!name)	{
-		printf(__FUNCTION__ "() Got a GET without a name-header!\n");
+		printf("%s() Got a GET without a name-header!\n", __FUNCTION__);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_FOUND, OBEX_RSP_NOT_FOUND);
 		return;
 	}
-	printf(__FUNCTION__ "() Got a request for %s\n", name);
+	printf("%s() Got a request for %s\n", __FUNCTION__, name);
 
 	buf = easy_readfile(name, &file_size);
 	if(buf == NULL) {
@@ -154,7 +154,7 @@ void connect_server(obex_t *handle, obex_object_t *object)
 
 	const uint8_t *who = NULL;
 	int who_len = 0;
-	printf(__FUNCTION__ "()\n");
+	printf("%s()\n", __FUNCTION__);
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_WHO)	{
@@ -162,7 +162,7 @@ void connect_server(obex_t *handle, obex_object_t *object)
 			who_len = hlen;
 		}
 		else	{
-			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
+			printf("%s() Skipped header %02x\n", __FUNCTION__, hi);
 		}
 	}
 	if (who_len == 6)	{
@@ -199,7 +199,7 @@ void server_request(obex_t *handle, obex_object_t *object, int event, int cmd)
 		OBEX_ObjectSetRsp(object, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
 		break;
 	default:
-		printf(__FUNCTION__ "() Denied %02x request\n", cmd);
+		printf("%s() Denied %02x request\n", __FUNCTION__, cmd);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
 		break;
 	}
@@ -224,7 +224,7 @@ void server_done(obex_t *handle, obex_object_t *object, int obex_cmd, int obex_r
 		break;
 
 	default:
-		printf(__FUNCTION__ "() Command (%02x) has now finished\n", obex_cmd);
+		printf("%s() Command (%02x) has now finished\n", __FUNCTION__, obex_cmd);
 		break;
 	}
 }

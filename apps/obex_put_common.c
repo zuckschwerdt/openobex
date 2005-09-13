@@ -82,7 +82,7 @@ void put_done(obex_object_t *object)
 			break;
 		
 		default:
-			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
+			printf("%s() Skipped header %02x\n", __FUNCTION__, hi);
 		}
 	}
 	if(!body)	{
@@ -123,7 +123,7 @@ void server_request(obex_object_t *object, int event, int cmd)
 		OBEX_ObjectSetRsp(object, OBEX_RSP_SUCCESS, OBEX_RSP_SUCCESS);
 		break;
 	default:
-		printf(__FUNCTION__ "() Denied %02x request\n", cmd);
+		printf("%s() Denied %02x request\n", __FUNCTION__, cmd);
 		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, OBEX_RSP_NOT_IMPLEMENTED);
 		break;
 	}

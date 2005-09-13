@@ -370,13 +370,13 @@ void get_client_done(obex_t *handle, obex_object_t *object, int obex_rsp, char *
 
 	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_BODY)	{
-		printf(__FUNCTION__ "() Found body\n");
+		printf("%s() Found body\n", __FUNCTION__);
 			body = hv.bs;
 			body_len = hlen;
 			break;
 		}
 		else	{
-			printf(__FUNCTION__ "() Skipped header %02x\n", hi);
+			printf("%s() Skipped header %02x\n", __FUNCTION__, hi);
 		}
 	}
 
