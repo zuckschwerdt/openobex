@@ -1,2 +1,16 @@
-#! /bin/sh
+#!/bin/sh
+
+echo "Seting up libtool..."
+
+if test "x`uname`" = "xDarwin"; then
+    LIBTOOLIZE=glibtoolize
+else
+    LIBTOOLIZE=libtoolize
+fi
+
+$LIBTOOLIZE --force --copy || {
+    echo "error: libtoolize failed"
+    exit 1
+}
+
 aclocal && autoheader && automake --copy --add-missing && autoconf
