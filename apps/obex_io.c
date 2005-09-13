@@ -209,9 +209,6 @@ int safe_save_file(char *name, const uint8_t *buf, int len)
 
 	printf("Filename = %s\n", name);
 
-#ifndef _WIN32
-	sprintf( filename, "/tmp/");
-#endif
 	s = strrchr(name, '/');
 	if (s == NULL)
 		s = name;

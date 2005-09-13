@@ -2,7 +2,7 @@
  *                
  * Filename:      irxfer.c
  * Version:       0.1
- * Description:   Communicate with the win95 IrXfer tool
+ * Description:   Send and receive files using IRDA
  * Status:        Experimental.
  * Author:        Fons Botman (budely@tref.nl)
  * Created at:    Sat May 15 11:19:34 CEST 1999
@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
 	obex_object_t *object;
 	int ret;
 
-	printf("Send files to and receive files from win95\n");
 	if ((argc < 1) || (argc > 2) )	{
 		printf ("Usage: %s [name]\n", argv[0]); 
 		return -1;
