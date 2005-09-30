@@ -338,6 +338,8 @@ static int send_stream(obex_t *self,
 		/* We are done. Remove header from tx-queue */
 		object->tx_headerq = slist_remove(object->tx_headerq, h);
 		body_txh->hi = OBEX_HDR_BODY_END;
+		g_netbuf_free(h->buf);
+		free(h);
 	}
 	
 	body_txh->hl = htons((uint16_t)actual);
