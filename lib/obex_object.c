@@ -206,8 +206,7 @@ int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 		element->buf = g_netbuf_new(sizeof(struct obex_uint_hdr));
 		if(element->buf) {
 			element->length = (unsigned int) sizeof(struct obex_uint_hdr);
-			object->totallen += insert_uint_header(element->buf, hi, hv.bq4);
-			ret = 1;
+			ret = insert_uint_header(element->buf, hi, hv.bq4);
 		}
 		break;
 		
@@ -217,8 +216,7 @@ int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 		element->buf = g_netbuf_new(sizeof(struct obex_ubyte_hdr));
 		if(element->buf) {
 			element->length = sizeof(struct obex_ubyte_hdr);
-			object->totallen += insert_ubyte_header(element->buf, hi, hv.bq1);
-			ret = 1;
+			ret = insert_ubyte_header(element->buf, hi, hv.bq1);
 		}
 		break;
 
@@ -228,8 +226,7 @@ int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 		element->buf = g_netbuf_new(hv_size + sizeof(struct obex_byte_stream_hdr) );
 		if(element->buf) {
 			element->length = hv_size + sizeof(struct obex_byte_stream_hdr);
-			object->totallen += insert_byte_stream_header(element->buf, hi, hv.bs, hv_size);
-			ret = 1;
+			ret = insert_byte_stream_header(element->buf, hi, hv.bs, hv_size);
 		}
 		break;
 	
@@ -239,8 +236,7 @@ int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 		element->buf = g_netbuf_new(hv_size + sizeof(struct obex_unicode_hdr) );
 		if(element->buf) {
 			element->length = hv_size + sizeof(struct obex_unicode_hdr);
-			object->totallen += insert_unicode_header(element->buf, hi, hv.bs, hv_size);
-			ret = 1;
+			ret = insert_unicode_header(element->buf, hi, hv.bs, hv_size);
 		}
 		break;
 	
@@ -258,9 +254,11 @@ int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 		}
 	}
 
-	if(ret > 0)
+	if (ret > 0) {
+		object->totallen += ret;
 		object->tx_headerq = slist_append(object->tx_headerq, element);
-	else {
+		ret = 1;
+	} else {
 		g_netbuf_free(element->buf);
 		free(element);
 	}

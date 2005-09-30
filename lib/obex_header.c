@@ -93,7 +93,7 @@ int insert_unicode_header(GNetBuf *msg, uint8_t opcode,
 
 	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
-	obex_return_val_if_fail(text != NULL, -1);
+	obex_return_val_if_fail(text != NULL || size == 0, -1);
 
 	hdr = (struct obex_unicode_hdr *) g_netbuf_put(msg, size + 3);
 
@@ -118,7 +118,7 @@ int insert_byte_stream_header(GNetBuf *msg, uint8_t opcode,
 
 	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
-	obex_return_val_if_fail(stream != NULL, -1);
+	obex_return_val_if_fail(stream != NULL || size == 0, -1);
 	
 	hdr = (struct obex_byte_stream_hdr *) g_netbuf_put(msg, size+3);
 	if (hdr == 0) {
