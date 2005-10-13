@@ -426,6 +426,19 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 
 	/* Calc how many bytes of headers we can fit in this package */
 	tx_left = self->mtu_tx - sizeof(struct obex_common_hdr);
+	switch(self->trans.type)
+	{
+#ifdef HAVE_IRDA
+	case OBEX_TRANS_IRDA:
+		if(self->trans.mtu > 0 && self->mtu_tx > self->trans.mtu)
+		{
+			tx_left -= self->mtu_tx%self->trans.mtu;
+		}
+		break;
+#endif /*HAVE_IRDA*/
+	default:
+		break;
+	}
 
 	/* Reuse transmit buffer */
 	txmsg = g_netbuf_recycle(self->tx_msg);
