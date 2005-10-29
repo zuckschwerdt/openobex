@@ -132,8 +132,7 @@ typedef struct {
 /* Min, Max and default transport MTU */
 #define OBEX_DEFAULT_MTU	1024
 #define OBEX_MINIMUM_MTU	255      
-#define OBEX_MAXIMUM_MTU	32768
-/* In theory max MTU is (64k-1), but that's quite big. */
+#define OBEX_MAXIMUM_MTU	65535
 
 /* Optimum MTU for various transport (optimum for throughput).
  * The user/application has to set them via OBEX_SetTransportMTU().
