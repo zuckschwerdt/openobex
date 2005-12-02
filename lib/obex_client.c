@@ -162,8 +162,16 @@ int obex_client(obex_t *self, GNetBuf *msg, int final)
 		/* Are we done yet? */
 		if (rsp == OBEX_RSP_CONTINUE) {
 			DEBUG(3, "Continue...\n");
+
+			self->object->continue_received = 1;
+
 			if (self->object->abort) {
 				DEBUG(3, "Ignoring CONTINUE because request was aborted\n");
+				break;
+			}
+
+			if (self->object->suspend) {
+				DEBUG(3, "Not sending new request because transfer is suspended\n");
 				break;
 			}
 
@@ -171,6 +179,8 @@ int obex_client(obex_t *self, GNetBuf *msg, int final)
 				obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
 			else
 				obex_deliver_event(self, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);
+
+			self->object->continue_received = 0;
 		} else {
 			/* Notify app that client-operation is done! */
 			DEBUG(3, "Done! Rsp=%02x!\n", rsp);

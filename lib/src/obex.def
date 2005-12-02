@@ -17,6 +17,8 @@ OBEX_ServerRegister
 OBEX_ServerAccept
 OBEX_Request
 OBEX_CancelRequest
+OBEX_SuspendRequest
+OBEX_ResumeRequest
 OBEX_ObjectNew
 OBEX_ObjectDelete
 OBEX_ObjectAddHeader

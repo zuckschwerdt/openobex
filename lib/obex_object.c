@@ -302,7 +302,11 @@ static int send_stream(obex_t *self,
 			/* End of stream ?*/
 			if(object->s_stop)
 				break;
-		
+
+			/* User suspended and didn't provide any new data */
+			if (object->suspend && object->s_buf == NULL)
+				break;
+
 			/* Error ?*/
 			if(object->s_buf == NULL) {
 				DEBUG(1, "Unexpected end-of-stream\n");
@@ -328,6 +332,8 @@ static int send_stream(obex_t *self,
 			object->s_offset += object->s_len;
 			actual += object->s_len;
 			object->s_len = 0;
+			if (object->suspend)
+				tx_left = 0;
 		}
 	} while(tx_left > 0);
 	
@@ -469,6 +475,8 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 			if(actual < 0 )
 				return -1;
 			tx_left -= actual;
+			if (object->suspend)
+				addmore = FALSE;
 		}
 		else if(h->hi == OBEX_HDR_BODY) {
 			/* The body may be fragmented over several packets. */
@@ -635,6 +643,11 @@ static void obex_object_receive_stream(obex_t *self, uint8_t hi,
 	
 	object->s_buf = source;
 	object->s_len = len;
+
+	if (object->abort) {
+		DEBUG(3, "Ignoring incomming data because request was aborted\n");
+		return;
+	}
 	
 	/* Notify app that data has arrived */
 	obex_deliver_event(self, OBEX_EV_STREAMAVAIL, 0, 0, FALSE);
@@ -889,5 +902,31 @@ int obex_object_readstream(obex_t *self, obex_object_t *object, const uint8_t **
 	DEBUG(4, "s_len = %d\n", object->s_len);
 	*buf = object->s_buf;
 	return object->s_len;
+}
+
+int obex_object_suspend(obex_object_t *object)
+{
+	object->suspend = 1;
+	return 0;
+}
+
+int obex_object_resume(obex_t *self, obex_object_t *object)
+{
+	if (!object->suspend)
+		return 0;
+
+	object->suspend = 0;
+
+ 	if (!object->continue_received)
+ 		return 0;
+
+	if (obex_object_send(self, object, TRUE, FALSE) < 0)
+		obex_deliver_event(self, OBEX_EV_LINKERR, object->opcode, 0, TRUE);
+	else
+		obex_deliver_event(self, OBEX_EV_PROGRESS, object->opcode, 0, FALSE);
+
+	object->continue_received = 0;
+	
+	return 0;
 }
 

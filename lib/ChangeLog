@@ -1,3 +1,8 @@
+2005-12-02  Johan Hedberg  <johan.hedberg@nokia.com>
+
+	* Add OBEX_SuspendRequest() and OBEX_ResumeRequest() functions for
+	  better control of streamed transfers.
+
 2004-03-06  Christian W. Zuckschwerdt  <zany@triq.net>
 
 	* Portability fixes, mainly replacing stdint.h with inttypes.h

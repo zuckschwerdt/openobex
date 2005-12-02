@@ -537,6 +537,26 @@ int OBEX_CancelRequest(obex_t *self, int nice)
 	return obex_cancelrequest(self, nice);
 }
 
+/**
+ * OBEX_SuspendRequest - Suspend transfer of an object
+ * @self: OBEX handle
+ * @object: object to suspend (NULL to suspend currently transfered object)
+ */
+int OBEX_SuspendRequest(obex_t *self, obex_object_t *object)
+{
+	obex_return_val_if_fail(object != NULL || self->object != NULL, -1);
+	return obex_object_suspend(object ? object : self->object);
+}
+
+/**
+ * OBEX_ResumeRequest - Resume transfer of an object
+ * @self: OBEX handle
+ */
+int OBEX_ResumeRequest(obex_t *self)
+{
+	obex_return_val_if_fail(self->object != NULL, -1);
+	return obex_object_resume(self, self->object);
+}
 
 /**
  * OBEX_ObjectNew - Create a new OBEX Object

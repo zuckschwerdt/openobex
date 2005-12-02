@@ -70,6 +70,9 @@ typedef struct {
 	int hinted_body_len;		/* Hinted body-length or 0 */
 	int totallen;			/* Size of all headers */
         int abort;			/* Request shall be aborted */
+
+	int suspend;			/* Temporarily stop transfering object */
+	int continue_received;		/* CONTINUE received after sending last command */
 	
 	const uint8_t *s_buf;		/* Pointer to streaming data */
 	unsigned int s_len;			/* Length of stream-data */
@@ -94,5 +97,7 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 		      int allowfinalcmd, int forcefinalbit);
 int obex_object_receive(obex_t *self, GNetBuf *msg);
 int obex_object_readstream(obex_t *self, obex_object_t *object, const uint8_t **buf);
+int obex_object_suspend(obex_object_t *object);
+int obex_object_resume(obex_t *self, obex_object_t *object);
 
 #endif

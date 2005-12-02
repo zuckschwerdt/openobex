@@ -81,6 +81,8 @@ int    OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen);
 obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data);
 int    OBEX_Request(obex_t *self, obex_object_t *object);
 int    OBEX_CancelRequest(obex_t *self, int nice);
+int    OBEX_SuspendRequest(obex_t *self, obex_object_t *object);
+int    OBEX_ResumeRequest(obex_t *self);
 
 obex_object_t	*OBEX_ObjectNew(obex_t *self, uint8_t cmd);
 int		OBEX_ObjectDelete(obex_t *self, obex_object_t *object);
