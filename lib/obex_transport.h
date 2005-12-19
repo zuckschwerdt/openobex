@@ -43,6 +43,9 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
 #endif /*HAVE_BLUETOOTH*/
+#ifdef HAVE_USB
+#include "usbobex.h"
+#endif /*HAVE_USB*/
 
 #include "obex_main.h"
 
@@ -54,6 +57,9 @@ typedef union {
 #ifdef HAVE_BLUETOOTH
 	struct sockaddr_rc   rfcomm;
 #endif /*HAVE_BLUETOOTH*/
+#ifdef HAVE_USB
+	struct obex_usb_intf_transport_t usb;
+#endif /*HAVE_USB*/
 } saddr_t;
 
 typedef struct obex_transport {

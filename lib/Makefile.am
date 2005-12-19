@@ -22,7 +22,8 @@ libopenobex_la_SOURCES = \
 	inobex.c inobex.h \
 	btobex.c btobex.h \
 	netbuf.c netbuf.h \
-	irda.h irda_wrap.h
+	irda.h irda_wrap.h \
+	usbobex.c usbobex.h
 
 libopenobex_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
@@ -31,5 +32,7 @@ libopenobex_la_LDFLAGS = \
 
 
 INCLUDES = -I$(top_srcdir)/src
+
+libopenobex_la_LIBADD = @USB_LIBS@
 
 EXTRA_DIST = obex.sym obex.def makefile.msc win32compat.c windeps.dep

@@ -155,12 +155,14 @@ int main (int argc, char *argv[])
 {
 	char cmd[10];
 	int end = 0;
-	int cobex = FALSE, tcpobex = FALSE, btobex = FALSE, r320 = FALSE;
+	int cobex = FALSE, tcpobex = FALSE, btobex = FALSE, r320 = FALSE, usbobex = FALSE;
 	obex_t *handle;
 #ifdef HAVE_BLUETOOTH
 	bdaddr_t bdaddr;
 	uint8_t channel;
 #endif
+
+	obex_interface_t *obex_intf;
 
 	struct context global_context = {0,};
 
@@ -181,7 +183,8 @@ int main (int argc, char *argv[])
 		tcpobex = TRUE;
 	if( (argc >= 2) && (strcmp(argv[1], "-b") == 0 ) )
 		btobex = TRUE;
-
+	if( (argc >= 2) && (strcmp(argv[1], "-u") == 0 ) )
+		usbobex = TRUE;
 
 	if(cobex)	{
 #ifndef _WIN32
@@ -262,6 +265,46 @@ int main (int argc, char *argv[])
 		printf("Not implemented in Win32 yet.\n");
 #endif	// _WIN32
 	}
+	else if(usbobex) {
+		int i, interfaces_number, intf_num;
+		switch (argc) {
+		case 2:
+			printf("Using USB transport, querying available interfaces\n");
+			if(! (handle = OBEX_Init(OBEX_TRANS_USB, obex_event, 0)))      {
+				perror( "OBEX_Init failed");
+				exit(0);
+			}
+			interfaces_number = OBEX_FindInterfaces(handle, &obex_intf);
+			for (i=0; i < interfaces_number; i++)
+				printf("Interface %d: %s %s %s\n", i, 
+					obex_intf[i].usb.manufacturer, 
+					obex_intf[i].usb.product, 
+					obex_intf[i].usb.control_interface);
+			printf("Use '%s -u interface_number' to run interactive OBEX test client\n", argv[0]);
+			OBEX_Cleanup(handle);
+			exit(0);
+			break;
+		case 3:
+			intf_num = atoi(argv[2]);
+			printf("Using USB transport \n");
+			if(! (handle = OBEX_Init(OBEX_TRANS_USB, obex_event, 0)))      {
+				perror( "OBEX_Init failed");
+				exit(0);
+			}
+
+			interfaces_number = OBEX_FindInterfaces(handle, &obex_intf);
+			if (intf_num >= interfaces_number) {
+				printf( "Invalid interface number\n");
+				exit(0);
+			}
+			obex_intf += intf_num;	
+
+			break;
+		default:
+			printf("Wrong number of arguments\n");
+			exit(0);
+		}
+	}
 	else	{
 		printf("Using IrDA transport\n");
 		if(! (handle = OBEX_Init(OBEX_TRANS_IRDA, obex_event, 0)))	{
@@ -321,6 +364,12 @@ int main (int argc, char *argv[])
 					printf("Transport not found! (Bluetooth)\n");
 #endif
 				}
+				if (usbobex) {
+					if (OBEX_InterfaceConnect(handle, obex_intf) < 0) {
+						printf("Transport connect error! (USB)\n");
+						break;
+					}
+				}	
 				else {
 					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0) {
 						printf("Transport connect error! (IrDA)\n");

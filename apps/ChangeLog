@@ -1,3 +1,7 @@
+2005-08-30  Alex Kanavin  <ak@sensi.org>
+
+	* Add client-side USB support and interface discovery
+
 2002-11-15  Marcel Holtmann  <marcel@holtmann.org>
 
 	* Add Bluetooth server support

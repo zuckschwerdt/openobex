@@ -47,3 +47,30 @@ if test "$ac_bluetooth_enabled" = yes; then
 	fi
 fi
 ])
+
+dnl
+dnl USB_HOOK (script-if-usb-found, failflag)
+dnl
+dnl if failflag is "failure" it aborts if obex is not found.
+dnl
+
+AC_DEFUN([USB_HOOK],[
+	AC_CACHE_CHECK([for USB support],am_cv_usb_found,[
+
+		AC_TRY_COMPILE([#include <usb.h>],
+		[struct usb_dev_handle *dev;],
+		am_cv_usb_found=yes,
+		am_cv_usb_found=no)])
+
+		if test $am_cv_usb_found = yes; then
+			AC_DEFINE(HAVE_USB,1,[Define if system supports USB])
+			USB_LIBS="-lusb"
+		fi
+		AC_SUBST(USB_LIBS)
+	])
+
+])
+
+AC_DEFUN([USB_CHECK], [
+	USB_HOOK([],failure)
+])

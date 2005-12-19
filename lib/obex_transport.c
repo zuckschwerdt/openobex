@@ -43,6 +43,9 @@
 #ifdef HAVE_BLUETOOTH
 #include "btobex.h"
 #endif /*HAVE_BLUETOOTH*/
+#ifdef HAVE_USB 
+#include "usbobex.h" 
+#endif /*HAVE_USB*/ 
 
 #include "obex_transport.h"
 
@@ -63,6 +66,9 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 			DEBUG(4, "No handleinput-callback exist!\n");
 			ret = -1;
 		}
+	}
+	else if (self->trans.type == OBEX_TRANS_USB) {
+		ret = obex_data_indication(self, NULL, 0);
 	}
 	else {
 		struct timeval time;
@@ -205,7 +211,11 @@ int obex_transport_connect_request(obex_t *self)
 		if (self->fd >= 0 && self->writefd >= 0)
 			ret = 0;
 		break;
-
+#ifdef HAVE_USB 
+	case OBEX_TRANS_USB:
+		ret = usbobex_connect_request(self);
+		break;
+#endif /*HAVE_USB*/ 
 	default:
 		DEBUG(4, "Transport not implemented!\n");
 		break;
@@ -250,6 +260,11 @@ void obex_transport_disconnect_request(obex_t *self)
 		/* no real disconnect on a file */
 		self->fd = self->writefd = -1;
 		break;
+#ifdef HAVE_USB 
+	case OBEX_TRANS_USB:
+		usbobex_disconnect_request(self);
+		break;
+#endif /*HAVE_USB*/ 
 	default:
 		DEBUG(4, "Transport not implemented!\n");
 		break;
@@ -289,7 +304,8 @@ int obex_transport_listen(obex_t *self)
 		break;
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_FD:
-		/* no real listen on the file */
+	case OBEX_TRANS_USB:
+		/* no real listen on the file or USB */
 		ret = 0;
 		break;
 	default:
@@ -330,7 +346,8 @@ void obex_transport_disconnect_server(obex_t *self)
 		break;
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_FD:
-		/* no real server on a file */;
+	case OBEX_TRANS_USB:
+		/* no real server on a file or USB */;
 		break;
 	default:
 		DEBUG(4, "Transport not implemented!\n");
@@ -389,6 +406,16 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 	case OBEX_TRANS_FD:
 		actual = do_write(self->writefd, msg, self->trans.mtu);
 		break;
+#ifdef HAVE_USB 
+	case OBEX_TRANS_USB:
+		if (self->trans.connected != TRUE)
+			break;
+		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.interface->data_endpoint_write);
+		actual = usb_bulk_write(self->trans.self.usb.dev_data, 
+		    self->trans.self.usb.data_endpoint_write,
+		    msg->data, msg->len, USB_OBEX_TIMEOUT);
+		break;
+#endif /*HAVE_USB*/ 
 	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, "Custom write\n");
 		if(self->ctrans.write)
@@ -427,6 +454,16 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	case OBEX_TRANS_FD:
 		actual = read(self->fd, msg->tail, max);
 		break;
+#ifdef HAVE_USB 
+	case OBEX_TRANS_USB:
+		if (self->trans.connected != TRUE)
+			break;
+		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.interface->data_endpoint_read);
+		actual = usb_bulk_read(self->trans.self.usb.dev_data, 
+		    self->trans.self.usb.data_endpoint_read,
+		    msg->tail, self->mtu_rx, USB_OBEX_TIMEOUT);
+		break;
+#endif /*HAVE_USB*/ 
 	case OBEX_TRANS_CUSTOM:
 		if(buflen > max) {
 			memcpy(msg->tail, buf, max);

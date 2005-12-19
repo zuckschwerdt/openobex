@@ -1,3 +1,7 @@
+2005-12-18  Alex Kanavin       <ak@sensi.org>
+
+	* Support for USB transport layer and USB interface discovery
+
 2005-12-02  Johan Hedberg  <johan.hedberg@nokia.com>
 
 	* Add OBEX_SuspendRequest() and OBEX_ResumeRequest() functions for

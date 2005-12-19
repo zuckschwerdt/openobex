@@ -40,3 +40,6 @@ IrOBEX_TransportConnect
 BtOBEX_ServerRegister
 BtOBEX_TransportConnect
 FdOBEX_TransportSetup
+OBEX_InterfaceConnect
+OBEX_FindInterfaces
+OBEX_FreeInterfaces

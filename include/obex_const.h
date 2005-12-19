@@ -47,6 +47,33 @@ typedef struct {
 	void * customdata;
 } obex_ctrans_t;
 
+/* USB-specific OBEX interface information */
+typedef struct {
+	/* Manufacturer, e.g. Nokia */
+	char *manufacturer;
+	/* Product, e.g. Nokia 6680 */
+	char *product;
+	/* Product serial number */
+	char *serial;
+	/* USB device configuration description */
+	char *configuration;
+	/* Control interface description */
+	char *control_interface;
+	/* Idle data interface description, typically empty */
+	char *data_interface_idle;
+	/* Active data interface description, typically empty */
+	char *data_interface_active;
+	/* Internal information for the transport layer in the library */
+	struct obex_usb_intf_transport_t *interface;
+} obex_usb_intf_t;
+
+/* Generic OBEX interface information */
+typedef union {
+	/* USB-specific OBEX interface information */
+	obex_usb_intf_t usb;
+//	obex_bluetooth_intf_t bt; // to be added
+} obex_interface_t;
+
 #define	OBEX_CLIENT		0
 #define	OBEX_SERVER		1
 
@@ -81,6 +108,7 @@ typedef struct {
 #define OBEX_TRANS_CUSTOM	3
 #define OBEX_TRANS_BLUETOOTH	4
 #define OBEX_TRANS_FD		5
+#define OBEX_TRANS_USB		6
 
 /* Standard headers */
 #define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */

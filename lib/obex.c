@@ -55,6 +55,9 @@
 #ifdef HAVE_IRDA
 #include "irobex.h"
 #endif
+#ifdef HAVE_USB
+#include "usbobex.h"
+#endif
 #ifdef HAVE_BLUETOOTH
 #include "btobex.h"
 #else
@@ -69,6 +72,7 @@ typedef char *bdaddr_t;
  *             %OBEX_TRANS_INET : Use regular TCP/IP socket
  *             %OBEX_TRANS_CUSTOM : Use user provided transport
  *             %OBEX_TRANS_BLUETOOTH: Use regular Bluetooth RFCOMM socket (need the BlueZ stack)
+ *             %OBEX_TRANS_USB: Use USB transport (libusb needed)
  *             If you use %OBEX_TRANS_CUSTOM you must register your own
  *             transport with OBEX_RegisterCTransport()
  * @eventcb: Function pointer to your event callback.
@@ -121,24 +125,31 @@ obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 	/* Init transport */
 	self->trans.type = transport;
 	self->trans.connected = FALSE;
+	
+	/* Safe values.
+	 * Both self->mtu_rx and self->mtu_tx_max can be increased by app
+	 * self->mtu_tx will be whatever the other end sneds us - Jean II */
+	/* Set MTU to the maximum, if using USB transport - Alex Kanavin */
+	if (transport == OBEX_TRANS_USB) {
+		self->mtu_rx = OBEX_MAXIMUM_MTU;
+		self->mtu_tx = OBEX_MINIMUM_MTU;
+		self->mtu_tx_max = OBEX_MAXIMUM_MTU;
+	} else {
+		self->mtu_rx = OBEX_DEFAULT_MTU;
+		self->mtu_tx = OBEX_MINIMUM_MTU;
+		self->mtu_tx_max = OBEX_DEFAULT_MTU;
+	}
 
 	/* Allocate message buffers */
 	/* It's safe to allocate them smaller than OBEX_MAXIMUM_MTU
 	 * because netbuf will realloc data as needed. - Jean II */
-	self->rx_msg = g_netbuf_new(OBEX_DEFAULT_MTU);
+	self->rx_msg = g_netbuf_new(self->mtu_rx);
 	if (self->rx_msg == NULL)
 		goto out_err;
 
-	self->tx_msg = g_netbuf_new(OBEX_DEFAULT_MTU);
+	self->tx_msg = g_netbuf_new(self->mtu_tx_max);
 	if (self->tx_msg == NULL)
 		goto out_err;
-
-	/* Safe values.
-	 * Both self->mtu_rx and self->mtu_tx_max can be increased by app
-	 * self->mtu_tx will be whatever the other end sneds us - Jean II */
-	self->mtu_rx = OBEX_DEFAULT_MTU;
-	self->mtu_tx = OBEX_MINIMUM_MTU;
-	self->mtu_tx_max = OBEX_DEFAULT_MTU;
 
 #ifndef _WIN32
 	/* Ignore SIGPIPE. Otherwise send() will raise it and the app will quit */
@@ -192,7 +203,8 @@ void OBEX_Cleanup(obex_t *self)
 	
 	if (self->rx_msg)
 		g_netbuf_free(self->rx_msg);
-	
+
+	OBEX_FreeInterfaces(self);
 	free(self);
 }
 
@@ -1077,3 +1089,81 @@ int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
 	return obex_transport_connect_request(self);
 }
 
+/**
+ *  OBEX_InterfaceConnect - Connect USB interface
+ *  @self: OBEX handle
+ *  @interface: USB interface to connect to
+ *
+ *  An easier connect function to connect to a discovered interface (currently
+ *  USB OBEX only). 
+ */
+int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *interface)
+{
+	DEBUG(4, "\n");
+
+	obex_return_val_if_fail(self != NULL, -1);
+
+	if (self->object) {
+		DEBUG(1, "We are busy.\n");
+		return -EBUSY;
+	}
+
+	obex_return_val_if_fail(interface != NULL, -1);
+	switch (self->trans.type) {
+	case OBEX_TRANS_USB:
+		obex_return_val_if_fail(interface->usb.interface != NULL, -1);
+#ifdef HAVE_USB
+		usbobex_prepare_connect(self, interface->usb.interface);
+		return obex_transport_connect_request(self);
+#else
+		return -ESOCKTNOSUPPORT;
+#endif /* HAVE_USB */
+	default:
+		return -ESOCKTNOSUPPORT;
+	}
+}
+
+/**
+ *  OBEX_FindInterfaces - Get a list of OBEX interfaces on the system
+ *  @self: OBEX handle
+ *  @interfaces: A list of OBEX interfaces
+ *
+ *  Gets a list of OBEX interfaces, or NULL if there are none.
+ */
+int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
+{
+	DEBUG(4, "\n");
+	OBEX_FreeInterfaces(self);
+	switch (self->trans.type) {
+	case OBEX_TRANS_USB:
+#ifdef HAVE_USB
+		self->interfaces_number = usbobex_find_interfaces(&self->interfaces);
+#endif
+		break;
+	default:
+		break;
+	}
+	*interfaces = self->interfaces;
+	return self->interfaces_number;
+}
+
+/**
+ *  OBEX_FreeInterfaces - free memory allocated to OBEX interface structures
+ *  @self: OBEX handle
+ *
+ *  Frees memory allocated to OBEX interface structures after it has been 
+ *  allocated by OBEX_FindInterfaces.
+ */
+void OBEX_FreeInterfaces(obex_t *self)
+{
+	switch (self->trans.type) {
+	case OBEX_TRANS_USB:
+#ifdef HAVE_USB
+		usbobex_free_interfaces(self->interfaces_number, self->interfaces);
+#endif
+		break;
+	default:
+		break;
+	}
+	self->interfaces_number = 0;
+}
