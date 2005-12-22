@@ -335,7 +335,7 @@ int usbobex_connect_request(obex_t *self)
 	self->trans.self.usb.dev_data = usb_open(self->trans.self.usb.device);
 
 	ret = usb_set_configuration(self->trans.self.usb.dev_control, self->trans.self.usb.configuration);
-	if (ret < 0) {
+	if ((ret < 0) && (ret != -EBUSY)) {
 		DEBUG(4, "Can't set configuration %d", ret);
 		goto err1;
 	}

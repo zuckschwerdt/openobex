@@ -410,7 +410,7 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 	case OBEX_TRANS_USB:
 		if (self->trans.connected != TRUE)
 			break;
-		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.interface->data_endpoint_write);
+		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_write);
 		actual = usb_bulk_write(self->trans.self.usb.dev_data, 
 		    self->trans.self.usb.data_endpoint_write,
 		    msg->data, msg->len, USB_OBEX_TIMEOUT);
@@ -458,7 +458,7 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	case OBEX_TRANS_USB:
 		if (self->trans.connected != TRUE)
 			break;
-		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.interface->data_endpoint_read);
+		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_read);
 		actual = usb_bulk_read(self->trans.self.usb.dev_data, 
 		    self->trans.self.usb.data_endpoint_read,
 		    msg->tail, self->mtu_rx, USB_OBEX_TIMEOUT);
