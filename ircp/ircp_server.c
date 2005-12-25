@@ -135,7 +135,7 @@ int ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
-	int hlen;
+	uint32_t hlen;
 
 	uint8_t *nonhdr_data = NULL;
 	int nonhdr_data_len;
@@ -149,11 +149,11 @@ int ircp_srv_setpath(ircp_server_t *srv, obex_object_t *object)
 		return -1;
 	}
 
-	while(OBEX_ObjectGetNextHeader(srv->obexhandle, object, &hi, &hv, &hlen))	{
+	while (OBEX_ObjectGetNextHeader(srv->obexhandle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_NAME:
 			if( (name = malloc(hlen / 2)))	{
-				OBEX_UnicodeToChar(name, hv.bs, hlen);
+				OBEX_UnicodeToChar((uint8_t *) name, hv.bs, hlen);
 			}
 			break;
 		default:
@@ -211,16 +211,16 @@ static int new_file(ircp_server_t *srv, obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
-	int hlen;
+	uint32_t hlen;
 	char *name = NULL;
 	int ret = -1;
 
 	/* First iterate through recieved header to find name */
-	while(OBEX_ObjectGetNextHeader(srv->obexhandle, object, &hi, &hv, &hlen))	{
+	while (OBEX_ObjectGetNextHeader(srv->obexhandle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_NAME:
 			if( (name = malloc(hlen / 2)))	{
-				OBEX_UnicodeToChar(name, hv.bs, hlen);
+				OBEX_UnicodeToChar((uint8_t *) name, hv.bs, hlen);
 			}
 			break;
 		default:

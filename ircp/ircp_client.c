@@ -297,7 +297,7 @@ static int ircp_setpath(ircp_client_t *cli, char *name, int up)
 	obex_headerdata_t hdd;
 
 	uint8_t setpath_nohdr_data[2] = {0,};
-	char *ucname;
+	uint8_t *ucname;
 	int ucname_len;
 	int ret;
 
@@ -315,7 +315,7 @@ static int ircp_setpath(ircp_client_t *cli, char *name, int up)
 			OBEX_ObjectDelete(cli->obexhandle, object);
 			return -1;
 		}
-		ucname_len = OBEX_CharToUnicode(ucname, name, ucname_len);
+		ucname_len = OBEX_CharToUnicode(ucname, (uint8_t *) name, ucname_len);
 
 		hdd.bs = ucname;
 		OBEX_ObjectAddHeader(cli->obexhandle, object, OBEX_HDR_NAME, hdd, ucname_len, 0);

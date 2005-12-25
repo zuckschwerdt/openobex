@@ -58,7 +58,7 @@ obex_object_t *build_object_from_file(obex_t *handle, const char *localname, con
 	if(ucname == NULL)
 		goto err;
 
-	ucname_len = OBEX_CharToUnicode(ucname, remotename, ucname_len);
+	ucname_len = OBEX_CharToUnicode(ucname, (uint8_t *) remotename, ucname_len);
 
 	hdd.bs = ucname;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hdd, ucname_len, 0);
