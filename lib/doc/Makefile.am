@@ -39,3 +39,5 @@ EXTRA_DIST = \
 
 docproc_SOURCES = docproc.c
 noinst_PROGRAMS = docproc
+
+MAINTAINERCLEANFILES = Makefile.in
