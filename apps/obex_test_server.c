@@ -53,7 +53,7 @@ void put_server(obex_t *handle, obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
-	int hlen;
+	uint32_t hlen;
 
 	const uint8_t *body = NULL;
 	int body_len = 0;
@@ -62,7 +62,7 @@ void put_server(obex_t *handle, obex_object_t *object)
 
 	printf("%s()\n", __FUNCTION__);
 
-	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
+	while (OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_BODY:
 			printf("%s() Found body\n", __FUNCTION__);
@@ -72,7 +72,7 @@ void put_server(obex_t *handle, obex_object_t *object)
 		case OBEX_HDR_NAME:
 			printf("%s() Found name\n", __FUNCTION__);
 			if( (namebuf = malloc(hlen / 2)))	{
-				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
+				OBEX_UnicodeToChar((uint8_t *) namebuf, hv.bs, hlen);
 				name = namebuf;
 			}
 			break;
@@ -103,7 +103,7 @@ void get_server(obex_t *handle, obex_object_t *object)
 
 	obex_headerdata_t hv;
 	uint8_t hi;
-	int hlen;
+	uint32_t hlen;
 	int file_size;
 
 	char *name = NULL;
@@ -111,12 +111,12 @@ void get_server(obex_t *handle, obex_object_t *object)
 
 	printf("%s()\n", __FUNCTION__);
 
-	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
+	while (OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_NAME:
 			printf("%s() Found name\n", __FUNCTION__);
 			if( (namebuf = malloc(hlen / 2)))	{
-				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
+				OBEX_UnicodeToChar((uint8_t *) namebuf, hv.bs, hlen);
 				name = namebuf;
 			}
 			break;
@@ -156,13 +156,13 @@ void connect_server(obex_t *handle, obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
-	int hlen;
+	uint32_t hlen;
 
 	const uint8_t *who = NULL;
 	int who_len = 0;
 	printf("%s()\n", __FUNCTION__);
 
-	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
+	while (OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_WHO)	{
 			who = hv.bs;
 			who_len = hlen;
@@ -172,7 +172,7 @@ void connect_server(obex_t *handle, obex_object_t *object)
 		}
 	}
 	if (who_len == 6)	{
-		if(strncmp("Linux", who, 6) == 0)	{
+		if(memcmp("Linux", who, 6) == 0)	{
 			printf("Weeeha. I'm talking to the coolest OS ever!\n");
 		}
 	}

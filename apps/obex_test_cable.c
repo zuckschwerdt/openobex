@@ -382,6 +382,6 @@ int cobex_handle_input(obex_t *handle, void * userdata, int timeout)
 		printf("\n");
 	}
 #endif
-	OBEX_CustomDataFeed(handle, gt->inputbuf, actual);
+	OBEX_CustomDataFeed(handle, (uint8_t *) gt->inputbuf, actual);
 	return actual;
 }

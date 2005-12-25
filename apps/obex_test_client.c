@@ -123,7 +123,7 @@ void connect_client(obex_t *handle)
 		return;
 	}
 
-	hd.bs = "Linux";
+	hd.bs = (uint8_t *) "Linux";
 	if(OBEX_ObjectAddHeader(handle, object, OBEX_HDR_WHO, hd, 6,
 				OBEX_FL_FIT_ONE_PACKET) < 0)	{
 		printf("Error adding header\n");
@@ -220,7 +220,7 @@ void push_client(obex_t *handle)
 	char fname[200];
 	unsigned int uname_size;
 	char *bfname;
-	char *uname;
+	uint8_t *uname;
 
 	obex_headerdata_t hd;
 	
@@ -249,7 +249,7 @@ void push_client(obex_t *handle)
 	
 	uname_size = (strlen(bfname)+1)<<1;
 	uname = malloc(uname_size);
-	OBEX_CharToUnicode(uname, bfname, uname_size);
+	OBEX_CharToUnicode(uname, (uint8_t *) bfname, uname_size);
 
 	hd.bs = uname;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd, uname_size, 0);
@@ -295,11 +295,11 @@ void put_client(obex_t *handle)
 	/* Build object */
 	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
 	
-	rname_size = OBEX_CharToUnicode(rname, rname, sizeof(rname));
+	rname_size = OBEX_CharToUnicode((uint8_t *) rname, (uint8_t *) rname, sizeof(rname));
 	hd.bq4 = file_size;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_LENGTH, hd, 4, 0);
 
-	hd.bs = rname;
+	hd.bs = (uint8_t *) rname;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd, rname_size, 0);
 
 	hd.bs = buf;
@@ -331,7 +331,7 @@ void put_client_done(obex_t *handle, obex_object_t *object, int obex_rsp)
 void get_client(obex_t *handle, struct context *gt)
 {
 	obex_object_t *object;
-	char rname[200];
+	uint8_t rname[200];
 	char req_name[200];
 	int rname_size;
 	obex_headerdata_t hd;
@@ -344,7 +344,7 @@ void get_client(obex_t *handle, struct context *gt)
 		return;
 	}
 
-	rname_size = OBEX_CharToUnicode(rname, req_name, sizeof(rname));
+	rname_size = OBEX_CharToUnicode(rname, (uint8_t *) req_name, sizeof(rname));
 
 	hd.bs = rname;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd,
@@ -364,7 +364,7 @@ void get_client_done(obex_t *handle, obex_object_t *object, int obex_rsp, char *
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
-	int hlen;
+	uint32_t hlen;
 
 	const uint8_t *body = NULL;
 	int body_len = 0;
@@ -374,7 +374,7 @@ void get_client_done(obex_t *handle, obex_object_t *object, int obex_rsp, char *
 		return;
 	}
 
-	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
+	while (OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		if(hi == OBEX_HDR_BODY)	{
 		printf("%s() Found body\n", __FUNCTION__);
 			body = hv.bs;
@@ -401,7 +401,7 @@ void get_client_done(obex_t *handle, obex_object_t *object, int obex_rsp, char *
 //
 void setpath_client(obex_t *handle)
 {
-	char setpath_data[2] = {0,0};
+	uint8_t setpath_data[2] = { 0, 0 };
 	obex_object_t *object;
 	char path[200];
 	int path_size;
@@ -415,9 +415,9 @@ void setpath_client(obex_t *handle)
 		return;
 	}
 
-	path_size = OBEX_CharToUnicode(path, path, sizeof(path));
+	path_size = OBEX_CharToUnicode((uint8_t *) path, (uint8_t *) path, sizeof(path));
 
-	hd.bs = path;
+	hd.bs = (uint8_t *) path;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd,
 				path_size, OBEX_FL_FIT_ONE_PACKET);
 

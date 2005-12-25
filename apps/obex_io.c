@@ -166,7 +166,7 @@ obex_object_t *build_object_from_file(obex_t *handle, const char *filename)
 	/* Build object */
 	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
 
-	namebuf_len = OBEX_CharToUnicode(unicode_buf, filename, sizeof(unicode_buf));
+	namebuf_len = OBEX_CharToUnicode(unicode_buf, (uint8_t *) filename, sizeof(unicode_buf));
 
 	hdd.bs = unicode_buf;
 	OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME,

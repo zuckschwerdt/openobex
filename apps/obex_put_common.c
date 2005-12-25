@@ -59,14 +59,14 @@ void put_done(obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
-	int hlen;
+	uint32_t hlen;
 
 	const uint8_t *body = NULL;
 	int body_len = 0;
 	char *name = NULL;
 	char *namebuf = NULL;
 
-	while(OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
+	while (OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen))	{
 		switch(hi)	{
 		case OBEX_HDR_BODY:
 			body = hv.bs;
@@ -74,7 +74,7 @@ void put_done(obex_object_t *object)
 			break;
 		case OBEX_HDR_NAME:
 			if( (namebuf = malloc(hlen / 2)))	{
-				OBEX_UnicodeToChar(namebuf, hv.bs, hlen);
+				OBEX_UnicodeToChar((uint8_t *) namebuf, hv.bs, hlen);
 				name = namebuf;
 			}
 			break;
