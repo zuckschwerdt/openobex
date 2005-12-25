@@ -32,8 +32,13 @@
  *     
  ********************************************************************/
 
-#include <unistd.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #include <openobex/obex.h>
 #include "obex_put_common.h"

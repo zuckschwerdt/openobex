@@ -1,5 +1,5 @@
 
-SUBDIRS = lib/src
+SUBDIRS = lib/src apps/src ircp/src
 
 aclocaldir = $(datadir)/aclocal
 
