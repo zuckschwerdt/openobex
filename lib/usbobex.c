@@ -305,7 +305,7 @@ void usbobex_free_interfaces(int num, obex_interface_t *intf)
 	int i;
 	if (intf == NULL)
 		return;
-	for (i=0; i++; i<num) {
+	for (i = 0; i < num; i++) {
 		free(intf[i].usb.manufacturer);
 		free(intf[i].usb.product);
 		free(intf[i].usb.serial);

@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <libgen.h>
+#include <string.h>
 #include <openobex/obex.h>
 
 

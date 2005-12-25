@@ -161,7 +161,7 @@ int main (int argc, char *argv[])
 	obex_t *handle;
 #ifdef HAVE_BLUETOOTH
 	bdaddr_t bdaddr;
-	uint8_t channel;
+	uint8_t channel = 0;
 #endif
 
 	obex_interface_t *obex_intf;

@@ -65,6 +65,8 @@
 typedef char *bdaddr_t;
 #endif
 
+void OBEX_FreeInterfaces(obex_t *self);
+
 /**
  * OBEX_Init - Initialize OBEX.
  * @transport: Which transport to use. The following transports are available :
@@ -270,9 +272,11 @@ int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
 		DEBUG(1, "We are busy.\n");
 		return -EBUSY;
 	}
-	if((mtu_rx < OBEX_MINIMUM_MTU) || (mtu_rx > OBEX_MAXIMUM_MTU))
+
+	if (mtu_rx < OBEX_MINIMUM_MTU /*|| mtu_rx > OBEX_MAXIMUM_MTU*/)
 		return -E2BIG;
-	if((mtu_tx_max < OBEX_MINIMUM_MTU) || (mtu_tx_max > OBEX_MAXIMUM_MTU))
+
+	if (mtu_tx_max < OBEX_MINIMUM_MTU /*|| mtu_tx_max > OBEX_MAXIMUM_MTU*/)
 		return -E2BIG;
 
 	/* Change MTUs */
@@ -581,7 +585,7 @@ obex_object_t *OBEX_ObjectNew(obex_t *self, uint8_t cmd)
 {
 	obex_object_t *object;
 
-	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(self != NULL, NULL);
 
 	object = obex_object_new();
 	if(object == NULL)
