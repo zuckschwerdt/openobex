@@ -1,5 +1,5 @@
 
-SUBDIRS = 
+SUBDIRS = lib/src
 
 aclocaldir = $(datadir)/aclocal
 

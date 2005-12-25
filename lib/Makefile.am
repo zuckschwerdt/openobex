@@ -1,6 +1,3 @@
-#  
-#  $Id$
-#
 
 includedir = @includedir@/openobex
 
@@ -26,13 +23,13 @@ libopenobex_la_SOURCES = \
 	usbobex.c usbobex.h
 
 libopenobex_la_LDFLAGS = \
-	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
-	-release $(LT_RELEASE) \
-	-export-symbols $(top_srcdir)/src/obex.sym
-
-
-INCLUDES = -I$(top_srcdir)/src
+	-version-info 1:1:0 \
+	-export-symbols $(top_srcdir)/lib/src/obex.sym
 
 libopenobex_la_LIBADD = @USB_LIBS@
 
+INCLUDES = -I$(top_srcdir)/lib/src
+
 EXTRA_DIST = obex.sym obex.def makefile.msc win32compat.c windeps.dep
+
+MAINTAINERCLEANFILES = Makefile.in

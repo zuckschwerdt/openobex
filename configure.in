@@ -20,4 +20,4 @@ AC_PROG_LIBTOOL
 
 AC_ARG_OPENOBEX
 
-AC_OUTPUT(Makefile openobex.pc)
+AC_OUTPUT(Makefile lib/src/Makefile openobex.pc)
