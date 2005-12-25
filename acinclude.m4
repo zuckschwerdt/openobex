@@ -176,9 +176,7 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2"
 	fi
 
-	PKG_REQUIRES=""
-	PKG_CFLAGS=""
-	PKG_LIBS=""
+	REQUIRES=""
 
 	if (test "${irda_enable}" = "yes" && test "${irda_found}" = "yes"); then
 		AC_DEFINE(HAVE_IRDA, 1, [Define if system supports IrDA and it's enabled])
@@ -186,16 +184,12 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	if (test "${bluetooth_enable}" = "yes" && test "${bluez_found}" = "yes"); then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
-		PKG_REQUIRES="bluez"
-		PKG_CFLAGS="$PKG_CFLAGS $BLUEZ_CFLAGS"
-		PKG_LIBS="$PKG_LIBS $BLUEZ_LIBS"
+		REQUIRES="bluez"
 	fi
 
 	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
 		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
-		PKG_REQUIRES="$PKG_REQUIRES libusb"
-		PKG_CFLAGS="$PKG_CFLAGS $USB_CFLAGS"
-		PKG_LIBS="$PKG_LIBS $USB_LIBS"
+		REQUIRES="$REQUIRES libusb"
 	fi
 
 	AM_CONDITIONAL(APPS, test "${apps_enable}" = "yes")
@@ -213,7 +207,5 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		AC_DEFINE_UNQUOTED(OBEX_DUMP, 1, [Protocol dumping])
 	fi
 
-	AC_SUBST(PKG_REQUIRES)
-	AC_SUBST(PKG_CFLAGS)
-	AC_SUBST(PKG_LIBS)
+	AC_SUBST(REQUIRES)
 ])

@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: OpenOBEX
 Description: Free implementation of the Object Exchange protocol
 Version: @VERSION@
-Requires: @PKG_REQUIRES@
-Libs: -L${libdir} -lopenobex @PKG_LIBS@
-Cflags: -I${includedir} @PKG_CFLAGS@
+Requires: @REQUIRES@
+Libs: -L${libdir} -lopenobex
+Cflags: -I${includedir}
