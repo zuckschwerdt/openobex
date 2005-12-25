@@ -118,7 +118,7 @@ int inobex_listen(obex_t *self)
  */
 int inobex_accept(obex_t *self)
 {
-	int addrlen = sizeof(struct sockaddr_in);
+	socklen_t addrlen = sizeof(struct sockaddr_in);
 
 	self->fd = accept(self->serverfd, (struct sockaddr *) 
 		&self->trans.peer.inet, &addrlen);
@@ -152,7 +152,7 @@ int inobex_connect_request(obex_t *self)
 	if (self->trans.peer.inet.sin_port == 0)
 		self->trans.peer.inet.sin_port = htons(OBEX_PORT);
 
-	addr = (char *) &self->trans.peer.inet.sin_addr.s_addr;
+	addr = (unsigned char *) &self->trans.peer.inet.sin_addr.s_addr;
 
 	DEBUG(2, "peer addr = %d.%d.%d.%d\n",
 		addr[0], addr[1], addr[2], addr[3]);

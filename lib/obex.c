@@ -844,7 +844,7 @@ int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
 	obex_return_val_if_fail(uc != NULL, -1);
 	obex_return_val_if_fail(c != NULL, -1);
 
-	len = n = strlen(c);
+	len = n = strlen((char *) c);
 	obex_return_val_if_fail(n*2+2 <= size, -1);
 
 	uc[n*2+1] = 0;

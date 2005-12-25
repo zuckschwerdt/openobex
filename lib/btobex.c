@@ -142,7 +142,7 @@ out_freesock:
 int btobex_accept(obex_t *self)
 {
 #ifndef _WIN32
-	int addrlen = sizeof(struct sockaddr_rc);
+	socklen_t addrlen = sizeof(struct sockaddr_rc);
 	//int mtu;
 	//int len = sizeof(int);
 

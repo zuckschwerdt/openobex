@@ -190,9 +190,9 @@ out_freesock:
  */
 int irobex_accept(obex_t *self)
 {
-	int addrlen = sizeof(struct sockaddr_irda);
+	socklen_t addrlen = sizeof(struct sockaddr_irda);
 	int mtu;
-	int len = sizeof(int);
+	socklen_t len = sizeof(int);
 
 	// First accept the connection and get the new client socket.
 	self->fd = accept(self->serverfd, (struct sockaddr *) &self->trans.peer.irda,
@@ -237,7 +237,7 @@ static int irobex_discover_devices(obex_t *self)
 	unsigned char		buf[DISC_BUF_LEN];
 	int ret = -1;
 	int err;
-	int len;
+	socklen_t len;
 	int i;
 
 #ifndef _WIN32
@@ -345,7 +345,7 @@ static int irobex_discover_devices(obex_t *self)
 int irobex_connect_request(obex_t *self)
 {
 	int mtu = 0;
-	int len = sizeof(int);
+	socklen_t len = sizeof(int);
 	int ret;
 
 	DEBUG(4, "\n");
