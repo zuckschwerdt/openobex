@@ -30,6 +30,6 @@ libopenobex_la_LIBADD = @USB_LIBS@
 
 INCLUDES = -I$(top_srcdir)/lib/src
 
-EXTRA_DIST = obex.sym obex.def makefile.msc win32compat.c windeps.dep
+EXTRA_DIST = obex.sym win32compat.c
 
 MAINTAINERCLEANFILES = Makefile.in
