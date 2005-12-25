@@ -1,4 +1,5 @@
 
+if APPS
 noinst_LIBRARIES = libircp.a
 
 libircp_a_SOURCES = \
@@ -8,11 +9,11 @@ libircp_a_SOURCES = \
 	dirtraverse.c dirtraverse.h \
 	debug.h ircp.h
 
-
 bin_PROGRAMS = ircp 
 
 LDADD = $(top_builddir)/lib/src/libopenobex.la libircp.a
 
 INCLUDES = -I$(top_srcdir)/lib/src
+endif
 
 MAINTAINERCLEANFILES = Makefile.in

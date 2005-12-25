@@ -1,10 +1,10 @@
 
+if APPS
 noinst_LIBRARIES = libmisc.a
 
 libmisc_a_SOURCES = \
 	obex_io.c obex_io.h \
 	obex_put_common.c obex_put_common.h
-
 
 bin_PROGRAMS = irxfer obex_tcp irobex_palm3 obex_test
 
@@ -19,5 +19,6 @@ obex_test_LDADD = $(top_builddir)/lib/src/libopenobex.la @BLUEZ_LIBS@ @USB_LIBS@
 LDADD = $(top_builddir)/lib/src/libopenobex.la libmisc.a
 
 INCLUDES = @USB_CFLAGS@ @BLUEZ_CFLAGS@ -I$(top_srcdir)/lib/src
+endif
 
 MAINTAINERCLEANFILES = Makefile.in

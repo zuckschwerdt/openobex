@@ -6,4 +6,6 @@ fi
 
 ./bootstrap && \
     ./configure --enable-maintainer-mode \
-		--prefix=/usr
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--enable-apps

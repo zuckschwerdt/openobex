@@ -132,12 +132,32 @@ AC_DEFUN([AC_PATH_USB], [
 
 AC_DEFUN([AC_ARG_OPENOBEX], [
 	fortify_enable=yes
+	irda_enable=yes
+	bluetooth_enable=yes
+	usb_enable=yes
+	apps_enable=no
 	debug_enable=no
 	syslog_enable=no
 	dump_enable=no
 
 	AC_ARG_ENABLE(fortify, AC_HELP_STRING([--disable-fortify], [disable compile time buffer checks]), [
 		fortify_enable=${enableval}
+	])
+
+	AC_ARG_ENABLE(irda, AC_HELP_STRING([--disable-irda], [disable IrDA support]), [
+		irda_enable=${enableval}
+	])
+
+	AC_ARG_ENABLE(bluetooth, AC_HELP_STRING([--disable-bluetooth], [disable Bluetooth support]), [
+		bluetooth_enable=${enableval}
+	])
+
+	AC_ARG_ENABLE(usb, AC_HELP_STRING([--disable-usb], [disable USB support]), [
+		usb_enable=${enableval}
+	])
+
+	AC_ARG_ENABLE(apps, AC_HELP_STRING([--enable-apps], [enable test applications]), [
+		apps_enable=${enableval}
 	])
 
 	AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [enable compiling with debugging information]), [
@@ -156,6 +176,20 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2"
 	fi
 
+	if (test "${irda_enable}" = "yes" && test "${irda_found}" = "yes"); then
+		AC_DEFINE(HAVE_IRDA, 1, [Define if system supports IrDA and it's enabled])
+	fi
+
+	if (test "${bluetooth_enable}" = "yes" && test "${bluez_found}" = "yes"); then
+		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
+	fi
+
+	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
+		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
+	fi
+
+	AM_CONDITIONAL(APPS, test "${apps_enable}" = "yes")
+
 	if (test "${debug_enable}" = "yes" && test "${ac_cv_prog_cc_g}" = "yes"); then
 		CFLAGS="$CFLAGS -g"
 		AC_DEFINE_UNQUOTED(OBEX_DEBUG, 1, [Enable debuggging])
@@ -167,17 +201,5 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	if (test "${syslog_enable}" = "yes"); then
 		AC_DEFINE_UNQUOTED(OBEX_DUMP, 1, [Protocol dumping])
-	fi
-
-	if (test "${irda_found}" = "yes"); then
-		AC_DEFINE(HAVE_IRDA, 1, [Define if system supports IrDA and it's enabled])
-	fi
-
-	if (test "${bluez_found}" = "yes"); then
-		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
-	fi
-
-	if (test "${usb_found}" = "yes"); then
-		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
 	fi
 ])
