@@ -1,0 +1,38 @@
+ver 1.0.1:
+	Make OBEX_TRANS_BLUETOOTH working on Big-endian platform.
+	Add COPYING.LIB for LGPL stuff.
+	Don't auto generate openobex.spec file.
+
+ver 1.0.0:
+	Make 1.0.0-pre5 the final release.
+
+ver 1.0.0-pre5:
+	Add Bluetooth server support.
+	Add OBEX_SetCustomData() and OBEX_GetCustomData().
+	Replace OBEX_GetResponseMessage() with OBEX_ResponseToString().
+
+ver 1.0.0-pre4:
+	Add Bluetooth client support.
+	Change Bluetooth MTU to OBEX_DEFAULT_MTU.
+	Change type of RFCOMM channel to uint8_t.
+	Return static strings from obex_get_response_message().
+	Add OBEX_TRANS_FD support.
+
+ver 1.0.0-pre3:
+	Fix workaround for Bluetooth support, again.
+	Implement correct handling of OBEX_EV_REQDONE.
+	Replace OBEX_TRANS_CUST with OBEX_TRANS_CUSTOM.
+	Remove default prefix statement.
+	Remove GLib dependencies.
+	Change g_htons() into htons().
+
+ver 1.0.0-pre2:
+	Add support for DEBUG and DUMP.
+	Add streaming support and push command.
+	Disable IrDA discovery if a valid IrDA address is supplied.
+	Fix workaround for compilation without Bluetooth support.
+
+ver 1.0.0-pre1:
+	Support for Bluetooth transport layer.
+	Handle unexpected data in continue.
+	Allow higher MTUs.
