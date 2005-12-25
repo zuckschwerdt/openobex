@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
+//#include <openobex/obex.h>
+#include "obex.h"
+
 #include "debug.h"
 #include "ircp.h"
 #include "ircp_client.h"

@@ -35,7 +35,6 @@
 
 
 #include <termios.h>
-#include <openobex/obex.h>
 
 #ifdef CABLE_DEBUG
 #define CDEBUG(format, args...) printf("%s(): " format, __FUNCTION__ , ##args)

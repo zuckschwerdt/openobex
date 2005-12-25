@@ -35,8 +35,9 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <string.h>
-#include <openobex/obex.h>
 
+//#include <openobex/obex.h>
+#include "obex.h"
 
 #include "obex_io.h"
 #include "obex_test_client.h"

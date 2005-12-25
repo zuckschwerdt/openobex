@@ -9,7 +9,8 @@
 #include <string.h>
 #include <time.h>
 
-#include <openobex/obex.h>
+//#include <openobex/obex.h>
+#include "obex.h"
 
 #include "debug.h"
 #include "ircp_io.h"

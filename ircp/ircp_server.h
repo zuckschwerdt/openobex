@@ -1,7 +1,6 @@
 #ifndef IRCP_SERVER_H
 #define IRCP_SERVER_H
 
-#include <openobex/obex.h>
 #include "ircp.h"
 
 typedef struct ircp_server

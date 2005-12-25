@@ -31,7 +31,9 @@
 #endif
 
 #include <stdio.h>
-#include <openobex/obex.h>
+
+//#include <openobex/obex.h>
+#include "obex.h"
 
 #include <stdlib.h>
 #include <fcntl.h>

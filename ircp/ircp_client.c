@@ -10,7 +10,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include <openobex/obex.h>
+//#include <openobex/obex.h>
+#include "obex.h"
 
 #include "ircp.h"
 #include "ircp_client.h"

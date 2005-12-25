@@ -33,9 +33,3 @@ INCLUDES = -I$(top_srcdir)/lib/src
 EXTRA_DIST = obex.sym win32compat.c
 
 MAINTAINERCLEANFILES = Makefile.in
-
-all-local:
-	@if [ ! -e openobex ] ; then $(LN_S) $(top_srcdir)/lib/src openobex ; fi
-
-clean-local:
-	@rm -f openobex

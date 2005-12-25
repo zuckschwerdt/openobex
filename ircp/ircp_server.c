@@ -7,7 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <openobex/obex.h>
+//#include <openobex/obex.h>
+#include "obex.h"
 
 #include "ircp.h"
 #include "ircp_io.h"

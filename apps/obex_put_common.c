@@ -35,7 +35,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <openobex/obex.h>
+//#include <openobex/obex.h>
+#include "obex.h"
+
 #include "obex_put_common.h"
 #include "obex_io.h"
 
