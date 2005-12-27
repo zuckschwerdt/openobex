@@ -24,4 +24,4 @@ AC_PATH_USB
 
 AC_ARG_OPENOBEX
 
-AC_OUTPUT(Makefile lib/src/Makefile apps/src/Makefile ircp/src/Makefile lib/doc/Makefile openobex.pc)
+AC_OUTPUT(Makefile lib/Makefile apps/Makefile ircp/Makefile doc/Makefile openobex.pc)

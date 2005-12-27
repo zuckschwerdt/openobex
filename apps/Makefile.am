@@ -14,11 +14,11 @@ obex_test_SOURCES = \
 	obex_test_server.c obex_test_server.h \
 	obex_test_cable.c obex_test_cable.h
 
-obex_test_LDADD = $(top_builddir)/lib/src/libopenobex.la @BLUEZ_LIBS@ @USB_LIBS@ libmisc.a
+obex_test_LDADD = $(top_builddir)/lib/libopenobex.la @BLUEZ_LIBS@ @USB_LIBS@ libmisc.a
 
-LDADD = $(top_builddir)/lib/src/libopenobex.la libmisc.a
+LDADD = $(top_builddir)/lib/libopenobex.la libmisc.a
 
-INCLUDES = @USB_CFLAGS@ @BLUEZ_CFLAGS@ -I$(top_srcdir)/lib/src
+INCLUDES = @USB_CFLAGS@ @BLUEZ_CFLAGS@ -I$(top_srcdir)/lib
 endif
 
 MAINTAINERCLEANFILES = Makefile.in

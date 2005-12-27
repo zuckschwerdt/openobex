@@ -24,11 +24,11 @@ libopenobex_la_SOURCES = \
 
 libopenobex_la_LDFLAGS = \
 	-version-info 1:1:0 \
-	-export-symbols $(top_srcdir)/lib/src/obex.sym
+	-export-symbols $(top_srcdir)/lib/obex.sym
 
 libopenobex_la_LIBADD = @USB_LIBS@
 
-INCLUDES = -I$(top_srcdir)/lib/src
+INCLUDES = -I$(top_srcdir)/lib
 
 EXTRA_DIST = obex.sym win32compat.c
 
