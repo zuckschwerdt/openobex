@@ -1,5 +1,5 @@
 
-SUBDIRS = lib apps ircp doc
+SUBDIRS = include lib apps ircp doc
 
 aclocaldir = $(datadir)/aclocal
 
