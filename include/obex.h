@@ -1,34 +1,31 @@
-/*********************************************************************
- *                
- * Filename:      obex.h
- * Version:       0.9.7
- * Description:   OBEX API
- * Status:        Experimental.
- * Author:        Dag Brattli <dagb@cs.uit.no>
- * Created at:    Fri Apr 23 14:02:42 1999
- * CVS ID:        $Id$
- * 
- *     Copyright (c) 1999, 2000 Dag Brattli, All Rights Reserved.
- *     
- *     This library is free software; you can redistribute it and/or
- *     modify it under the terms of the GNU Lesser General Public
- *     License as published by the Free Software Foundation; either
- *     version 2 of the License, or (at your option) any later version.
+/*
  *
- *     This library is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *     Lesser General Public License for more details.
+ *  OpenOBEX - Free implementation of the Object Exchange protocol
  *
- *     You should have received a copy of the GNU Lesser General Public
- *     License along with this library; if not, write to the Free Software
- *     Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
- *     MA  02111-1307  USA
- *     
- ********************************************************************/
+ *  Copyright (C) 1999-2000  Dag Brattli <dagb@cs.uit.no>
+ *  Copyright (C) 1999-2000  Pontus Fuchs <pontus.fuchs@tactel.se>
+ *  Copyright (C) 2001-2002  Jean Tourrilhes <jt@hpl.hp.com>
+ *  Copyright (C) 2002-2006  Marcel Holtmann <marcel@holtmann.org>
+ *
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
 
-#ifndef __OPENOBEX_H
-#define __OPENOBEX_H
+#ifndef __OBEX_H
+#define __OBEX_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,4 +148,4 @@ int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu);
 }
 #endif
 
-#endif /* __OPENOBEX_H */
+#endif /* __OBEX_H */

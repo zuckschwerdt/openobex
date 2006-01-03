@@ -1,34 +1,31 @@
-/*********************************************************************
- *                
- * Filename:      obex_const.h
- * Version:       
- * Description:   Lots of constants and some typedefs for OpenOBEX.
- * Status:        Stable.
- * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
- * Created at:    Mon May 08 15:03:03 2000
- * CVS ID:        $Id$
- * 
- *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
- *      
- *     This library is free software; you can redistribute it and/or
- *     modify it under the terms of the GNU Lesser General Public
- *     License as published by the Free Software Foundation; either
- *     version 2 of the License, or (at your option) any later version.
+/*
  *
- *     This library is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *     Lesser General Public License for more details.
+ *  OpenOBEX - Free implementation of the Object Exchange protocol
  *
- *     You should have received a copy of the GNU Lesser General Public
- *     License along with this library; if not, write to the Free Software
- *     Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
- *     MA  02111-1307  USA
- *     
- ********************************************************************/
+ *  Copyright (C) 1999-2000  Dag Brattli <dagb@cs.uit.no>
+ *  Copyright (C) 1999-2000  Pontus Fuchs <pontus.fuchs@tactel.se>
+ *  Copyright (C) 2001-2002  Jean Tourrilhes <jt@hpl.hp.com>
+ *  Copyright (C) 2002-2006  Marcel Holtmann <marcel@holtmann.org>
+ *
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
 
-#ifndef __OPENOBEX_CONST_H
-#define __OPENOBEX_CONST_H
+#ifndef __OBEX_CONST_H
+#define __OBEX_CONST_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -176,4 +173,4 @@ typedef union {
 }
 #endif
 
-#endif /* __OPENOBEX_CONST_H */
+#endif /* __OBEX_CONST_H */
