@@ -27,8 +27,12 @@
  *     
  ********************************************************************/
 
-#ifndef OBEX_H
-#define OBEX_H
+#ifndef __OPENOBEX_H
+#define __OPENOBEX_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <inttypes.h>
 
@@ -55,7 +59,7 @@ typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int e
 typedef char* bdaddr_t;
 #endif
 
-#include "obex_const.h"
+#include <openobex/obex_const.h>
 
 /*
  *  OBEX API
@@ -142,4 +146,9 @@ int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu);
  int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces);
  int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *interface);
  void OBEX_FreeInterfaces(obex_t *self);
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __OPENOBEX_H */

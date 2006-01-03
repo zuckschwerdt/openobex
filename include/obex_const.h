@@ -27,8 +27,12 @@
  *     
  ********************************************************************/
 
-#ifndef OBEX_CONST_H
-#define OBEX_CONST_H
+#ifndef __OPENOBEX_CONST_H
+#define __OPENOBEX_CONST_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <inttypes.h>
 
@@ -168,4 +172,8 @@ typedef union {
  * default... - Jean II */
 #define OBEX_IRDA_OPT_MTU	(7 * 2039)	/* 7 IrLAP frames */
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __OPENOBEX_CONST_H */
