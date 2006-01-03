@@ -28,8 +28,8 @@
 #ifndef USBOBEX_H
 #define USBOBEX_H
 
-#include "obex_const.h"
-#include "usb.h"
+#include <openobex/obex_const.h>
+#include <usb.h>
 
 /* Information about a USB OBEX interface present on the system */
 struct obex_usb_intf_transport_t {

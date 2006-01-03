@@ -54,8 +54,9 @@ typedef struct obex obex_t;
 
 #define obex_return_if_fail(test)	do { if (!(test)) return; } while(0);
 #define obex_return_val_if_fail(test, val)	do { if (!(test)) return val; } while(0);
-		
-#include "obex_const.h"
+
+#include <openobex/obex_const.h>
+
 #include "obex_object.h"
 #include "obex_transport.h"
 #include "netbuf.h"

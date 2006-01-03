@@ -1,9 +1,4 @@
 
-includedir = @includedir@/openobex
-
-include_HEADERS = obex.h obex_const.h
-
-
 lib_LTLIBRARIES = libopenobex.la
 
 libopenobex_la_SOURCES = \
@@ -28,7 +23,7 @@ libopenobex_la_LDFLAGS = \
 
 libopenobex_la_LIBADD = @USB_LIBS@
 
-INCLUDES = -I$(top_srcdir)/lib
+INCLUDES = -I$(top_builddir)/include
 
 EXTRA_DIST = obex.sym win32compat.c
 

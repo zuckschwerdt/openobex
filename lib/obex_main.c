@@ -55,7 +55,8 @@
 #include "obex_header.h"
 #include "obex_server.h"
 #include "obex_client.h"
-#include "obex_const.h"
+
+#include <openobex/obex_const.h>
 
 #ifdef OBEX_DEBUG
 int obex_debug;

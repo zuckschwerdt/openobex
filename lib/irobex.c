@@ -57,9 +57,8 @@
 #endif /* _WIN32 */
 
 
-#include <obex_main.h>
-#include <irobex.h>
-
+#include "obex_main.h"
+#include "irobex.h"
 
 /*
  * Function irobex_no_addr (addr)

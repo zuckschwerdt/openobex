@@ -42,8 +42,8 @@
 
 #include <usb.h>
 
-#include <obex_main.h>
-#include <usbobex.h>
+#include "obex_main.h"
+#include "usbobex.h"
 
 /*
  * Function usbobex_prepare_connect (self, interface)

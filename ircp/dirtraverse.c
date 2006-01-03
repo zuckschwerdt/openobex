@@ -9,8 +9,8 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <dirent.h>
-#include "dirtraverse.h"
 
+#include "dirtraverse.h"
 #include "debug.h"
 
 #define TRUE  1

@@ -13,8 +13,7 @@
 #include <string.h>
 #include <time.h>
 
-//#include <openobex/obex.h>
-#include "obex.h"
+#include <openobex/obex.h>
 
 #include "debug.h"
 #include "ircp_io.h"
@@ -179,4 +178,3 @@ int ircp_checkdir(const char *path, const char *dir, cd_flags flags)
 out:
 	return ret;
 }
-	

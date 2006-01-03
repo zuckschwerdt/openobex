@@ -929,4 +929,3 @@ int obex_object_resume(obex_t *self, obex_object_t *object)
 	
 	return 0;
 }
-

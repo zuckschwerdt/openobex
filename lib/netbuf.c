@@ -345,6 +345,3 @@ slist_t *slist_remove(slist_t *list, void *data)
 	}
 	return list;
 }
-
-
-

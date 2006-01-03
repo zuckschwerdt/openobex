@@ -76,6 +76,3 @@ slist_t *slist_append(slist_t *list, void *data);
 slist_t *slist_remove(slist_t *list, void *data);
 
 #endif
-
-
-

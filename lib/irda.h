@@ -205,7 +205,3 @@ struct if_irda_req {
 #define ifr_rts       ifr_ifru.ifru_line.rts
 
 #endif /* IRDA_H */
-
-
-
-

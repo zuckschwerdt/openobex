@@ -39,7 +39,6 @@
 #include "obex_header.h"
 #include "obex_connect.h"
 
-
 /*
  * Function obex_server ()
  *

@@ -42,8 +42,7 @@
 #include <unistd.h>
 #include <termios.h>
 
-//#include <openobex/obex.h>
-#include "obex.h"
+#include <openobex/obex.h>
 
 #include "obex_test_cable.h"
 

@@ -18,7 +18,7 @@ obex_test_LDADD = $(top_builddir)/lib/libopenobex.la @BLUEZ_LIBS@ @USB_LIBS@ lib
 
 LDADD = $(top_builddir)/lib/libopenobex.la libmisc.a
 
-INCLUDES = @USB_CFLAGS@ @BLUEZ_CFLAGS@ -I$(top_srcdir)/lib
+INCLUDES = @USB_CFLAGS@ @BLUEZ_CFLAGS@ -I$(top_builddir)/include
 endif
 
 MAINTAINERCLEANFILES = Makefile.in

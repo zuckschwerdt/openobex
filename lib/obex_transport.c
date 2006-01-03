@@ -44,8 +44,8 @@
 #include "btobex.h"
 #endif /*HAVE_BLUETOOTH*/
 #ifdef HAVE_USB 
-#include "usbobex.h" 
-#endif /*HAVE_USB*/ 
+#include "usbobex.h"
+#endif /*HAVE_USB*/
 
 #include "obex_transport.h"
 
@@ -480,5 +480,3 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	}	
 	return actual;
 }
-
-

@@ -13,7 +13,7 @@ bin_PROGRAMS = ircp
 
 LDADD = $(top_builddir)/lib/libopenobex.la libircp.a
 
-INCLUDES = -I$(top_srcdir)/lib
+INCLUDES = -I$(top_builddir)/include
 endif
 
 MAINTAINERCLEANFILES = Makefile.in

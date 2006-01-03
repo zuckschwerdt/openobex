@@ -51,10 +51,8 @@
 
 #endif /* _WIN32 */
 
-
-#include <obex_main.h>
-#include <btobex.h>
-
+#include "obex_main.h"
+#include "btobex.h"
 
 /*
  * Function btobex_prepare_connect (self, service)

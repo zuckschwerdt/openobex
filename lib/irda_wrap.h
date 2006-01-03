@@ -13,7 +13,7 @@ struct sockaddr_irda {SOCKADDR_IRDA;};
 
 #else /* _WIN32 */
 
-#include <irda.h>
+#include "irda.h"
 
 #endif /* _WIN32 */
 

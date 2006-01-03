@@ -48,8 +48,7 @@
 #include <bluetooth/rfcomm.h>
 #endif
 
-//#include <openobex/obex.h>
-#include "obex.h"
+#include <openobex/obex.h>
 
 #include "obex_test.h"
 #include "obex_test_client.h"

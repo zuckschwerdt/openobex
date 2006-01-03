@@ -42,6 +42,7 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #endif /*_WIN32*/
+
 #include "obex_main.h"
 
 #define OBEX_PORT 650

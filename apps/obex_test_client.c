@@ -36,8 +36,7 @@
 #include <libgen.h>
 #include <string.h>
 
-//#include <openobex/obex.h>
-#include "obex.h"
+#include <openobex/obex.h>
 
 #include "obex_io.h"
 #include "obex_test_client.h"
@@ -438,4 +437,3 @@ void setpath_client_done(obex_t *handle, obex_object_t *object, int obex_rsp)
 		printf("SETPATH failed 0x%02x!\n", obex_rsp);
 	}
 }
-	

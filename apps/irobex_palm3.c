@@ -45,8 +45,7 @@
 #include <unistd.h>
 #endif
 
-//#include <openobex/obex.h>
-#include "obex.h"
+#include <openobex/obex.h>
 
 #include "obex_put_common.h"
 #include "obex_io.h"
