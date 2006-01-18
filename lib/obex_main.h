@@ -102,7 +102,7 @@ void DUMPBUFFERS(n, label, msg);
 
 #endif /* _WIN32 */
 
-#define OBEX_VERSION		0x11      /* Version 1.1 */
+#define OBEX_VERSION		0x10      /* OBEX Protocol Version 1.1 */
 
 // Note that this one is also defined in obex.h
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
