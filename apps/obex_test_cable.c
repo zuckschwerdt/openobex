@@ -224,7 +224,13 @@ static void cobex_cleanup(struct cobex_context *gt, int force)
 {
 	if(force)	{
 		// Send a break to get out of OBEX-mode
-		if(ioctl(gt->ttyfd, TCSBRKP, 0) < 0)	{
+#ifdef TCSBRKP
+		if(ioctl(gt->ttyfd, TCSBRKP, 0) < 0) {
+#elif defined(TCSBRK)
+		if(ioctl(gt->ttyfd, TCSBRK, 0) < 0) {
+#else
+		if(tcsendbreak(gt->ttyfd, 0) < 0) {
+#endif /* TCSBRKP */
 			printf("Unable to send break!\n");
 		}
 	}

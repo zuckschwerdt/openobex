@@ -123,6 +123,12 @@ AC_DEFUN([AC_PATH_USB], [
 	AC_CHECK_LIB(usb, usb_get_busses, dummy=yes, AC_DEFINE(NEED_USB_GET_BUSSES, 1, [Define to 1 if you need the usb_get_busses() function.]))
 	AC_CHECK_LIB(usb, usb_interrupt_read, dummy=yes, AC_DEFINE(NEED_USB_INTERRUPT_READ, 1, [Define to 1 if you need the usb_interrupt_read() function.]))
 
+	case "${host_cpu}-${host_os}" in
+		*-darwin*)
+			USB_LIBS="$USB_LIBS -framework CoreFoundation -framework IOKit"
+		;;
+	esac
+
 	CPPFLAGS=$ac_save_CPPFLAGS
 	LDFLAGS=$ac_save_LDFLAGS
 
