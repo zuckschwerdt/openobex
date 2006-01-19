@@ -129,8 +129,6 @@ AC_DEFUN([AC_PATH_USB], [
 		;;
 	esac
 
-	AC_CHECK_FILE(${usb_prefix}/lib/pkgconfig/libusb.pc, dummy=yes, usb_found=no)
-
 	CPPFLAGS=$ac_save_CPPFLAGS
 	LDFLAGS=$ac_save_LDFLAGS
 
@@ -197,7 +195,7 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
 		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
-		REQUIRES="$REQUIRES libusb"
+		AC_CHECK_FILE(${usb_prefix}/lib/pkgconfig/libusb.pc, REQUIRES="$REQUIRES libusb")
 	fi
 
 	AM_CONDITIONAL(APPS, test "${apps_enable}" = "yes")
