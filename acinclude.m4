@@ -129,6 +129,8 @@ AC_DEFUN([AC_PATH_USB], [
 		;;
 	esac
 
+	AC_CHECK_FILE(${usb_prefix}/lib/pkgconfig/libusb.pc, dummy=yes, usb_found=no)
+
 	CPPFLAGS=$ac_save_CPPFLAGS
 	LDFLAGS=$ac_save_LDFLAGS
 
