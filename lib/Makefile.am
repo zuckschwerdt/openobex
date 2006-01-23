@@ -18,7 +18,7 @@ libopenobex_la_SOURCES = \
 	usbobex.c usbobex.h
 
 libopenobex_la_LDFLAGS = \
-	-version-info 1:1:0 \
+	-version-info 2:0:1 \
 	-export-symbols $(top_srcdir)/lib/obex.sym
 
 libopenobex_la_LIBADD = @USB_LIBS@
