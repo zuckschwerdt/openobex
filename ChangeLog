@@ -1,3 +1,17 @@
+ver 1.1:
+	Fix list of exported functions (Bug 644690).
+	Fix duplicate string from basename() result (Bug 668977).
+	Fix wrong order of sanity checks (Bug 703452).
+	Fix memory leak in send_stream() function.
+	ISO C99 says that inttypes.h includes stdint.h header.
+	Add proper client side ABORT support.
+	Add support for OBEX_SuspendRequest() and OBEX_ResumeRequest().
+	Add USB transport support.
+	Increase the allowed maximum MTU to 64kB-1.
+	Disconnect when an ABORT fails.
+	Make it possible to include headers from C++ source code.
+	Advertise OBEX Protocol Version 1.0.
+
 ver 1.0.1:
 	Make OBEX_TRANS_BLUETOOTH working on Big-endian platform.
 	Add COPYING.LIB for LGPL stuff.
