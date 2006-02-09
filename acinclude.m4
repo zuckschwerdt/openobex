@@ -209,7 +209,7 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		AC_DEFINE_UNQUOTED(OBEX_SYSLOG, 1, [System logger debugging])
 	fi
 
-	if (test "${syslog_enable}" = "yes"); then
+	if (test "${dump_enable}" = "yes"); then
 		AC_DEFINE_UNQUOTED(OBEX_DUMP, 1, [Protocol dumping])
 	fi
 
