@@ -75,8 +75,8 @@ typedef union {
 	//obex_bluetooth_intf_t bt; // to be added
 } obex_interface_t;
 
-#define	OBEX_CLIENT		0
-#define	OBEX_SERVER		1
+#define OBEX_CLIENT		0
+#define OBEX_SERVER		1
 
 /* Possible events */
 #define OBEX_EV_PROGRESS	0	/* Progress has been made */
@@ -113,6 +113,7 @@ typedef union {
 #define OBEX_TRANS_USB		6
 
 /* Standard headers */
+#define OBEX_HDR_EMPTY		0x00 /* Empty header (buggy OBEX servers) */
 #define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */
 #define OBEX_HDR_NAME		0x01 /* Name of the object */
 #define OBEX_HDR_TYPE		0x42 /* Type of the object */
@@ -161,7 +162,7 @@ typedef union {
 
 /* Min, Max and default transport MTU */
 #define OBEX_DEFAULT_MTU	1024
-#define OBEX_MINIMUM_MTU	255      
+#define OBEX_MINIMUM_MTU	255
 #define OBEX_MAXIMUM_MTU	65535
 
 /* Optimum MTU for various transport (optimum for throughput).

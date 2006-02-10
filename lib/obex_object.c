@@ -198,6 +198,12 @@ int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 		return 1;
 	}
 
+	if (hi == OBEX_HDR_EMPTY) {
+		DEBUG(2, "Empty header\n");
+		object->tx_headerq = slist_append(object->tx_headerq, element);
+		return 1;
+	}
+
 	switch (hi & OBEX_HI_MASK) {
 	case OBEX_INT:
 		DEBUG(2, "4BQ header %d\n", hv.bq4);
@@ -481,6 +487,10 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 		else if(h->hi == OBEX_HDR_BODY) {
 			/* The body may be fragmented over several packets. */
 			tx_left -= send_body(object, h, txmsg, tx_left);
+		}
+		else if(h->hi == OBEX_HDR_EMPTY) {
+			object->tx_headerq = slist_remove(object->tx_headerq, h);
+			free_h = TRUE;
 		}
 		else if(h->length <= tx_left) {
 			/* There is room for more data in tx msg */
