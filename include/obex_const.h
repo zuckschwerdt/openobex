@@ -72,7 +72,7 @@ typedef struct {
 typedef union {
 	/* USB-specific OBEX interface information */
 	obex_usb_intf_t usb;
-//	obex_bluetooth_intf_t bt; // to be added
+	//obex_bluetooth_intf_t bt; // to be added
 } obex_interface_t;
 
 #define	OBEX_CLIENT		0
@@ -101,6 +101,7 @@ typedef union {
 #define OBEX_FL_STREAM_START	0x02	/* Start of streaming body */
 #define OBEX_FL_STREAM_DATA	0x04	/* Body-stream data */
 #define OBEX_FL_STREAM_DATAEND	0x08	/* Body stream last data */
+#define OBEX_FL_SUSPEND		0x10	/* Suspend after sending this header */
 
 /* Transports */
 #define OBEX_TRANS_IRDA		1

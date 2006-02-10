@@ -59,7 +59,6 @@ obex_object_t *obex_object_new(void)
 	return object;
 }
 
-
 /*
  * Function free_headerq(q)
  *
@@ -189,15 +188,15 @@ int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 	memset(element, 0, sizeof(struct obex_header_element));
 
 	element->hi = hi;
-	
+	element->flags = flags;
+
 	/* Is this a stream? */
-	if(flags & OBEX_FL_STREAM_START)	{
+	if(flags & OBEX_FL_STREAM_START) {
 		DEBUG(3, "Adding stream\n");
 		element->stream = TRUE;
 		object->tx_headerq = slist_append(object->tx_headerq, element);
 		return 1;
 	}
-	
 
 	switch (hi & OBEX_HI_MASK) {
 	case OBEX_INT:
@@ -426,7 +425,7 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 	int actual, finished = 0;
 	uint16_t tx_left;
 	int addmore = TRUE;
-	int real_opcode;
+	int free_h, real_opcode;
 
 	DEBUG(4, "\n");
 
@@ -462,12 +461,13 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 	}
 
 	DEBUG(4, "4\n");
-	
+
 	/* Take headers from the tx queue and try to stuff as
 	   many as possible into the tx-msg */
 	while(addmore == TRUE && object->tx_headerq != NULL) {
-		
+
 		h = object->tx_headerq->data;
+		free_h = FALSE;
 
 		if(h->stream) {
 			/* This is a streaming body */
@@ -491,7 +491,7 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 			/* Remove from tx-queue */
 			object->tx_headerq = slist_remove(object->tx_headerq, h);
 			g_netbuf_free(h->buf);
-			free(h);
+			free_h = TRUE;
 		}
 		else if(h->length > self->mtu_tx) {
 			/* Header is bigger than MTU. This should not happen,
@@ -505,12 +505,19 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 			/* This header won't fit. */
 			addmore = FALSE;
 		}
-		
-		if(tx_left == 0)
+
+		if (h->flags & OBEX_FL_SUSPEND) {
+			object->suspend = 1;
+			addmore = FALSE;
+		}
+
+		if(free_h)
+			free(h);
+
+		if (tx_left == 0)
 			addmore = FALSE;
 	};
 
-	
 	/* Decide which command to use, and if to use final-bit */
 	if(object->tx_headerq) {
 		/* Have more headers (or body) to send */
