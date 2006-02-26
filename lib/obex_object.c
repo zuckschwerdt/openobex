@@ -431,7 +431,7 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 	int actual, finished = 0;
 	uint16_t tx_left;
 	int addmore = TRUE;
-	int free_h, real_opcode;
+	int real_opcode;
 
 	DEBUG(4, "\n");
 
@@ -473,35 +473,40 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 	while(addmore == TRUE && object->tx_headerq != NULL) {
 
 		h = object->tx_headerq->data;
-		free_h = FALSE;
 
 		if(h->stream) {
 			/* This is a streaming body */
+			if(h->flags & OBEX_FL_SUSPEND)
+				object->suspend = 1;
 			actual = send_stream(self, h, txmsg, tx_left);
 			if(actual < 0 )
 				return -1;
 			tx_left -= actual;
-			if (object->suspend)
-				addmore = FALSE;
 		}
 		else if(h->hi == OBEX_HDR_BODY) {
 			/* The body may be fragmented over several packets. */
+			if(h->flags & OBEX_FL_SUSPEND)
+				object->suspend = 1;
 			tx_left -= send_body(object, h, txmsg, tx_left);
 		}
 		else if(h->hi == OBEX_HDR_EMPTY) {
+			if(h->flags & OBEX_FL_SUSPEND)
+				object->suspend = 1;
 			object->tx_headerq = slist_remove(object->tx_headerq, h);
-			free_h = TRUE;
+			free(h);
 		}
 		else if(h->length <= tx_left) {
 			/* There is room for more data in tx msg */
 			DEBUG(4, "Adding non-body header\n");
 			g_netbuf_put_data(txmsg, h->buf->data, h->length);
 			tx_left -= h->length;
+			if(h->flags & OBEX_FL_SUSPEND)
+				object->suspend = 1;
 				
 			/* Remove from tx-queue */
 			object->tx_headerq = slist_remove(object->tx_headerq, h);
 			g_netbuf_free(h->buf);
-			free_h = TRUE;
+			free(h);
 		}
 		else if(h->length > self->mtu_tx) {
 			/* Header is bigger than MTU. This should not happen,
@@ -516,13 +521,8 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 			addmore = FALSE;
 		}
 
-		if (h->flags & OBEX_FL_SUSPEND) {
-			object->suspend = 1;
+		if (object->suspend)
 			addmore = FALSE;
-		}
-
-		if(free_h)
-			free(h);
 
 		if (tx_left == 0)
 			addmore = FALSE;
