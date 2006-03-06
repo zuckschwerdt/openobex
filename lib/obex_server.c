@@ -48,7 +48,7 @@
 int obex_server(obex_t *self, GNetBuf *msg, int final)
 {
 	obex_common_hdr_t *request;
-	int cmd, ret;
+	int cmd, ret, deny = 0;
 	unsigned int len;
 
 	
@@ -135,7 +135,29 @@ int obex_server(obex_t *self, GNetBuf *msg, int final)
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			return -1;
 		}
-		
+
+		if (!final) {
+			/* Let the user decide whether to accept or deny a multi-packet
+			 * request by examining all headers in the first packet */
+			if (!self->object->checked) {
+				obex_deliver_event(self, OBEX_EV_REQCHECK, cmd, 0, FALSE);
+				self->object->checked = 1;                       
+			}
+
+			/* Everything except 0x1X and 0x2X means that the user callback
+			 * denied the request. In the denied cases treat the last
+			 * packet as a final one but don't signal OBEX_EV_REQ */
+			switch ((self->object->opcode & ~OBEX_FINAL) & 0xF0) {
+				case 0x10:
+				case 0x20:
+					break;
+				default:
+					final = 1;
+					deny = 1;
+					break;
+			}
+		}
+
 		if(!final) {
 			/* As a server, the final bit is always SET- Jean II */
 			if(obex_object_send(self, self->object, FALSE, TRUE) < 0) {
@@ -156,7 +178,8 @@ int obex_server(obex_t *self, GNetBuf *msg, int final)
 			/* Tell the app that a whole request has arrived. While
 			   this event is delivered the app should append the
 			   headers that should be in the response */
-			obex_deliver_event(self, OBEX_EV_REQ, cmd, 0, FALSE);
+			if (!deny)
+				obex_deliver_event(self, OBEX_EV_REQ, cmd, 0, FALSE);
 			self->state = MODE_SRV | STATE_SEND;
 			len = 3; /* Otherwise sanitycheck later will fail */
 		}

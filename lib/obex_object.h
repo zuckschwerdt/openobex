@@ -72,6 +72,8 @@ typedef struct {
 	int totallen;			/* Size of all headers */
 	int abort;			/* Request shall be aborted */
 
+	int checked;			/* OBEX_EV_REQCHECK has been signaled */
+
 	int suspend;			/* Temporarily stop transfering object */
 	int continue_received;		/* CONTINUE received after sending last command */
 	
