@@ -1,3 +1,9 @@
+ver 1.2:
+	Add OBEX_EV_REQCHECK support.
+	Add support for suspend after sending a header.
+	Add support for empty headers for buggy OBEX servers.
+	Fix memory leak in obex_object_send().
+
 ver 1.1:
 	Fix list of exported functions (Bug 644690).
 	Fix duplicate string from basename() result (Bug 668977).
