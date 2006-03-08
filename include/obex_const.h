@@ -118,27 +118,35 @@ typedef union {
 #define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */
 #define OBEX_HDR_NAME		0x01 /* Name of the object */
 #define OBEX_HDR_TYPE		0x42 /* Type of the object */
+#define OBEX_HDR_LENGTH		0xc3 /* Total lenght of object */
 #define OBEX_HDR_TIME		0x44 /* Last modification time of (ISO8601) */
 #define OBEX_HDR_TIME2		0xC4 /* Deprecated use HDR_TIME instead */
-#define OBEX_HDR_LENGTH		0xc3 /* Total lenght of object */
 #define OBEX_HDR_DESCRIPTION	0x05 /* Description of object */
 #define OBEX_HDR_TARGET		0x46 /* Identifies the target for the object */
+#define OBEX_HDR_HTTP		0x47 /* An HTTP 1.x header */
 #define OBEX_HDR_BODY		0x48 /* Data part of the object */
 #define OBEX_HDR_BODY_END	0x49 /* Last data part of the object */
 #define OBEX_HDR_WHO		0x4a /* Identifies the sender of the object */
+#define OBEX_HDR_CONNECTION	0xcb /* Connection identifier */
 #define OBEX_HDR_APPARAM	0x4c /* Application parameters */
 #define OBEX_HDR_AUTHCHAL	0x4d /* Authentication challenge */
 #define OBEX_HDR_AUTHRESP	0x4e /* Authentication response */
-#define OBEX_HDR_OBJCLASS	0x4f /* OBEX Object class of object */
-#define OBEX_HDR_CONNECTION	0xcb /* Connection identifier */
+#define OBEX_HDR_CREATOR	0xcf /* indicates the creator of an object */
+#define OBEX_HDR_WANUUID	0x50 /* uniquely identifies the network client
+					(OBEX server) */
+#define OBEX_HDR_OBJECTCLASS	0x51 /* OBEX Object class of object */
+#define OBEX_HDR_SESSIONPARAM	0x52 /* Parameters used in session
+					commands/responses */
+#define OBEX_HDR_SESSIONSEQ	0x93 /* Sequence number used in each OBEX
+					packet for reliability */
 
 /* Commands */
 #define OBEX_CMD_CONNECT	0x00
 #define OBEX_CMD_DISCONNECT	0x01
 #define OBEX_CMD_PUT		0x02
 #define OBEX_CMD_GET		0x03
-#define OBEX_CMD_COMMAND	0x04
 #define OBEX_CMD_SETPATH	0x05
+#define OBEX_CMD_SESSION	0x07 /* used for reliable session support */
 #define OBEX_CMD_ABORT		0x7f
 #define OBEX_FINAL		0x80
 
@@ -148,16 +156,38 @@ typedef union {
 #define OBEX_RSP_SUCCESS		0x20
 #define OBEX_RSP_CREATED		0x21
 #define OBEX_RSP_ACCEPTED		0x22
+#define OBEX_RSP_NON_AUTHORITATIVE	0x23
 #define OBEX_RSP_NO_CONTENT		0x24
+#define OBEX_RSP_RESET_CONTENT		0x25
+#define OBEX_RSP_PARTIAL_CONTENT        0x26
+#define OBEX_RSP_MULTIPLE_CHOICES	0x30
+#define OBEX_RSP_MOVED_PERMANENTLY	0x31
+#define OBEX_RSP_MOVED_TEMPORARILY	0x32
+#define OBEX_RSP_SEE_OTHER		0x33
+#define OBEX_RSP_NOT_MODIFIED		0x34
+#define OBEX_RSP_USE_PROXY		0x35
 #define OBEX_RSP_BAD_REQUEST		0x40
 #define OBEX_RSP_UNAUTHORIZED		0x41
 #define OBEX_RSP_PAYMENT_REQUIRED	0x42
 #define OBEX_RSP_FORBIDDEN		0x43
 #define OBEX_RSP_NOT_FOUND		0x44
 #define OBEX_RSP_METHOD_NOT_ALLOWED	0x45
+#define OBEX_RSP_NOT_ACCEPTABLE		0x46
+#define OBEX_RSP_PROXY_AUTH_REQUIRED	0x47
+#define OBEX_RSP_REQUEST_TIME_OUT	0x48
 #define OBEX_RSP_CONFLICT		0x49
+#define OBEX_RSP_GONE			0x4a
+#define OBEX_RSP_LENGTH_REQUIRED	0x4b
+#define OBEX_RSP_PRECONDITION_FAILED	0x4c
+#define OBEX_RSP_REQ_ENTITY_TOO_LARGE	0x4d
+#define OBEX_RSP_REQ_URL_TOO_LARGE	0x4e
+#define OBEX_RSP_UNSUPPORTED_MEDIA_TYPE	0x4f
 #define OBEX_RSP_INTERNAL_SERVER_ERROR	0x50
 #define OBEX_RSP_NOT_IMPLEMENTED	0x51
+#define OBEX_RSP_BAD_GATEWAY		0x52
+#define OBEX_RSP_SERVICE_UNAVAILABLE	0x53
+#define OBEX_RSP_GATEWAY_TIMEOUT	0x54
+#define OBEX_RSP_VERSION_NOT_SUPPORTED	0x55
 #define OBEX_RSP_DATABASE_FULL		0x60
 #define OBEX_RSP_DATABASE_LOCKED	0x61
 
