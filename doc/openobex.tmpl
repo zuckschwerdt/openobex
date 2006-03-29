@@ -1,4 +1,7 @@
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN"[]>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+                  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<!-- use this for sgml tools
+	DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN"[]-->
 
 <book id="OpenOBEX-Guide">
  <bookinfo>
@@ -14,11 +17,24 @@
      </address>
     </affiliation>
    </author>
+   <author>
+    <firstname>Christian</firstname>
+    <surname>Zuckschwerdt</surname>
+    <affiliation>
+     <address>
+      <email>zany@triq.net</email>
+     </address>
+    </affiliation>
+   </author>
   </authorgroup>
 
   <copyright>
    <year>2000</year>
    <holder>Pontus Fuchs</holder>
+  </copyright>
+  <copyright>
+   <year>2006</year>
+   <holder>Christian Zuckschwerdt</holder>
   </copyright>
 
   <legalnotice>
@@ -58,8 +74,8 @@
 
   <para>
     When you read this it's very useful to have a copy of the OBEX specification. It is available for download on IrDA's website
-    http://www.irda.org. Make sure you have <filename class=headerfile>obex.h</filename> and
-    <filename class=headerfile>obex_const.h</filename> too. You might also find the OpenOBEX test-apps useful.
+    http://www.irda.org. Make sure you have <filename class="headerfile">obex.h</filename> and
+    <filename class="headerfile">obex_const.h</filename> too. You might also find the OpenOBEX test-apps useful.
   </para>
 
 
@@ -70,7 +86,7 @@
 
   <sect1><title>Preparations</title>
   <para>
-    To be able to use the OpenOBEX API you must include the file <filename class=headerfile>openobex/obex.h</filename>.
+    To be able to use the OpenOBEX API you must include the file <filename class="headerfile">openobex/obex.h</filename>.
   </para>
   <para>
     First of all you must create an OBEX instance by calling <function>OBEX_init</function>.
@@ -100,8 +116,8 @@
     </funcprototype>
     </funcsynopsis>
 
-<table frame=all><title>Arguments</title>
-<tgroup cols=2 align=left colsep=1 rowsep=1>
+<table frame="all"><title>Arguments</title>
+<tgroup cols="2" align="left" colsep="1" rowsep="1">
 <thead>
 <row>
   <entry>Argument</entry>
@@ -123,7 +139,7 @@
 </row>
 <row>
   <entry>event</entry>
-  <entry>The event. See <filename class=headerfile>obex_const.h</filename> for possible events.</entry>
+  <entry>The event. See <filename class="headerfile">obex_const.h</filename> for possible events.</entry>
 </row>
 <row>
   <entry>obex_cmd</entry>
@@ -193,7 +209,7 @@
 	OBEX_ObjectAddHeader(handle, object,
                 OBEX_HDR_BODY, hd, body_size, 0);
 
-	if(OBEX_Request(handle, object) < 0) {
+	if(OBEX_Request(handle, object) &lt; 0) {
 		/* Error */
 	}
 	
@@ -304,7 +320,7 @@
 
   <chapter id="apiref">
      <title>API Reference</title>
-!Esrc/obex.c
+!Elib/obex.c
   </chapter>
 
 </book>

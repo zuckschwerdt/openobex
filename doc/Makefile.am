@@ -5,7 +5,7 @@ pdf:	openobex.pdf
 ps:	openobex.ps
 html:	openobex
 
-openobex.sgml: openobex.tmpl docproc ../src/obex.c
+openobex.sgml: openobex.tmpl docproc ../lib/obex.c
 	$(top_srcdir)/doc/docproc <$< >$@
 
 clean:
@@ -13,23 +13,23 @@ clean:
 	-$(RM) -rf openobex
 	
 %.ps : %.sgml
-	@(which db2ps > /dev/null 2>&1) || \
+	@(which docbook2ps > /dev/null 2>&1) || \
 	 (echo "*** You need to install DocBook stylesheets ***"; \
 	  exit 1)
-	db2ps $<
+	docbook2ps $<
 
 %.pdf : %.sgml
-	@(which db2pdf > /dev/null 2>&1) || \
+	@(which docbook2pdf > /dev/null 2>&1) || \
 	 (echo "*** You need to install DocBook stylesheets ***"; \
 	  exit 1)
-	db2pdf $<
+	docbook2pdf $<
 
 %:	%.sgml
-	@(which db2html > /dev/null 2>&1) || \
+	@(which docbook2html > /dev/null 2>&1) || \
 	 (echo "*** You need to install DocBook stylesheets ***"; \
 	  exit 1)
 	-$(RM) -r $@
-	db2html $<
+	docbook2html $<
 	if [ ! -z "$(JPG-$@)" ]; then cp $(JPG-$@) $@; fi
 
 

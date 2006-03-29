@@ -333,6 +333,7 @@ sub output_sgml {
     print "<refsynopsisdiv>\n";
     print " <title>Synopsis</title>\n";
     print "  <funcsynopsis>\n";
+    print "  <funcprototype>\n";
     print "   <funcdef>".$args{'functiontype'}." ";
     print "<function>".$args{'function'}." ";
     print "</function></funcdef>\n";
@@ -360,6 +361,7 @@ sub output_sgml {
     } else {
 	print "  <void>\n";
     }
+    print "  </funcprototype>\n";
     print "  </funcsynopsis>\n";
     print "</refsynopsisdiv>\n";
 #    print "</refsect1>\n";
