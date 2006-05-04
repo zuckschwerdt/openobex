@@ -59,7 +59,7 @@ typedef struct obex obex_t;
 
 #include "obex_object.h"
 #include "obex_transport.h"
-#include "netbuf.h"
+#include "databuffer.h"
 
 #ifdef OBEX_SYSLOG
 #include <syslog.h>
@@ -90,7 +90,7 @@ extern int obex_debug;
 
 #  if OBEX_DUMP
 extern int obex_dump;
-#  define DUMPBUFFER(n, label, msg)	if (obex_dump & (n)) g_netbuf_print(label, msg);
+#  define DUMPBUFFER(n, label, msg)	if (obex_dump & (n)) buf_dump(msg, label);
 #  else
 #  define DUMPBUFFER(n, label, msg)
 #  endif /* OBEX_DUMP != 0 */
@@ -120,20 +120,20 @@ enum
 
 struct obex {
 	uint16_t mtu_tx;			/* Maximum OBEX TX packet size */
-        uint16_t mtu_rx;			/* Maximum OBEX RX packet size */
+	uint16_t mtu_rx;			/* Maximum OBEX RX packet size */
 	uint16_t mtu_tx_max;		/* Maximum TX we can accept */
 
 	int fd;			/* Socket descriptor */
 	int serverfd;
 	int writefd;		/* write descriptor - only OBEX_TRANS_FD */
-        unsigned int state;
+	unsigned int state;
 	
 	int keepserver;		/* Keep server alive */
 	int filterhint;		/* Filter devices based on hint bits */
 	int filterias;		/* Filter devices based on IAS entry */
 
-	GNetBuf *tx_msg;		/* Reusable transmit message */
-	GNetBuf *rx_msg;		/* Reusable receive message */
+	buf_t *tx_msg;		/* Reusable transmit message */
+	buf_t *rx_msg;		/* Reusable receive message */
 
 	obex_object_t	*object;	/* Current object being transfered */      
 	obex_event_t	eventcb;	/* Event-callback */
@@ -155,7 +155,7 @@ void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del);
 int obex_data_indication(obex_t *self, uint8_t *buf, int buflen);
 
 void obex_response_request(obex_t *self, uint8_t opcode);
-int obex_data_request(obex_t *self, GNetBuf *msg, int opcode);
+int obex_data_request(obex_t *self, buf_t *msg, int opcode);
 int obex_cancelrequest(obex_t *self, int nice);
 
 char *obex_response_to_string(int rsp);

@@ -44,7 +44,7 @@
  *    Handle client operations
  *
  */
-int obex_client(obex_t *self, GNetBuf *msg, int final)
+int obex_client(obex_t *self, buf_t *msg, int final)
 {
 	obex_common_hdr_t *response = NULL;
 	int rsp = OBEX_RSP_BAD_REQUEST, ret;

@@ -32,14 +32,14 @@
 #define OBEX_OBJECT_H
 
 #include "obex_main.h"
-#include "netbuf.h"
+#include "databuffer.h"
 
 /* If an object has no expected length we have to 
 reallocated every OBEX_OBJECT_ALLOCATIONTRESHOLD bytes */
 #define OBEX_OBJECT_ALLOCATIONTRESHOLD 10240
 
 struct obex_header_element {
-	GNetBuf *buf;
+	buf_t *buf;
 	uint8_t hi;
 	unsigned int flags;
 	unsigned int length;
@@ -54,9 +54,9 @@ typedef struct {
 	slist_t *tx_headerq;		/* List of headers to transmit*/
 	slist_t *rx_headerq;		/* List of received headers */
 	slist_t *rx_headerq_rm;		/* List of recieved header already read by the app */
-	GNetBuf *rx_body;		/* The rx body header need some extra help */
-	GNetBuf *tx_nonhdr_data;	/* Data before of headers (like CONNECT and SETPATH) */
-	GNetBuf *rx_nonhdr_data;	/* -||- */
+	buf_t *rx_body;		/* The rx body header need some extra help */
+	buf_t *tx_nonhdr_data;	/* Data before of headers (like CONNECT and SETPATH) */
+	buf_t *rx_nonhdr_data;	/* -||- */
 
 	uint8_t cmd;			/* The command of this object */
 
@@ -97,7 +97,7 @@ int obex_object_setcmd(obex_object_t *object, uint8_t cmd, uint8_t lastcmd);
 int obex_object_setrsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp);
 int obex_object_send(obex_t *self, obex_object_t *object,
 					int allowfinalcmd, int forcefinalbit);
-int obex_object_receive(obex_t *self, GNetBuf *msg);
+int obex_object_receive(obex_t *self, buf_t *msg);
 int obex_object_readstream(obex_t *self, obex_object_t *object, const uint8_t **buf);
 int obex_object_suspend(obex_object_t *object);
 int obex_object_resume(obex_t *self, obex_object_t *object);

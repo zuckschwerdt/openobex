@@ -110,14 +110,14 @@ typedef struct {
 	} t;
 } obex_header_t;
 
-int insert_uint_header(GNetBuf *msg, uint8_t identifier, uint32_t value);
-int insert_ubyte_header(GNetBuf *msg, uint8_t identifier, uint8_t value);
-int insert_unicode_header(GNetBuf *msg, uint8_t opcode, const uint8_t *text,
+int insert_uint_header(buf_t *msg, uint8_t identifier, uint32_t value);
+int insert_ubyte_header(buf_t *msg, uint8_t identifier, uint8_t value);
+int insert_unicode_header(buf_t *msg, uint8_t opcode, const uint8_t *text,
 				int size);
 
-int insert_byte_stream_header(GNetBuf *msg, uint8_t opcode, 
+int insert_byte_stream_header(buf_t *msg, uint8_t opcode, 
 			const uint8_t *stream, int size);
 
-int obex_extract_header(GNetBuf *msg, obex_header_t *header);
+int obex_extract_header(buf_t *msg, obex_header_t *header);
 
 #endif

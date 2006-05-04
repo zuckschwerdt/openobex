@@ -45,7 +45,7 @@
  *    Handle server-operations
  *
  */
-int obex_server(obex_t *self, GNetBuf *msg, int final)
+int obex_server(obex_t *self, buf_t *msg, int final)
 {
 	obex_common_hdr_t *request;
 	int cmd, ret, deny = 0;

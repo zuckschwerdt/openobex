@@ -186,12 +186,11 @@ void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del)
  */
 void obex_response_request(obex_t *self, uint8_t opcode)
 {
-	GNetBuf *msg;
+	buf_t *msg;
 
 	obex_return_if_fail(self != NULL);
 
-	msg = g_netbuf_recycle(self->tx_msg);
-	g_netbuf_reserve(msg, sizeof(obex_common_hdr_t));
+	msg = buf_reuse(self->tx_msg);
 
 	obex_data_request(self, msg, opcode | OBEX_FINAL);
 }
@@ -202,7 +201,7 @@ void obex_response_request(obex_t *self, uint8_t opcode)
  *    Send response or command code along with optional headers/data.
  *
  */
-int obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
+int obex_data_request(obex_t *self, buf_t *msg, int opcode)
 {
 	obex_common_hdr_t *hdr;
 	int actual = 0;
@@ -211,13 +210,13 @@ int obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
 	obex_return_val_if_fail(msg != NULL, -1);
 
 	/* Insert common header */
-	hdr = (obex_common_hdr_t *) g_netbuf_push(msg, sizeof(obex_common_hdr_t));
+	hdr = (obex_common_hdr_t *) buf_reserve_begin(msg, sizeof(obex_common_hdr_t));
 
 	hdr->opcode = opcode;
-	hdr->len = htons((uint16_t)msg->len);
+	hdr->len = htons((uint16_t)msg->data_size);
 
 	DUMPBUFFER(1, "Tx", msg);
-	DEBUG(1, "len = %d bytes\n", msg->len);
+	DEBUG(1, "len = %d bytes\n", msg->data_size);
 
 	actual = obex_transport_write(self, msg);
 	return actual;
@@ -232,7 +231,7 @@ int obex_data_request(obex_t *self, GNetBuf *msg, int opcode)
 int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 {
 	obex_common_hdr_t *hdr;
-	GNetBuf *msg;
+	buf_t *msg;
 	int final;
 	int actual = 0;
 	unsigned int size;
@@ -245,8 +244,8 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 	msg = self->rx_msg;
 	
 	/* First we need 3 bytes to be able to know how much data to read */
-	if(msg->len < 3)  {
-		actual = obex_transport_read(self, 3 - (msg->len), buf, buflen);
+	if(msg->data_size < 3)  {
+		actual = obex_transport_read(self, 3 - (msg->data_size), buf, buflen);
 		
 		DEBUG(4, "Got %d bytes\n", actual);
 
@@ -257,18 +256,17 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 		}
 		buf += actual;
 		buflen -= actual;
-		g_netbuf_put(msg, actual);
 	}
 
 	/* If we have 3 bytes data we can decide how big the packet is */
-	if(msg->len >= 3) {
+	if(msg->data_size >= 3) {
 		hdr = (obex_common_hdr_t *) msg->data;
 		size = ntohs(hdr->len);
 
 		actual = 0;
-		if(msg->len != (int) ntohs(hdr->len)) {
+		if(msg->data_size != (int) ntohs(hdr->len)) {
 
-			actual = obex_transport_read(self, size - msg->len, buf,
+			actual = obex_transport_read(self, size - msg->data_size, buf,
 				buflen);
 
 			/* Check if we are still connected */
@@ -280,14 +278,13 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 	}
         else {
 		/* Wait until we have at least 3 bytes data */
-		DEBUG(3, "Need at least 3 bytes got only %d!\n", msg->len);
+		DEBUG(3, "Need at least 3 bytes got only %d!\n", msg->data_size);
 		return actual;
         }
 
 
 	/* New data has been inserted at the end of message */
-	g_netbuf_put(msg, actual);
-	DEBUG(1, "Got %d bytes msg len=%d\n", actual, msg->len);
+	DEBUG(1, "Got %d bytes msg len=%d\n", actual, msg->data_size);
 
 	/*
 	 * Make sure that the buffer we have, actually has the specified
@@ -296,28 +293,28 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 	 */
 
 	/* Make sure we have a whole packet */
-	if (size > msg->len) {
+	if (size > msg->data_size) {
 		DEBUG(3, "Need more data, size=%d, len=%d!\n",
-		      size, msg->len);
+		      size, msg->data_size);
 
 		/* I'll be back! */
-		return msg->len;
+		return msg->data_size;
 	}
 
 	DUMPBUFFER(2, "Rx", msg);
 
-	actual = msg->len;
+	actual = msg->data_size;
 	final = hdr->opcode & OBEX_FINAL; /* Extract final bit */
 
 	/* Dispatch to the mode we are in */
 	if(self->state & MODE_SRV) {
 		ret = obex_server(self, msg, final);
-		g_netbuf_recycle(msg);
+		buf_reuse(msg);
 		
 	}
 	else	{
 		ret = obex_client(self, msg, final);
-		g_netbuf_recycle(msg);
+		buf_reuse(msg);
 	}
 	/* Check parse errors */
 	if(ret < 0)
@@ -341,8 +338,8 @@ int obex_cancelrequest(obex_t *self, int nice)
 	if (!nice) {
 		/* Deliver event will delete the object */
 		obex_deliver_event(self, OBEX_EV_ABORT, 0, 0, TRUE);
-		g_netbuf_recycle(self->tx_msg);
-		g_netbuf_recycle(self->rx_msg);
+		buf_reuse(self->tx_msg);
+		buf_reuse(self->rx_msg);
 		/* Since we didn't send ABORT to peer we are out of sync
 		   and need to disconnect transport immediately, so we signal
 		   link error to app */

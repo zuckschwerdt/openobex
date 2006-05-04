@@ -358,17 +358,17 @@ void obex_transport_disconnect_server(obex_t *self)
 /*
  * does fragmented write
  */
-static int do_write(int fd, GNetBuf *msg, int mtu)
+static int do_write(int fd, buf_t *msg, int mtu)
 {
 	int actual = -1;
 	int size;
 
 	/* Send and fragment if necessary  */
-	while (msg->len) {
-		if (msg->len > mtu)
+	while (msg->data_size) {
+		if (msg->data_size > mtu)
 			size = mtu;
 		else
-			size = msg->len;
+			size = msg->data_size;
 		DEBUG(1, "sending %d bytes\n", size);
 
 		actual = write(fd, msg->data, size);
@@ -376,7 +376,7 @@ static int do_write(int fd, GNetBuf *msg, int mtu)
 			return actual;
 			
 		/* Hide sent data */
-		g_netbuf_pull(msg, actual);
+		buf_remove_begin(msg, actual);
 	}
 	return actual;
 }
@@ -387,7 +387,7 @@ static int do_write(int fd, GNetBuf *msg, int mtu)
  *    Do the writing
  *
  */
-int obex_transport_write(obex_t *self, GNetBuf *msg)
+int obex_transport_write(obex_t *self, buf_t *msg)
 {
 	int actual = -1;
 
@@ -413,13 +413,13 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_write);
 		actual = usb_bulk_write(self->trans.self.usb.dev_data, 
 		    self->trans.self.usb.data_endpoint_write,
-		    (char *) msg->data, msg->len, USB_OBEX_TIMEOUT);
+		    (char *) msg->data, msg->data_size, USB_OBEX_TIMEOUT);
 		break;
 #endif /*HAVE_USB*/ 
 	case OBEX_TRANS_CUSTOM:
 		DEBUG(4, "Custom write\n");
 		if(self->ctrans.write)
-			actual = self->ctrans.write(self, self->ctrans.customdata, msg->data, msg->len);
+			actual = self->ctrans.write(self, self->ctrans.customdata, msg->data, msg->data_size);
 		else
 			DEBUG(4, "No write-callback exist!\n");
 		break;
@@ -439,7 +439,7 @@ int obex_transport_write(obex_t *self, GNetBuf *msg)
 int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 {
 	int actual = -1;
-	GNetBuf *msg = self->rx_msg;
+	buf_t *msg = self->rx_msg;
 
 	DEBUG(4, "Request to read max %d bytes\n", max);
 
@@ -452,7 +452,8 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
 	case OBEX_TRANS_FD:
-		actual = read(self->fd, msg->tail, max);
+		actual = read(self->fd, buf_reserve_end(msg, max), max);
+		buf_remove_end(msg, max - actual);
 		break;
 #ifdef HAVE_USB 
 	case OBEX_TRANS_USB:
@@ -461,16 +462,18 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_read);
 		actual = usb_bulk_read(self->trans.self.usb.dev_data, 
 		    self->trans.self.usb.data_endpoint_read,
-		    (char *) msg->tail, self->mtu_rx, USB_OBEX_TIMEOUT);
+		    buf_reserve_end(msg, self->mtu_rx), self->mtu_rx, 
+		    USB_OBEX_TIMEOUT);
+		buf_remove_end(msg, self->mtu_rx - actual);
 		break;
 #endif /*HAVE_USB*/ 
 	case OBEX_TRANS_CUSTOM:
 		if(buflen > max) {
-			memcpy(msg->tail, buf, max);
+			memcpy(buf_reserve_end(msg, max), buf, max);
 			actual = max;
 		}
 		else {
-			memcpy(msg->tail, buf, buflen);
+			memcpy(buf_reserve_end(msg, buflen), buf, buflen);
 			actual = buflen;
 		}
 		break;

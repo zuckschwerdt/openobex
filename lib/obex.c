@@ -144,12 +144,12 @@ obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 
 	/* Allocate message buffers */
 	/* It's safe to allocate them smaller than OBEX_MAXIMUM_MTU
-	 * because netbuf will realloc data as needed. - Jean II */
-	self->rx_msg = g_netbuf_new(self->mtu_rx);
+	 * because buf_t will realloc data as needed. - Jean II */
+	self->rx_msg = buf_new(self->mtu_rx);
 	if (self->rx_msg == NULL)
 		goto out_err;
 
-	self->tx_msg = g_netbuf_new(self->mtu_tx_max);
+	self->tx_msg = buf_new(self->mtu_tx_max);
 	if (self->tx_msg == NULL)
 		goto out_err;
 
@@ -162,9 +162,9 @@ obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 
 out_err:
 	if (self->tx_msg != NULL)
-		g_netbuf_free(self->tx_msg);
+		buf_free(self->tx_msg);
 	if (self->rx_msg != NULL)
-		g_netbuf_free(self->rx_msg);
+		buf_free(self->rx_msg);
 	free(self);
 	return NULL;
 }
@@ -201,10 +201,10 @@ void OBEX_Cleanup(obex_t *self)
 	obex_transport_disconnect_server(self);
 
 	if (self->tx_msg)
-		g_netbuf_free(self->tx_msg);
+		buf_free(self->tx_msg);
 	
 	if (self->rx_msg)
-		g_netbuf_free(self->rx_msg);
+		buf_free(self->rx_msg);
 
 	OBEX_FreeInterfaces(self);
 	free(self);
@@ -283,10 +283,10 @@ int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
 	self->mtu_rx = mtu_rx;
 	self->mtu_tx_max = mtu_tx_max;
 	/* Reallocate transport buffers */
-	self->rx_msg = g_netbuf_realloc(self->rx_msg, self->mtu_rx);
+	buf_resize(self->rx_msg, self->mtu_rx);
 	if (self->rx_msg == NULL)
 		return -ENOMEM;
-	self->tx_msg = g_netbuf_realloc(self->tx_msg, self->mtu_tx_max);
+	buf_resize(self->tx_msg, self->mtu_tx_max);
 	if (self->tx_msg == NULL)
 		return -ENOMEM;
 	return 0;
@@ -384,12 +384,12 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
 	self->mtu_tx_max = server->mtu_tx_max;
 
 	/* Allocate message buffers */
-	self->rx_msg = g_netbuf_new(self->mtu_rx);
+	self->rx_msg = buf_new(self->mtu_rx);
 	if (self->rx_msg == NULL)
 		goto out_err;
 
 	/* Note : mtu_tx not yet negociated, so let's be safe here - Jean II */
-	self->tx_msg = g_netbuf_new(self->mtu_tx_max);
+	self->tx_msg = buf_new(self->mtu_tx_max);
 	if (self->tx_msg == NULL)
 		goto out_err;
 
@@ -405,9 +405,9 @@ obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
 
 out_err:
 	if (self->tx_msg != NULL)
-		g_netbuf_free(self->tx_msg);
+		buf_free(self->tx_msg);
 	if (self->rx_msg != NULL)
-		g_netbuf_free(self->rx_msg);
+		buf_free(self->rx_msg);
 	free(self);
 	return NULL;
 }
@@ -755,7 +755,7 @@ int OBEX_ObjectGetNonHdrData(obex_object_t *object, uint8_t **buffer)
 		return 0;
 
 	*buffer = object->rx_nonhdr_data->data;
-	return object->rx_nonhdr_data->len;
+	return object->rx_nonhdr_data->data_size;
 }
 
 /**
@@ -777,11 +777,11 @@ int OBEX_ObjectSetNonHdrData(obex_object_t *object, const uint8_t *buffer, unsig
 	if(object->tx_nonhdr_data)
 		return -1;
 
-	object->tx_nonhdr_data = g_netbuf_new(len);
+	object->tx_nonhdr_data = buf_new(len);
 	if(object->tx_nonhdr_data == NULL)
 		return -1;
 
-	g_netbuf_put_data(object->tx_nonhdr_data, (uint8_t *)buffer, len);
+	buf_insert_end(object->tx_nonhdr_data, (uint8_t *)buffer, len);
 	return 1;
 }
 

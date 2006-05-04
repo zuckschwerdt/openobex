@@ -53,14 +53,13 @@ int obex_insert_connectframe(obex_t *self, obex_object_t *object)
 
 	DEBUG(4, "\n");
 
-	object->tx_nonhdr_data = g_netbuf_new(4);
+	object->tx_nonhdr_data = buf_new(4);
 	if(!object->tx_nonhdr_data) 
 		return -1;
-	conn_hdr = (obex_connect_hdr_t *) object->tx_nonhdr_data->data;
+	conn_hdr = (obex_connect_hdr_t *) buf_reserve_end(object->tx_nonhdr_data, 4);
 	conn_hdr->version = OBEX_VERSION; 
 	conn_hdr->flags = 0x00;              /* Flags */
 	conn_hdr->mtu = htons(self->mtu_rx); /* Max packet size */
-	g_netbuf_put(object->tx_nonhdr_data, 4);
 	return 0;
 }
 
@@ -70,7 +69,7 @@ int obex_insert_connectframe(obex_t *self, obex_object_t *object)
  *    Parse a Connect
  *
  */
-int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
+int obex_parse_connect_header(obex_t *self, buf_t *msg)
 {
 	obex_connect_hdr_t *conn_hdr;
 	obex_common_hdr_t *common_hdr;
@@ -92,8 +91,8 @@ int obex_parse_connect_header(obex_t *self, GNetBuf *msg)
 	if( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) && (opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
 		return 1;
 
-	DEBUG(4, "Len: %d\n", msg->len);
-	if(msg->len >= 7) {
+	DEBUG(4, "Len: %d\n", msg->data_size);
+	if(msg->data_size >= 7) {
 		/* Get what we need */
 		conn_hdr = (obex_connect_hdr_t *) ((msg->data) + 3);
 		version = conn_hdr->version;

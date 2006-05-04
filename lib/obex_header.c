@@ -45,19 +45,19 @@
  *    identifier if the header ID which is supposed to consist of
  *    both the header enconding and type
  */
-int insert_uint_header(GNetBuf *msg, uint8_t identifier, uint32_t value)
+int insert_uint_header(buf_t *msg, uint8_t identifier, uint32_t value)
 {
 	struct obex_uint_hdr *hdr;
 
 	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
 
-	hdr = (struct obex_uint_hdr *) g_netbuf_put(msg, 5);
+	hdr = (struct obex_uint_hdr *) buf_reserve_end(msg, sizeof(struct obex_uint_hdr));
 
 	hdr->hi = identifier;
 	hdr->hv = htonl(value);
 	
-	return 5;
+	return sizeof(struct obex_uint_hdr);
 }
 
 /*
@@ -65,19 +65,19 @@ int insert_uint_header(GNetBuf *msg, uint8_t identifier, uint32_t value)
  *
  *    Insert a byte unsigned header.
  */
-int insert_ubyte_header(GNetBuf *msg, uint8_t identifier, uint8_t value)
+int insert_ubyte_header(buf_t *msg, uint8_t identifier, uint8_t value)
 {
 	struct obex_ubyte_hdr *hdr;
 
 	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
 
-	hdr = (struct obex_ubyte_hdr *) g_netbuf_put(msg, 2);
+	hdr = (struct obex_ubyte_hdr *) buf_reserve_end(msg, sizeof(struct obex_ubyte_hdr));
 
 	hdr->hi = identifier;
 	hdr->hv = value;
 	
-	return 2;
+	return sizeof(struct obex_ubyte_hdr);
 }
 
 /*
@@ -86,7 +86,7 @@ int insert_ubyte_header(GNetBuf *msg, uint8_t identifier, uint8_t value)
  *    Insert a char string into the buffer
  *
  */
-int insert_unicode_header(GNetBuf *msg, uint8_t opcode, 
+int insert_unicode_header(buf_t *msg, uint8_t opcode, 
 			const uint8_t *text, int size)
 {
 	struct obex_unicode_hdr *hdr;
@@ -95,14 +95,13 @@ int insert_unicode_header(GNetBuf *msg, uint8_t opcode,
 	obex_return_val_if_fail(msg != NULL, -1);
 	obex_return_val_if_fail(text != NULL || size == 0, -1);
 
-	hdr = (struct obex_unicode_hdr *) g_netbuf_put(msg, size + 3);
+	hdr = (struct obex_unicode_hdr *) buf_reserve_end(msg, size + sizeof(struct obex_unicode_hdr));
 
 	hdr->hi = opcode;
-	hdr->hl = htons((uint16_t)(size + 3));
+	hdr->hl = htons((uint16_t)(size + sizeof(struct obex_unicode_hdr)));
 	memcpy(hdr->hv, text, size);
 
-	return size+3;
-
+	return size + sizeof(struct obex_unicode_hdr);
 }
 
 /*
@@ -111,7 +110,7 @@ int insert_unicode_header(GNetBuf *msg, uint8_t opcode,
  *    Insert a byte stream into the buffer
  *
  */
-int insert_byte_stream_header(GNetBuf *msg, uint8_t opcode,
+int insert_byte_stream_header(buf_t *msg, uint8_t opcode,
 			const uint8_t *stream, int size)
 {
 	struct obex_byte_stream_hdr *hdr;
@@ -120,16 +119,16 @@ int insert_byte_stream_header(GNetBuf *msg, uint8_t opcode,
 	obex_return_val_if_fail(msg != NULL, -1);
 	obex_return_val_if_fail(stream != NULL || size == 0, -1);
 	
-	hdr = (struct obex_byte_stream_hdr *) g_netbuf_put(msg, size+3);
+	hdr = (struct obex_byte_stream_hdr *) buf_reserve_end(msg, size + sizeof(struct obex_byte_stream_hdr));
 	if (hdr == 0) {
 		DEBUG(4, "put failed!\n");
 		return 0;
 	}
 
 	hdr->hi = opcode;
-	hdr->hl = htons(size+3);
+	hdr->hl = htons(size + sizeof(struct obex_byte_stream_hdr));
 
 	memcpy(hdr->hv, stream, size);
-	
-	return size+3;
+
+	return size + sizeof(struct obex_byte_stream_hdr);
 }
