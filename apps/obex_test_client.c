@@ -231,8 +231,10 @@ void push_client(obex_t *handle)
 	bfname = strdup(basename(fname));
 
 	buf = easy_readfile(fname, &file_size);
-	if(buf == NULL)
+	if(buf == NULL) {
+	        printf("file not found: %s\n", fname);
 		return;
+	}
 	fileDesc = open(fname, O_RDONLY, 0);
 
 	if (fileDesc < 0) {
@@ -286,8 +288,10 @@ void put_client(obex_t *handle)
 	scanf("%s %s", lname, rname);
 
 	buf = easy_readfile(lname, &file_size);
-	if(buf == NULL)
+	if(buf == NULL) {
+	        printf("file not found: %s\n", lname);
 		return;
+	}
 
 	printf("Going to send %d bytes\n", file_size);
 

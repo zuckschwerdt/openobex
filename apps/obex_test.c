@@ -340,7 +340,7 @@ int main (int argc, char *argv[])
 			case 'c':
 				/* First connect transport */
 				if(tcpobex) {
-					if(inet_connect(handle)) {
+					if(inet_connect(handle) < 0) {
 						printf("Transport connect error! (TCP)\n");
 						break;
 					}
@@ -371,7 +371,7 @@ int main (int argc, char *argv[])
 						break;
 					}
 				}	
-				else {
+				if (!tcpobex && !cobex && !btobex && !usbobex) {
 					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0) {
 						printf("Transport connect error! (IrDA)\n");
 						break;
@@ -386,7 +386,7 @@ int main (int argc, char *argv[])
 			case 's':
 				/* First register server */
 				if(tcpobex) {
-					if(InOBEX_ServerRegister(handle)) {
+					if(InOBEX_ServerRegister(handle) < 0) {
 						printf("Server register error! (TCP)\n");
 						break;
 					}
@@ -407,7 +407,10 @@ int main (int argc, char *argv[])
 					printf("Transport not found! (Bluetooth)\n");
 #endif
 				}
-				else {
+				if (usbobex) {
+					printf("Transport not found! (USB)\n");
+				}
+				if (!tcpobex && !cobex && !btobex && !usbobex) {
 					if(IrOBEX_ServerRegister(handle, IR_SERVICE) < 0)	{
 						printf("Server register error! (IrDA)\n");
 						break;

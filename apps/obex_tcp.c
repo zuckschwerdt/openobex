@@ -112,13 +112,18 @@ int main(int argc, char *argv[])
 	if (argc == 1)	{
 		printf("Waiting for files\n");
 		ret = InOBEX_ServerRegister(handle);
-		if(ret < 0)
+		if(ret < 0) {
+                        printf("Cannot listen to socket\n");
 			exit(ret);
+		}
 
 		while (!finished) {
 			ret = OBEX_HandleInput(handle, 10);
-			if (ret < 1) {
+			if (ret == 0) {
 				printf("Timeout waiting for connection\n");
+				break;
+			} else if (ret < 0) {
+			        printf("Error waiting for connection\n");
 				break;
 			}
 		}

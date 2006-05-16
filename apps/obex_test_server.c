@@ -239,14 +239,21 @@ void server_done(obex_t *handle, obex_object_t *object, int obex_cmd, int obex_r
 //
 void server_do(obex_t *handle)
 {
+        int ret;
 	struct context *gt;
 	gt = OBEX_GetUserData(handle);
 
 	gt->serverdone = FALSE;
 	while(!gt->serverdone) {
-		if(OBEX_HandleInput(handle, 1) < 0) {
+	        ret = OBEX_HandleInput(handle, 10);
+		if(ret < 0) {
 			printf("Error while doing OBEX_HandleInput()\n");
 			break;
+		} else if (ret == 0) {
+			printf("Timeout while doing OBEX_HandleInput()\n");
+			break;
+		} else {
+			printf("OBEX_HandleInput() returned %d\n",ret);
 		}
 	}
 }
