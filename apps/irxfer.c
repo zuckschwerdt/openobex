@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 		object = OBEX_ObjectNew(handle, OBEX_CMD_CONNECT);
 		ret = do_sync_request(handle, object, 0);
 
-		if( (object = build_object_from_file(handle, argv[1])) )	{
+		if( (object = build_object_from_file(handle, argv[1], 0)) )	{
 			ret = do_sync_request(handle, object, 0);
 		}
 		else	{

@@ -43,6 +43,7 @@
 
 #ifndef _WIN32
 #include <unistd.h>
+#include <string.h>
 #endif
 
 #include <openobex/obex.h>
@@ -58,6 +59,15 @@ volatile int finished = FALSE;
 extern int last_rsp;
 
 /*
+ * Function usage (void)
+ */
+int usage(char *argv[]) {
+	printf ("Usage: %s [-h id] [name]\n", argv[0]);
+	printf ("       where id is the header_creator_id (default: memo)\n");
+	return -1;
+}
+
+/*
  * Function main (argc, )
  *
  *    Starts all the fun!
@@ -67,11 +77,11 @@ int main(int argc, char *argv[])
 {
 	obex_object_t *object;
 	int ret, exitval = EXIT_SUCCESS;
+	uint32_t creator_id = 0;
 
 	printf("Send and receive files to Palm3\n");
-	if ((argc < 1) || (argc > 2))	{
-		printf ("Usage: %s [name]\n", argv[0]); 
-		return -1;
+	if ((argc < 1) || (argc > 4))	{
+		return usage(argv);
 	}
 	handle = OBEX_Init(OBEX_TRANS_IRDA, obex_event, 0);
 
@@ -87,6 +97,14 @@ int main(int argc, char *argv[])
 	else {
 		/* We are a client */
 
+		/* Check for parameters */
+		if(argc > 2) {
+			if(strcmp("-h", argv[1]) || strlen(argv[2]) != 4)
+				return usage(argv);
+			creator_id = argv[2][0] << 24 | argv[2][1] << 16 | argv[2][2] << 8 | argv[2][3];
+			printf("debug: %s %d;", argv[2], creator_id);
+		}
+
 		/* Try to connect to peer */
 		ret = IrOBEX_TransportConnect(handle, "OBEX");
 		if (ret < 0) {
@@ -100,7 +118,7 @@ int main(int argc, char *argv[])
 			printf("Sorry, unable to connect!\n");
 			return EXIT_FAILURE;
 		}
-		if ((object = build_object_from_file(handle, argv[1])))	{
+		if ((object = build_object_from_file(handle, argv[(creator_id ? 3 : 1)], creator_id))) {
 			ret = do_sync_request(handle, object, FALSE);
 			if ((last_rsp != OBEX_RSP_SUCCESS) || (ret < 0))
 				exitval = EXIT_FAILURE;

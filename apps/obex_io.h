@@ -11,7 +11,7 @@
 #define PILOT_RESOURCE 0x6c6e6368 /* "Inch" *.prc */
 
 int get_filesize(const char *filename);
-obex_object_t *build_object_from_file(obex_t *handle, const char *filename);
+obex_object_t *build_object_from_file(obex_t *handle, const char *filename, uint32_t creator_id);
 int safe_save_file(char *name, const uint8_t *buf, int len);
 uint8_t* easy_readfile(const char *filename, int *file_size);
 

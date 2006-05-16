@@ -125,13 +125,13 @@ uint8_t* easy_readfile(const char *filename, int *file_size)
 //
 //
 //
-obex_object_t *build_object_from_file(obex_t *handle, const char *filename)
+obex_object_t *build_object_from_file(obex_t *handle, const char *filename, uint32_t creator_id)
 {
 	obex_headerdata_t hdd;
 	uint8_t unicode_buf[200];
 	int namebuf_len;
  	obex_object_t *object;
-	uint32_t creator_id;
+	//uint32_t creator_id;
 	int file_size;
 	char *name = NULL;
 	uint8_t *buf;
@@ -142,7 +142,8 @@ obex_object_t *build_object_from_file(obex_t *handle, const char *filename)
 		return NULL;
 
 	/* Set Memopad as the default creator ID */
-	creator_id = MEMO_PAD;	
+	if(creator_id == 0)
+		creator_id = MEMO_PAD;
 
 	/* Find the . in the filename */
 	name = strchr(filename, '.');
