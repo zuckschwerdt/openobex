@@ -1137,6 +1137,9 @@ int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *interface)
 int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
 {
 	DEBUG(4, "\n");
+
+	obex_return_val_if_fail(self != NULL, -1);
+	
 	OBEX_FreeInterfaces(self);
 	switch (self->trans.type) {
 	case OBEX_TRANS_USB:
@@ -1147,7 +1150,8 @@ int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
 	default:
 		break;
 	}
-	*interfaces = self->interfaces;
+	if (interfaces)
+		*interfaces = self->interfaces;
 	return self->interfaces_number;
 }
 
@@ -1160,10 +1164,15 @@ int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
  */
 void OBEX_FreeInterfaces(obex_t *self)
 {
+	DEBUG(4, "\n");
+
+	obex_return_if_fail(self != NULL);
+	
 	switch (self->trans.type) {
 	case OBEX_TRANS_USB:
 #ifdef HAVE_USB
 		usbobex_free_interfaces(self->interfaces_number, self->interfaces);
+		self->interfaces = NULL;
 #endif
 		break;
 	default:
