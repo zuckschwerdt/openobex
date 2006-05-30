@@ -115,6 +115,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			DEBUG(1, "Got OBEX_ABORT request!\n");
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			obex_response_request(self, OBEX_RSP_SUCCESS);
+ 			self->state = MODE_SRV | STATE_IDLE;
 			/* This is not an Obex error, it is just that the peer
 			 * aborted the request, so return 0 - Jean II */
 			return 0;
@@ -194,6 +195,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			DEBUG(1, "Got OBEX_ABORT request!\n");
 			obex_response_request(self, OBEX_RSP_SUCCESS);
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
+ 			self->state = MODE_SRV | STATE_IDLE;
 			/* This is not an Obex error, it is just that the peer
 			 * aborted the request, so return 0 - Jean II */
 			return 0;		
