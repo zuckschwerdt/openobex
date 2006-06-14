@@ -1,3 +1,9 @@
+ver 1.3:
+	Add support for setting the creation-ID.
+	Updated constants to match IrOBEX 1.3.
+	Replace netbuf implementation with databuffer.
+	Fix segmentation fault when receiving invalid OBEX packets.
+
 ver 1.2:
 	Add OBEX_EV_REQCHECK support.
 	Add support for suspend after sending a header.
