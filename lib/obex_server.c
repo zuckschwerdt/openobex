@@ -127,6 +127,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			   same as int the first fragment. Bail out! */
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, cmd, TRUE);
+ 			self->state = MODE_SRV | STATE_IDLE;
 			return -1;
 		}
 		
@@ -134,6 +135,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 		if(obex_object_receive(self, msg) < 0)	{
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+ 			self->state = MODE_SRV | STATE_IDLE;
 			return -1;
 		}
 
@@ -228,6 +230,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			   (obex_object_receive(self, msg) < 0))	{
 				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
+				self->state = MODE_SRV | STATE_IDLE;
 				return -1;
 			}
 			obex_deliver_event(self, OBEX_EV_UNEXPECTED, self->object->opcode, 0, FALSE);
