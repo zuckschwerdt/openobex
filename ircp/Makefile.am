@@ -11,7 +11,7 @@ libircp_a_SOURCES = \
 
 bin_PROGRAMS = ircp 
 
-LDADD = $(top_builddir)/lib/libopenobex.la libircp.a
+LDADD = libircp.a $(top_builddir)/lib/libopenobex.la
 
 INCLUDES = -I$(top_builddir)/include
 endif
