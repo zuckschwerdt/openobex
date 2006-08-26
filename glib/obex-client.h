@@ -52,6 +52,8 @@ GType obex_client_get_type(void);
 
 ObexClient *obex_client_new(void);
 
+void obex_client_set_fd(ObexClient *self, int fd);
+
 G_END_DECLS
 
 #endif /* __OBEX_CLIENT_H */

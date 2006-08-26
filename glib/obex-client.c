@@ -31,18 +31,41 @@
 
 #include <openobex/obex.h>
 
+#define OBEX_CLIENT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), OBEX_TYPE_CLIENT, ObexClientPrivate))
+
+typedef struct _ObexClientPrivate ObexClientPrivate;
+
+struct _ObexClientPrivate {
+	GMainContext *context;
+	GIOChannel *channel;
+	int fd;
+};
+
 G_DEFINE_TYPE(ObexClient, obex_client, G_TYPE_OBJECT)
 
 static void obex_client_init(ObexClient *self)
 {
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
 	g_printf("object %p init\n", self);
+
+	priv->context = g_main_context_default();
+
+	g_main_context_ref(priv->context);
+
+	priv->fd = -1;
 }
 
 static void obex_client_finalize(GObject *object)
 {
 	ObexClient *self = OBEX_CLIENT(object);
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 
 	g_printf("object %p finalize\n", self);
+
+	priv->fd = -1;
+
+	g_main_context_unref(priv->context);
 }
 
 enum {
@@ -89,6 +112,13 @@ static void obex_client_class_init(ObexClientClass *klass)
 {
 	g_printf("class init\n");
 
+#ifdef G_THREADS_ENABLED
+	if (!g_thread_supported())
+		g_thread_init(NULL);
+#endif
+
+	g_type_class_add_private(klass, sizeof(ObexClientPrivate));
+
 	G_OBJECT_CLASS(klass)->finalize = obex_client_finalize;
 
 	G_OBJECT_CLASS(klass)->set_property = obex_client_set_property;
@@ -99,7 +129,38 @@ static void obex_client_class_init(ObexClientClass *klass)
 				0, G_MAXINT,0 , G_PARAM_READWRITE));
 }
 
+static gboolean obex_client_callback(GIOChannel *source,
+					GIOCondition cond, gpointer data)
+{
+	ObexClientPrivate *priv = data;
+
+	if (priv->fd < 0)
+		return FALSE;
+
+	return TRUE;
+}
+
 ObexClient *obex_client_new(void)
 {
 	return OBEX_CLIENT(g_object_new(OBEX_TYPE_CLIENT, NULL));
+}
+
+void obex_client_set_fd(ObexClient *self, int fd)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	GSource *source;
+
+	priv->channel = g_io_channel_unix_new(fd);
+
+	source = g_io_create_watch(priv->channel,
+		G_IO_IN | G_IO_HUP | G_IO_ERR | G_IO_NVAL);
+
+	g_source_set_callback(source, (GSourceFunc) obex_client_callback,
+								priv, NULL);
+
+	g_source_attach(source, priv->context);
+
+	g_source_unref(source);
+
+	priv->fd = fd;
 }
