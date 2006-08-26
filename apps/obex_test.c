@@ -79,7 +79,7 @@ void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int 
 		break;
 
 	case OBEX_EV_REQDONE:
-		if(mode == OBEX_CLIENT) {
+		if(mode == OBEX_MODE_CLIENT) {
 			client_done(handle, object, obex_cmd, obex_rsp);
 		}
 		else	{

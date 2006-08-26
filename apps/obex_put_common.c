@@ -176,7 +176,7 @@ void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int 
 	case OBEX_EV_REQDONE:
 		printf("\n");
 		/* Comes when a command has finished. */
-		if(mode == OBEX_CLIENT)
+		if(mode == OBEX_MODE_CLIENT)
 			client_done(object, obex_cmd, obex_rsp);
 		else
 			server_done(object, obex_cmd);
