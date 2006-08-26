@@ -69,11 +69,18 @@ AC_DEFUN([AC_PATH_USB], [
 	AC_CHECK_LIB(usb, usb_interrupt_read, dummy=yes, AC_DEFINE(NEED_USB_INTERRUPT_READ, 1, [Define to 1 if you need the usb_interrupt_read() function.]))
 ])
 
+AC_DEFUN([AC_PATH_GLIB], [
+	PKG_CHECK_MODULES(GLIB, glib-2.0, glib_found=yes, AC_MSG_RESULT(no))
+	AC_SUBST(GLIB_CFLAGS)
+	AC_SUBST(GLIB_LIBS)
+])
+
 AC_DEFUN([AC_ARG_OPENOBEX], [
 	fortify_enable=yes
 	irda_enable=yes
 	bluetooth_enable=yes
 	usb_enable=yes
+	glib_enable=no
 	apps_enable=no
 	debug_enable=no
 	syslog_enable=no
@@ -93,6 +100,10 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	AC_ARG_ENABLE(usb, AC_HELP_STRING([--disable-usb], [disable USB support]), [
 		usb_enable=${enableval}
+	])
+
+	AC_ARG_ENABLE(glib, AC_HELP_STRING([--enable-glib], [enable GLib bindings]), [
+		glib_enable=${enableval}
 	])
 
 	AC_ARG_ENABLE(apps, AC_HELP_STRING([--enable-apps], [enable test applications]), [
@@ -131,6 +142,7 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb.pc, REQUIRES="$REQUIRES libusb")
 	fi
 
+	AM_CONDITIONAL(GLIB, test "${glib_enable}" = "yes" && test "${glib_found}" = "yes")
 	AM_CONDITIONAL(APPS, test "${apps_enable}" = "yes")
 
 	if (test "${debug_enable}" = "yes" && test "${ac_cv_prog_cc_g}" = "yes"); then

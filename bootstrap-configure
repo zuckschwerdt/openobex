@@ -8,4 +8,5 @@ fi
     ./configure --enable-maintainer-mode \
 		--prefix=/usr \
 		--sysconfdir=/etc \
+		--enable-glib \
 		--enable-apps

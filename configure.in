@@ -19,10 +19,11 @@ m4_ifdef([AC_LIBTOOL_TAGS], [AC_LIBTOOL_TAGS([])])
 
 AC_PROG_LIBTOOL
 
+AC_PATH_GLIB
 AC_PATH_IRDA
 AC_PATH_BLUEZ
 AC_PATH_USB
 
 AC_ARG_OPENOBEX
 
-AC_OUTPUT(Makefile include/Makefile lib/Makefile apps/Makefile ircp/Makefile doc/Makefile openobex.pc)
+AC_OUTPUT(Makefile include/Makefile lib/Makefile glib/Makefile apps/Makefile ircp/Makefile doc/Makefile openobex.pc openobex-glib.pc)
