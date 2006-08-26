@@ -70,7 +70,7 @@ AC_DEFUN([AC_PATH_USB], [
 ])
 
 AC_DEFUN([AC_PATH_GLIB], [
-	PKG_CHECK_MODULES(GLIB, gobject-2.0, glib_found=yes, AC_MSG_RESULT(no))
+	PKG_CHECK_MODULES(GLIB, glib-2.0 gobject-2.0 gthread-2.0, glib_found=yes, AC_MSG_RESULT(no))
 	AC_SUBST(GLIB_CFLAGS)
 	AC_SUBST(GLIB_LIBS)
 ])
