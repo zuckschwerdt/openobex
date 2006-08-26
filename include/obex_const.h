@@ -75,8 +75,8 @@ typedef union {
 	//obex_bluetooth_intf_t bt; // to be added
 } obex_interface_t;
 
-#define OBEX_CLIENT		0
-#define OBEX_SERVER		1
+#define OBEX_MODE_CLIENT	0
+#define OBEX_MODE_SERVER	1
 
 /* Possible events */
 #define OBEX_EV_PROGRESS	0	/* Progress has been made */
