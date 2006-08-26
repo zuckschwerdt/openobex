@@ -30,10 +30,19 @@
 int main(int argc, char *argv[])
 {
 	ObexClient *client;
+	gint test;
 
 	g_type_init();
 
 	client = obex_client_new();
+
+	g_object_set(client, "test", 0, NULL);
+
+	g_object_unref(client);
+
+	client = obex_client_new();
+
+	g_object_get(client, "test", &test, NULL);
 
 	g_object_unref(client);
 

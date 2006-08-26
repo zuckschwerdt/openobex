@@ -27,10 +27,77 @@
 
 #include "obex-client.h"
 
+#include <glib/gprintf.h>
+
+#include <openobex/obex.h>
+
 G_DEFINE_TYPE(ObexClient, obex_client, G_TYPE_OBJECT)
 
-static void obex_client_init(ObexClient *self) {}
-static void obex_client_class_init(ObexClientClass *klass) {}
+static void obex_client_init(ObexClient *self)
+{
+	g_printf("object %p init\n", self);
+}
+
+static void obex_client_finalize(GObject *object)
+{
+	ObexClient *self = OBEX_CLIENT(object);
+
+	g_printf("object %p finalize\n", self);
+}
+
+enum {
+	PROP_TEST = 1
+};
+
+static void obex_client_set_property(GObject *object, guint prop_id,
+					const GValue *value, GParamSpec *pspec)
+{
+	ObexClient *self = OBEX_CLIENT(object);
+	gint test;
+
+	g_printf("object %p set property %d\n", self, prop_id);
+
+	switch (prop_id) {
+	case PROP_TEST:
+		test = g_value_get_int(value);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+		break;
+	}
+}
+
+static void obex_client_get_property(GObject *object, guint prop_id,
+					GValue *value, GParamSpec *pspec)
+{
+	ObexClient *self = OBEX_CLIENT(object);
+	gint test = 0;
+
+	g_printf("object %p get property %d\n", self, prop_id);
+
+	switch (prop_id) {
+	case PROP_TEST:
+		g_value_set_int(value, test);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+		break;
+	}
+}
+
+static void obex_client_class_init(ObexClientClass *klass)
+{
+	g_printf("class init\n");
+
+	G_OBJECT_CLASS(klass)->finalize = obex_client_finalize;
+
+	G_OBJECT_CLASS(klass)->set_property = obex_client_set_property;
+	G_OBJECT_CLASS(klass)->get_property = obex_client_get_property;
+
+	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_TEST, 
+			g_param_spec_int("test", NULL, NULL,
+				0, G_MAXINT,0 , G_PARAM_READWRITE));
+}
 
 ObexClient *obex_client_new(void)
 {
