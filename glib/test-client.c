@@ -29,7 +29,9 @@
 
 int main(int argc, char *argv[])
 {
-	GObject *client;
+	ObexClient *client;
+
+	g_type_init();
 
 	client = obex_client_new();
 
