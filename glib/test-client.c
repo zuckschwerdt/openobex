@@ -34,6 +34,9 @@
 
 #include "obex-client.h"
 
+#define FTP_UUID (guchar *) \
+	"\xF9\xEC\x7B\xC4\x95\x3C\x11\xD2\x98\x4E\x52\x54\x00\xDC\x9E\x09"
+
 static int open_device(const char *device)
 {
 	struct termios ti;
@@ -53,9 +56,8 @@ static int open_device(const char *device)
 
 int main(int argc, char *argv[])
 {
-	GMainLoop *mainloop;	
+	GMainLoop *mainloop;
 	ObexClient *client;
-	gint test;
 	int fd;
 
 	g_type_init();
@@ -66,16 +68,16 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	mainloop = g_main_loop_new(NULL, FALSE);
+	mainloop = g_main_loop_new (NULL, FALSE);
 
 
 	client = obex_client_new();
 
+	obex_client_set_auto_connect(client, FALSE);
+
 	obex_client_set_fd(client, fd);
 
-	g_object_get(client, "test", &test, NULL);
-
-	g_object_set(client, "test", 0, NULL);
+	obex_client_connect(client, FTP_UUID, 16, NULL);
 
 
 	g_main_loop_run(mainloop);

@@ -25,20 +25,20 @@
 #include <config.h>
 #endif
 
+#include "obex-lowlevel.h"
 #include "obex-client.h"
 
-#include <glib/gprintf.h>
-
-#include <openobex/obex.h>
-
-#define OBEX_CLIENT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), OBEX_TYPE_CLIENT, ObexClientPrivate))
+#define OBEX_CLIENT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), \
+					OBEX_TYPE_CLIENT, ObexClientPrivate))
 
 typedef struct _ObexClientPrivate ObexClientPrivate;
 
 struct _ObexClientPrivate {
+	gboolean auto_connect;
+
 	GMainContext *context;
 	GIOChannel *channel;
-	int fd;
+	obex_t *handle;
 };
 
 G_DEFINE_TYPE(ObexClient, obex_client, G_TYPE_OBJECT)
@@ -47,42 +47,33 @@ static void obex_client_init(ObexClient *self)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 
-	g_printf("object %p init\n", self);
-
 	priv->context = g_main_context_default();
-
 	g_main_context_ref(priv->context);
-
-	priv->fd = -1;
 }
 
 static void obex_client_finalize(GObject *object)
 {
-	ObexClient *self = OBEX_CLIENT(object);
-	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(object);
 
-	g_printf("object %p finalize\n", self);
-
-	priv->fd = -1;
+	obex_close(priv->handle);
+	priv->handle = NULL;
 
 	g_main_context_unref(priv->context);
+	priv->context = NULL;
 }
 
 enum {
-	PROP_TEST = 1
+	PROP_AUTO_CONNECT = 1
 };
 
 static void obex_client_set_property(GObject *object, guint prop_id,
 					const GValue *value, GParamSpec *pspec)
 {
-	ObexClient *self = OBEX_CLIENT(object);
-	gint test;
-
-	g_printf("object %p set property %d\n", self, prop_id);
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(object);
 
 	switch (prop_id) {
-	case PROP_TEST:
-		test = g_value_get_int(value);
+	case PROP_AUTO_CONNECT:
+		priv->auto_connect = g_value_get_boolean(value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -93,14 +84,11 @@ static void obex_client_set_property(GObject *object, guint prop_id,
 static void obex_client_get_property(GObject *object, guint prop_id,
 					GValue *value, GParamSpec *pspec)
 {
-	ObexClient *self = OBEX_CLIENT(object);
-	gint test = 0;
-
-	g_printf("object %p get property %d\n", self, prop_id);
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(object);
 
 	switch (prop_id) {
-	case PROP_TEST:
-		g_value_set_int(value, test);
+	case PROP_AUTO_CONNECT:
+		g_value_set_boolean(value, priv->auto_connect);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -110,8 +98,6 @@ static void obex_client_get_property(GObject *object, guint prop_id,
 
 static void obex_client_class_init(ObexClientClass *klass)
 {
-	g_printf("class init\n");
-
 #ifdef G_THREADS_ENABLED
 	if (!g_thread_supported())
 		g_thread_init(NULL);
@@ -124,9 +110,9 @@ static void obex_client_class_init(ObexClientClass *klass)
 	G_OBJECT_CLASS(klass)->set_property = obex_client_set_property;
 	G_OBJECT_CLASS(klass)->get_property = obex_client_get_property;
 
-	g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_TEST, 
-			g_param_spec_int("test", NULL, NULL,
-				0, G_MAXINT,0 , G_PARAM_READWRITE));
+	g_object_class_install_property(G_OBJECT_CLASS(klass),
+			PROP_AUTO_CONNECT, g_param_spec_boolean("auto-connect",
+					NULL, NULL, TRUE, G_PARAM_READWRITE));
 }
 
 static gboolean obex_client_callback(GIOChannel *source,
@@ -134,8 +120,7 @@ static gboolean obex_client_callback(GIOChannel *source,
 {
 	ObexClientPrivate *priv = data;
 
-	if (priv->fd < 0)
-		return FALSE;
+	OBEX_HandleInput(priv->handle, 0);
 
 	return TRUE;
 }
@@ -145,15 +130,33 @@ ObexClient *obex_client_new(void)
 	return OBEX_CLIENT(g_object_new(OBEX_TYPE_CLIENT, NULL));
 }
 
+void obex_client_set_auto_connect(ObexClient *self, gboolean auto_connect)
+{
+	g_object_set(self, "auto-connect", auto_connect, NULL);
+}
+
+gboolean obex_client_get_auto_connect(ObexClient *self)
+{
+	gboolean auto_connect;
+
+	g_object_get(self, "auto-connect", &auto_connect, NULL);
+
+	return auto_connect;
+}
+
 void obex_client_set_fd(ObexClient *self, int fd)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 	GSource *source;
 
+	priv->handle = obex_open(fd);
+	if (priv->handle == NULL)
+		return;
+
 	priv->channel = g_io_channel_unix_new(fd);
 
 	source = g_io_create_watch(priv->channel,
-		G_IO_IN | G_IO_HUP | G_IO_ERR | G_IO_NVAL);
+				G_IO_IN | G_IO_HUP | G_IO_ERR | G_IO_NVAL);
 
 	g_source_set_callback(source, (GSourceFunc) obex_client_callback,
 								priv, NULL);
@@ -161,6 +164,31 @@ void obex_client_set_fd(ObexClient *self, int fd)
 	g_source_attach(source, priv->context);
 
 	g_source_unref(source);
+}
 
-	priv->fd = fd;
+gboolean obex_client_connect(ObexClient *self, const guchar *target,
+						gsize size, GError *error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	if (obex_connect(priv->handle, target, size) < 0)
+		return FALSE;
+
+	return TRUE;
+}
+
+gboolean obex_client_disconnect(ObexClient *self, GError *error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	if (obex_disconnect(priv->handle) < 0)
+		return FALSE;
+
+	return TRUE;
+}
+
+gboolean obex_client_get_object(ObexClient *self, const gchar *type,
+					const gchar *name, GError *error)
+{
+	return TRUE;
 }

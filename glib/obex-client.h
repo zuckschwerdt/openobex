@@ -28,12 +28,17 @@
 
 G_BEGIN_DECLS
 
-#define OBEX_TYPE_CLIENT		(obex_client_get_type())
-#define OBEX_CLIENT(obj)		(G_TYPE_CHECK_INSTANCE_CAST((obj), OBEX_TYPE_CLIENT, ObexClient))
-#define OBEX_CLIENT_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST((klass), OBEX_TYPE_CLIENT, ObexClientClass))
-#define OBEX_IS_CLIENT(obj)		(G_TYPE_CHECK_INSTANCE_TYPE((obj), OBEX_TYPE_CLIENT))
-#define OBEX_IS_CLIENT_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE((klass), OBEX_TYPE_CLIENT))
-#define OBEX_GET_CLIENT_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), OBEX_TYPE_CLIENT, ObexClientClass))
+#define OBEX_TYPE_CLIENT (obex_client_get_type())
+#define OBEX_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), \
+					OBEX_TYPE_CLIENT, ObexClient))
+#define OBEX_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST((klass), \
+					OBEX_TYPE_CLIENT, ObexClientClass))
+#define OBEX_IS_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), \
+							OBEX_TYPE_CLIENT))
+#define OBEX_IS_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), \
+							OBEX_TYPE_CLIENT))
+#define OBEX_GET_CLIENT_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), \
+					OBEX_TYPE_CLIENT, ObexClientClass))
 
 typedef struct _ObexClient ObexClient;
 typedef struct _ObexClientClass ObexClientClass;
@@ -52,7 +57,19 @@ GType obex_client_get_type(void);
 
 ObexClient *obex_client_new(void);
 
+void obex_client_set_auto_connect(ObexClient *self, gboolean auto_connect);
+
+gboolean obex_client_get_auto_connect(ObexClient *self);
+
 void obex_client_set_fd(ObexClient *self, int fd);
+
+gboolean obex_client_connect(ObexClient *self, const guchar *target,
+						gsize size, GError *error);
+
+gboolean obex_client_disconnect(ObexClient *self, GError *error);
+
+gboolean obex_client_get_object(ObexClient *self, const gchar *type,
+					const gchar *name, GError *error);
 
 G_END_DECLS
 
