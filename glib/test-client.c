@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	mainloop = g_main_loop_new (NULL, FALSE);
+	mainloop = g_main_loop_new(NULL, FALSE);
 
 
 	client = obex_client_new();
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 
 	g_main_loop_run(mainloop);
 
-	g_object_unref(client);
+	obex_client_destroy(client);
 
 	close(fd);
 

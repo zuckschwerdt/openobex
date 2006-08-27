@@ -57,6 +57,8 @@ GType obex_client_get_type(void);
 
 ObexClient *obex_client_new(void);
 
+void obex_client_destroy(ObexClient *self);
+
 void obex_client_set_auto_connect(ObexClient *self, gboolean auto_connect);
 
 gboolean obex_client_get_auto_connect(ObexClient *self);

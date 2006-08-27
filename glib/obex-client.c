@@ -130,6 +130,11 @@ ObexClient *obex_client_new(void)
 	return OBEX_CLIENT(g_object_new(OBEX_TYPE_CLIENT, NULL));
 }
 
+void obex_client_destroy(ObexClient *self)
+{
+	g_object_unref(self);
+}
+
 void obex_client_set_auto_connect(ObexClient *self, gboolean auto_connect)
 {
 	g_object_set(self, "auto-connect", auto_connect, NULL);
