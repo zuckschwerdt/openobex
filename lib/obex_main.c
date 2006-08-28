@@ -167,15 +167,18 @@ char *obex_response_to_string(int rsp)
  */
 void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del)
 {
-	if(self->state & MODE_SRV)
-		self->eventcb(self, self->object, OBEX_MODE_SERVER, event, cmd, rsp);
-	else
-		self->eventcb(self, self->object, OBEX_MODE_CLIENT, event, cmd, rsp);
-	
-	if(del == TRUE && self->object != NULL) {
-		obex_object_delete(self->object);
+	obex_object_t *object = self->object;
+
+	if (del == TRUE)
 		self->object = NULL;
-	}
+
+	if (self->state & MODE_SRV)
+		self->eventcb(self, object, OBEX_MODE_SERVER, event, cmd, rsp);
+	else
+		self->eventcb(self, object, OBEX_MODE_CLIENT, event, cmd, rsp);
+	
+	if (del == TRUE)
+		obex_object_delete(object);
 }
 
 /*
