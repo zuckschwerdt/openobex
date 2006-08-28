@@ -37,6 +37,10 @@ typedef struct _ObexClientPrivate ObexClientPrivate;
 struct _ObexClientPrivate {
 	gboolean auto_connect;
 
+#ifdef G_THREADS_ENABLED
+	GMutex *mutex;
+#endif
+
 	GMainContext *context;
 	GIOChannel *channel;
 	obex_t *handle;
@@ -47,6 +51,10 @@ G_DEFINE_TYPE(ObexClient, obex_client, G_TYPE_OBJECT)
 static void obex_client_init(ObexClient *self)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+#ifdef G_THREADS_ENABLED
+	priv->mutex = g_mutex_new();
+#endif
 
 	priv->auto_connect = TRUE;
 
@@ -66,6 +74,10 @@ static void obex_client_finalize(GObject *object)
 
 	g_main_context_unref(priv->context);
 	priv->context = NULL;
+
+#ifdef G_THREADS_ENABLED
+	g_mutex_free(priv->mutex);
+#endif
 }
 
 enum {
