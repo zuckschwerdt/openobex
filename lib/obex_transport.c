@@ -91,6 +91,7 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 		FD_ZERO(&fdset);
 		if(self->fd >= 0) {
 			FD_SET(self->fd, &fdset);
+			if(self->fd > highestfd)
 				highestfd = self->fd;
 		}
 		if(self->serverfd >= 0) {
