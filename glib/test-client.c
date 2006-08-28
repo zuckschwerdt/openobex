@@ -30,12 +30,24 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
+#include <signal.h>
 #include <termios.h>
+
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
 
 #include "obex-client.h"
 
 #define FTP_UUID (guchar *) \
 	"\xF9\xEC\x7B\xC4\x95\x3C\x11\xD2\x98\x4E\x52\x54\x00\xDC\x9E\x09"
+
+static GMainLoop *mainloop;
+
+static void sig_term(int sig)
+{
+	g_main_loop_quit(mainloop);
+}
 
 static int open_device(const char *device)
 {
@@ -48,16 +60,22 @@ static int open_device(const char *device)
 
 	tcflush(fd, TCIOFLUSH);
 
+	memset(&ti, 0, sizeof(ti));
 	cfmakeraw(&ti);
 	tcsetattr(fd, TCSANOW, &ti);
 
 	return fd;
 }
 
+static void connected(ObexClient *object, gpointer user_data)
+{
+	obex_client_get_object(object, NULL, "telecom/devinfo.txt", NULL);
+}
+
 int main(int argc, char *argv[])
 {
-	GMainLoop *mainloop;
 	ObexClient *client;
+	struct sigaction sa;
 	int fd;
 
 	g_type_init();
@@ -75,10 +93,18 @@ int main(int argc, char *argv[])
 
 	obex_client_set_auto_connect(client, FALSE);
 
-	obex_client_set_fd(client, fd);
+	g_signal_connect(G_OBJECT(client), "connected",
+					G_CALLBACK(connected), NULL);
 
-	obex_client_connect(client, FTP_UUID, 16, NULL);
+	obex_client_attach_fd(client, fd);
 
+	obex_client_connect(client, NULL, 0, NULL);
+
+
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = sig_term;
+	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGINT,  &sa, NULL);
 
 	g_main_loop_run(mainloop);
 

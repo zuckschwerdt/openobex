@@ -28,26 +28,151 @@
 #include <stdio.h>
 #include <errno.h>
 #include <malloc.h>
+#include <string.h>
 
 #include "obex-lowlevel.h"
 
+enum {
+	OBEX_CONNECTED = 1,	/* Equal to TCP_ESTABLISHED */
+	OBEX_OPEN,
+	OBEX_BOUND,
+	OBEX_LISTEN,
+	OBEX_CONNECT,
+	OBEX_CONNECT2,
+	OBEX_CONFIG,
+	OBEX_DISCONN,
+	OBEX_CLOSED
+};
+
 typedef struct {
+	unsigned long state;
+	uint32_t cid;
+
+	void *user_data;
+	obex_callback_t *callback;
 } obex_context_t;
 
-static void obex_event(obex_t *handle, obex_object_t *object,
-			int mode, int event, int obex_cmd, int obex_rsp)
+static void obex_progress(obex_t *handle, obex_object_t *object)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
 
-	if (!context)
+	printf("== [handle %p progress]\n", handle);
+
+	if (!context->callback)
+		return;
+}
+
+static void obex_connect_done(obex_t *handle,
+					obex_object_t *object, int response)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+        obex_headerdata_t hd;
+        uint32_t hl;
+        uint8_t hi;
+
+	if (response != OBEX_RSP_SUCCESS)
 		return;
 
+	context->state = OBEX_CONNECTED;
+
+	while (OBEX_ObjectGetNextHeader(handle, object, &hi, &hd, &hl)) {
+		switch (hi) {
+		case OBEX_HDR_CONNECTION:
+			context->cid = hd.bq4;
+			break;
+		case OBEX_HDR_WHO:
+			break;
+		}
+	}
+
+	printf("== [handle %p connected id %d]\n", handle, context->cid);
+
+	if (!context->callback)
+		return;
+
+	if (context->callback->connect_cfm)
+		context->callback->connect_cfm(handle, context->user_data);
+}
+
+static void obex_disconnect_done(obex_t *handle,
+					obex_object_t *object, int response)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+
+	context->state = OBEX_CLOSED;
+
+	printf("== [handle %p disconnected]\n", handle);
+}
+
+static void obex_event(obex_t *handle, obex_object_t *object,
+			int mode, int event, int command, int response)
+{
+	printf("== [mode %d event %d command 0x%02x response 0x%02x]\n",
+					mode, event, command, response);
+
 	switch (event) {
+	case OBEX_EV_PROGRESS:
+		obex_progress(handle, object);
+		break;
+
+	case OBEX_EV_REQHINT:
+		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, response);
+		break;
+
+	case OBEX_EV_REQ:
+		OBEX_ObjectSetRsp(object, OBEX_RSP_NOT_IMPLEMENTED, response);
+		break;
+
+	case OBEX_EV_REQDONE:
+	        switch (command) {
+	        case OBEX_CMD_CONNECT:
+			obex_connect_done(handle, object, response);
+			break;
+		case OBEX_CMD_DISCONNECT:
+			obex_disconnect_done(handle, object, response);
+			break;
+		case OBEX_CMD_PUT:
+			break;
+		case OBEX_CMD_GET:
+			break;
+		case OBEX_CMD_SETPATH:
+			break;
+		case OBEX_CMD_SESSION:
+			break;
+		case OBEX_CMD_ABORT:
+			break;
+		}
+		break;
+
+	case OBEX_EV_LINKERR:
+		OBEX_TransportDisconnect(handle);
+		break;
+
+	case OBEX_EV_PARSEERR:
+		OBEX_TransportDisconnect(handle);
+		break;
+
+	case OBEX_EV_ACCEPTHINT:
+		break;
+
+	case OBEX_EV_ABORT:
+		break;
+
+	case OBEX_EV_STREAMEMPTY:
+		break;
+
+	case OBEX_EV_STREAMAVAIL:
+		break;
+
+	case OBEX_EV_UNEXPECTED:
+		break;
+
+	case OBEX_EV_REQCHECK:
+		break;
 	}
 }
 
-
-obex_t *obex_open(int fd)
+obex_t *obex_open(int fd, obex_callback_t *callback, void *data)
 {
 	obex_t *handle;
 	obex_context_t *context;
@@ -56,11 +181,19 @@ obex_t *obex_open(int fd)
 	if (!context)
 		return NULL;
 
+	memset(context, 0, sizeof(*context));
+
+	context->state = OBEX_OPEN;
+	context->cid = 0;
+
 	handle = OBEX_Init(OBEX_TRANS_FD, obex_event, 0);
 	if (!handle) {
 		free(context);
 		return NULL;
 	}
+
+	context->user_data = data;
+	context->callback = callback;
 
 	OBEX_SetUserData(handle, context);
 
@@ -87,18 +220,22 @@ void obex_close(obex_t *handle)
 
 int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
 {
+	obex_context_t *context = OBEX_GetUserData(handle);
 	obex_object_t *object;
+	obex_headerdata_t hd;
 	int err;
+
+	if (context->state != OBEX_OPEN && context->state != OBEX_CLOSED)
+		return -EISCONN;
 
 	object = OBEX_ObjectNew(handle, OBEX_CMD_CONNECT);
 	if (!object)
 		return -ENOMEM;
 
 	if (target) {
-		obex_headerdata_t hd;
                 hd.bs = target;
 
-                err = OBEX_ObjectAddHeader(handle, object,
+		err = OBEX_ObjectAddHeader(handle, object,
 			OBEX_HDR_TARGET, hd, size, OBEX_FL_FIT_ONE_PACKET);
 		if (err < 0) {
 			OBEX_ObjectDelete(handle, object);
@@ -106,16 +243,83 @@ int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
                 }
 	}
 
+	context->state = OBEX_CONNECT;
+
 	return OBEX_Request(handle, object);
 }
 
 int obex_disconnect(obex_t *handle)
 {
+	obex_context_t *context = OBEX_GetUserData(handle);
 	obex_object_t *object;
+
+	if (context->state != OBEX_CONNECTED)
+		return -ENOTCONN;
 
 	object = OBEX_ObjectNew(handle, OBEX_CMD_DISCONNECT);
 	if (!object)
 		return -ENOMEM;
+
+	context->state = OBEX_DISCONN;
+
+	return OBEX_Request(handle, object);
+}
+
+int obex_get(obex_t *handle, const char *type, const char *name)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+	obex_object_t *object;
+	obex_headerdata_t hd;
+	int err;
+
+	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECTED)
+		return -ENOTCONN;
+
+	object = OBEX_ObjectNew(handle, OBEX_CMD_GET);
+	if (!object)
+		return -ENOMEM;
+
+	if (context->cid > 0) {
+		hd.bq4 = context->cid;
+		OBEX_ObjectAddHeader(handle, object,
+			OBEX_HDR_CONNECTION, hd, 4, OBEX_FL_FIT_ONE_PACKET);
+	}
+
+	if (type) {
+		int len = strlen(name);
+
+		hd.bs = (uint8_t *) type;
+
+		err = OBEX_ObjectAddHeader(handle, object,
+			OBEX_HDR_TYPE, hd, len, OBEX_FL_FIT_ONE_PACKET);
+		if (err < 0) {
+			OBEX_ObjectDelete(handle, object);
+			return err;
+                }
+        }
+
+	if (name) {
+		int len, ulen = (strlen(name) + 1) * 2;
+		uint8_t *unicode = malloc(ulen);
+
+		if (!unicode) {
+			OBEX_ObjectDelete(handle, object);
+			return -ENOMEM;
+		}
+
+		len = OBEX_CharToUnicode(unicode, (uint8_t *) name, ulen);
+		hd.bs = unicode;
+
+		err = OBEX_ObjectAddHeader(handle, object,
+			OBEX_HDR_NAME, hd, len, OBEX_FL_FIT_ONE_PACKET);
+		if (err < 0) {
+			OBEX_ObjectDelete(handle, object);
+			free(unicode);
+			return err;
+                }
+
+                free(unicode);
+        }
 
 	return OBEX_Request(handle, object);
 }

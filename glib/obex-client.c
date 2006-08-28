@@ -26,6 +26,7 @@
 #endif
 
 #include "obex-lowlevel.h"
+#include "obex-marshal.h"
 #include "obex-client.h"
 
 #define OBEX_CLIENT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), \
@@ -47,6 +48,8 @@ static void obex_client_init(ObexClient *self)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 
+	priv->auto_connect = TRUE;
+
 	priv->context = g_main_context_default();
 	g_main_context_ref(priv->context);
 }
@@ -54,6 +57,9 @@ static void obex_client_init(ObexClient *self)
 static void obex_client_finalize(GObject *object)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(object);
+
+	if (priv->auto_connect == TRUE)
+		obex_disconnect(priv->handle);
 
 	obex_close(priv->handle);
 	priv->handle = NULL;
@@ -63,7 +69,8 @@ static void obex_client_finalize(GObject *object)
 }
 
 enum {
-	PROP_AUTO_CONNECT = 1
+	PROP_0,
+	PROP_AUTO_CONNECT
 };
 
 static void obex_client_set_property(GObject *object, guint prop_id,
@@ -96,6 +103,13 @@ static void obex_client_get_property(GObject *object, guint prop_id,
 	}
 }
 
+enum {
+	CONNECTED_SIGNAL,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
 static void obex_client_class_init(ObexClientClass *klass)
 {
 #ifdef G_THREADS_ENABLED
@@ -113,14 +127,33 @@ static void obex_client_class_init(ObexClientClass *klass)
 	g_object_class_install_property(G_OBJECT_CLASS(klass),
 			PROP_AUTO_CONNECT, g_param_spec_boolean("auto-connect",
 					NULL, NULL, TRUE, G_PARAM_READWRITE));
+
+	signals[CONNECTED_SIGNAL] = g_signal_new("connected",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET(ObexClientClass, connected),
+			NULL, NULL,
+			obex_marshal_VOID__VOID,
+			G_TYPE_NONE, 0);
 }
 
 static gboolean obex_client_callback(GIOChannel *source,
 					GIOCondition cond, gpointer data)
 {
-	ObexClientPrivate *priv = data;
+	ObexClient *self = data;
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
 
-	OBEX_HandleInput(priv->handle, 0);
+	//printf("== [source %p]\n", source);
+
+	if (cond & (G_IO_ERR | G_IO_HUP | G_IO_NVAL)) {
+		//printf("== [link error]\n");
+		return FALSE;
+	}
+
+	err = OBEX_HandleInput(priv->handle, 1);
+
+	//printf("== [error %d]\n", err);
 
 	return TRUE;
 }
@@ -149,12 +182,23 @@ gboolean obex_client_get_auto_connect(ObexClient *self)
 	return auto_connect;
 }
 
-void obex_client_set_fd(ObexClient *self, int fd)
+static void obex_connect_cfm(obex_t *handle, void *user_data)
+{
+	ObexClient *self = user_data;
+
+	g_signal_emit(self, signals[CONNECTED_SIGNAL], 0, NULL);
+}
+
+static obex_callback_t callback = {
+	.connect_cfm = obex_connect_cfm,
+};
+
+void obex_client_attach_fd(ObexClient *self, int fd)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 	GSource *source;
 
-	priv->handle = obex_open(fd);
+	priv->handle = obex_open(fd, &callback, self);
 	if (priv->handle == NULL)
 		return;
 
@@ -164,11 +208,14 @@ void obex_client_set_fd(ObexClient *self, int fd)
 				G_IO_IN | G_IO_HUP | G_IO_ERR | G_IO_NVAL);
 
 	g_source_set_callback(source, (GSourceFunc) obex_client_callback,
-								priv, NULL);
+								self, NULL);
 
 	g_source_attach(source, priv->context);
 
 	g_source_unref(source);
+
+	if (priv->auto_connect == TRUE)
+		obex_connect(priv->handle, NULL, 0);
 }
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
@@ -195,5 +242,10 @@ gboolean obex_client_disconnect(ObexClient *self, GError *error)
 gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError *error)
 {
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	if (obex_get(priv->handle, type, name) < 0)
+		return FALSE;
+
 	return TRUE;
 }

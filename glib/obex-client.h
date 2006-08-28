@@ -45,12 +45,12 @@ typedef struct _ObexClientClass ObexClientClass;
 
 struct _ObexClient {
 	GObject parent;
-	/* define public instance variables here */
 };
 
 struct _ObexClientClass {
 	GObjectClass parent_class;
-	/* define vtable methods and signals here */
+
+	void (*connected)(ObexClient *self);
 };
 
 GType obex_client_get_type(void);
@@ -63,7 +63,7 @@ void obex_client_set_auto_connect(ObexClient *self, gboolean auto_connect);
 
 gboolean obex_client_get_auto_connect(ObexClient *self);
 
-void obex_client_set_fd(ObexClient *self, int fd);
+void obex_client_attach_fd(ObexClient *self, int fd);
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
 						gsize size, GError *error);
