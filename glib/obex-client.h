@@ -51,6 +51,10 @@ struct _ObexClientClass {
 	GObjectClass parent_class;
 
 	void (*connected)(ObexClient *self);
+	void (*disconnect)(ObexClient *self);
+	void (*canceled)(ObexClient *self);
+	void (*progress)(ObexClient *self);
+	void (*idle)(ObexClient *self);
 };
 
 GType obex_client_get_type(void);
@@ -63,6 +67,22 @@ void obex_client_set_auto_connect(ObexClient *self, gboolean auto_connect);
 
 gboolean obex_client_get_auto_connect(ObexClient *self);
 
+typedef enum {
+	OBEX_CLIENT_COND_IN	= 1 << 0,
+	OBEX_CLIENT_COND_OUT 	= 1 << 1,
+	OBEX_CLIENT_COND_ERR 	= 1 << 2,
+} ObexClientCondition;
+
+typedef void (*ObexClientFunc)(ObexClient *client,
+				ObexClientCondition condition, gpointer data);
+
+void obex_client_add_watch(ObexClient *self, ObexClientCondition condition,
+				ObexClientFunc func, gpointer data);
+
+void obex_client_add_watch_full(ObexClient *self,
+			ObexClientCondition condition, ObexClientFunc func,
+					gpointer data, GDestroyNotify notify);
+
 void obex_client_attach_fd(ObexClient *self, int fd);
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
@@ -72,6 +92,16 @@ gboolean obex_client_disconnect(ObexClient *self, GError *error);
 
 gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError *error);
+
+typedef enum {
+	OBEX_CLIENT_ERROR_NONE,
+	OBEX_CLIENT_ERROR_AGAIN,
+	OBEX_CLIENT_ERROR_INVAL,
+	OBEX_CLIENT_ERROR_UNKNOWN
+} ObexClientError;
+
+ObexClientError obex_client_read(ObexClient *self, gchar *buf,
+					gsize count, gsize *bytes_read);
 
 G_END_DECLS
 

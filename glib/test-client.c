@@ -63,9 +63,19 @@ static int open_device(const char *device)
 	return fd;
 }
 
-static void connected(ObexClient *object, gpointer user_data)
+static void transfer(ObexClient *object,
+				ObexClientCondition cond, gpointer data)
 {
-	obex_client_get_object(object, NULL, "telecom/devinfo.txt", NULL);
+	gchar buf[1024];
+	gsize len;
+	ObexClientError err;
+
+	err = obex_client_read(object, buf, sizeof(buf), &len);
+
+	printf("Data buffer with size %d available\n", len);
+
+	if (len > 0)
+		printf("%s\n", buf);
 }
 
 int main(int argc, char *argv[])
@@ -87,10 +97,11 @@ int main(int argc, char *argv[])
 
 	client = obex_client_new();
 
-	g_signal_connect(G_OBJECT(client), "connected",
-					G_CALLBACK(connected), NULL);
+	obex_client_add_watch(client, 0, transfer, NULL);
 
 	obex_client_attach_fd(client, fd);
+
+	obex_client_get_object(client, NULL, "telecom/devinfo.txt", NULL);
 
 
 	memset(&sa, 0, sizeof(sa));

@@ -25,6 +25,8 @@
 #include <config.h>
 #endif
 
+#include <errno.h>
+
 #include "obex-debug.h"
 #include "obex-lowlevel.h"
 #include "obex-marshal.h"
@@ -45,6 +47,10 @@ struct _ObexClientPrivate {
 	GMainContext *context;
 	GIOChannel *channel;
 	obex_t *handle;
+
+	gpointer watch_data;
+	ObexClientFunc watch_func;
+	GDestroyNotify watch_destroy;
 
 	gboolean connected;
 };
@@ -122,6 +128,10 @@ static void obex_client_get_property(GObject *object, guint prop_id,
 
 enum {
 	CONNECTED_SIGNAL,
+	DISCONNECT_SIGNAL,
+	CANCELED_SIGNAL,
+	PROGRESS_SIGNAL,
+	IDLE_SIGNAL,
 	LAST_SIGNAL
 };
 
@@ -149,6 +159,38 @@ static void obex_client_class_init(ObexClientClass *klass)
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			G_STRUCT_OFFSET(ObexClientClass, connected),
+			NULL, NULL,
+			obex_marshal_VOID__VOID,
+			G_TYPE_NONE, 0);
+
+	signals[DISCONNECT_SIGNAL] = g_signal_new("disconnect",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET(ObexClientClass, disconnect),
+			NULL, NULL,
+			obex_marshal_VOID__VOID,
+			G_TYPE_NONE, 0);
+
+	signals[CANCELED_SIGNAL] = g_signal_new("canceled",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET(ObexClientClass, canceled),
+			NULL, NULL,
+			obex_marshal_VOID__VOID,
+			G_TYPE_NONE, 0);
+
+	signals[PROGRESS_SIGNAL] = g_signal_new("progress",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET(ObexClientClass, progress),
+			NULL, NULL,
+			obex_marshal_VOID__VOID,
+			G_TYPE_NONE, 0);
+
+	signals[IDLE_SIGNAL] = g_signal_new("idle",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET(ObexClientClass, idle),
 			NULL, NULL,
 			obex_marshal_VOID__VOID,
 			G_TYPE_NONE, 0);
@@ -196,6 +238,23 @@ gboolean obex_client_get_auto_connect(ObexClient *self)
 	return auto_connect;
 }
 
+void obex_client_add_watch_full(ObexClient *self,
+			ObexClientCondition condition, ObexClientFunc func,
+					gpointer data, GDestroyNotify notify)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	priv->watch_data = data;
+	priv->watch_func = func;
+	priv->watch_destroy = notify;
+}
+
+void obex_client_add_watch(ObexClient *self, ObexClientCondition condition,
+				ObexClientFunc func, gpointer data)
+{
+	obex_client_add_watch_full(self, condition, func, data, NULL);
+}
+
 static void obex_connect_cfm(obex_t *handle, void *user_data)
 {
 	ObexClient *self = user_data;
@@ -210,12 +269,24 @@ static void obex_connect_cfm(obex_t *handle, void *user_data)
 
 static void obex_disconn_ind(obex_t *handle, void *user_data)
 {
+	ObexClient *self = user_data;
+
 	debug("disconnect");
+
+	g_signal_emit(self, signals[DISCONNECT_SIGNAL], 0, NULL);
 }
 
 static void obex_progress_ind(obex_t *handle, void *user_data)
 {
+	ObexClient *self = user_data;
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
 	debug("progress");
+
+	if (priv->watch_func)
+		priv->watch_func(self, 0, priv->watch_data);
+
+	g_signal_emit(self, signals[PROGRESS_SIGNAL], 0, NULL);
 }
 
 static obex_callback_t callback = {
@@ -274,9 +345,22 @@ gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError *error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
 
-	if (obex_get(priv->handle, type, name) < 0)
-		return FALSE;
+	err = obex_get(priv->handle, type, name);
+	if (err < 0) {
+		obex_poll(priv->handle);
+		if (obex_get(priv->handle, type, name) < 0)
+			return FALSE;
+	}
 
 	return TRUE;
+}
+
+ObexClientError obex_client_read(ObexClient *self, gchar *buf,
+					gsize count, gsize *bytes_read)
+{
+	*bytes_read = 0;
+
+	return OBEX_CLIENT_ERROR_NONE;
 }
