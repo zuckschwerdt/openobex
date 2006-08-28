@@ -18,7 +18,9 @@ nodist_libopenobex_glib_la_SOURCES = $(BUILT_SOURCES)
 
 CLEANFILES = $(BUILT_SOURCES)
 
-noinst_PROGRAMS = test-client
+noinst_PROGRAMS = test-lowlevel test-client
+
+test_lowlevel_LDADD = libopenobex-glib.la
 
 test_client_LDADD = @GLIB_LIBS@ libopenobex-glib.la
 endif

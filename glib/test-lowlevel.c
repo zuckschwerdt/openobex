@@ -30,21 +30,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <string.h>
-#include <signal.h>
 #include <termios.h>
 
-#include "obex-client.h"
-
-#define FTP_UUID (guchar *) \
-	"\xF9\xEC\x7B\xC4\x95\x3C\x11\xD2\x98\x4E\x52\x54\x00\xDC\x9E\x09"
-
-static GMainLoop *mainloop;
-
-static void sig_term(int sig)
-{
-	g_main_loop_quit(mainloop);
-}
+#include "obex-lowlevel.h"
 
 static int open_device(const char *device)
 {
@@ -63,18 +51,10 @@ static int open_device(const char *device)
 	return fd;
 }
 
-static void connected(ObexClient *object, gpointer user_data)
-{
-	obex_client_get_object(object, NULL, "telecom/devinfo.txt", NULL);
-}
-
 int main(int argc, char *argv[])
 {
-	ObexClient *client;
-	struct sigaction sa;
+	obex_t *handle;
 	int fd;
-
-	g_type_init();
 
 	fd = open_device("/dev/rfcomm42");
 	if (fd < 0) {
@@ -82,29 +62,18 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	mainloop = g_main_loop_new(NULL, FALSE);
+	handle = obex_open(fd, NULL, NULL);
 
+	obex_connect(handle, NULL, 0);
+	obex_poll(handle);
 
-	client = obex_client_new();
+	obex_get(handle, NULL, "telecom/devinfo.txt");
+	obex_poll(handle);
 
-	obex_client_set_auto_connect(client, FALSE);
+	obex_disconnect(handle);
+	obex_poll(handle);
 
-	g_signal_connect(G_OBJECT(client), "connected",
-					G_CALLBACK(connected), NULL);
-
-	obex_client_attach_fd(client, fd);
-
-	obex_client_connect(client, NULL, 0, NULL);
-
-
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = sig_term;
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGINT,  &sa, NULL);
-
-	g_main_loop_run(mainloop);
-
-	obex_client_destroy(client);
+	obex_close(handle);
 
 	close(fd);
 

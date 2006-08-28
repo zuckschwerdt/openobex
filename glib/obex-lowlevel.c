@@ -32,6 +32,8 @@
 
 #include "obex-lowlevel.h"
 
+#define OBEX_TIMEOUT 1
+
 enum {
 	OBEX_CONNECTED = 1,	/* Equal to TCP_ESTABLISHED */
 	OBEX_OPEN,
@@ -216,6 +218,18 @@ void obex_close(obex_t *handle)
 	free(context);
 
 	OBEX_Cleanup(handle);
+}
+
+void obex_poll(obex_t *handle)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+	unsigned long state = context->state;
+
+	while (1) {
+		OBEX_HandleInput(handle, OBEX_TIMEOUT);
+		if (context->state != state)
+			break;
+        }
 }
 
 int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
