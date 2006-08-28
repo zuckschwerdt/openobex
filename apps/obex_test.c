@@ -155,7 +155,7 @@ int inet_connect(obex_t *handle)
 int main (int argc, char *argv[])
 {
 	char cmd[10];
-	int end = 0;
+	int num, end = 0;
 	int cobex = FALSE, tcpobex = FALSE, btobex = FALSE, r320 = FALSE, usbobex = FALSE;
 	obex_t *handle;
 #ifdef HAVE_BLUETOOTH
@@ -320,7 +320,7 @@ int main (int argc, char *argv[])
 
 	while (!end) {
 		printf("> ");
-		scanf("%s", cmd);
+		num = scanf("%s", cmd);
 		switch (cmd[0] | 0x20)	{
 			case 'q':
 				end=1;

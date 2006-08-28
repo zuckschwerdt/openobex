@@ -220,6 +220,7 @@ void push_client(obex_t *handle)
 	unsigned int uname_size;
 	char *bfname;
 	uint8_t *uname;
+	int num;
 
 	obex_headerdata_t hd;
 	
@@ -227,7 +228,7 @@ void push_client(obex_t *handle)
 	int file_size;
 
 	printf("PUSH filename> ");
-	scanf("%s", fname);
+	num = scanf("%s", fname);
 	bfname = strdup(basename(fname));
 
 	buf = easy_readfile(fname, &file_size);
@@ -280,12 +281,13 @@ void put_client(obex_t *handle)
 	char rname[200];
 	unsigned int rname_size;
 	obex_headerdata_t hd;
+	int num;
 	
 	uint8_t *buf;
 	int file_size;
 
 	printf("PUT file (local, remote)> ");
-	scanf("%s %s", lname, rname);
+	num = scanf("%s %s", lname, rname);
 
 	buf = easy_readfile(lname, &file_size);
 	if(buf == NULL) {
@@ -336,11 +338,11 @@ void get_client(obex_t *handle, struct context *gt)
 	obex_object_t *object;
 	uint8_t rname[200];
 	char req_name[200];
-	int rname_size;
+	int num, rname_size;
 	obex_headerdata_t hd;
 
 	printf("GET File> ");
-	scanf("%s", req_name);
+	num = scanf("%s", req_name);
 
 	if(! (object = OBEX_ObjectNew(handle, OBEX_CMD_GET)))	{
 		printf("Error\n");
@@ -407,11 +409,11 @@ void setpath_client(obex_t *handle)
 	uint8_t setpath_data[2] = { 0, 0 };
 	obex_object_t *object;
 	char path[200];
-	int path_size;
+	int num, path_size;
 	obex_headerdata_t hd;
 
 	printf("SETPATH> ");
-	scanf("%s", path);
+	num = scanf("%s", path);
 
 	if(! (object = OBEX_ObjectNew(handle, OBEX_CMD_SETPATH)))	{
 		printf("Error\n");

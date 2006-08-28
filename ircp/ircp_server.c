@@ -249,7 +249,7 @@ out:	free(name);
 int ircp_srv_receive(ircp_server_t *srv, obex_object_t *object, int finished)
 {
 	const uint8_t *body = NULL;
-	int body_len = 0;
+	int len, body_len = 0;
 
 	if(srv->fd < 0 && finished == FALSE) {
 		/* Not receiving a file */
@@ -278,7 +278,7 @@ int ircp_srv_receive(ircp_server_t *srv, obex_object_t *object, int finished)
 		}
 		else {
 			if(srv->fd > 0)
-				write(srv->fd, body, body_len);
+				len = write(srv->fd, body, body_len);
 		}
 		return 1;
 	}
@@ -331,7 +331,7 @@ void ircp_srv_close(ircp_server_t *srv)
 //
 int ircp_srv_recv(ircp_server_t *srv, char *inbox)
 {
-	int ret;
+	int err, ret;
 	
 	if(ircp_checkdir("", inbox, CD_ALLOWABS) < 0) {
 		srv->infocb(IRCP_EV_ERRMSG, "Specified desination directory does not exist.");
@@ -351,7 +351,7 @@ int ircp_srv_recv(ircp_server_t *srv, char *inbox)
 	ret = ircp_srv_sync_wait(srv);
 	
 	/* Go back to inbox */
-	chdir(inbox);
+	err = chdir(inbox);
 	
 	return ret;
 }

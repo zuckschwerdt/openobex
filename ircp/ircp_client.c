@@ -365,7 +365,7 @@ int ircp_put(ircp_client_t *cli, char *name)
 {
 	struct stat statbuf;
 	char *origdir;
-	int ret;
+	int err, ret;
 	
 	/* Remember cwd */
 	origdir = getcwd(NULL, 0);
@@ -381,7 +381,7 @@ int ircp_put(ircp_client_t *cli, char *name)
 		char *newrealdir = NULL;
 		char *dirname;
 		
-		chdir(name);
+		err = chdir(name);
 		name = ".";
 		
 		/* Get real name of new wd, extract last part of and do setpath to it */
@@ -395,7 +395,7 @@ int ircp_put(ircp_client_t *cli, char *name)
 	
 	ret = visit_all_files(name, ircp_visit, cli);
 
-	chdir(origdir);
+	err = chdir(origdir);
 	free(origdir);
 	return ret;
 
