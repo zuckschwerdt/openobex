@@ -52,6 +52,8 @@ typedef struct {
 
 	void *user_data;
 	obex_callback_t *callback;
+
+	obex_object_t *current, *pending;
 } obex_context_t;
 
 static void obex_progress(obex_t *handle, obex_object_t *object)
@@ -100,6 +102,8 @@ static void obex_disconnect_done(obex_t *handle,
 static void obex_event(obex_t *handle, obex_object_t *object,
 			int mode, int event, int command, int response)
 {
+	obex_context_t *context = OBEX_GetUserData(handle);
+
 	switch (event) {
 	case OBEX_EV_PROGRESS:
 		obex_progress(handle, object);
@@ -114,6 +118,11 @@ static void obex_event(obex_t *handle, obex_object_t *object,
 		break;
 
 	case OBEX_EV_REQDONE:
+		context->current = context->pending;
+		if (context->current)
+			OBEX_Request(handle, context->current);
+		context->pending = NULL;
+
 	        switch (command) {
 	        case OBEX_CMD_CONNECT:
 			obex_connect_done(handle, object, response);
@@ -220,6 +229,23 @@ void obex_poll(obex_t *handle)
         }
 }
 
+static int obex_send_or_queue(obex_t *handle, obex_object_t *object)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+
+	if (context->current) {
+		if (!context->pending) {
+			context->pending = object;
+			return 0;
+		} else
+			return -EBUSY;
+	}
+
+	context->current = object;
+
+	return OBEX_Request(handle, object);
+}
+
 int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
@@ -247,7 +273,7 @@ int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
 
 	context->state = OBEX_CONNECT;
 
-	return OBEX_Request(handle, object);
+	return obex_send_or_queue(handle, object);	
 }
 
 int obex_disconnect(obex_t *handle)
@@ -267,7 +293,7 @@ int obex_disconnect(obex_t *handle)
 	if (context->callback && context->callback->disconn_ind)
 		context->callback->disconn_ind(handle, context->user_data);
 
-	return OBEX_Request(handle, object);
+	return obex_send_or_queue(handle, object);	
 }
 
 int obex_get(obex_t *handle, const char *type, const char *name)
@@ -277,7 +303,8 @@ int obex_get(obex_t *handle, const char *type, const char *name)
 	obex_headerdata_t hd;
 	int err;
 
-	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECTED)
+	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECT
+					&& context->state != OBEX_CONNECTED)
 		return -ENOTCONN;
 
 	object = OBEX_ObjectNew(handle, OBEX_CMD_GET);
@@ -326,5 +353,5 @@ int obex_get(obex_t *handle, const char *type, const char *name)
                 free(unicode);
         }
 
-	return OBEX_Request(handle, object);
+	return obex_send_or_queue(handle, object);	
 }

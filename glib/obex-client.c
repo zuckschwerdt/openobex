@@ -315,9 +315,6 @@ void obex_client_attach_fd(ObexClient *self, int fd)
 	g_source_attach(source, priv->context);
 
 	g_source_unref(source);
-
-	if (priv->auto_connect == TRUE)
-		obex_connect(priv->handle, NULL, 0);
 }
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
@@ -345,14 +342,12 @@ gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError *error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
-	int err;
 
-	err = obex_get(priv->handle, type, name);
-	if (err < 0) {
-		obex_poll(priv->handle);
-		if (obex_get(priv->handle, type, name) < 0)
+	if (priv->connected == FALSE && priv->auto_connect == TRUE)
+		obex_connect(priv->handle, NULL, 0);
+
+	if (obex_get(priv->handle, type, name) < 0)
 			return FALSE;
-	}
 
 	return TRUE;
 }

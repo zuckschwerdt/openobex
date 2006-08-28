@@ -72,7 +72,7 @@ static void transfer(ObexClient *object,
 
 	err = obex_client_read(object, buf, sizeof(buf), &len);
 
-	printf("Data buffer with size %d available\n", len);
+	printf("Data buffer with size %ld available\n", len);
 
 	if (len > 0)
 		printf("%s\n", buf);
