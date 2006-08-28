@@ -184,6 +184,7 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 		} else {
 			/* Notify app that client-operation is done! */
 			DEBUG(3, "Done! Rsp=%02x!\n", rsp);
+			self->state = MODE_SRV | STATE_IDLE;
 			if (self->object->abort) {
 				if (rsp == OBEX_RSP_SUCCESS)
 					obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, rsp, TRUE);
@@ -192,7 +193,6 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 			}
 			else
 				obex_deliver_event(self, OBEX_EV_REQDONE, self->object->opcode, rsp, TRUE);
-			self->state = MODE_SRV | STATE_IDLE;
 		}
 		break;
        	

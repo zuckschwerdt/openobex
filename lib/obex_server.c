@@ -263,8 +263,8 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 				DEBUG(2, "CMD_DISCONNECT done. Resetting MTU!\n");
 				self->mtu_tx = OBEX_MINIMUM_MTU;
 			}
+			self->state = MODE_SRV | STATE_IDLE;
 			obex_deliver_event(self, OBEX_EV_REQDONE, cmd, 0, TRUE);
- 			self->state = MODE_SRV | STATE_IDLE;
 		}
 		break;
 	
