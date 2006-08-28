@@ -25,6 +25,7 @@
 #include <config.h>
 #endif
 
+#include "obex-debug.h"
 #include "obex-lowlevel.h"
 #include "obex-marshal.h"
 #include "obex-client.h"
@@ -44,6 +45,8 @@ struct _ObexClientPrivate {
 	GMainContext *context;
 	GIOChannel *channel;
 	obex_t *handle;
+
+	gboolean connected;
 };
 
 G_DEFINE_TYPE(ObexClient, obex_client, G_TYPE_OBJECT)
@@ -60,13 +63,15 @@ static void obex_client_init(ObexClient *self)
 
 	priv->context = g_main_context_default();
 	g_main_context_ref(priv->context);
+
+	priv->connected = FALSE;
 }
 
 static void obex_client_finalize(GObject *object)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(object);
 
-	if (priv->auto_connect == TRUE)
+	if (priv->connected == TRUE && priv->auto_connect == TRUE)
 		obex_disconnect(priv->handle);
 
 	obex_close(priv->handle);
@@ -154,18 +159,15 @@ static gboolean obex_client_callback(GIOChannel *source,
 {
 	ObexClient *self = data;
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
-	int err;
-
-	//printf("== [source %p]\n", source);
 
 	if (cond & (G_IO_ERR | G_IO_HUP | G_IO_NVAL)) {
-		//printf("== [link error]\n");
+		debug("link error");
 		return FALSE;
 	}
 
-	err = OBEX_HandleInput(priv->handle, 1);
-
-	//printf("== [error %d]\n", err);
+	if (OBEX_HandleInput(priv->handle, 1) < 0) {
+		debug("input error");
+	}
 
 	return TRUE;
 }
@@ -197,12 +199,29 @@ gboolean obex_client_get_auto_connect(ObexClient *self)
 static void obex_connect_cfm(obex_t *handle, void *user_data)
 {
 	ObexClient *self = user_data;
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	debug("connected");
+
+	priv->connected = TRUE;
 
 	g_signal_emit(self, signals[CONNECTED_SIGNAL], 0, NULL);
 }
 
+static void obex_disconn_ind(obex_t *handle, void *user_data)
+{
+	debug("disconnect");
+}
+
+static void obex_progress_ind(obex_t *handle, void *user_data)
+{
+	debug("progress");
+}
+
 static obex_callback_t callback = {
-	.connect_cfm = obex_connect_cfm,
+	.connect_cfm  = obex_connect_cfm,
+	.disconn_ind  = obex_disconn_ind,
+	.progress_ind = obex_progress_ind,
 };
 
 void obex_client_attach_fd(ObexClient *self, int fd)

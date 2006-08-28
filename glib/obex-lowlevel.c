@@ -58,10 +58,8 @@ static void obex_progress(obex_t *handle, obex_object_t *object)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
 
-	printf("== [handle %p progress]\n", handle);
-
-	if (!context->callback)
-		return;
+	if (context->callback && context->callback->progress_ind)
+		context->callback->progress_ind(handle, context->user_data);
 }
 
 static void obex_connect_done(obex_t *handle,
@@ -87,12 +85,7 @@ static void obex_connect_done(obex_t *handle,
 		}
 	}
 
-	printf("== [handle %p connected id %d]\n", handle, context->cid);
-
-	if (!context->callback)
-		return;
-
-	if (context->callback->connect_cfm)
+	if (context->callback && context->callback->connect_cfm)
 		context->callback->connect_cfm(handle, context->user_data);
 }
 
@@ -102,16 +95,11 @@ static void obex_disconnect_done(obex_t *handle,
 	obex_context_t *context = OBEX_GetUserData(handle);
 
 	context->state = OBEX_CLOSED;
-
-	printf("== [handle %p disconnected]\n", handle);
 }
 
 static void obex_event(obex_t *handle, obex_object_t *object,
 			int mode, int event, int command, int response)
 {
-	printf("== [mode %d event %d command 0x%02x response 0x%02x]\n",
-					mode, event, command, response);
-
 	switch (event) {
 	case OBEX_EV_PROGRESS:
 		obex_progress(handle, object);
@@ -275,6 +263,9 @@ int obex_disconnect(obex_t *handle)
 		return -ENOMEM;
 
 	context->state = OBEX_DISCONN;
+
+	if (context->callback && context->callback->disconn_ind)
+		context->callback->disconn_ind(handle, context->user_data);
 
 	return OBEX_Request(handle, object);
 }

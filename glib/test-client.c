@@ -87,14 +87,10 @@ int main(int argc, char *argv[])
 
 	client = obex_client_new();
 
-	obex_client_set_auto_connect(client, FALSE);
-
 	g_signal_connect(G_OBJECT(client), "connected",
 					G_CALLBACK(connected), NULL);
 
 	obex_client_attach_fd(client, fd);
-
-	obex_client_connect(client, NULL, 0, NULL);
 
 
 	memset(&sa, 0, sizeof(sa));
