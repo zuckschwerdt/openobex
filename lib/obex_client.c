@@ -97,8 +97,8 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 			 * Jean II */
 			if((self->object->opcode == OBEX_CMD_CONNECT) ||
 			   (obex_object_receive(self, msg) < 0))	{
-				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				self->state = MODE_SRV | STATE_IDLE;
+				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				return -1;
 			}
 			obex_deliver_event(self, OBEX_EV_UNEXPECTED, self->object->opcode, 0, FALSE);
@@ -116,8 +116,8 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 		ret = obex_object_send(self, self->object, TRUE, FALSE);
 		if(ret < 0) {
 			/* Error while sending */
-			obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
 			self->state = MODE_CLI | STATE_IDLE;
+			obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
 		}
 		else if (ret == 0) {
 			/* Some progress made */			
@@ -139,8 +139,8 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 		if(self->object->opcode == OBEX_CMD_CONNECT)	{
 			DEBUG(2, "We expect a connect-rsp\n");
 			if(obex_parse_connect_header(self, msg) < 0)	{
-				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				self->state = MODE_SRV | STATE_IDLE;
+				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				return -1;
 			}
 			self->object->headeroffset=4;
@@ -154,8 +154,8 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 
 		/* Receive any headers */
 		if(obex_object_receive(self, msg) < 0)	{
-			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			self->state = MODE_SRV | STATE_IDLE;
+			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 			return -1;
 		}
 	

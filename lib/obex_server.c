@@ -113,9 +113,9 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 		/* Abort? */
 		if(cmd == OBEX_CMD_ABORT) {
 			DEBUG(1, "Got OBEX_ABORT request!\n");
-			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			obex_response_request(self, OBEX_RSP_SUCCESS);
- 			self->state = MODE_SRV | STATE_IDLE;
+			self->state = MODE_SRV | STATE_IDLE;
+			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			/* This is not an Obex error, it is just that the peer
 			 * aborted the request, so return 0 - Jean II */
 			return 0;
@@ -126,16 +126,16 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			/* The cmd-field of this packet is not the
 			   same as int the first fragment. Bail out! */
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
+			self->state = MODE_SRV | STATE_IDLE;
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, cmd, TRUE);
- 			self->state = MODE_SRV | STATE_IDLE;
 			return -1;
 		}
 		
 		/* Get the headers... */
 		if(obex_object_receive(self, msg) < 0)	{
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
+			self->state = MODE_SRV | STATE_IDLE;
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
- 			self->state = MODE_SRV | STATE_IDLE;
 			return -1;
 		}
 
@@ -196,8 +196,8 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 		if(cmd == OBEX_CMD_ABORT) {
 			DEBUG(1, "Got OBEX_ABORT request!\n");
 			obex_response_request(self, OBEX_RSP_SUCCESS);
+			self->state = MODE_SRV | STATE_IDLE;
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
- 			self->state = MODE_SRV | STATE_IDLE;
 			/* This is not an Obex error, it is just that the peer
 			 * aborted the request, so return 0 - Jean II */
 			return 0;		
@@ -229,8 +229,8 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			if((cmd == OBEX_CMD_CONNECT) ||
 			   (obex_object_receive(self, msg) < 0))	{
 				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
-				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				self->state = MODE_SRV | STATE_IDLE;
+				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				return -1;
 			}
 			obex_deliver_event(self, OBEX_EV_UNEXPECTED, self->object->opcode, 0, FALSE);
