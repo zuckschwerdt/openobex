@@ -34,4 +34,5 @@ void obex_close(obex_t *handle);
 void obex_poll(obex_t *handle);
 int obex_connect(obex_t *handle, const unsigned char *target, size_t size);
 int obex_disconnect(obex_t *handle);
+int obex_put(obex_t *handle, const char *type, const char *name);
 int obex_get(obex_t *handle, const char *type, const char *name);

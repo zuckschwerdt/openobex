@@ -294,6 +294,11 @@ int obex_disconnect(obex_t *handle)
 	return obex_send_or_queue(handle, object);	
 }
 
+int obex_put(obex_t *handle, const char *type, const char *name)
+{
+	return 0;
+}
+
 int obex_get(obex_t *handle, const char *type, const char *name)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);

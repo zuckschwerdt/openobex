@@ -338,6 +338,20 @@ gboolean obex_client_disconnect(ObexClient *self, GError **error)
 	return TRUE;
 }
 
+gboolean obex_client_put_object(ObexClient *self, const gchar *type,
+					const gchar *name, GError **error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	if (priv->connected == FALSE && priv->auto_connect == TRUE)
+		obex_connect(priv->handle, NULL, 0);
+
+	if (obex_put(priv->handle, type, name) < 0)
+			return FALSE;
+
+	return TRUE;
+}
+
 gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError **error)
 {

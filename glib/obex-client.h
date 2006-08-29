@@ -90,6 +90,9 @@ gboolean obex_client_connect(ObexClient *self, const guchar *target,
 
 gboolean obex_client_disconnect(ObexClient *self, GError **error);
 
+gboolean obex_client_put_object(ObexClient *self, const gchar *type,
+					const gchar *name, GError **error);
+
 gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError **error);
 
