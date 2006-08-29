@@ -86,22 +86,20 @@ void obex_client_add_watch_full(ObexClient *self,
 void obex_client_attach_fd(ObexClient *self, int fd);
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
-						gsize size, GError *error);
+						gsize size, GError **error);
 
-gboolean obex_client_disconnect(ObexClient *self, GError *error);
+gboolean obex_client_disconnect(ObexClient *self, GError **error);
 
 gboolean obex_client_get_object(ObexClient *self, const gchar *type,
-					const gchar *name, GError *error);
+					const gchar *name, GError **error);
 
-typedef enum {
-	OBEX_CLIENT_ERROR_NONE,
-	OBEX_CLIENT_ERROR_AGAIN,
-	OBEX_CLIENT_ERROR_INVAL,
-	OBEX_CLIENT_ERROR_UNKNOWN
-} ObexClientError;
+gboolean obex_client_read(ObexClient *self, gchar *buf, gsize count,
+					gsize *bytes_read, GError **error);
 
-ObexClientError obex_client_read(ObexClient *self, gchar *buf,
-					gsize count, gsize *bytes_read);
+gboolean obex_client_write(ObexClient *self, const gchar *buf, gsize count,
+					gsize *bytes_written, GError **error);
+
+gboolean obex_client_close(ObexClient *self, GError **error);
 
 G_END_DECLS
 

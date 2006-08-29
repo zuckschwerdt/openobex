@@ -68,9 +68,8 @@ static void transfer(ObexClient *object,
 {
 	gchar buf[1024];
 	gsize len;
-	ObexClientError err;
 
-	err = obex_client_read(object, buf, sizeof(buf), &len);
+	obex_client_read(object, buf, sizeof(buf), &len, NULL);
 
 	printf("Data buffer with size %ld available\n", len);
 

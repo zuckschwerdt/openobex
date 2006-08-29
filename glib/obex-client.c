@@ -318,7 +318,7 @@ void obex_client_attach_fd(ObexClient *self, int fd)
 }
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
-						gsize size, GError *error)
+						gsize size, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 
@@ -328,7 +328,7 @@ gboolean obex_client_connect(ObexClient *self, const guchar *target,
 	return TRUE;
 }
 
-gboolean obex_client_disconnect(ObexClient *self, GError *error)
+gboolean obex_client_disconnect(ObexClient *self, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 
@@ -339,7 +339,7 @@ gboolean obex_client_disconnect(ObexClient *self, GError *error)
 }
 
 gboolean obex_client_get_object(ObexClient *self, const gchar *type,
-					const gchar *name, GError *error)
+					const gchar *name, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 
@@ -352,10 +352,23 @@ gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 	return TRUE;
 }
 
-ObexClientError obex_client_read(ObexClient *self, gchar *buf,
-					gsize count, gsize *bytes_read)
+gboolean obex_client_read(ObexClient *self, gchar *buf, gsize count,
+					gsize *bytes_read, GError **error)
 {
 	*bytes_read = 0;
 
-	return OBEX_CLIENT_ERROR_NONE;
+	return TRUE;
+}
+
+gboolean obex_client_write(ObexClient *self, const gchar *buf, gsize count,
+					gsize *bytes_written, GError **error)
+{
+	*bytes_written = 0;
+
+	return TRUE;
+}
+
+gboolean obex_client_close(ObexClient *self, GError **error)
+{
+	return TRUE;
 }
