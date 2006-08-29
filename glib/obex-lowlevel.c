@@ -53,7 +53,7 @@ typedef struct {
 	void *user_data;
 	obex_callback_t *callback;
 
-	obex_object_t *current, *pending;
+	obex_object_t *pending;
 } obex_context_t;
 
 static void obex_progress(obex_t *handle, obex_object_t *object)
@@ -118,10 +118,10 @@ static void obex_event(obex_t *handle, obex_object_t *object,
 		break;
 
 	case OBEX_EV_REQDONE:
-		context->current = context->pending;
-		if (context->current)
-			OBEX_Request(handle, context->current);
-		context->pending = NULL;
+		if (context->pending) {
+			OBEX_Request(handle, context->pending);
+			context->pending = NULL;
+		}
 
 	        switch (command) {
 	        case OBEX_CMD_CONNECT:
@@ -232,18 +232,16 @@ void obex_poll(obex_t *handle)
 static int obex_send_or_queue(obex_t *handle, obex_object_t *object)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
+	int err;
 
-	if (context->current) {
-		if (!context->pending) {
-			context->pending = object;
-			return 0;
-		} else
-			return -EBUSY;
+	err = OBEX_Request(handle, object);
+
+	if (err == -EBUSY && !context->pending) {
+		context->pending = object;
+		return 0;
 	}
 
-	context->current = object;
-
-	return OBEX_Request(handle, object);
+	return err;
 }
 
 int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
