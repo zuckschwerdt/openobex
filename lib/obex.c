@@ -802,6 +802,23 @@ int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset)
 }
 
 /**
+ * OBEX_ObjecGetCommand - Get the OBEX commmand of an object
+ * @self: OBEX context
+ * @object: OBEX object (or NULL to access the current object)
+ *
+ * Call this function to get the OBEX command of an object.
+ */
+int OBEX_ObjectGetCommand(obex_t *self, obex_object_t *object)
+{
+	obex_return_val_if_fail(object != NULL || self->object != NULL, -1);
+
+	if (object)
+		return object->cmd;
+
+	return self->object->cmd;
+}
+
+/**
  * OBEX_UnicodeToChar - Simple unicode to char function.
  * @c: Destination (char)
  * @uc: Source (unicode)
