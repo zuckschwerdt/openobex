@@ -33,6 +33,8 @@
 #include <string.h>
 #include <signal.h>
 #include <termios.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "obex-client.h"
 
@@ -63,25 +65,67 @@ static int open_device(const char *device)
 	return fd;
 }
 
-static void transfer(ObexClient *object,
-				ObexClientCondition cond, gpointer data)
+static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data)
 {
-	gchar buf[1024];
-	gsize len;
+	int *input = data;
 
-	obex_client_read(object, buf, sizeof(buf), &len, NULL);
+	if (cond & OBEX_CLIENT_COND_IN) {
+		gchar buf[1024];
+		gsize len;
 
-	printf("Data buffer with size %ld available\n", len);
+		printf("OBEX_CLIENT_COND_IN\n");
 
-	if (len > 0)
-		printf("%s\n", buf);
+		obex_client_read(client, buf, sizeof(buf), &len, NULL);
+
+		printf("Data buffer with size %zd available\n", len);
+
+		if (len > 0)
+			printf("%s\n", buf);
+	}
+
+	if (cond & OBEX_CLIENT_COND_OUT) {
+		char buf[10000];
+		int actual;
+		gsize written;
+
+		printf("OBEX_CLIENT_COND_OUT\n");
+
+		if (*input < 0) {
+			printf("No data to send!\n");
+			return;
+		}
+
+		actual = read(*input, buf, sizeof(buf));
+		if (actual == 0)
+			obex_client_close(client, NULL);
+		else if (actual > 0) {
+			if (!obex_client_write(client, buf, actual, &written, NULL))
+				fprintf(stderr, "writing data failed\n");
+		}
+		else
+			fprintf(stderr, "read: %s\n", strerror(errno));
+	}
+	
+	if (cond & OBEX_CLIENT_COND_DONE) {
+		printf("OBEX_CLIENT_COND_DONE\n");
+
+		if (!obex_client_get_error(client, NULL))
+			printf("Transfer failed\n");
+		else
+			printf("Transfer completed\n");
+	}
+		
+	if (cond & OBEX_CLIENT_COND_ERR)
+		printf("Error in transfer\n");
+
+		
 }
 
 int main(int argc, char *argv[])
 {
 	ObexClient *client;
 	struct sigaction sa;
-	int fd;
+	int fd, input = -1;
 
 	g_type_init();
 
@@ -93,14 +137,30 @@ int main(int argc, char *argv[])
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
-
 	client = obex_client_new();
 
-	obex_client_add_watch(client, 0, transfer, NULL);
+	obex_client_add_watch(client, 0, transfer, &input);
 
 	obex_client_attach_fd(client, fd);
 
-	obex_client_get_object(client, NULL, "telecom/devinfo.txt", NULL);
+	if (argc > 1) {
+		struct stat s;
+
+		if (stat(argv[1], &s) < 0) {
+			fprintf(stderr, "stat(%s): %s\n", argv[1], strerror(errno));
+			return 1;
+		}
+
+		input = open(argv[1], O_RDONLY);
+		if (input < 0) {
+			fprintf(stderr, "open(%s): %s\n", argv[1], strerror(errno));
+			return 1;
+		}
+
+		obex_client_put_object(client, NULL, argv[1], s.st_size, s.st_mtime, NULL);
+	}
+	else
+		obex_client_get_object(client, NULL, "telecom/devinfo.txt", NULL);
 
 
 	memset(&sa, 0, sizeof(sa));
@@ -111,6 +171,9 @@ int main(int argc, char *argv[])
 	g_main_loop_run(mainloop);
 
 	obex_client_destroy(client);
+
+	if (input >= 0)
+		close(input);
 
 	close(fd);
 

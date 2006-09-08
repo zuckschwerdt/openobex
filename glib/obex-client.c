@@ -52,6 +52,9 @@ struct _ObexClientPrivate {
 	ObexClientFunc watch_func;
 	GDestroyNotify watch_destroy;
 
+	gboolean idle_cb_after_connect;
+	GSource *idle_source;
+
 	gboolean connected;
 };
 
@@ -79,6 +82,11 @@ static void obex_client_finalize(GObject *object)
 
 	if (priv->connected == TRUE && priv->auto_connect == TRUE)
 		obex_disconnect(priv->handle);
+
+	if (priv->idle_source) {
+		g_source_destroy(priv->idle_source);
+		priv->idle_source = NULL;
+	}
 
 	obex_close(priv->handle);
 	priv->handle = NULL;
@@ -207,11 +215,51 @@ static gboolean obex_client_callback(GIOChannel *source,
 		return FALSE;
 	}
 
-	if (OBEX_HandleInput(priv->handle, 1) < 0) {
+	if (OBEX_HandleInput(priv->handle, 1) < 0)
 		debug("input error");
-	}
+	else
+		obex_do_callback(priv->handle);
 
 	return TRUE;
+}
+
+static void err2gerror(int err, GError **gerr)
+{
+	debug("%s", g_strerror(err));
+
+	if (!gerr)
+		return;
+
+	switch (err) {
+	default:
+		break;
+	}
+}
+
+static void rsp2gerror(int rsp, GError **gerr)
+{
+	if (!gerr)
+		return;
+
+	switch (rsp) {
+	default:
+		break;
+	}
+}
+
+static gboolean obex_client_put_idle(ObexClient *self)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	debug("obex_client_put_idle");
+
+	g_source_destroy(priv->idle_source);
+	priv->idle_source = NULL;
+
+	if (priv->watch_func)
+		priv->watch_func(self, OBEX_CLIENT_COND_OUT, priv->watch_data);
+
+	return FALSE;
 }
 
 ObexClient *obex_client_new(void)
@@ -265,6 +313,15 @@ static void obex_connect_cfm(obex_t *handle, void *user_data)
 	priv->connected = TRUE;
 
 	g_signal_emit(self, signals[CONNECTED_SIGNAL], 0, NULL);
+
+	/* A little hackish, but needed if a put triggered the connect */
+	if (priv->idle_cb_after_connect) {
+		priv->idle_source = g_idle_source_new();
+		g_source_set_callback(priv->idle_source, (GSourceFunc) obex_client_put_idle, self, NULL);
+		g_source_attach(priv->idle_source, priv->context);
+		g_source_unref(priv->idle_source);
+		priv->idle_cb_after_connect = FALSE;
+	}
 }
 
 static void obex_disconn_ind(obex_t *handle, void *user_data)
@@ -279,20 +336,50 @@ static void obex_disconn_ind(obex_t *handle, void *user_data)
 static void obex_progress_ind(obex_t *handle, void *user_data)
 {
 	ObexClient *self = user_data;
-	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 
 	debug("progress");
 
-	if (priv->watch_func)
-		priv->watch_func(self, 0, priv->watch_data);
-
 	g_signal_emit(self, signals[PROGRESS_SIGNAL], 0, NULL);
+}
+
+static void obex_transfer_ind(obex_t *handle, int event, void *user_data)
+{
+	ObexClient *self = user_data;
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+
+	if (!priv->watch_func)
+		return;
+
+	switch (event) {
+	case OBEX_EV_LINKERR:
+	case OBEX_EV_PARSEERR:
+		priv->watch_func(self, OBEX_CLIENT_COND_ERR, priv->watch_data);
+		break;
+
+	case OBEX_EV_STREAMAVAIL:
+		priv->watch_func(self, OBEX_CLIENT_COND_IN, priv->watch_data);
+		break;
+
+	case OBEX_EV_STREAMEMPTY:
+		priv->watch_func(self, OBEX_CLIENT_COND_OUT, priv->watch_data);
+		break;
+
+	case OBEX_EV_ABORT:
+	case OBEX_EV_REQDONE:
+		priv->watch_func(self, OBEX_CLIENT_COND_DONE, priv->watch_data);
+		break;
+		
+	default:
+		debug("obex_transfer_ind: unhandled event %d", event);
+		break;
+	}
 }
 
 static obex_callback_t callback = {
 	.connect_cfm  = obex_connect_cfm,
 	.disconn_ind  = obex_disconn_ind,
 	.progress_ind = obex_progress_ind,
+	.transfer_ind = obex_transfer_ind,
 };
 
 void obex_client_attach_fd(ObexClient *self, int fd)
@@ -321,9 +408,13 @@ gboolean obex_client_connect(ObexClient *self, const guchar *target,
 						gsize size, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
 
-	if (obex_connect(priv->handle, target, size) < 0)
+	err = obex_connect(priv->handle, target, size);
+	if (err < 0) {
+		err2gerror(-err, error);
 		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -331,23 +422,34 @@ gboolean obex_client_connect(ObexClient *self, const guchar *target,
 gboolean obex_client_disconnect(ObexClient *self, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
 
-	if (obex_disconnect(priv->handle) < 0)
+	err = obex_disconnect(priv->handle);
+	if (err < 0) {
+		err2gerror(-err, error);
 		return FALSE;
+	}
 
 	return TRUE;
 }
 
 gboolean obex_client_put_object(ObexClient *self, const gchar *type,
-					const gchar *name, GError **error)
+					const gchar *name, gint size,
+					time_t mtime, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
 
 	if (priv->connected == FALSE && priv->auto_connect == TRUE)
 		obex_connect(priv->handle, NULL, 0);
 
-	if (obex_put(priv->handle, type, name) < 0)
-			return FALSE;
+	err = obex_put(priv->handle, type, name, size, mtime);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
+
+	priv->idle_cb_after_connect = TRUE;
 
 	return TRUE;
 }
@@ -356,12 +458,16 @@ gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
 
 	if (priv->connected == FALSE && priv->auto_connect == TRUE)
 		obex_connect(priv->handle, NULL, 0);
 
-	if (obex_get(priv->handle, type, name) < 0)
-			return FALSE;
+	err = obex_get(priv->handle, type, name);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -369,7 +475,14 @@ gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 gboolean obex_client_read(ObexClient *self, gchar *buf, gsize count,
 					gsize *bytes_read, GError **error)
 {
-	*bytes_read = 0;
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	err = obex_read(priv->handle, buf, count, bytes_read);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -377,12 +490,57 @@ gboolean obex_client_read(ObexClient *self, gchar *buf, gsize count,
 gboolean obex_client_write(ObexClient *self, const gchar *buf, gsize count,
 					gsize *bytes_written, GError **error)
 {
-	*bytes_written = 0;
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	err = obex_write(priv->handle, buf, count, bytes_written);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+gboolean obex_client_abort(ObexClient *self, GError **error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	err = obex_abort(priv->handle);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
 
 	return TRUE;
 }
 
 gboolean obex_client_close(ObexClient *self, GError **error)
 {
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	err = obex_close_transfer(priv->handle);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
+
 	return TRUE;
 }
+
+gboolean obex_client_get_error(ObexClient *self, GError **error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int rsp;
+
+	rsp = obex_get_response(priv->handle);
+	if (rsp == OBEX_RSP_SUCCESS)
+		return TRUE;
+
+	rsp2gerror(rsp, error);
+
+	return FALSE;
+}
+

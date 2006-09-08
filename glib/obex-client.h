@@ -70,7 +70,8 @@ gboolean obex_client_get_auto_connect(ObexClient *self);
 typedef enum {
 	OBEX_CLIENT_COND_IN	= 1 << 0,
 	OBEX_CLIENT_COND_OUT 	= 1 << 1,
-	OBEX_CLIENT_COND_ERR 	= 1 << 2,
+	OBEX_CLIENT_COND_DONE 	= 1 << 2,
+	OBEX_CLIENT_COND_ERR 	= 1 << 3,
 } ObexClientCondition;
 
 typedef void (*ObexClientFunc)(ObexClient *client,
@@ -91,7 +92,8 @@ gboolean obex_client_connect(ObexClient *self, const guchar *target,
 gboolean obex_client_disconnect(ObexClient *self, GError **error);
 
 gboolean obex_client_put_object(ObexClient *self, const gchar *type,
-					const gchar *name, GError **error);
+					const gchar *name, gint size,
+					time_t mtime, GError **error);
 
 gboolean obex_client_get_object(ObexClient *self, const gchar *type,
 					const gchar *name, GError **error);
@@ -102,7 +104,11 @@ gboolean obex_client_read(ObexClient *self, gchar *buf, gsize count,
 gboolean obex_client_write(ObexClient *self, const gchar *buf, gsize count,
 					gsize *bytes_written, GError **error);
 
+gboolean obex_client_abort(ObexClient *self, GError **error);
+
 gboolean obex_client_close(ObexClient *self, GError **error);
+
+gboolean obex_client_get_error(ObexClient *self, GError **error);
 
 G_END_DECLS
 
