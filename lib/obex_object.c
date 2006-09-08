@@ -943,6 +943,8 @@ int obex_object_resume(obex_t *self, obex_object_t *object)
 	else
 		obex_deliver_event(self, OBEX_EV_PROGRESS, object->opcode, 0, FALSE);
 
+	self->state = MODE_CLI | STATE_REC;
+	object->first_packet_sent = 1;
 	object->continue_received = 0;
 	
 	return 0;
