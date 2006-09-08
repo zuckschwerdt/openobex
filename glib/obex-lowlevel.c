@@ -368,7 +368,6 @@ static void obex_writestream(obex_t *handle, obex_object_t *object)
 			debug("OBEX_SuspendRequest");
 			OBEX_SuspendRequest(handle, object);
 			context->do_cb = 1;
-			debug("context->do_cb set to 1");
 			context->cb_event = OBEX_EV_STREAMEMPTY;
 		}
 	}
@@ -398,6 +397,7 @@ static void obex_event(obex_t *handle, obex_object_t *object,
 		break;
 
 	case OBEX_EV_REQDONE:
+		debug("OBEX_EV_REQDONE");
 		context->transfer = TRANSFER_NONE;
 
 		if (context->pending) {
