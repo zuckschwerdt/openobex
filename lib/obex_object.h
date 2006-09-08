@@ -76,6 +76,7 @@ typedef struct {
 
 	int suspend;			/* Temporarily stop transfering object */
 	int continue_received;		/* CONTINUE received after sending last command */
+	int first_packet_sent;		/* Whether we've sent the first packet */
 	
 	const uint8_t *s_buf;		/* Pointer to streaming data */
 	unsigned int s_len;		/* Length of stream-data */

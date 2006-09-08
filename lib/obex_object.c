@@ -433,6 +433,10 @@ int obex_object_send(obex_t *self, obex_object_t *object,
 
 	DEBUG(4, "\n");
 
+	/* Don't do anything of object is suspended */
+	if (object->suspend)
+		return 0;
+
 	/* Calc how many bytes of headers we can fit in this package */
 	tx_left = self->mtu_tx - sizeof(struct obex_common_hdr);
 	switch(self->trans.type)
@@ -931,7 +935,7 @@ int obex_object_resume(obex_t *self, obex_object_t *object)
 
 	object->suspend = 0;
 
- 	if (!object->continue_received)
+ 	if (object->first_packet_sent && !object->continue_received)
  		return 0;
 
 	if (obex_object_send(self, object, TRUE, FALSE) < 0)

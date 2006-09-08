@@ -127,6 +127,7 @@ int obex_client(obex_t *self, buf_t *msg, int final)
                 else {
                 	/* Sending of object finished.. */
                 	self->state = MODE_CLI | STATE_REC;
+			self->object->first_packet_sent = 1;
 			// Should we deliver a EV_PROGRESS here ? Jean II
                 }
 		break;
