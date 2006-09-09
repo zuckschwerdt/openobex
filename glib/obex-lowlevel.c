@@ -53,12 +53,6 @@ enum {
 	OBEX_CLOSED
 };
 
-enum {
-	TRANSFER_PUT = 1,
-	TRANSFER_GET,
-	TRANSFER_NONE
-};
-
 typedef struct obex_setpath_hdr {
     uint8_t  flags;
     uint8_t constants;
