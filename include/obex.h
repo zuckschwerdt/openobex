@@ -100,6 +100,7 @@ int OBEX_ObjectGetNonHdrData(obex_object_t *object, uint8_t **buffer);
 int OBEX_ObjectSetNonHdrData(obex_object_t *object, const uint8_t *buffer, unsigned int len);
 int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset);
 int OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const uint8_t **buf);
+int OBEX_ObjectGetCommand(obex_t *self, obex_object_t *object);
 
 int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size);
 int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size);
