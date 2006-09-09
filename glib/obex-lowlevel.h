@@ -42,3 +42,4 @@ int obex_read(obex_t *handle, char *buf, size_t count, size_t *bytes_read);
 int obex_abort(obex_t *handle);
 int obex_close_transfer(obex_t *handle);
 int obex_get_response(obex_t *handle);
+void obex_do_callback(obex_t *handle);

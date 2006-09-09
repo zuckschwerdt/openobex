@@ -73,18 +73,15 @@ typedef struct obex_connect_hdr {
 typedef struct {
 	unsigned long state;
 	uint32_t cid;
-	uint8_t obex_cmd;
 
 	void *user_data;
 	obex_callback_t *callback;
 
 	obex_object_t *pending;
-	int pending_transfer;	/* Type of the pending transfer */
 
 	int obex_rsp;		/* Response to last OBEX command */
 
 	/* Transfer related variables */
-	int transfer;           /* Transfer type: TRANSFER_{PUT,GET,NONE} */
 	char buf[BUF_SIZE];	/* Data buffer for put and get requests */
 	int data_start;		/* Offset of data in buffer */
 	int data_length;	/* Length of actual data in buffer */
@@ -281,8 +278,6 @@ static void obex_abort_done(obex_t *handle)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
 
-	context->transfer = TRANSFER_NONE;
-
 	context->do_cb = 1;
 	context->cb_event = OBEX_EV_ABORT;
 }
@@ -302,15 +297,6 @@ static void obex_readstream(obex_t *handle, obex_object_t *object)
 	obex_context_t *context = OBEX_GetUserData(handle);
 	const uint8_t *buf;
 	int actual, free_space;
-
-	if (context->transfer != TRANSFER_GET) {
-		debug("Incomming data even though no get active!");
-		/* Flush incomming stream */
-		actual = OBEX_ObjectReadStream(handle, object, &buf);
-		if (actual > 0)
-			debug("Ignored %d bytes", actual);
-		return;
-	}
 
 	if (context->counter == 0)
 		get_target_size_and_time(handle, object, &context->target_size,
@@ -398,17 +384,8 @@ static void obex_event(obex_t *handle, obex_object_t *object,
 
 	case OBEX_EV_REQDONE:
 		debug("OBEX_EV_REQDONE");
-		context->transfer = TRANSFER_NONE;
 
 		if (context->pending) {
-			if (context->pending_transfer != TRANSFER_NONE) {
-				context->transfer = context->pending_transfer;
-				context->pending_transfer = TRANSFER_NONE;
-				if (context->transfer == TRANSFER_PUT)
-					context->obex_cmd = OBEX_CMD_PUT;
-				else
-					context->obex_cmd = OBEX_CMD_GET;
-			}
 			OBEX_Request(handle, context->pending);
 			context->pending = NULL;
 		}
@@ -479,7 +456,6 @@ obex_t *obex_open(int fd, obex_callback_t *callback, void *data)
 
 	context->state = OBEX_OPEN;
 	context->cid = CID_INVALID;
-	context->transfer = TRANSFER_NONE;
 
 	handle = OBEX_Init(OBEX_TRANS_FD, obex_event, 0);
 	if (!handle) {
@@ -531,19 +507,15 @@ void obex_poll(obex_t *handle)
 	obex_do_callback(handle);
 }
 
-static int obex_send_or_queue(obex_t *handle, obex_object_t *object, int transfer_type)
+static int obex_send_or_queue(obex_t *handle, obex_object_t *object)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
 	int err;
 
 	err = OBEX_Request(handle, object);
 
-	if (!err)
-		context->transfer = transfer_type;
-
 	if (err == -EBUSY && !context->pending) {
 		context->pending = object;
-		context->pending_transfer = transfer_type;
 		return 0;
 	}
 
@@ -577,7 +549,7 @@ int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
 
 	context->state = OBEX_CONNECT;
 
-	return obex_send_or_queue(handle, object, TRANSFER_NONE);	
+	return obex_send_or_queue(handle, object);	
 }
 
 int obex_disconnect(obex_t *handle)
@@ -597,7 +569,7 @@ int obex_disconnect(obex_t *handle)
 	if (context->callback && context->callback->disconn_ind)
 		context->callback->disconn_ind(handle, context->user_data);
 
-	return obex_send_or_queue(handle, object, TRANSFER_NONE);	
+	return obex_send_or_queue(handle, object);
 }
 
 int obex_put(obex_t *handle, const char *type, const char *name, int size, time_t mtime)
@@ -605,13 +577,14 @@ int obex_put(obex_t *handle, const char *type, const char *name, int size, time_
 	obex_context_t *context = OBEX_GetUserData(handle);
 	obex_object_t *object;
 	obex_headerdata_t hd;
-	int err;
+	int err, cmd;
 
 	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECT
 					&& context->state != OBEX_CONNECTED)
 		return -ENOTCONN;
 
-	if (context->transfer != TRANSFER_NONE)
+	cmd = OBEX_ObjectGetCommand(handle, NULL);
+	if (cmd == OBEX_CMD_GET || cmd == OBEX_CMD_PUT)
 		return -EBUSY;
 
 	/* Initialize transfer variables */
@@ -697,7 +670,7 @@ int obex_put(obex_t *handle, const char *type, const char *name, int size, time_
 	debug("OBEX_SuspendRequest");
 	OBEX_SuspendRequest(handle, object);
 
-	err = obex_send_or_queue(handle, object, TRANSFER_PUT);	
+	err = obex_send_or_queue(handle, object);
 	if (err < 0) {
 		context->target_size = -1;
 		OBEX_ObjectDelete(handle, object);
@@ -711,13 +684,14 @@ int obex_get(obex_t *handle, const char *type, const char *name)
 	obex_context_t *context = OBEX_GetUserData(handle);
 	obex_object_t *object;
 	obex_headerdata_t hd;
-	int err;
+	int err, cmd;
 
 	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECT
 					&& context->state != OBEX_CONNECTED)
 		return -ENOTCONN;
 
-	if (context->transfer != TRANSFER_NONE)
+	cmd = OBEX_ObjectGetCommand(handle, NULL);
+	if (cmd == OBEX_CMD_GET || cmd == OBEX_CMD_PUT)
 		return -EBUSY;
 
 	/* Initialize transfer variables */
@@ -776,7 +750,7 @@ int obex_get(obex_t *handle, const char *type, const char *name)
 
 	OBEX_ObjectReadStream(handle, object, NULL);
 
-	err = obex_send_or_queue(handle, object, TRANSFER_GET);	
+	err = obex_send_or_queue(handle, object);
 	if (err < 0)
 		OBEX_ObjectDelete(handle, object);
 
@@ -787,7 +761,7 @@ int obex_read(obex_t *handle, char *buf, size_t count, size_t *bytes_read)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
 
-	if (context->obex_cmd != OBEX_CMD_GET)
+	if (OBEX_ObjectGetCommand(handle, NULL) != OBEX_CMD_GET)
 		return -EINVAL;
 
 	if (context->data_length == 0)
@@ -815,7 +789,7 @@ int obex_write(obex_t *handle, const char *buf, size_t count, size_t *bytes_writ
 	obex_context_t *context = OBEX_GetUserData(handle);
 	int free_space;
 
-	if (context->obex_cmd != OBEX_CMD_PUT)
+	if (OBEX_ObjectGetCommand(handle, NULL) != OBEX_CMD_PUT)
 		return -EINVAL;
 
 	free_space = sizeof(context->buf) - (context->data_start + context->data_length);
@@ -836,9 +810,10 @@ int obex_write(obex_t *handle, const char *buf, size_t count, size_t *bytes_writ
 
 int obex_abort(obex_t *handle)
 {
-	obex_context_t *context = OBEX_GetUserData(handle);
+	int cmd;
 
-	if (context->transfer == TRANSFER_NONE)
+	cmd = OBEX_ObjectGetCommand(handle, NULL);
+	if (cmd != OBEX_CMD_PUT || cmd != OBEX_CMD_GET)
 		return -EINVAL;
 
 	return OBEX_CancelRequest(handle, 1);
@@ -847,8 +822,10 @@ int obex_abort(obex_t *handle)
 int obex_close_transfer(obex_t *handle)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
+	int cmd;
 
-	if (context->transfer == TRANSFER_NONE)
+	cmd = OBEX_ObjectGetCommand(handle, NULL);
+	if (cmd != OBEX_CMD_PUT && cmd != OBEX_CMD_GET)
 		return -EINVAL;
 
 	context->close = 1;
