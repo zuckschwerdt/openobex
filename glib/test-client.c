@@ -67,6 +67,7 @@ static int open_device(const char *device)
 
 static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data)
 {
+	GError *gerr = NULL;
 	int *input = data;
 
 	if (cond & OBEX_CLIENT_COND_IN) {
@@ -75,12 +76,18 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 
 		printf("OBEX_CLIENT_COND_IN\n");
 
-		obex_client_read(client, buf, sizeof(buf), &len, NULL);
+		obex_client_read(client, buf, sizeof(buf), &len, &gerr);
 
-		printf("Data buffer with size %zd available\n", len);
+		if (gerr != NULL) {
+			printf("obex_client_read failed: %s\n", gerr->message);
+			g_error_free(gerr);
+			gerr = NULL;
+		} else {
+			printf("Data buffer with size %zd available\n", len);
 
-		if (len > 0)
-			printf("%s\n", buf);
+			if (len > 0)
+				printf("%s\n", buf);
+		}
 	}
 
 	if (cond & OBEX_CLIENT_COND_OUT) {
@@ -95,14 +102,24 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 		}
 
 		actual = read(*input, buf, sizeof(buf));
-		if (actual == 0)
-			obex_client_close(client, NULL);
-		else if (actual > 0) {
+		if (actual == 0) {
+			obex_client_close(client, &gerr);
+			if (gerr != NULL) {
+				printf("obex_client_close failed: %s\n",
+						gerr->message);
+				g_error_free(gerr);
+				gerr = NULL;
+			}
+		} else if (actual > 0) {
 			gsize written;
 
-			if (!obex_client_write(client, buf, actual, &written, NULL))
-				fprintf(stderr, "writing data failed\n");
-			else if (written < actual)
+			obex_client_write(client, buf, actual, &written, &gerr);
+
+			if (gerr != NULL) {
+				printf("writing data failed: %s\n", gerr->message);
+				g_error_free(gerr);
+				gerr = NULL;
+			} else if (written < actual)
 				printf("Only %d/%d bytes were accepted by obex_client_write!\n",
 						written, actual);
 
@@ -111,14 +128,19 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 			fprintf(stderr, "read: %s\n", strerror(errno));
 	}
 	
-	if (cond & OBEX_CLIENT_COND_DONE)
-		printf("OBEX_CLIENT_COND_DONE: %s\n", obex_client_get_error(client, NULL) ?
-							"success" : "failure");
+	if (cond & OBEX_CLIENT_COND_DONE) {
+		obex_client_get_error(client, &gerr);
+		if (gerr != NULL) {
+			printf("Operation failed: %s\n", gerr->message);
+			g_error_free(gerr);
+			gerr = NULL;
+		}
+		else
+			printf("Operation completed with success\n");
+	}
 		
 	if (cond & OBEX_CLIENT_COND_ERR)
 		printf("Error in transfer\n");
-
-		
 }
 
 int main(int argc, char *argv[])

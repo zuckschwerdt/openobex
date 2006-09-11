@@ -29,6 +29,7 @@
 
 #include "obex-debug.h"
 #include "obex-lowlevel.h"
+#include "obex-error.h"
 #include "obex-marshal.h"
 #include "obex-client.h"
 
@@ -220,30 +221,6 @@ static gboolean obex_client_callback(GIOChannel *source,
 		obex_do_callback(priv->handle);
 
 	return TRUE;
-}
-
-static void err2gerror(int err, GError **gerr)
-{
-	debug("%s", g_strerror(err));
-
-	if (!gerr)
-		return;
-
-	switch (err) {
-	default:
-		break;
-	}
-}
-
-static void rsp2gerror(int rsp, GError **gerr)
-{
-	if (!gerr)
-		return;
-
-	switch (rsp) {
-	default:
-		break;
-	}
 }
 
 static gboolean obex_client_put_idle(ObexClient *self)

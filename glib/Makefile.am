@@ -6,7 +6,7 @@ include_HEADERS = obex-client.h
 
 lib_LTLIBRARIES = libopenobex-glib.la
 
-libopenobex_glib_la_SOURCES = obex-lowlevel.h obex-lowlevel.c obex-client.c obex-debug.h
+libopenobex_glib_la_SOURCES = obex-lowlevel.h obex-lowlevel.c obex-client.c obex-debug.h obex-error.c obex-error.h
 
 libopenobex_glib_la_LDFLAGS = -version-info 1:0:0
 
