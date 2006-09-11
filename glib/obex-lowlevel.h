@@ -27,7 +27,7 @@ typedef struct {
 	void (*connect_cfm)(obex_t *handle, void *data);
 	void (*disconn_ind)(obex_t *handle, void *data);
 	void (*progress_ind)(obex_t *handle, void *data);
-	void (*transfer_ind)(obex_t *handle, int event, void *data);
+	void (*command_ind)(obex_t *handle, int event, void *data);
 } obex_callback_t;
 
 obex_t *obex_open(int fd, obex_callback_t *callback, void *data);

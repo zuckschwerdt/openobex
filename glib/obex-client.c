@@ -52,7 +52,6 @@ struct _ObexClientPrivate {
 	ObexClientFunc watch_func;
 	GDestroyNotify watch_destroy;
 
-	gboolean idle_cb_after_connect;
 	GSource *idle_source;
 
 	gboolean connected;
@@ -313,15 +312,6 @@ static void obex_connect_cfm(obex_t *handle, void *user_data)
 	priv->connected = TRUE;
 
 	g_signal_emit(self, signals[CONNECTED_SIGNAL], 0, NULL);
-
-	/* A little hackish, but needed if a put triggered the connect */
-	if (priv->idle_cb_after_connect) {
-		priv->idle_source = g_idle_source_new();
-		g_source_set_callback(priv->idle_source, (GSourceFunc) obex_client_put_idle, self, NULL);
-		g_source_attach(priv->idle_source, priv->context);
-		g_source_unref(priv->idle_source);
-		priv->idle_cb_after_connect = FALSE;
-	}
 }
 
 static void obex_disconn_ind(obex_t *handle, void *user_data)
@@ -342,7 +332,7 @@ static void obex_progress_ind(obex_t *handle, void *user_data)
 	g_signal_emit(self, signals[PROGRESS_SIGNAL], 0, NULL);
 }
 
-static void obex_transfer_ind(obex_t *handle, int event, void *user_data)
+static void obex_command_ind(obex_t *handle, int event, void *user_data)
 {
 	ObexClient *self = user_data;
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
@@ -370,7 +360,7 @@ static void obex_transfer_ind(obex_t *handle, int event, void *user_data)
 		break;
 		
 	default:
-		debug("obex_transfer_ind: unhandled event %d", event);
+		debug("unhandled event %d", event);
 		break;
 	}
 }
@@ -379,7 +369,7 @@ static obex_callback_t callback = {
 	.connect_cfm  = obex_connect_cfm,
 	.disconn_ind  = obex_disconn_ind,
 	.progress_ind = obex_progress_ind,
-	.transfer_ind = obex_transfer_ind,
+	.command_ind = obex_command_ind,
 };
 
 void obex_client_attach_fd(ObexClient *self, int fd)
@@ -438,10 +428,13 @@ gboolean obex_client_put_object(ObexClient *self, const gchar *type,
 					time_t mtime, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	gboolean add_idle = FALSE;
 	int err;
 
 	if (priv->connected == FALSE && priv->auto_connect == TRUE)
 		obex_connect(priv->handle, NULL, 0);
+	else
+		add_idle = TRUE;
 
 	err = obex_put(priv->handle, type, name, size, mtime);
 	if (err < 0) {
@@ -449,7 +442,15 @@ gboolean obex_client_put_object(ObexClient *self, const gchar *type,
 		return FALSE;
 	}
 
-	priv->idle_cb_after_connect = TRUE;
+	/* So the application gets OBEX_CLIENT_COND_OUT immediately when
+	 * returning to the mainloop */
+	if (add_idle) {
+		priv->idle_source = g_idle_source_new();
+		g_source_set_callback(priv->idle_source, (GSourceFunc) obex_client_put_idle,
+					self, NULL);
+		g_source_attach(priv->idle_source, priv->context);
+		g_source_unref(priv->idle_source);
+	}
 
 	return TRUE;
 }
@@ -520,6 +521,8 @@ gboolean obex_client_close(ObexClient *self, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 	int err;
+
+	debug("");
 
 	err = obex_close_transfer(priv->handle);
 	if (err < 0) {

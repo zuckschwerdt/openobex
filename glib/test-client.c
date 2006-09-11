@@ -86,7 +86,6 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 	if (cond & OBEX_CLIENT_COND_OUT) {
 		char buf[10000];
 		int actual;
-		gsize written;
 
 		printf("OBEX_CLIENT_COND_OUT\n");
 
@@ -99,21 +98,22 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 		if (actual == 0)
 			obex_client_close(client, NULL);
 		else if (actual > 0) {
+			gsize written;
+
 			if (!obex_client_write(client, buf, actual, &written, NULL))
 				fprintf(stderr, "writing data failed\n");
+			else if (written < actual)
+				printf("Only %d/%d bytes were accepted by obex_client_write!\n",
+						written, actual);
+
 		}
 		else
 			fprintf(stderr, "read: %s\n", strerror(errno));
 	}
 	
-	if (cond & OBEX_CLIENT_COND_DONE) {
-		printf("OBEX_CLIENT_COND_DONE\n");
-
-		if (!obex_client_get_error(client, NULL))
-			printf("Transfer failed\n");
-		else
-			printf("Transfer completed\n");
-	}
+	if (cond & OBEX_CLIENT_COND_DONE)
+		printf("OBEX_CLIENT_COND_DONE: %s\n", obex_client_get_error(client, NULL) ?
+							"success" : "failure");
 		
 	if (cond & OBEX_CLIENT_COND_ERR)
 		printf("Error in transfer\n");

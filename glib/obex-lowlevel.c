@@ -32,6 +32,8 @@
 #include <time.h>
 #include <arpa/inet.h>
 
+#include <glib.h>
+
 #include "obex-debug.h"
 #include "obex-lowlevel.h"
 
@@ -65,6 +67,10 @@ typedef struct obex_connect_hdr {
 } __attribute__ ((packed)) obex_connect_hdr_t;
 
 typedef struct {
+	int event;
+} obex_ev_t;
+
+typedef struct {
 	unsigned long state;
 	uint32_t cid;
 
@@ -84,9 +90,23 @@ typedef struct {
 	time_t modtime;		/* Modification time of object under transfer */
 	int tx_max;		/* Maximum size for sent chunks of data */
 	int close;		/* If the user has called obex_close */
-	int do_cb;		/* Whether to call the transfer callback */
-	int cb_event;		/* Event to pass to the transfer callback */
+	GSList *events;		/* Events to signal when HandleInput returns */
 } obex_context_t;
+
+static void queue_event(obex_context_t *context, int e)
+{
+	obex_ev_t *event;
+
+	event = malloc(sizeof(obex_ev_t));
+	if (!event)
+		return;
+
+	memset(event, 0, sizeof(obex_ev_t));
+
+	event->event = e;
+
+	context->events = g_slist_append(context->events, event);
+}
 
 static int make_iso8601(time_t time, char *str, int len) {
     struct tm tm;
@@ -172,21 +192,21 @@ time_t parse_iso8601(const char *str, int len)
 }
 
 static void get_target_size_and_time(obex_t *handle, obex_object_t *object,
-                                     int *size, time_t *time) {
+					obex_context_t *context) {
     obex_headerdata_t hv;
     uint8_t hi;
     unsigned int hlen;
 
-    *size = -1;
-    *time = -1;
+    context->target_size = -1;
+    context->modtime = -1;
 
     while (OBEX_ObjectGetNextHeader(handle, object, &hi, &hv, &hlen)) {
         switch (hi) {
             case OBEX_HDR_LENGTH:
-                *size = hv.bq4;
+                context->target_size = hv.bq4;
                 break;
             case OBEX_HDR_TIME:
-                *time = parse_iso8601((char *) hv.bs, hlen);
+                context->modtime = parse_iso8601((char *) hv.bs, hlen);
                 break;
             default:
                 break;
@@ -257,33 +277,20 @@ static void obex_disconnect_done(obex_t *handle,
 
 void obex_do_callback(obex_t *handle)
 {
+	GSList *l;
 	obex_context_t *context = OBEX_GetUserData(handle);
 
-	if (!context->do_cb)
+	if (!context->events || ! context->callback || ! context->callback->command_ind)
 		return;
 
-	context->do_cb = 0;
+	for (l = context->events; l != NULL; l = l->next) {
+		obex_ev_t *event = l->data;
+		context->callback->command_ind(handle, event->event, context->user_data);
+		free(event);
+	}
 
-	if (context->callback && context->callback->transfer_ind)
-		context->callback->transfer_ind(handle, context->cb_event, context->user_data);
-}
-
-static void obex_abort_done(obex_t *handle)
-{
-	obex_context_t *context = OBEX_GetUserData(handle);
-
-	context->do_cb = 1;
-	context->cb_event = OBEX_EV_ABORT;
-}
-
-static void obex_transfer_done(obex_t *handle, int response)
-{
-	obex_context_t *context = OBEX_GetUserData(handle);
-
-	context->obex_rsp = response;
-
-	context->do_cb = 1;
-	context->cb_event = OBEX_EV_REQDONE;
+	g_slist_free(context->events);
+	context->events = NULL;
 }
 
 static void obex_readstream(obex_t *handle, obex_object_t *object)
@@ -293,8 +300,7 @@ static void obex_readstream(obex_t *handle, obex_object_t *object)
 	int actual, free_space;
 
 	if (context->counter == 0)
-		get_target_size_and_time(handle, object, &context->target_size,
-						&context->modtime);
+		get_target_size_and_time(handle, object, context);
 
 	actual = OBEX_ObjectReadStream(handle, object, &buf);
 	if (actual <= 0) {
@@ -319,8 +325,7 @@ static void obex_readstream(obex_t *handle, obex_object_t *object)
 	debug("OBEX_SuspendRequest");
 	OBEX_SuspendRequest(handle, object);
 
-	context->do_cb = 1;
-	context->cb_event = OBEX_EV_STREAMAVAIL;
+	queue_event(context, OBEX_EV_STREAMAVAIL);
 }
 
 static void obex_writestream(obex_t *handle, obex_object_t *object)
@@ -344,14 +349,16 @@ static void obex_writestream(obex_t *handle, obex_object_t *object)
 		else
 			context->data_start += send_size;
 
-		if (!context->close) {
+		if (!context->close && context->data_length == 0) {
 			debug("OBEX_SuspendRequest");
 			OBEX_SuspendRequest(handle, object);
-			context->do_cb = 1;
-			context->cb_event = OBEX_EV_STREAMEMPTY;
+			queue_event(context, OBEX_EV_STREAMEMPTY);
 		}
 	}
 	else {
+		if (context->counter < context->target_size)
+			debug("Sending stream end but only %d/%d bytes sent",
+					context->counter, context->target_size);
 		hv.bs = NULL;
 		OBEX_ObjectAddHeader(handle, object, OBEX_HDR_BODY, hv, 0,
 					OBEX_FL_STREAM_DATAEND);
@@ -379,8 +386,12 @@ static void obex_event(obex_t *handle, obex_object_t *object,
 	case OBEX_EV_REQDONE:
 		debug("OBEX_EV_REQDONE");
 
-		if (context->pending) {
-			OBEX_Request(handle, context->pending);
+		context->obex_rsp = response;
+		queue_event(context, OBEX_EV_REQDONE);
+
+		if (context->pending && OBEX_Request(handle, context->pending) == 0) {
+			if (OBEX_ObjectGetCommand(handle, context->pending) == OBEX_CMD_PUT)
+				queue_event(context, OBEX_EV_STREAMEMPTY);
 			context->pending = NULL;
 		}
 
@@ -393,7 +404,6 @@ static void obex_event(obex_t *handle, obex_object_t *object,
 			break;
 		case OBEX_CMD_PUT:
 		case OBEX_CMD_GET:
-			obex_transfer_done(handle, response);
 			break;
 		case OBEX_CMD_SETPATH:
 			break;
@@ -416,7 +426,7 @@ static void obex_event(obex_t *handle, obex_object_t *object,
 		break;
 
 	case OBEX_EV_ABORT:
-		obex_abort_done(handle);
+		queue_event(context, OBEX_EV_ABORT);
 		break;
 
 	case OBEX_EV_STREAMEMPTY:
