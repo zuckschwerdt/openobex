@@ -531,7 +531,7 @@ int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
 	obex_context_t *context = OBEX_GetUserData(handle);
 	obex_object_t *object;
 	obex_headerdata_t hd;
-	int err;
+	int err, ret;
 
 	if (context->state != OBEX_OPEN && context->state != OBEX_CLOSED)
 		return -EISCONN;
@@ -553,13 +553,18 @@ int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
 
 	context->state = OBEX_CONNECT;
 
-	return obex_send_or_queue(handle, object);	
+	ret = obex_send_or_queue(handle, object);	
+	if (ret < 0)
+		OBEX_ObjectDelete(handle, object);
+
+	return ret;
 }
 
 int obex_disconnect(obex_t *handle)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
 	obex_object_t *object;
+	int ret;
 
 	if (context->state != OBEX_CONNECTED)
 		return -ENOTCONN;
@@ -573,7 +578,11 @@ int obex_disconnect(obex_t *handle)
 	if (context->callback && context->callback->disconn_ind)
 		context->callback->disconn_ind(handle, context->user_data);
 
-	return obex_send_or_queue(handle, object);
+	ret = obex_send_or_queue(handle, object);
+	if (ret < 0)
+		OBEX_ObjectDelete(handle, object);
+
+	return ret;
 }
 
 int obex_put(obex_t *handle, const char *type, const char *name, int size, time_t mtime)
@@ -675,10 +684,8 @@ int obex_put(obex_t *handle, const char *type, const char *name, int size, time_
 	OBEX_SuspendRequest(handle, object);
 
 	err = obex_send_or_queue(handle, object);
-	if (err < 0) {
-		context->target_size = -1;
+	if (err < 0)
 		OBEX_ObjectDelete(handle, object);
-	}
 
 	return err;
 }
@@ -849,4 +856,65 @@ int obex_get_response(obex_t *handle)
 	context->obex_rsp = OBEX_RSP_SUCCESS;
 
 	return rsp;
+}
+
+int obex_setpath(obex_t *handle, const char *path, int create)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+	obex_object_t *object;
+	obex_headerdata_t hd;
+	obex_setpath_hdr_t sphdr;
+	int ret;
+
+	if (context->state != OBEX_CONNECTED)
+		return -ENOTCONN;
+
+	object = OBEX_ObjectNew(handle, OBEX_CMD_SETPATH);
+	if (!object)
+		return -ENOMEM;
+
+	if (context->cid != CID_INVALID) {
+		hd.bq4 = context->cid;
+		OBEX_ObjectAddHeader(handle, object, OBEX_HDR_CONNECTION, hd, 4, 0);
+	}
+
+	memset(&sphdr, 0, sizeof(obex_setpath_hdr_t));
+
+	if (strcmp(path, "..") == 0) {
+		/* Can't create parent dir */
+		if (create)
+			return -EINVAL;
+		sphdr.flags = 0x03;
+	} else {
+		int len, ulen = (strlen(path) + 1) * 2;
+		uint8_t *unicode = malloc(ulen);
+
+		if (!create)
+			sphdr.flags = 0x02;
+
+		if (!unicode) {
+			OBEX_ObjectDelete(handle, object);
+			return -ENOMEM;
+		}
+
+		len = OBEX_CharToUnicode(unicode, (uint8_t *) path, ulen);
+		hd.bs = unicode;
+
+		ret = OBEX_ObjectAddHeader(handle, object, OBEX_HDR_NAME, hd, len, 0);
+		if (ret < 0) {
+			OBEX_ObjectDelete(handle, object);
+			free(unicode);
+			return ret;
+		}
+
+		free(unicode);
+	}
+
+	OBEX_ObjectSetNonHdrData(object, (uint8_t *) &sphdr, 2);
+
+	ret = obex_send_or_queue(handle, object);
+	if (ret < 0)
+		OBEX_ObjectDelete(handle, object);
+
+	return ret;
 }

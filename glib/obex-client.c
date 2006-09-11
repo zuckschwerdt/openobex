@@ -547,3 +547,34 @@ gboolean obex_client_get_error(ObexClient *self, GError **error)
 	return FALSE;
 }
 
+gboolean obex_client_mkdir(ObexClient *self, const gchar *path, GError **error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	debug("");
+
+	err = obex_setpath(priv->handle, path, 1);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+gboolean obex_client_chdir(ObexClient *self, const gchar *path, GError **error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	debug("");
+
+	err = obex_setpath(priv->handle, path, 0);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
+
+	return TRUE;
+}

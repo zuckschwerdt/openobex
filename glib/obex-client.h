@@ -110,6 +110,10 @@ gboolean obex_client_close(ObexClient *self, GError **error);
 
 gboolean obex_client_get_error(ObexClient *self, GError **error);
 
+gboolean obex_client_mkdir(ObexClient *self, const gchar *path, GError **error);
+
+gboolean obex_client_chdir(ObexClient *self, const gchar *path, GError **error);
+
 G_END_DECLS
 
 #endif /* __OBEX_CLIENT_H */
