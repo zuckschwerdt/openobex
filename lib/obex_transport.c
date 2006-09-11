@@ -33,6 +33,7 @@
 #endif
 
 #include <string.h>
+#include <unistd.h>
 #include <stdio.h>
 
 #include "obex_main.h"
