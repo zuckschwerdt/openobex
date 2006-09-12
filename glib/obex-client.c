@@ -480,6 +480,20 @@ gboolean obex_client_write(ObexClient *self, const gchar *buf, gsize count,
 	return TRUE;
 }
 
+gboolean obex_client_flush(ObexClient *self, GError **error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	err = obex_flush(priv->handle);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 gboolean obex_client_abort(ObexClient *self, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);

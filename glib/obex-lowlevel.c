@@ -811,6 +811,21 @@ int obex_write(obex_t *handle, const char *buf, size_t count, size_t *bytes_writ
 
 	context->data_length += *bytes_written;
 
+	if (context->data_length >= context->tx_max || *bytes_written == free_space) {
+		debug("OBEX_ResumeRequest");
+		OBEX_ResumeRequest(handle);
+	}
+
+	return 0;
+}
+
+int obex_flush(obex_t *handle)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+
+	if (OBEX_ObjectGetCommand(handle, NULL) != OBEX_CMD_PUT)
+		return -EINVAL;
+
 	if (context->data_length) {
 		debug("OBEX_ResumeRequest");
 		OBEX_ResumeRequest(handle);

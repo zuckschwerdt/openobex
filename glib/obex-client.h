@@ -146,6 +146,8 @@ gboolean obex_client_read(ObexClient *self, gchar *buf, gsize count,
 gboolean obex_client_write(ObexClient *self, const gchar *buf, gsize count,
 					gsize *bytes_written, GError **error);
 
+gboolean obex_client_flush(ObexClient *self, GError **error);
+
 gboolean obex_client_abort(ObexClient *self, GError **error);
 
 gboolean obex_client_close(ObexClient *self, GError **error);

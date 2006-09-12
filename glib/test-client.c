@@ -68,7 +68,7 @@ static int open_device(const char *device)
 static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data)
 {
 	GError *gerr = NULL;
-	int *input = data;
+	int *io = data;
 
 	if (cond & OBEX_CLIENT_COND_IN) {
 		gchar buf[1024];
@@ -76,32 +76,36 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 
 		printf("OBEX_CLIENT_COND_IN\n");
 
-		obex_client_read(client, buf, sizeof(buf), &len, &gerr);
+		do {
+			obex_client_read(client, buf, sizeof(buf), &len, &gerr);
 
-		if (gerr != NULL) {
-			printf("obex_client_read failed: %s\n", gerr->message);
-			g_error_free(gerr);
-			gerr = NULL;
-		} else {
+			if (gerr != NULL) {
+				printf("obex_client_read failed: %s\n", gerr->message);
+				g_error_free(gerr);
+				gerr = NULL;
+				break;
+			}
+
 			printf("Data buffer with size %zd available\n", len);
 
-			if (len > 0)
-				printf("%s\n", buf);
-		}
+			if (len > 0 && *io >= 0)
+				write(*io, buf, len);	
+
+		} while (len == sizeof(buf));
 	}
 
 	if (cond & OBEX_CLIENT_COND_OUT) {
 		char buf[10000];
-		int actual;
+		ssize_t actual;
 
 		printf("OBEX_CLIENT_COND_OUT\n");
 
-		if (*input < 0) {
+		if (*io < 0) {
 			printf("No data to send!\n");
 			return;
 		}
 
-		actual = read(*input, buf, sizeof(buf));
+		actual = read(*io, buf, sizeof(buf));
 		if (actual == 0) {
 			obex_client_close(client, &gerr);
 			if (gerr != NULL) {
@@ -110,6 +114,8 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 				g_error_free(gerr);
 				gerr = NULL;
 			}
+			close(*io);
+			*io = -1;
 		} else if (actual > 0) {
 			gsize written;
 
@@ -120,8 +126,10 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 				g_error_free(gerr);
 				gerr = NULL;
 			} else if (written < actual)
-				printf("Only %d/%d bytes were accepted by obex_client_write!\n",
+				printf("Only %zd/%zd bytes were accepted by obex_client_write!\n",
 						written, actual);
+			else
+				obex_client_flush(client, NULL);
 
 		}
 		else
@@ -147,7 +155,7 @@ int main(int argc, char *argv[])
 {
 	ObexClient *client;
 	struct sigaction sa;
-	int fd, input = -1;
+	int fd, io = -1;
 
 	g_type_init();
 
@@ -161,7 +169,7 @@ int main(int argc, char *argv[])
 
 	client = obex_client_new();
 
-	obex_client_add_watch(client, 0, transfer, &input);
+	obex_client_add_watch(client, 0, transfer, &io);
 
 	obex_client_attach_fd(client, fd);
 
@@ -173,8 +181,8 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 
-		input = open(argv[1], O_RDONLY);
-		if (input < 0) {
+		io = open(argv[1], O_RDONLY);
+		if (io < 0) {
 			fprintf(stderr, "open(%s): %s\n", argv[1], strerror(errno));
 			return 1;
 		}
@@ -194,8 +202,8 @@ int main(int argc, char *argv[])
 
 	obex_client_destroy(client);
 
-	if (input >= 0)
-		close(input);
+	if (io >= 0)
+		close(io);
 
 	close(fd);
 
