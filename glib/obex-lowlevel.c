@@ -585,6 +585,57 @@ int obex_disconnect(obex_t *handle)
 	return ret;
 }
 
+int obex_delete(obex_t *handle, const char *name)
+{
+	obex_context_t *context = OBEX_GetUserData(handle);
+	obex_object_t *object;
+	obex_headerdata_t hd;
+	int err;
+
+	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECT
+					&& context->state != OBEX_CONNECTED)
+		return -ENOTCONN;
+
+	object = OBEX_ObjectNew(handle, OBEX_CMD_PUT);
+	if (!object)
+		return -ENOMEM;
+
+	if (context->cid != CID_INVALID) {
+		hd.bq4 = context->cid;
+		OBEX_ObjectAddHeader(handle, object,
+			OBEX_HDR_CONNECTION, hd, 4, OBEX_FL_FIT_ONE_PACKET);
+	}
+
+	if (name) {
+		int len, ulen = (strlen(name) + 1) * 2;
+		uint8_t *unicode = malloc(ulen);
+
+		if (!unicode) {
+			OBEX_ObjectDelete(handle, object);
+			return -ENOMEM;
+		}
+
+		len = OBEX_CharToUnicode(unicode, (uint8_t *) name, ulen);
+		hd.bs = unicode;
+
+		err = OBEX_ObjectAddHeader(handle, object,
+			OBEX_HDR_NAME, hd, len, OBEX_FL_FIT_ONE_PACKET);
+		if (err < 0) {
+			OBEX_ObjectDelete(handle, object);
+			free(unicode);
+			return err;
+                }
+
+                free(unicode);
+        }
+
+	err = obex_send_or_queue(handle, object);
+	if (err < 0)
+		OBEX_ObjectDelete(handle, object);
+
+	return err;
+}
+
 int obex_put(obex_t *handle, const char *type, const char *name, int size, time_t mtime)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);

@@ -158,6 +158,8 @@ gboolean obex_client_mkdir(ObexClient *self, const gchar *path, GError **error);
 
 gboolean obex_client_chdir(ObexClient *self, const gchar *path, GError **error);
 
+gboolean obex_client_delete(ObexClient *self, const gchar *name, GError **error);
+
 G_END_DECLS
 
 #endif /* __OBEX_CLIENT_H */

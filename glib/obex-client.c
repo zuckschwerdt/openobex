@@ -569,3 +569,19 @@ gboolean obex_client_chdir(ObexClient *self, const gchar *path, GError **error)
 
 	return TRUE;
 }
+
+gboolean obex_client_delete(ObexClient *self, const gchar *name, GError **error)
+{
+	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
+	int err;
+
+	debug("");
+
+	err = obex_delete(priv->handle, name);
+	if (err < 0) {
+		err2gerror(-err, error);
+		return FALSE;
+	}
+
+	return TRUE;
+}

@@ -45,3 +45,4 @@ int obex_close_transfer(obex_t *handle);
 int obex_get_response(obex_t *handle);
 void obex_do_callback(obex_t *handle);
 int obex_setpath(obex_t *handle, const char *path, int create);
+int obex_delete(obex_t *handle, const char *name);
