@@ -114,31 +114,56 @@ typedef union {
 #define OBEX_TRANS_USB		6
 
 /* Standard headers */
-#define OBEX_HDR_EMPTY		0x00 /* Empty header (buggy OBEX servers) */
-#define OBEX_HDR_COUNT		0xc0 /* Number of objects (used by connect) */
-#define OBEX_HDR_NAME		0x01 /* Name of the object */
-#define OBEX_HDR_TYPE		0x42 /* Type of the object */
-#define OBEX_HDR_LENGTH		0xc3 /* Total lenght of object */
-#define OBEX_HDR_TIME		0x44 /* Last modification time of (ISO8601) */
-#define OBEX_HDR_TIME2		0xC4 /* Deprecated use HDR_TIME instead */
-#define OBEX_HDR_DESCRIPTION	0x05 /* Description of object */
-#define OBEX_HDR_TARGET		0x46 /* Identifies the target for the object */
-#define OBEX_HDR_HTTP		0x47 /* An HTTP 1.x header */
-#define OBEX_HDR_BODY		0x48 /* Data part of the object */
-#define OBEX_HDR_BODY_END	0x49 /* Last data part of the object */
-#define OBEX_HDR_WHO		0x4a /* Identifies the sender of the object */
-#define OBEX_HDR_CONNECTION	0xcb /* Connection identifier */
-#define OBEX_HDR_APPARAM	0x4c /* Application parameters */
-#define OBEX_HDR_AUTHCHAL	0x4d /* Authentication challenge */
-#define OBEX_HDR_AUTHRESP	0x4e /* Authentication response */
-#define OBEX_HDR_CREATOR	0xcf /* indicates the creator of an object */
-#define OBEX_HDR_WANUUID	0x50 /* uniquely identifies the network client
-					(OBEX server) */
-#define OBEX_HDR_OBJECTCLASS	0x51 /* OBEX Object class of object */
-#define OBEX_HDR_SESSIONPARAM	0x52 /* Parameters used in session
-					commands/responses */
-#define OBEX_HDR_SESSIONSEQ	0x93 /* Sequence number used in each OBEX
-					packet for reliability */
+#define OBEX_HDR_TYPE_UNICODE	(0 << 6)  /* zero terminated unicode string (network byte order) */
+#define OBEX_HDR_TYPE_BYTES	(1 << 6)  /* byte array */
+#define OBEX_HDR_TYPE_UINT8	(2 << 6)  /* 8bit unsigned integer */
+#define OBEX_HDR_TYPE_UINT32	(3 << 6)  /* 32bit unsigned integer */
+#define OBEX_HDR_TYPE_MASK	0xc0
+
+#define OBEX_HDR_ID_COUNT	 0x00	/* Number of objects (used by connect) */
+#define OBEX_HDR_ID_NAME	 0x01	/* Name of the object */
+#define OBEX_HDR_ID_TYPE	 0x02	/* Type of the object */
+#define OBEX_HDR_ID_LENGTH	 0x03	/* Total lenght of object */
+#define OBEX_HDR_ID_TIME	 0x04	/* Last modification time of (ISO8601) */
+#define OBEX_HDR_ID_DESCRIPTION	 0x05	/* Description of object */
+#define OBEX_HDR_ID_TARGET	 0x06	/* Identifies the target for the object */
+#define OBEX_HDR_ID_HTTP	 0x07	/* An HTTP 1.x header */
+#define OBEX_HDR_ID_BODY	 0x08	/* Data part of the object */
+#define OBEX_HDR_ID_BODY_END	 0x09	/* Last data part of the object */
+#define OBEX_HDR_ID_WHO		 0x0a	/* Identifies the sender of the object */
+#define OBEX_HDR_ID_CONNECTION	 0x0b	/* Connection identifier */
+#define OBEX_HDR_ID_APPARAM	 0x0c	/* Application parameters */
+#define OBEX_HDR_ID_AUTHCHAL	 0x0d	/* Authentication challenge */
+#define OBEX_HDR_ID_AUTHRESP	 0x0e	/* Authentication response */
+#define OBEX_HDR_ID_CREATOR	 0x0f	/* indicates the creator of an object */
+#define OBEX_HDR_ID_WANUUID	 0x10	/* uniquely identifies the network client (OBEX server) */
+#define OBEX_HDR_ID_OBJECTCLASS	 0x11	/* OBEX Object class of object */
+#define OBEX_HDR_ID_SESSIONPARAM 0x12	/* Parameters used in session commands/responses */
+#define OBEX_HDR_ID_SESSIONSEQ	 0x13	/* Sequence number used in each OBEX packet for reliability */
+#define OBEX_HDR_ID_MASK	 0x3f
+
+#define OBEX_HDR_EMPTY		0x00	/* Empty header (buggy OBEX servers) */
+#define OBEX_HDR_COUNT		(OBEX_HDR_ID_COUNT        | OBEX_HDR_TYPE_UINT32 )
+#define OBEX_HDR_NAME		(OBEX_HDR_ID_NAME         | OBEX_HDR_TYPE_UNICODE)
+#define OBEX_HDR_TYPE		(OBEX_HDR_ID_TYPE         | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_LENGTH		(OBEX_HDR_ID_LENGTH       | OBEX_HDR_TYPE_UINT32 )
+#define OBEX_HDR_TIME		(OBEX_HDR_ID_TIME         | OBEX_HDR_TYPE_BYTES  ) /* Format: ISO 8601 */
+#define OBEX_HDR_TIME2		(OBEX_HDR_ID_TIME         | OBEX_HDR_TYPE_UINT32 ) /* Deprecated use HDR_TIME instead */
+#define OBEX_HDR_DESCRIPTION	(OBEX_HDR_ID_DESCRIPTION  | OBEX_HDR_TYPE_UNICODE)
+#define OBEX_HDR_TARGET		(OBEX_HDR_ID_TARGET       | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_HTTP		(OBEX_HDR_ID_HTTP         | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_BODY		(OBEX_HDR_ID_BODY         | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_BODY_END	(OBEX_HDR_ID_BODY_END     | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_WHO		(OBEX_HDR_ID_WHO          | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_CONNECTION	(OBEX_HDR_ID_CONNECTION   | OBEX_HDR_TYPE_UINT32 )
+#define OBEX_HDR_APPARAM	(OBEX_HDR_ID_APPARAM      | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_AUTHCHAL	(OBEX_HDR_ID_AUTHCHAL     | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_AUTHRESP	(OBEX_HDR_ID_AUTHRESP     | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_CREATOR	(OBEX_HDR_ID_CREATOR      | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_WANUUID	(OBEX_HDR_ID_WANUUID      | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_OBJECTCLASS	(OBEX_HDR_ID_OBJECTCLASS  | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_SESSIONPARAM	(OBEX_HDR_ID_SESSIONPARAM | OBEX_HDR_TYPE_BYTES  )
+#define OBEX_HDR_SESSIONSEQ	(OBEX_HDR_ID_SESSIONSEQ   | OBEX_HDR_TYPE_UINT8  )
 
 /* Commands */
 #define OBEX_CMD_CONNECT	0x00
