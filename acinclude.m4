@@ -136,12 +136,11 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	if (test "${bluetooth_enable}" = "yes" && test "${bluez_found}" = "yes"); then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
-		REQUIRES="bluez"
 	fi
 
 	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
 		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
-		AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb.pc, REQUIRES="$REQUIRES libusb")
+		AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb.pc, REQUIRES="libusb")
 	fi
 
 	AM_CONDITIONAL(GLIB, test "${glib_enable}" = "yes" && test "${glib_found}" = "yes")

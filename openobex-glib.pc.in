@@ -6,6 +6,7 @@ includedir=@includedir@
 Name: OpenOBEX
 Description: GLib integration of the Object Exchange protocol
 Version: @VERSION@
-Requires: openobex glib-2.0
+Requires: glib-2.0
+Requires.private: openobex
 Libs: -L${libdir} -lopenobex-glib
 Cflags: -I${includedir}
