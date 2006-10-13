@@ -267,7 +267,7 @@ int obex_data_indication(obex_t *self, uint8_t *buf, int buflen)
 		size = ntohs(hdr->len);
 
 		actual = 0;
-		if(msg->data_size != (int) ntohs(hdr->len)) {
+		if(msg->data_size < (int) ntohs(hdr->len)) {
 
 			actual = obex_transport_read(self, size - msg->data_size, buf,
 				buflen);

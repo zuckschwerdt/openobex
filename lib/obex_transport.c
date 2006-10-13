@@ -455,7 +455,8 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	case OBEX_TRANS_INET:
 	case OBEX_TRANS_FD:
 		actual = read(self->fd, buf_reserve_end(msg, max), max);
-		buf_remove_end(msg, max - actual);
+		if (actual > 0)
+			buf_remove_end(msg, max - actual);
 		break;
 #ifdef HAVE_USB 
 	case OBEX_TRANS_USB:
