@@ -37,7 +37,7 @@
 #include <winsock.h>
 
 #else /* _WIN32 */
-/* Linux case */
+/* Linux/FreeBSD/NetBSD case */
 
 #include <string.h>
 #include <unistd.h>
@@ -46,8 +46,18 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#ifdef HAVE_BLUETOOTH_LINUX
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
+#endif
+#ifdef HAVE_BLUETOOTH_NETBSD
+#define rc_family    bt_family
+#define rc_bdaddr    bt_bdaddr
+#define rc_channel   bt_channel
+#define sockaddr_rc  sockaddr_bt
+#include <bluetooth.h>
+#include <netbt/rfcomm.h>
+#endif
 
 #endif /* _WIN32 */
 

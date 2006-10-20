@@ -46,7 +46,12 @@
 #include <stdio.h>
 
 #ifdef HAVE_BLUETOOTH
+#ifdef HAVE_BLUETOOTH_LINUX
 #include <bluetooth/bluetooth.h>
+#endif
+#ifdef HAVE_BLUETOOTH_NETBSB
+#include <bluetooth.h>
+#endif
 #endif /*HAVE_BLUETOOTH*/
 
 #endif /* _WIN32 */
