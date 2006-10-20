@@ -81,6 +81,20 @@ AC_DEFUN([AC_PATH_BLUEZ], [
 	AC_SUBST(BLUEZ_LIBS)
 ])
 
+AC_DEFUN([AC_PATH_BLUETOOTH], [
+	case $host in
+	*-*-linux*)
+		AC_PATH_BLUEZ
+		;;
+	*-*-freebsd*)
+		AC_PATH_FREEBSDBT
+		;;
+	*-*-netbsd*)
+		AC_PATH_NETBSDBT
+		;;
+	esac
+])
+
 AC_DEFUN([AC_PATH_USB], [
 	PKG_CHECK_MODULES(USB, libusb, usb_found=yes, AC_MSG_RESULT(no))
 	AC_SUBST(USB_CFLAGS)
