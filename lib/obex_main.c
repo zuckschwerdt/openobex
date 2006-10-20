@@ -49,6 +49,10 @@
 #ifdef HAVE_BLUETOOTH_LINUX
 #include <bluetooth/bluetooth.h>
 #endif
+#ifdef HAVE_BLUETOOTH_FREEBSD
+#include <bluetooth.h>
+#define BTPROTO_RFCOMM  BLUETOOTH_PROTO_RFCOMM
+#endif
 #ifdef HAVE_BLUETOOTH_NETBSB
 #include <bluetooth.h>
 #endif

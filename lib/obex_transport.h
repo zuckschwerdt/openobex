@@ -44,6 +44,10 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
 #endif
+#ifdef HAVE_BLUETOOTH_FREEBSD
+#include <bluetooth.h>
+#define sockaddr_rc  sockaddr_rfcomm
+#endif
 #ifdef HAVE_BLUETOOTH_NETBSD
 #include <bluetooth.h>
 #include <netbt/rfcomm.h>

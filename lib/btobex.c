@@ -50,6 +50,13 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
 #endif
+#ifdef HAVE_BLUETOOTH_FREEBSD
+#include <bluetooth.h>
+#define sockaddr_rc  sockaddr_rfcomm
+#define rc_family    rfcomm_family
+#define rc_bdaddr    rfcomm_bdaddr
+#define rc_channel   rfcomm_channel
+#endif
 #ifdef HAVE_BLUETOOTH_NETBSD
 #define rc_family    bt_family
 #define rc_bdaddr    bt_bdaddr

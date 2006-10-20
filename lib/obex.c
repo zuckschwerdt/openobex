@@ -61,6 +61,9 @@
 #endif
 #ifdef HAVE_BLUETOOTH
 #include "btobex.h"
+#ifdef HAVE_BLUETOOTH_FREEBSD
+#define BDADDR_ANY  NG_HCI_BDADDR_ANY
+#endif
 #else
 // This is to workaround compilation without Bluetooth support. - Jean II
 typedef char *bdaddr_t;
