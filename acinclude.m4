@@ -55,6 +55,26 @@ AC_DEFUN([AC_PATH_IRDA], [
 	])
 ])
 
+AC_DEFUN([AC_PATH_NETBSDBT], [
+	AC_CACHE_CHECK([for NetBSD Bluetooth support], netbsdbt_found, [
+		AC_TRY_COMPILE([
+				#include <bluetooth.h>
+			], [
+				struct sockaddr_bt *bt;
+			], netbsdbt_found=yes, netbsdbt_found=no)
+	])
+])
+
+AC_DEFUN([AC_PATH_FREEBSDBT], [
+	AC_CACHE_CHECK([for FreeBSD Bluetooth support], freebsdbt_found, [
+		AC_TRY_COMPILE([
+				#include <bluetooth.h>
+			], [
+				struct sockaddr_rfcomm *rfcomm;
+			], freebsdbt_found=yes, freebsdbt_found=no)
+	])
+])
+
 AC_DEFUN([AC_PATH_BLUEZ], [
 	PKG_CHECK_MODULES(BLUEZ, bluez, bluez_found=yes, AC_MSG_RESULT(no))
 	AC_SUBST(BLUEZ_CFLAGS)
@@ -134,8 +154,19 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		AC_DEFINE(HAVE_IRDA, 1, [Define if system supports IrDA and it's enabled])
 	fi
 
+	if (test "${bluetooth_enable}" = "yes" && test "${netbsdbt_found}" = "yes"); then
+		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
+		AC_DEFINE(HAVE_BLUETOOTH_NETBSD, 1, [Define if system supports Bluetooth stack for NetBSD])
+	fi
+
+	if (test "${bluetooth_enable}" = "yes" && test "${freebsdbt_found}" = "yes"); then
+		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
+		AC_DEFINE(HAVE_BLUETOOTH_FREEBSD, 1, [Define if system supports Bluetooth stack for FreeBSD])
+	fi
+
 	if (test "${bluetooth_enable}" = "yes" && test "${bluez_found}" = "yes"); then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
+		AC_DEFINE(HAVE_BLUETOOTH_LINUX, 1, [Define if system supports Bluetooth stack for Linux])
 	fi
 
 	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
