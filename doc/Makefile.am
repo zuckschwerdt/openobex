@@ -29,7 +29,7 @@ clean:
 	 (echo "*** You need to install DocBook stylesheets ***"; \
 	  exit 1)
 	-$(RM) -r $@
-	docbook2html $<
+	docbook2html -o $@ $<
 	if [ ! -z "$(JPG-$@)" ]; then cp $(JPG-$@) $@; fi
 
 
