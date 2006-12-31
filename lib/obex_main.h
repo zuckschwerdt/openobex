@@ -96,9 +96,8 @@ extern int obex_dump;
 #  endif /* OBEX_DUMP != 0 */
 
 #else /* _WIN32 */
-
-void DEBUG(unsigned int n, ...);
-void DUMPBUFFERS(n, label, msg);
+#define DEBUG(n, format, args...)
+#define DUMPBUFFER(n, label, msg)
 
 #endif /* _WIN32 */
 

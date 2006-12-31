@@ -38,7 +38,7 @@
 #include <errno.h>
 
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #define ESOCKTNOSUPPORT 1
 #else /* _WIN32 */
 

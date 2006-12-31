@@ -34,7 +34,7 @@
 #ifdef HAVE_BLUETOOTH
 
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 
 #else /* _WIN32 */
 /* Linux/FreeBSD/NetBSD case */

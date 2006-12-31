@@ -38,7 +38,7 @@
 #include <string.h>
 
 #if _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #else
 
 #include <sys/stat.h>

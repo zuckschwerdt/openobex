@@ -33,7 +33,7 @@
 #endif
 
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #else /* _WIN32 */
 
 #include <unistd.h>

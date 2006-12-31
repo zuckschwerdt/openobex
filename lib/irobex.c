@@ -35,7 +35,7 @@
 #ifdef HAVE_IRDA
 
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 
 #include <irda_wrap.h>
 

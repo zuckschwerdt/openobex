@@ -35,7 +35,8 @@
 #include <string.h>
 
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #else
 
 #include <sys/types.h>

@@ -44,6 +44,15 @@ AC_DEFUN([AC_INIT_OPENOBEX], [
 	AC_DEFINE_UNQUOTED(CONFIGDIR, "${configdir}", [Directory for the configuration files])
 ])
 
+AC_DEFUN([AC_PATH_WIN32], [
+	case $host in
+	*-*-mingw32*)
+		EXTRA_LIBS="$EXTRA_LIBS -lws2_32"
+		;;
+	esac
+	AC_SUBST(EXTRA_LIBS)
+])
+
 AC_DEFUN([AC_PATH_IRDA], [
 	AC_CACHE_CHECK([for IrDA support], irda_found, [
 		AC_TRY_COMPILE([
@@ -96,7 +105,15 @@ AC_DEFUN([AC_PATH_BLUETOOTH], [
 ])
 
 AC_DEFUN([AC_PATH_USB], [
-	PKG_CHECK_MODULES(USB, libusb, usb_found=yes, AC_MSG_RESULT(no))
+	case $host in
+	*-*-mingw32*)
+		USB_CFLAGS=""
+		USB_LIBS="-lusb"
+		;;
+	*)
+		PKG_CHECK_MODULES(USB, libusb, usb_found=yes, AC_MSG_RESULT(no))
+		;;
+	esac
 	AC_SUBST(USB_CFLAGS)
 	AC_SUBST(USB_LIBS)
 	AC_CHECK_LIB(usb, usb_get_busses, dummy=yes, AC_DEFINE(NEED_USB_GET_BUSSES, 1, [Define to 1 if you need the usb_get_busses() function.]))
