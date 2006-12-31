@@ -65,7 +65,7 @@ typedef struct {
 	/* Active data interface description, typically empty */
 	char *data_interface_active;
 	/* Internal information for the transport layer in the library */
-	struct obex_usb_intf_transport_t *interface;
+	struct obex_usb_intf_transport_t *intf;
 } obex_usb_intf_t;
 
 /* Generic OBEX interface information */

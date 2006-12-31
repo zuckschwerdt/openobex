@@ -264,7 +264,7 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 	memset(intf_array, 0, sizeof(obex_interface_t) * num);
 	num = 0;
 	while (current) {
-		intf_array[num].usb.interface = current;
+		intf_array[num].usb.intf = current;
 		usb_handle = usb_open(current->device);
 		get_intf_string(usb_handle, &intf_array[num].usb.manufacturer, 
 			current->device->descriptor.iManufacturer);
@@ -313,7 +313,7 @@ void usbobex_free_interfaces(int num, obex_interface_t *intf)
 		free(intf[i].usb.control_interface);
 		free(intf[i].usb.data_interface_idle);
 		free(intf[i].usb.data_interface_active);
-		free(intf[i].usb.interface);
+		free(intf[i].usb.intf);
 	}
 	free(intf);
 }

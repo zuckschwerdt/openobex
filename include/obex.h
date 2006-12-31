@@ -141,8 +141,8 @@ int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu);
 /*  
  * OBEX interface discovery API 
  */
- int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces);
- int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *interface);
+ int OBEX_FindInterfaces(obex_t *self, obex_interface_t **intf);
+ int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *intf);
  void OBEX_FreeInterfaces(obex_t *self);
 
 #ifdef __cplusplus

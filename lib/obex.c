@@ -1122,7 +1122,7 @@ int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
  *  An easier connect function to connect to a discovered interface (currently
  *  USB OBEX only). 
  */
-int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *interface)
+int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *intf)
 {
 	DEBUG(4, "\n");
 
@@ -1133,12 +1133,12 @@ int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *interface)
 		return -EBUSY;
 	}
 
-	obex_return_val_if_fail(interface != NULL, -1);
+	obex_return_val_if_fail(intf != NULL, -1);
 	switch (self->trans.type) {
 	case OBEX_TRANS_USB:
-		obex_return_val_if_fail(interface->usb.interface != NULL, -1);
+		obex_return_val_if_fail(intf->usb.intf != NULL, -1);
 #ifdef HAVE_USB
-		usbobex_prepare_connect(self, interface->usb.interface);
+		usbobex_prepare_connect(self, intf->usb.intf);
 		return obex_transport_connect_request(self);
 #else
 		return -ESOCKTNOSUPPORT;
