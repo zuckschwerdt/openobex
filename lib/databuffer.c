@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "obex_main.h"
+
 slist_t *slist_append(slist_t *list, void *element) 
 {
 	slist_t *node, *p;
@@ -286,22 +288,14 @@ void buf_dump(buf_t *p, const char *label)
 
 	n = 0;
 	for (i = 0; i < p->data_size; ++i) {
-#ifndef OBEX_SYSLOG
 		if (n == 0)
-			fprintf(stderr, "%s: ", label);
-		fprintf(stderr, "%02X ", p->data[i]);
+			log_debug("%s%s:", log_debug_prefix, label);
+		log_debug(" %02X", p->data[i]);
 		if (n >= 25 || i == p->data_size - 1) {
-			fprintf(stderr, "\n");
-#else
-		if (n == 0)
-			syslog(LOG_DEBUG, "OpenObex: %s: ", label);
-		syslog(LOG_DEBUG, "%02X ", p->data[i]);
-		if (n >= 25 || i == p->data_size - 1) {
-			syslog(LOG_DEBUG, "\n");
-#endif
-			n = -1;
-		}
-		n++;
+			log_debug("\n");
+			n = 0;
+		} else
+			n++;
 	}
 }
 

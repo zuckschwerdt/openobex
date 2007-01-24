@@ -61,45 +61,43 @@ typedef struct obex obex_t;
 #include "obex_transport.h"
 #include "databuffer.h"
 
-#ifdef OBEX_SYSLOG
+
+#if defined(OBEX_SYSLOG) && !defined(_WIN32)
 #include <syslog.h>
+#define log_debug(format, args...) syslog(LOG_DEBUG, format, ##args)
+#define log_debug_prefix "OpenOBEX: "
+#else
+#include <stdio.h>
+#define log_debug(format, args...) fprintf(stderr, format, ##args)
+#define log_debug_prefix ""
 #endif
 
-/* use 0 for none, 1 for sendbuff, 2 for receivebuff and 3 for both */
-#ifndef OBEX_DUMP
-#define OBEX_DUMP 0
-#endif
 
-/* use 0 for production, 1 for verification, >2 for debug */
-#ifndef OBEX_DEBUG
-#define OBEX_DEBUG 0
-#endif
-
-#ifndef _WIN32
-
-#  if OBEX_DEBUG
+/* use integer:  0 for production
+ *               1 for verification
+ *              >2 for debug
+ */
+#if OBEX_DEBUG
 extern int obex_debug;
-#    ifdef OBEX_SYSLOG
-#    define DEBUG(n, format, args...) if (obex_debug >= (n)) syslog(LOG_DEBUG, "OpenOBEX: %s(): " format, __FUNCTION__ , ##args)
-#    else
-#    define DEBUG(n, format, args...) if (obex_debug >= (n)) fprintf(stderr, "%s(): " format, __FUNCTION__ , ##args)
-#    endif	/* OBEX_SYSLOG */
-#  else
-#  define DEBUG(n, format, args...)
-#  endif /* OBEX_DEBUG != 0 */
-
-#  if OBEX_DUMP
-extern int obex_dump;
-#  define DUMPBUFFER(n, label, msg)	if (obex_dump & (n)) buf_dump(msg, label);
-#  else
-#  define DUMPBUFFER(n, label, msg)
-#  endif /* OBEX_DUMP != 0 */
-
-#else /* _WIN32 */
+#define DEBUG(n, format, args...) \
+        if (obex_debug >= (n)) \
+          log_debug("%s%s(): " format, log_debug_prefix, __FUNCTION__, ##args)
+#else
 #define DEBUG(n, format, args...)
-#define DUMPBUFFER(n, label, msg)
+#endif
 
-#endif /* _WIN32 */
+
+/* use bitmask: 0x1 for sendbuff
+ *              0x2 for receivebuff
+ */
+#if OBEX_DUMP
+extern int obex_dump;
+#define DUMPBUFFER(n, label, msg) \
+        if ((obex_dump & 0x3) & (n)) buf_dump(msg, label);
+#else
+#define DUMPBUFFER(n, label, msg)
+#endif
+
 
 #define OBEX_VERSION		0x10      /* OBEX Protocol Version 1.1 */
 
