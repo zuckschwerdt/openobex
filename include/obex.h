@@ -116,7 +116,13 @@ char *OBEX_ResponseToString(int rsp);
 char* OBEX_GetResponseMessage(obex_t *self, int rsp);
 
 /*
- * InOBEX API (TCP/IP)
+ * TcpOBEX API (IPv4/IPv6)
+ */
+ int TcpOBEX_ServerRegister(obex_t *self, struct sockaddr *addr, int addrlen);
+ int TcpOBEX_TransportConnect(obex_t *self, struct sockaddr *addr, int addrlen);
+
+/*
+ * InOBEX API (deprecated)
  */
  int InOBEX_ServerRegister(obex_t *self);
  int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen);

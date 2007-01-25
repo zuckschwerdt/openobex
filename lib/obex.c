@@ -941,10 +941,63 @@ void * OBEX_GetCustomData(obex_t *self)
 }
 
 /**
+ * TcpOBEX_ServerRegister - Start listening for incoming TCP connections
+ * @self: OBEX handle
+ * @addr: Address to bind to (*:650 if NULL)
+ * @addrlen: Length of address structure
+ *
+ * An easier server function to use for TCP/IP (TcpOBEX) only.
+ * It supports IPv4 (AF_INET) and IPv6 (AF_INET6).
+ * Note: INADDR_ANY will get mapped to IN6ADDR_ANY and using port 0
+ *       will select the default OBEX port.
+ *
+ * Returns -1 on error.
+ */
+int TcpOBEX_ServerRegister(obex_t *self, struct sockaddr *addr, int addrlen)
+{
+	DEBUG(3, "\n");
+
+	errno = EINVAL;
+	obex_return_val_if_fail(self != NULL, -1);
+
+	inobex_prepare_listen(self, addr, addrlen);
+	return obex_transport_listen(self);
+}
+
+/**
+ * TcpOBEX_TransportConnect - Connect TCP transport
+ * @self: OBEX handle
+ * @addr: Address to connect to ([::1]:650 if NULL)
+ * @addrlen: Length of address structure
+ *
+ * An easier connect function to use for TCP/IP (TcpOBEX) only.
+ * It supports IPv4 (AF_INET) and IPv6 (AF_INET6).
+ *
+ * Returns -1 on error.
+ */
+int TcpOBEX_TransportConnect(obex_t *self, struct sockaddr *addr, int addrlen)
+{
+     	DEBUG(4, "\n");
+
+	errno = EINVAL;
+	obex_return_val_if_fail(self != NULL, -1);
+
+	if (self->object)	{
+		DEBUG(1, "We are busy.\n");
+		errno = EBUSY;
+		return -1;
+	}
+
+	inobex_prepare_connect(self, addr, addrlen);
+	return obex_transport_connect_request(self);
+}
+/**
  * InOBEX_ServerRegister - Start listening for incoming connections
  * @self: OBEX handle
  *
  * An easier server function to use for TCP/IP (InOBEX) only.
+ *
+ * This function is deprecated, use TcpOBEX_ServerRegister() instead.
  *
  * Returns -1 on error.
  */
@@ -952,36 +1005,38 @@ int InOBEX_ServerRegister(obex_t *self)
 {
 	DEBUG(3, "\n");
 
-	obex_return_val_if_fail(self != NULL, -1);
-
-	inobex_prepare_listen(self, NULL, 0);
-	return obex_transport_listen(self);
+	return TcpOBEX_ServerRegister(self, NULL, 0);
 }
 
 /**
- * InOBEX_TransportConnect - Connect Inet transport
+ * InOBEX_TransportConnect - Connect Inet transport (deprecated)
  * @self: OBEX handle
+ * @saddr: Address to connect to
+ * @addrlen: Length of address
  *
  * An easier connect function to use for TCP/IP (InOBEX) only.
  *
- * Note : I would like feedback on this API to know which input
- * parameter make most sense. Thanks...
+ * This function is deprecated, use TcpOBEX_TransportConnect() instead.
+ *
+ * Returns -1 on error.
  */
 int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
      	DEBUG(4, "\n");
 
+	errno = EINVAL;
 	obex_return_val_if_fail(self != NULL, -1);
 
 	if (self->object)	{
 		DEBUG(1, "We are busy.\n");
-		return -EBUSY;
+		errno = EBUSY;
+		return -1;
 	}
 
+	errno = EINVAL;
 	obex_return_val_if_fail(saddr != NULL, -1);
 
-	inobex_prepare_connect(self, saddr, addrlen);
-	return obex_transport_connect_request(self);
+	return TcpOBEX_TransportConnect(self, saddr, addrlen);
 }
 
 /**

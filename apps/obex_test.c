@@ -359,7 +359,7 @@ int main (int argc, char *argv[])
 			case 'c':
 				/* First connect transport */
 				if(tcpobex) {
-					if(inet_connect(handle) < 0) {
+					if(TcpOBEX_TransportConnect(handle, NULL, 0) < 0) {
 						printf("Transport connect error! (TCP)\n");
 						break;
 					}
@@ -405,7 +405,7 @@ int main (int argc, char *argv[])
 			case 's':
 				/* First register server */
 				if(tcpobex) {
-					if(InOBEX_ServerRegister(handle) < 0) {
+					if(TcpOBEX_ServerRegister(handle, NULL, 0) < 0) {
 						printf("Server register error! (TCP)\n");
 						break;
 					}
