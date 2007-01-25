@@ -32,6 +32,7 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #else
 #include <netinet/in.h>
 #endif
@@ -63,7 +64,7 @@ typedef union {
 #ifdef HAVE_IRDA
 	struct sockaddr_irda irda;
 #endif /*HAVE_IRDA*/
-	struct sockaddr_in   inet;
+	struct sockaddr_in6  inet6;
 #ifdef HAVE_BLUETOOTH
 #ifdef HAVE_BLUETOOTH_LINUX
 	struct sockaddr_rc   rfcomm;

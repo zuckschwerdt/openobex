@@ -954,7 +954,7 @@ int InOBEX_ServerRegister(obex_t *self)
 
 	obex_return_val_if_fail(self != NULL, -1);
 
-	inobex_prepare_listen(self);
+	inobex_prepare_listen(self, NULL, 0);
 	return obex_transport_listen(self);
 }
 

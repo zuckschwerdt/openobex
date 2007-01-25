@@ -43,11 +43,42 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #endif /*_WIN32*/
 
 #include "obex_main.h"
 
 #define OBEX_PORT 650
+
+static void map_ip4to6(struct sockaddr_in *in, struct sockaddr_in6 *out)
+{
+	out->sin6_family = AF_INET6;
+	if (in->sin_port == 0)
+		out->sin6_port = htons(OBEX_PORT);
+	else
+		out->sin6_port = in->sin_port;
+	out->sin6_flowinfo = 0;
+
+	/* default, matches IN6ADDR_ANY */
+	memset(out->sin6_addr.s6_addr, 0, sizeof(out->sin6_addr.s6_addr));
+	switch (in->sin_addr.s_addr) {
+	case INADDR_ANY:
+		/* does not work, so use IN6ADDR_ANY
+		 * which includes INADDR_ANY
+		 */
+		break;
+	default:
+		/* map the IPv4 address to [::FFFF:<ipv4>]
+		 * see RFC2373 and RFC2553 for details
+		 */
+		out->sin6_addr.s6_addr16[10/2] = 0xFFFF;
+		out->sin6_addr.s6_addr[12] = (in->sin_addr.s_addr >> 24) & 0xFF;
+		out->sin6_addr.s6_addr[13] = (in->sin_addr.s_addr >> 16) & 0xFF;
+		out->sin6_addr.s6_addr[14] = (in->sin_addr.s_addr >>  8) & 0xFF;
+		out->sin6_addr.s6_addr[15] = (in->sin_addr.s_addr >>  0) & 0xFF;
+		break;
+	}
+}
 
 /*
  * Function inobex_prepare_connect (self, service)
@@ -57,10 +88,30 @@
  */
 void inobex_prepare_connect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	memcpy(&self->trans.peer, saddr, addrlen);
-	/* Override to be safe... */
-	self->trans.peer.inet.sin_family = AF_INET;
-	self->trans.peer.inet.sin_port = htons(OBEX_PORT);
+	struct sockaddr_in6 addr = {
+		.sin6_family       = AF_INET6,
+		.sin6_port         = htons(OBEX_PORT),
+#ifdef _WIN32
+		.sin6_addr.s6_addr = IN6ADDR_LOOPBACK_INIT,
+#else
+		.sin6_addr         = IN6ADDR_LOOPBACK_INIT,
+#endif
+		.sin6_flowinfo     = 0
+	};
+	if (saddr == NULL)
+		saddr = (struct sockaddr*)(&addr);
+	else
+		switch (saddr->sa_family){
+		case AF_INET6:
+			break;
+		case AF_INET:
+			map_ip4to6((struct sockaddr_in*)saddr,&addr);
+			/* no break */
+		default:
+			saddr = (struct sockaddr*)(&addr);
+			break;
+	}
+	memcpy(&self->trans.peer.inet6, saddr, sizeof(self->trans.self.inet6));
 }
 
 /*
@@ -69,12 +120,33 @@ void inobex_prepare_connect(obex_t *self, struct sockaddr *saddr, int addrlen)
  *    Prepare for INET-listen
  *
  */
-void inobex_prepare_listen(obex_t *self)
+void inobex_prepare_listen(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
+	struct sockaddr_in6 addr = {
+		.sin6_family       = AF_INET6,
+		.sin6_port         = htons(OBEX_PORT),
+#ifdef _WIN32
+		.sin6_addr.s6_addr = IN6ADDR_ANY_INIT,
+#else
+		.sin6_addr         = IN6ADDR_ANY_INIT,
+#endif
+		.sin6_flowinfo     = 0
+	};
 	/* Bind local service */
-	self->trans.self.inet.sin_family = AF_INET;
-	self->trans.self.inet.sin_port = htons(OBEX_PORT);
-	self->trans.self.inet.sin_addr.s_addr = INADDR_ANY;
+	if (saddr == NULL)
+		saddr = (struct sockaddr *) &addr;
+	else
+		switch (saddr->sa_family) {
+		case AF_INET6:
+			break;
+		case AF_INET:
+			map_ip4to6((struct sockaddr_in *) saddr, &addr);
+			/* no break */
+		default:
+			saddr = (struct sockaddr *) &addr;
+			break;
+		}
+	memcpy(&self->trans.self.inet6, saddr, sizeof(self->trans.self.inet6));
 }
 
 /*
@@ -87,7 +159,7 @@ int inobex_listen(obex_t *self)
 {
 	DEBUG(4, "\n");
 
-	self->serverfd = obex_create_socket(self, AF_INET);
+	self->serverfd = obex_create_socket(self, AF_INET6);
 	if(self->serverfd < 0) {
 		DEBUG(0, "Cannot create server-socket\n");
 		return -1;
@@ -95,9 +167,8 @@ int inobex_listen(obex_t *self)
 
 	//printf("TCP/IP listen %d %X\n", self->trans.self.inet.sin_port,
 	//       self->trans.self.inet.sin_addr.s_addr);
-	if (bind(self->serverfd, (struct sockaddr*) &self->trans.self.inet,
-		 sizeof(struct sockaddr_in))) 
-	{
+	if (bind(self->serverfd, (struct sockaddr *) &self->trans.self.inet6,
+						sizeof(struct sockaddr_in6))) {
 		DEBUG(0, "bind() Failed\n");
 		return -1;
 	}
@@ -121,10 +192,11 @@ int inobex_listen(obex_t *self)
  */
 int inobex_accept(obex_t *self)
 {
-	socklen_t addrlen = sizeof(struct sockaddr_in);
+	socklen_t addrlen = sizeof(struct sockaddr_in6);
 
-	self->fd = accept(self->serverfd, (struct sockaddr *) 
-		&self->trans.peer.inet, &addrlen);
+	self->fd = accept(self->serverfd,
+			  (struct sockaddr *) &self->trans.peer.inet6,
+			  &addrlen);
 
 	if(self->fd < 0)
 		return -1;
@@ -143,26 +215,30 @@ int inobex_accept(obex_t *self)
  */
 int inobex_connect_request(obex_t *self)
 {
-	unsigned char *addr;
+	char addr[INET6_ADDRSTRLEN];
 	int ret;
 
-	self->fd = obex_create_socket(self, AF_INET);
+	self->fd = obex_create_socket(self, AF_INET6);
 	if(self->fd < 0)
 		return -1;
 
 	/* Set these just in case */
-	self->trans.peer.inet.sin_family = AF_INET;
-	if (self->trans.peer.inet.sin_port == 0)
-		self->trans.peer.inet.sin_port = htons(OBEX_PORT);
+	if (self->trans.peer.inet6.sin6_port == 0)
+		self->trans.peer.inet6.sin6_port = htons(OBEX_PORT);
 
-	addr = (unsigned char *) &self->trans.peer.inet.sin_addr.s_addr;
+#ifndef _WIN32
+	if (!inet_ntop(AF_INET6,&self->trans.peer.inet6.sin6_addr,
+		       addr,sizeof(addr))) {
+		DEBUG(4, "Adress problem\n");
+		obex_delete_socket(self, self->fd);
+		self->fd = -1;
+		return -1;
+	}
+	DEBUG(2, "peer addr = [%s]:%u\n",addr,ntohs(self->trans.peer.inet6.sin6_port));
+#endif
 
-	DEBUG(2, "peer addr = %d.%d.%d.%d\n",
-		addr[0], addr[1], addr[2], addr[3]);
-
-
-	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.inet, 
-		      sizeof(struct sockaddr_in));
+	ret = connect(self->fd, (struct sockaddr *) &self->trans.peer.inet6,
+		      sizeof(struct sockaddr_in6));
 	if (ret < 0) {
 		DEBUG(4, "Connect failed\n");
 		obex_delete_socket(self, self->fd);
