@@ -202,7 +202,7 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
 		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
-		PKG_CHECK_EXISTS(libusb, [REQUIRES="libusb"])
+		AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb.pc, REQUIRES="libusb")
 	fi
 
 	AM_CONDITIONAL(GLIB, test "${glib_enable}" = "yes" && test "${glib_found}" = "yes")
