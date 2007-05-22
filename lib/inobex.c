@@ -72,10 +72,10 @@ static void map_ip4to6(struct sockaddr_in *in, struct sockaddr_in6 *out)
 		 * see RFC2373 and RFC2553 for details
 		 */
 		out->sin6_addr.s6_addr16[10/2] = 0xFFFF;
-		out->sin6_addr.s6_addr[12] = (in->sin_addr.s_addr >> 24) & 0xFF;
-		out->sin6_addr.s6_addr[13] = (in->sin_addr.s_addr >> 16) & 0xFF;
-		out->sin6_addr.s6_addr[14] = (in->sin_addr.s_addr >>  8) & 0xFF;
-		out->sin6_addr.s6_addr[15] = (in->sin_addr.s_addr >>  0) & 0xFF;
+		out->sin6_addr.s6_addr[12] = (in->sin_addr.s_addr >>  0) & 0xFF;
+		out->sin6_addr.s6_addr[13] = (in->sin_addr.s_addr >>  8) & 0xFF;
+		out->sin6_addr.s6_addr[14] = (in->sin_addr.s_addr >> 16) & 0xFF;
+		out->sin6_addr.s6_addr[15] = (in->sin_addr.s_addr >> 24) & 0xFF;
 		break;
 	}
 }

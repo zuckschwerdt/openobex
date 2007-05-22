@@ -193,6 +193,13 @@ int obex_transport_connect_request(obex_t *self)
 		break;
 #endif /*HAVE_IRDA*/
 	case OBEX_TRANS_INET:
+		/* needed as compat for apps that call OBEX_TransportConnect
+		 * instead of InOBEX_TransportConnect (e.g. obexftp)
+		 */
+		if (self->trans.peer.inet6.sin6_family == AF_INET)
+			inobex_prepare_connect(self,
+					       (struct sockaddr*) &self->trans.peer.inet6,
+					       sizeof(self->trans.peer.inet6));
 		ret = inobex_connect_request(self);
 		break;
 	case OBEX_TRANS_CUSTOM:
