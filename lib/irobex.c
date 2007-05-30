@@ -396,7 +396,7 @@ out_freesock:
 }
 
 /*
- * Function irobex_link_disconnect_request (self)
+ * Function irobex_disconnect_request (self)
  *
  *    Shutdown the IrTTP link
  *
@@ -413,7 +413,7 @@ int irobex_disconnect_request(obex_t *self)
 }
 
 /*
- * Function irobex_link_disconnect_server (self)
+ * Function irobex_disconnect_server (self)
  *
  *    Close the server socket
  *

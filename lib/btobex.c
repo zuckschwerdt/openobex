@@ -175,7 +175,7 @@ int btobex_accept(obex_t *self)
 }
 	
 /*
- * Function btobex_irda_connect_request (self)
+ * Function btobex_connect_request (self)
  *
  *    Open the RFCOMM connection
  *
@@ -225,7 +225,7 @@ out_freesock:
 }
 
 /*
- * Function btobex_link_disconnect_request (self)
+ * Function btobex_disconnect_request (self)
  *
  *    Shutdown the RFCOMM link
  *
@@ -244,7 +244,7 @@ int btobex_disconnect_request(obex_t *self)
 }
 
 /*
- * Function btobex_link_disconnect_server (self)
+ * Function btobex_disconnect_server (self)
  *
  *    Close the server socket
  *

@@ -379,7 +379,7 @@ err1:
 }
 
 /*
- * Function usbobex_link_disconnect_request (self)
+ * Function usbobex_disconnect_request (self)
  *
  *    Shutdown the USB link
  *
