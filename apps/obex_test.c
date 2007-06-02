@@ -286,6 +286,7 @@ int main (int argc, char *argv[])
 #endif	// _WIN32
 	}
 	else if(usbobex) {
+#ifdef HAVE_USB
 		int i, interfaces_number, intf_num;
 		switch (argc) {
 		case 2:
@@ -324,6 +325,10 @@ int main (int argc, char *argv[])
 			printf("Wrong number of arguments\n");
 			exit(0);
 		}
+#else
+		printf("Not compiled with USB support\n");
+		exit(0);
+#endif
 	}
 	else	{
 		printf("Using IrDA transport\n");
