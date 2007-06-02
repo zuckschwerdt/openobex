@@ -213,7 +213,7 @@ int irobex_accept(obex_t *self)
 #else
 	self->trans.mtu = OBEX_DEFAULT_MTU;
 #endif /* _WIN32 */
-	return 0;
+	return 1;
 }
 	
 /* Memory allocation for discovery */
