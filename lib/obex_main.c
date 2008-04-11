@@ -53,7 +53,7 @@
 #include <bluetooth.h>
 #define BTPROTO_RFCOMM  BLUETOOTH_PROTO_RFCOMM
 #endif
-#ifdef HAVE_BLUETOOTH_NETBSB
+#ifdef HAVE_BLUETOOTH_NETBSD
 #include <bluetooth.h>
 #endif
 #endif /*HAVE_BLUETOOTH*/
