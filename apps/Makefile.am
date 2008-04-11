@@ -18,7 +18,7 @@ obex_test_LDADD = $(top_builddir)/lib/libopenobex.la @BLUEZ_LIBS@ libmisc.a
 
 LDADD = $(top_builddir)/lib/libopenobex.la libmisc.a
 
-INCLUDES = @BLUEZ_CFLAGS@ -I$(top_builddir)/include
+INCLUDES = @BLUEZ_CFLAGS@ -I$(top_srcdir)/include
 endif
 
 MAINTAINERCLEANFILES = Makefile.in

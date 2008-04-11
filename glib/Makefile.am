@@ -27,7 +27,7 @@ endif
 
 AM_CFLAGS = @GLIB_CFLAGS@
 
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_srcdir)/include
 
 EXTRA_DIST = obex-marshal.list
 

@@ -24,7 +24,7 @@ libopenobex_la_LDFLAGS = \
 
 libopenobex_la_LIBADD = @USB_LIBS@ @EXTRA_LIBS@
 
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_srcdir)/include
 
 EXTRA_DIST = obex.sym win32compat.c
 
