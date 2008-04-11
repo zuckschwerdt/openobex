@@ -78,6 +78,10 @@ typedef union {
 #define OBEX_MODE_CLIENT	0
 #define OBEX_MODE_SERVER	1
 
+/* compatibility definitions */
+#define OBEX_CLIENT OBEX_MODE_CLIENT
+#define OBEX_SERVER OBEX_MODE_SERVER
+
 /* Possible events */
 #define OBEX_EV_PROGRESS	0	/* Progress has been made */
 #define OBEX_EV_REQHINT		1	/* An incoming request is about to come */
