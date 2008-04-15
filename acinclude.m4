@@ -53,7 +53,7 @@ AC_DEFUN([AC_PATH_WIN32], [
 	AC_SUBST(EXTRA_LIBS)
 ])
 
-AC_DEFUN([AC_PATH_IRDA], [
+AC_DEFUN([AC_PATH_IRDA_LINUX], [
 	AC_CACHE_CHECK([for IrDA support], irda_found, [
 		AC_TRY_COMPILE([
 				#include <sys/socket.h>
@@ -62,6 +62,33 @@ AC_DEFUN([AC_PATH_IRDA], [
 				struct irda_device_list l;
 			], irda_found=yes, irda_found=no)
 	])
+])
+
+AC_DEFUN([AC_PATH_IRDA_WIN32], [
+	AC_CACHE_VAL(irda_found, [
+		AC_CHECK_HEADERS(af_irda.h, irda_found=yes, irda_found=no,
+				 [
+				  #include <winsock2.h>
+		])
+	])
+	AC_MSG_CHECKING([for IrDA support])
+	AC_MSG_RESULT([$irda_found])
+])
+
+AC_DEFUN([AC_PATH_IRDA], [
+	case $host in
+	*-*-linux*)
+		AC_PATH_IRDA_LINUX
+		;;
+	*-*-mingw32*)
+		AC_PATH_IRDA_WIN32
+		;;
+	*)
+		irda_found=no;
+		AC_MSG_CHECKING([for IrDA support])
+		AC_MSG_RESULT([$irda_found])
+		;;
+	esac
 ])
 
 AC_DEFUN([AC_PATH_WINBT], [

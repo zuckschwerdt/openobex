@@ -2,14 +2,18 @@
 #define IRDA_WRAP_H
 
 #ifdef _WIN32
-#define _WIN32_WINNT
+
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 1
+#endif
 
 #include <af_irda.h>
-struct irda_device_list {DEVICELIST;};
-struct irda_device_info {IRDA_DEVICE_INFO;};
-struct sockaddr_irda {SOCKADDR_IRDA;};
-#define sir_name irdaServiceName
+#define irda_device_info _WINDOWS_IRDA_DEVICE_INFO
+#define irda_device_list _WINDOWS_DEVICELIST
+
+#define sockaddr_irda _SOCKADDR_IRDA
 #define sir_family irdaAddressFamily
+#define sir_name   irdaServiceName
 
 #else /* _WIN32 */
 
