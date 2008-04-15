@@ -2,14 +2,19 @@
 #include <config.h>
 #endif
 
+#include <openobex/obex.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <direct.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-
-#include <openobex/obex.h>
 
 #include "ircp.h"
 #include "ircp_client.h"
@@ -25,6 +30,12 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#endif
+
+#ifdef _WIN32
+#define getcwd(b,len) _getcwd(b,len)
+#define chdir(s) _chdir(s)
+#define S_IFDIR _S_IFDIR
 #endif
 
 #define TRUE  1
@@ -377,7 +388,7 @@ int ircp_put(ircp_client_t *cli, char *name)
 	}
 	
 	/* This is a directory. CD into it */
-	if(S_ISDIR(statbuf.st_mode)) {
+	if(statbuf.st_mode & S_IFDIR) {
 		char *newrealdir = NULL;
 		char *dirname;
 		

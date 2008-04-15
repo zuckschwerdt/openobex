@@ -31,15 +31,18 @@
 #ifndef OBEX_TEST_CABLE_H
 #define OBEX_TEST_CABLE_H
 
-#define CABLE_DEBUG 1
-
-
+#ifdef _WIN32
+#include <windows.h>
+#define tty_desc_t DCB
+#else
 #include <termios.h>
+#define tty_desc_t struct termios
+#endif
 
 #ifdef CABLE_DEBUG
 #define CDEBUG(format, args...) printf("%s(): " format, __FUNCTION__ , ##args)
 #else
-#define CDEBUG(args...)
+#define CDEBUG(format, args...)
 #endif
 
 struct cobex_context
@@ -47,7 +50,7 @@ struct cobex_context
 	const char *portname;
 	int ttyfd;
 	char inputbuf[500];
-	struct termios oldtio, newtio;
+	tty_desc_t oldtio, newtio;
 	int r320;
 };
 

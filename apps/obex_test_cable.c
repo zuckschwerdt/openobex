@@ -32,17 +32,21 @@
 #include <config.h>
 #endif
 
+#include <openobex/obex.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-#include <termios.h>
 
-#include <openobex/obex.h>
+#ifdef _WIN32
+#define strcasecmp(a,b) _stricmp(a,b)
+#else
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#endif
 
 #include "obex_test_cable.h"
 
@@ -60,6 +64,10 @@ static void cobex_cleanup(struct cobex_context *gt, int force);
 //
 int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbuflen, int timeout)
 {
+#ifdef _WIN32
+#warning "Implementation for win32 is missing!"
+	return -1;
+#else
 	fd_set ttyset;
 	struct timeval tv;
 	int fd;
@@ -151,6 +159,7 @@ int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbu
 	strncpy(rspbuf, answer, answer_size);
 	rspbuf[answer_size] = 0;
 	return 0;
+#endif
 }
 
 //
@@ -158,6 +167,9 @@ int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbu
 //
 static int cobex_init(struct cobex_context *gt)
 {
+#ifdef _WIN32
+#warning "Implementation for win32 is missing!"
+#else
 	char rspbuf[200];
 
 	CDEBUG("\n");
@@ -214,6 +226,7 @@ static int cobex_init(struct cobex_context *gt)
 		return 1;
 err:
 	cobex_cleanup(gt, TRUE);
+#endif
 	return -1;
 }
 
@@ -222,6 +235,7 @@ err:
 //
 static void cobex_cleanup(struct cobex_context *gt, int force)
 {
+#ifndef _WIN32
 	if(force)	{
 		// Send a break to get out of OBEX-mode
 #ifdef TCSBRKP
@@ -236,6 +250,7 @@ static void cobex_cleanup(struct cobex_context *gt, int force)
 	}
 	close(gt->ttyfd);
 	gt->ttyfd = -1;
+#endif
 }
 
 //

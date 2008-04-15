@@ -14,9 +14,11 @@ obex_test_SOURCES = \
 	obex_test_server.c obex_test_server.h \
 	obex_test_cable.c obex_test_cable.h
 
-obex_test_LDADD = $(top_builddir)/lib/libopenobex.la @BLUETOOTH_LIBS@ libmisc.a
+obex_test_LDADD = libmisc.a $(top_builddir)/lib/libopenobex.la @BLUETOOTH_LIBS@
 
-LDADD = $(top_builddir)/lib/libopenobex.la libmisc.a
+AM_CFLAGS = @OPENOBEX_CFLAGS@
+
+LDADD = libmisc.a $(top_builddir)/lib/libopenobex.la
 
 INCLUDES = @BLUETOOTH_CFLAGS@ -I$(top_srcdir)/include
 endif

@@ -32,22 +32,20 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <openobex/obex.h>
 
 #ifdef _WIN32
-#include <io.h>
 #include <windows.h>
+#include <io.h>
 #else
 #include <sys/stat.h>
 #include <unistd.h>
 #endif /*_WIN32 */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
-
-
-#include <openobex/obex.h>
 
 #include "obex_io.h"
 
@@ -205,6 +203,9 @@ obex_object_t *build_object_from_file(obex_t *handle, const char *filename, uint
  *    First remove path and add "/tmp/". Then save.
  *
  */
+#ifndef DEFFILEMODE
+#define DEFFILEMODE 0
+#endif
 int safe_save_file(char *name, const uint8_t *buf, int len)
 {
 	char *s = NULL;
@@ -222,11 +223,7 @@ int safe_save_file(char *name, const uint8_t *buf, int len)
 		s++;
 
 	strncat(filename, s, 250);
-#ifdef _WIN32
-	fd = open(filename, O_RDWR | O_CREAT, 0);
-#else
 	fd = open(filename, O_RDWR | O_CREAT, DEFFILEMODE);
-#endif
 
 	if ( fd < 0) {
 		perror( filename);

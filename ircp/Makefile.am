@@ -11,6 +11,8 @@ libircp_a_SOURCES = \
 
 bin_PROGRAMS = ircp 
 
+AM_CFLAGS = @OPENOBEX_CFLAGS@
+
 LDADD = libircp.a $(top_builddir)/lib/libopenobex.la
 
 INCLUDES = -I$(top_srcdir)/include

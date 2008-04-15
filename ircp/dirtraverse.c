@@ -7,8 +7,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/param.h>
+
+#ifndef _WIN32
 #include <dirent.h>
+#include <sys/param.h>
+#endif
 
 #include "dirtraverse.h"
 #include "debug.h"
@@ -21,6 +24,10 @@
 //
 int visit_dir(char *path, visit_cb cb, void *userdata)
 {
+#ifdef _MSC_VER
+	/** TODO */
+	return -1;
+#else
 	struct stat statbuf;
 	DIR *dir;
 	struct dirent *dirent;
@@ -40,7 +47,12 @@ int visit_dir(char *path, visit_cb cb, void *userdata)
 		}
 		else {
 			snprintf(t, MAXPATHLEN, "%s/%s", path, dirent->d_name);
+#ifdef _WIN32
+#warning "Do not use symbolic links in Windows Vista or fix this."
+			if (stat(t, &statbuf) < 0) {
+#else
 			if(lstat(t, &statbuf) < 0) {
+#endif
 				return -1;
 			}
 			else if(S_ISREG(statbuf.st_mode)) {
@@ -71,6 +83,7 @@ int visit_dir(char *path, visit_cb cb, void *userdata)
 
 out:
 	return ret;
+#endif
 }
 
 //
@@ -78,6 +91,10 @@ out:
 //
 int visit_all_files(char *name, visit_cb cb, void *userdata)
 {
+#ifdef _MSC_VER
+	/** TODO */
+	return -1;
+#else
 	struct stat statbuf;
 	int ret;
 	char path[MAXPATHLEN];
@@ -118,6 +135,7 @@ int visit_all_files(char *name, visit_cb cb, void *userdata)
 
 out:
 	return ret;
+#endif
 }
 
 #if 0

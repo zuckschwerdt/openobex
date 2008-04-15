@@ -1,8 +1,7 @@
 //#define DEBUG_TCP 1
 
-#define IRCP_DEBUG 0
-#ifdef IRCP_DEBUG
-#define DEBUG(n, format, args...) if(n <= IRCP_DEBUG) printf("%s(): " format, __FUNCTION__ , ##args)
+#if IRCP_DEBUG
+#define DEBUG(n, format, ...) if(n <= IRCP_DEBUG) printf("%s(): " format, __FUNCTION__ , ## __VA_ARGS__)
 #else
-#define DEBUG(n, format, args...)
+#define DEBUG(n, format, ...)
 #endif //IRCP_DEBUG

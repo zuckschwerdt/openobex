@@ -44,27 +44,7 @@
 #endif /* _WIN32 */
 
 #ifdef HAVE_BLUETOOTH
-#ifdef HAVE_BLUETOOTH_LINUX
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/rfcomm.h>
-#endif
-#ifdef HAVE_BLUETOOTH_FREEBSD
-#include <bluetooth.h>
-#define sockaddr_rc  sockaddr_rfcomm
-#define rc_family    rfcomm_family
-#define rc_bdaddr    rfcomm_bdaddr
-#define rc_channel   rfcomm_channel
-#define str2ba       bt_aton
-#endif
-#ifdef HAVE_BLUETOOTH_NETBSD
-#define rc_family    bt_family
-#define rc_bdaddr    bt_bdaddr
-#define rc_channel   bt_channel
-#define sockaddr_rc  sockaddr_bt
-#define str2ba       bt_aton
-#include <bluetooth.h>
-#include <netbt/rfcomm.h>
-#endif
+#include "../lib/bluez_compat.h"
 #endif
 
 #include <openobex/obex.h>

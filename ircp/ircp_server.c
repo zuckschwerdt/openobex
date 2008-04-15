@@ -2,12 +2,18 @@
 #include <config.h>
 #endif
 
+#include <openobex/obex.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <direct.h>
+#define chdir(s) _chdir(s)
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include <openobex/obex.h>
 
 #include "ircp.h"
 #include "ircp_io.h"

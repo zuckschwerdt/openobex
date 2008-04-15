@@ -33,8 +33,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <string.h>
+
+#ifdef _WIN32
+#warning "No implementation for basename() in win32!"
+#define basename(x) (x)
+#else
+#include <libgen.h>
+#endif
 
 #include <openobex/obex.h>
 

@@ -2,18 +2,32 @@
 #include <config.h>
 #endif
 
+#include <openobex/obex.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#include <direct.h>
+#define snprintf _snprintf
+#define open _open
+#define mkdir(dir,mode) _mkdir(dir)
+#define S_ISDIR(m) ((m & _S_IFDIR) != 0)
+#endif
+
+#if ! defined(_MSC_VER)
+#include <sys/param.h>
+#else
+#define MAXPATHLEN 1024
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/param.h>
-
 #include <fcntl.h>
 #include <string.h>
 #include <time.h>
-
-#include <openobex/obex.h>
 
 #include "debug.h"
 #include "ircp_io.h"
@@ -115,6 +129,9 @@ static int ircp_nameok(const char *name)
 //
 // Open a file, but do some sanity-checking first.
 //
+#ifndef DEFFILEMODE
+#define DEFFILEMODE 0
+#endif
 int ircp_open_safe(const char *path, const char *name)
 {
 	char diskname[MAXPATHLEN];
@@ -169,7 +186,11 @@ int ircp_checkdir(const char *path, const char *dir, cd_flags flags)
 	}
 	if(flags & CD_CREATE) {
 		DEBUG(4, "Will try to create %s\n", newpath);
+#ifdef _WIN32
+		ret = _mkdir(newpath);
+#else
 		ret = mkdir(newpath, DEFFILEMODE | S_IXGRP | S_IXUSR | S_IXOTH);
+#endif
 	}
 	else {
 		ret = -1;

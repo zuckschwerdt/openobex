@@ -36,11 +36,21 @@
 #include <config.h>
 #endif
 
+#ifdef _WIN32
+#include <windows.h>
+#define sleep(sec) Sleep(1000*sec)
+#endif
+
+#include <openobex/obex.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#define sleep(sec) Sleep(1000*sec)
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-
-#include <openobex/obex.h>
 
 #include "obex_put_common.h"
 #include "obex_io.h"
