@@ -118,7 +118,7 @@ int btobex_listen(obex_t *self)
 	DEBUG(3, "\n");
 
 	self->serverfd = obex_create_socket(self, AF_BLUETOOTH);
-	if(self->serverfd < 0) {
+	if (self->serverfd == INVALID_SOCKET) {
 		DEBUG(0, "Error creating socket\n");
 		return -1;
 	}
@@ -141,7 +141,7 @@ int btobex_listen(obex_t *self)
 
 out_freesock:
 	obex_delete_socket(self, self->serverfd);
-	self->serverfd = -1;
+	self->serverfd = INVALID_SOCKET;
 #endif /* _WIN32 */
 	return -1;
 }
@@ -165,7 +165,7 @@ int btobex_accept(obex_t *self)
 	self->fd = accept(self->serverfd, (struct sockaddr *) &self->trans.peer.rfcomm,
  			  &addrlen);
 
-	if (self->fd < 0) {
+	if (self->fd == INVALID_SOCKET) {
 		return -1;
 	}
 
@@ -189,9 +189,9 @@ int btobex_connect_request(obex_t *self)
 
 	DEBUG(4, "\n");
 
-	if(self->fd < 0)	{
+	if(self->fd == INVALID_SOCKET) {
 		self->fd = obex_create_socket(self, AF_BLUETOOTH);
-		if(self->fd < 0)
+		if(self->fd == INVALID_SOCKET)
 			return -1;
 	}
 
@@ -205,7 +205,7 @@ int btobex_connect_request(obex_t *self)
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.rfcomm,
 		      sizeof(struct sockaddr_rc));
-	if (ret < 0) {
+	if (ret  == INVALID_SOCKET) {
 		DEBUG(4, "ret=%d\n", ret);
 		goto out_freesock;
 	}
@@ -219,7 +219,7 @@ int btobex_connect_request(obex_t *self)
 
 out_freesock:
 	obex_delete_socket(self, self->fd);
-	self->fd = -1;
+	self->fd = INVALID_SOCKET;
 #endif /* _WIN32 */
 	return ret;	
 }
@@ -238,7 +238,7 @@ int btobex_disconnect_request(obex_t *self)
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
-	self->fd = -1;
+	self->fd = INVALID_SOCKET;
 #endif /* _WIN32 */
 	return ret;	
 }
@@ -257,7 +257,7 @@ int btobex_disconnect_server(obex_t *self)
 #ifndef _WIN32
 	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
-	self->serverfd = -1;
+	self->serverfd = INVALID_SOCKET;
 #endif /* _WIN32 */
 	return ret;	
 }

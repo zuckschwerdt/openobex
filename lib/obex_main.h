@@ -33,11 +33,18 @@
 
 #include <time.h>
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <winsock2.h>
+#define socket_t SOCKET
+
+#else /* _WIN32 */
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#endif
+#define socket_t int
+#define INVALID_SOCKET -1
+
+#endif /* _WIN32 */
 
 /* Forward decl */
 typedef struct obex obex_t;
@@ -120,9 +127,9 @@ struct obex {
 	uint16_t mtu_rx;			/* Maximum OBEX RX packet size */
 	uint16_t mtu_tx_max;		/* Maximum TX we can accept */
 
-	int fd;			/* Socket descriptor */
-	int serverfd;
-	int writefd;		/* write descriptor - only OBEX_TRANS_FD */
+	socket_t fd;		/* Socket descriptor */
+	socket_t serverfd;
+	socket_t writefd;	/* write descriptor - only OBEX_TRANS_FD */
 	unsigned int state;
 	
 	int keepserver;		/* Keep server alive */
@@ -145,8 +152,8 @@ struct obex {
 };
 
 
-int obex_create_socket(obex_t *self, int domain);
-int obex_delete_socket(obex_t *self, int fd);
+socket_t obex_create_socket(obex_t *self, int domain);
+int obex_delete_socket(obex_t *self, socket_t fd);
 
 void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del);
 int obex_data_indication(obex_t *self, uint8_t *buf, int buflen);

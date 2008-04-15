@@ -40,7 +40,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <winsock2.h>
-#define ESOCKTNOSUPPORT 1
+#define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
 #ifdef OPENOBEX_EXPORTS
 #define LIB_SYMBOL __declspec(dllexport)
 #endif
@@ -53,7 +53,7 @@
 #ifdef HAVE_VISIBILITY
 #define LIB_SYMBOL __attribute__ ((visibility("default")))
 #endif
-#endif
+#endif /* _WIN32 */
 
 #ifndef LIB_SYMBOL
 #define LIB_SYMBOL

@@ -131,7 +131,7 @@ int irobex_listen(obex_t *self)
 	DEBUG(3, "\n");
 
 	self->serverfd = obex_create_socket(self, AF_IRDA);
-	if(self->serverfd < 0) {
+	if(self->serverfd == INVALID_SOCKET) {
 		DEBUG(0, "Error creating socket\n");
 		return -1;
 	}
@@ -175,7 +175,7 @@ int irobex_listen(obex_t *self)
 
 out_freesock:
 	obex_delete_socket(self, self->serverfd);
-	self->serverfd = -1;
+	self->serverfd = INVALID_SOCKET;
 	return -1;
 }
 
@@ -197,7 +197,7 @@ int irobex_accept(obex_t *self)
 	self->fd = accept(self->serverfd, (struct sockaddr *) &self->trans.peer.irda,
  			  &addrlen);
 
-	if (self->fd < 0) {
+	if (self->fd == INVALID_SOCKET) {
 		return -1;
 	}
 
@@ -349,9 +349,9 @@ int irobex_connect_request(obex_t *self)
 
 	DEBUG(4, "\n");
 
-	if(self->fd < 0)	{
+	if(self->fd  == INVALID_SOCKET) {
 		self->fd = obex_create_socket(self, AF_IRDA);
-		if(self->fd < 0)
+		if(self->fd == INVALID_SOCKET)
 			return -1;
 	}
 
@@ -391,7 +391,7 @@ int irobex_connect_request(obex_t *self)
 
 out_freesock:
 	obex_delete_socket(self, self->fd);
-	self->fd = -1;
+	self->fd = INVALID_SOCKET;
 	return ret;	
 }
 
@@ -408,7 +408,7 @@ int irobex_disconnect_request(obex_t *self)
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
-	self->fd = -1;
+	self->fd = INVALID_SOCKET;
 	return ret;	
 }
 
@@ -425,7 +425,7 @@ int irobex_disconnect_server(obex_t *self)
 	int ret;
 	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
-	self->serverfd = -1;
+	self->serverfd = INVALID_SOCKET;
 	return ret;	
 }
 

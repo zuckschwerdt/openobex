@@ -80,9 +80,10 @@ int obex_dump;
  *    Create socket if needed.
  *
  */
-int obex_create_socket(obex_t *self, int domain)
+socket_t obex_create_socket(obex_t *self, int domain)
 {
-	int fd, proto;
+	socket_t fd;
+	int proto;
 	DEBUG(4, "\n");
 
 	proto = 0;
@@ -102,7 +103,7 @@ int obex_create_socket(obex_t *self, int domain)
  *    Close socket if opened.
  *
  */
-int obex_delete_socket(obex_t *self, int fd)
+int obex_delete_socket(obex_t *self, socket_t fd)
 {
 	int ret;
 

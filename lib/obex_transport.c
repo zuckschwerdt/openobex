@@ -74,13 +74,14 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 	else {
 		struct timeval time;
 		fd_set fdset;
-		int highestfd = 0;
+		socket_t highestfd = 0;
 	
 		DEBUG(4, "\n");
 		obex_return_val_if_fail(self != NULL, -1);
 
 		/* Check of we have any fd's to do select on. */
-		if(self->fd < 0 && self->serverfd < 0) {
+		if(self->fd == INVALID_SOCKET
+		   && self->serverfd == INVALID_SOCKET) {
 			DEBUG(0, "No valid socket is open\n");
 			return -1;
 		}
@@ -90,19 +91,19 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 
 		/* Add the fd's to the set. */
 		FD_ZERO(&fdset);
-		if(self->fd >= 0) {
+		if(self->fd != INVALID_SOCKET) {
 			FD_SET(self->fd, &fdset);
 			if(self->fd > highestfd)
 				highestfd = self->fd;
 		}
-		if(self->serverfd >= 0) {
+		if(self->serverfd != INVALID_SOCKET) {
 			FD_SET(self->serverfd, &fdset);
 			if(self->serverfd > highestfd)
 				highestfd = self->serverfd;
 		}
 
 		/* Wait for input */
-		ret = select(highestfd+1, &fdset, NULL, NULL, &time);
+		ret = select((int)highestfd+1, &fdset, NULL, NULL, &time);
 	
 		/* Check if this is a timeout (0) or error (-1) */
 		if (ret < 1)

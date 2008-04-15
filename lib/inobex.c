@@ -160,7 +160,7 @@ int inobex_listen(obex_t *self)
 	DEBUG(4, "\n");
 
 	self->serverfd = obex_create_socket(self, AF_INET6);
-	if(self->serverfd < 0) {
+	if(self->serverfd == INVALID_SOCKET) {
 		DEBUG(0, "Cannot create server-socket\n");
 		return -1;
 	}
@@ -209,7 +209,7 @@ int inobex_accept(obex_t *self)
 			  (struct sockaddr *) &self->trans.peer.inet6,
 			  &addrlen);
 
-	if(self->fd < 0)
+	if(self->fd == INVALID_SOCKET)
 		return -1;
 
 	/* Just use the default MTU for now */
@@ -230,7 +230,7 @@ int inobex_connect_request(obex_t *self)
 	int ret;
 
 	self->fd = obex_create_socket(self, AF_INET6);
-	if(self->fd < 0)
+	if(self->fd == INVALID_SOCKET)
 		return -1;
 
 	/* Set these just in case */
@@ -242,7 +242,7 @@ int inobex_connect_request(obex_t *self)
 		       addr,sizeof(addr))) {
 		DEBUG(4, "Adress problem\n");
 		obex_delete_socket(self, self->fd);
-		self->fd = -1;
+		self->fd = INVALID_SOCKET;
 		return -1;
 	}
 	DEBUG(2, "peer addr = [%s]:%u\n",addr,ntohs(self->trans.peer.inet6.sin6_port));
@@ -250,10 +250,10 @@ int inobex_connect_request(obex_t *self)
 
 	ret = connect(self->fd, (struct sockaddr *) &self->trans.peer.inet6,
 		      sizeof(struct sockaddr_in6));
-	if (ret < 0) {
+	if (ret == INVALID_SOCKET) {
 		DEBUG(4, "Connect failed\n");
 		obex_delete_socket(self, self->fd);
-		self->fd = -1;
+		self->fd = INVALID_SOCKET;
 		return ret;
 	}
 
@@ -276,7 +276,7 @@ int inobex_disconnect_request(obex_t *self)
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
-	self->fd = -1;
+	self->fd = INVALID_SOCKET;
 	return ret;	
 }
 
@@ -293,6 +293,6 @@ int inobex_disconnect_server(obex_t *self)
 	int ret;
 	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
-	self->serverfd = -1;
+	self->serverfd = INVALID_SOCKET;
 	return ret;	
 }
