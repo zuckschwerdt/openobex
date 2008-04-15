@@ -9,3 +9,4 @@ Version: @VERSION@
 Requires.private: @REQUIRES@
 Libs: -L${libdir} -lopenobex
 Cflags: -I${includedir}
+Cflags.private: @OPENOBEX_CFLAGS@

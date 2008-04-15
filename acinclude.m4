@@ -128,6 +128,21 @@ AC_DEFUN([AC_PATH_GLIB], [
 	AC_SUBST(GLIB_GENMARSHAL)
 ])
 
+AC_DEFUN([AC_VISIBILITY], [
+	case $host in
+	*-*-mingw32*)
+		AC_SUBST(CFLAG_VISIBILITY)
+		if (test "${enable_shared}" = "yes"); then
+		   OPENOBEX_CFLAGS="-DOPENOBEX_EXPORTS"
+		fi
+		AC_SUBST(OPENOBEX_CFLAGS)
+		;;
+	*)
+		gl_VISIBILITY
+		;;
+	esac
+])
+
 AC_DEFUN([AC_ARG_OPENOBEX], [
 	fortify_enable=yes
 	irda_enable=yes

@@ -38,13 +38,29 @@
 #include <errno.h>
 
 #ifdef _WIN32
+#include <windows.h>
 #include <winsock2.h>
 #define ESOCKTNOSUPPORT 1
-#else /* _WIN32 */
+#ifdef OPENOBEX_EXPORTS
+#define LIB_SYMBOL __declspec(dllexport)
+#endif
+#define CALLAPI WINAPI
 
+#else /* _WIN32 */
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
+#ifdef HAVE_VISIBILITY
+#define LIB_SYMBOL __attribute__ ((visibility("default")))
+#endif
+#endif
+
+#ifndef LIB_SYMBOL
+#define LIB_SYMBOL
+#endif
+
+#ifndef CALLAPI
+#define CALLAPI
 #endif
 
 #include "obex_main.h"
@@ -69,6 +85,7 @@
 typedef char *bdaddr_t;
 #endif
 
+LIB_SYMBOL
 void OBEX_FreeInterfaces(obex_t *self);
 
 /**
@@ -90,6 +107,7 @@ void OBEX_FreeInterfaces(obex_t *self);
  *
  * Returns an OBEX handle or %NULL on error.
  */
+LIB_SYMBOL
 obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 {
 	obex_t *self;
@@ -182,7 +200,8 @@ out_err:
  * Call this function directly after OBEX_Init if you are using
  * a custom transport.
  */
-int OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
+LIB_SYMBOL
+int CALLAPI OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
 {
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(ctrans != NULL, -1);
@@ -197,7 +216,8 @@ int OBEX_RegisterCTransport(obex_t *self, obex_ctrans_t *ctrans)
  *
  * Close down an OBEX instance.
  */
-void OBEX_Cleanup(obex_t *self)
+LIB_SYMBOL
+void CALLAPI OBEX_Cleanup(obex_t *self)
 {
 	obex_return_if_fail(self != NULL);
 	
@@ -220,7 +240,8 @@ void OBEX_Cleanup(obex_t *self)
  * @self: OBEX handle
  * @data: It's all up to you!
  */
-void OBEX_SetUserData(obex_t *self, void * data)
+LIB_SYMBOL
+void CALLAPI OBEX_SetUserData(obex_t *self, void * data)
 {
 	obex_return_if_fail(self != NULL);
 	self->userdata=data;
@@ -232,7 +253,8 @@ void OBEX_SetUserData(obex_t *self, void * data)
  *
  * Returns userdata
  */
-void * OBEX_GetUserData(obex_t *self)
+LIB_SYMBOL
+void * CALLAPI OBEX_GetUserData(obex_t *self)
 {
 	obex_return_val_if_fail(self != NULL, 0);
 	return self->userdata;
@@ -244,7 +266,8 @@ void * OBEX_GetUserData(obex_t *self)
  * @eventcb: Function pointer to your new event callback.
  * @data: Pointer to the new user data to pass to the new callback (optional)
  */
-void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, void * data)
+LIB_SYMBOL
+void CALLAPI OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, void * data)
 {
 	obex_return_if_fail(self != NULL);
 	/* The callback can't be NULL */
@@ -269,7 +292,8 @@ void OBEX_SetUserCallBack(obex_t *self, obex_event_t eventcb, void * data)
  *
  * Returns -1 on error.
  */
-int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
+LIB_SYMBOL
+int CALLAPI OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
 {
 	obex_return_val_if_fail(self != NULL, -EFAULT);
 	if (self->object)	{
@@ -311,7 +335,8 @@ int OBEX_SetTransportMTU(obex_t *self, uint16_t mtu_rx, uint16_t mtu_tx_max)
  *
  * Returns -1 on error.
  */
-int OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
+LIB_SYMBOL
+int CALLAPI OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
 	DEBUG(3, "\n");
 
@@ -343,7 +368,8 @@ int OBEX_ServerRegister(obex_t *self, struct sockaddr *saddr, int addrlen)
  *
  * Returns the client instance or %NULL for error.
  */
-obex_t *OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
+LIB_SYMBOL
+obex_t * CALLAPI OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * data)
 {
 	obex_t *self;
 
@@ -431,7 +457,8 @@ out_err:
  * Like select() this function returns -1 on error, 0 on timeout or
  * positive on success.
  */
-int OBEX_HandleInput(obex_t *self, int timeout)
+LIB_SYMBOL
+int CALLAPI OBEX_HandleInput(obex_t *self, int timeout)
 {
 	DEBUG(4, "\n");
 	obex_return_val_if_fail(self != NULL, -1);
@@ -445,7 +472,8 @@ int OBEX_HandleInput(obex_t *self, int timeout)
  * @inputbuf: Pointer to custom data
  * @actual: Length of buffer
  */
-int OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual)
+LIB_SYMBOL
+int CALLAPI OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual)
 {
 	DEBUG(3, "\n");
 
@@ -464,7 +492,8 @@ int OBEX_CustomDataFeed(obex_t *self, uint8_t *inputbuf, int actual)
  *
  * Returns -1 on error.
  */
-int OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
+LIB_SYMBOL
+int CALLAPI OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
 	DEBUG(4, "\n");
 
@@ -481,7 +510,8 @@ int OBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
  * OBEX_TransportDisconnect - Disconnect transport
  * @self: OBEX handle
  */
-int OBEX_TransportDisconnect(obex_t *self)
+LIB_SYMBOL
+int CALLAPI OBEX_TransportDisconnect(obex_t *self)
 {
 	DEBUG(4, "\n");
 
@@ -508,7 +538,8 @@ int OBEX_TransportDisconnect(obex_t *self)
  * This mean that after receiving an incomming connection, you need to
  * call this function again.
  */
-int OBEX_GetFD(obex_t *self)
+LIB_SYMBOL
+int CALLAPI OBEX_GetFD(obex_t *self)
 {
 	obex_return_val_if_fail(self != NULL, -1);
 	if(self->fd == -1)
@@ -523,7 +554,8 @@ int OBEX_GetFD(obex_t *self)
  *
  * Returns negative on error.
  */
-int OBEX_Request(obex_t *self, obex_object_t *object)
+LIB_SYMBOL
+int CALLAPI OBEX_Request(obex_t *self, obex_object_t *object)
 {
 	DEBUG(4, "\n");
 
@@ -551,7 +583,8 @@ int OBEX_Request(obex_t *self, obex_object_t *object)
  *
  *
  */
-int OBEX_CancelRequest(obex_t *self, int nice)
+LIB_SYMBOL
+int CALLAPI OBEX_CancelRequest(obex_t *self, int nice)
 {
 	obex_return_val_if_fail(self != NULL, -1);
 	return obex_cancelrequest(self, nice);
@@ -562,7 +595,8 @@ int OBEX_CancelRequest(obex_t *self, int nice)
  * @self: OBEX handle
  * @object: object to suspend (NULL to suspend currently transfered object)
  */
-int OBEX_SuspendRequest(obex_t *self, obex_object_t *object)
+LIB_SYMBOL
+int CALLAPI OBEX_SuspendRequest(obex_t *self, obex_object_t *object)
 {
 	obex_return_val_if_fail(object != NULL || self->object != NULL, -1);
 	return obex_object_suspend(object ? object : self->object);
@@ -572,7 +606,8 @@ int OBEX_SuspendRequest(obex_t *self, obex_object_t *object)
  * OBEX_ResumeRequest - Resume transfer of an object
  * @self: OBEX handle
  */
-int OBEX_ResumeRequest(obex_t *self)
+LIB_SYMBOL
+int CALLAPI OBEX_ResumeRequest(obex_t *self)
 {
 	obex_return_val_if_fail(self->object != NULL, -1);
 	return obex_object_resume(self, self->object);
@@ -585,7 +620,8 @@ int OBEX_ResumeRequest(obex_t *self)
  *
  * Returns a pointer to a new OBEX Object or %NULL on error.
  */
-obex_object_t *OBEX_ObjectNew(obex_t *self, uint8_t cmd)
+LIB_SYMBOL
+obex_object_t * CALLAPI OBEX_ObjectNew(obex_t *self, uint8_t cmd)
 {
 	obex_object_t *object;
 
@@ -615,7 +651,8 @@ obex_object_t *OBEX_ObjectNew(obex_t *self, uint8_t cmd)
  * Note that as soon as you have passed an object to the lib using
  * OBEX_Request(), you shall not delete it yourself.
  */
-int OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
 {
 	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_delete(object);
@@ -651,7 +688,8 @@ int OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
  *
  * The headers will be sent in the order you add them.
  */
-int OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, uint8_t hi,
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, uint8_t hi,
 				obex_headerdata_t hv, uint32_t hv_size,
 				unsigned int flags)
 {
@@ -675,7 +713,8 @@ int OBEX_ObjectAddHeader(obex_t *self, obex_object_t *object, uint8_t hi,
  *
  * You will get the headers in the received order.
  */
-int OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, uint8_t *hi,
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, uint8_t *hi,
 					obex_headerdata_t *hv,
 					uint32_t *hv_size)
 {
@@ -697,7 +736,8 @@ int OBEX_ObjectGetNextHeader(obex_t *self, obex_object_t *object, uint8_t *hi,
  * Returns 1 on success
  * Returns 0 if failed due previous parsing not completed.
  */
-int OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object)
 {
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(object != NULL, -1);
@@ -722,7 +762,8 @@ int OBEX_ObjectReParseHeaders(obex_t *self, obex_object_t *object)
  *
  * Returns the number of bytes in buffer, or 0 for end-of-stream.
  */
-int OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const uint8_t **buf)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const uint8_t **buf)
 {
 	obex_return_val_if_fail(self != NULL, -1);
 	obex_return_val_if_fail(object != NULL, -1);
@@ -739,7 +780,8 @@ int OBEX_ObjectReadStream(obex_t *self, obex_object_t *object, const uint8_t **b
  *
  * Returns -1 on error.
  */
-int OBEX_ObjectSetRsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectSetRsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp)
 {
 	obex_return_val_if_fail(object != NULL, -1);
 	return obex_object_setrsp(object, rsp, lastrsp);
@@ -752,7 +794,8 @@ int OBEX_ObjectSetRsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp)
  *
  * Returns the size of the buffer or -1 for error.
  */
-int OBEX_ObjectGetNonHdrData(obex_object_t *object, uint8_t **buffer)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectGetNonHdrData(obex_object_t *object, uint8_t **buffer)
 {
 	obex_return_val_if_fail(object != NULL, -1);
 	if(!object->rx_nonhdr_data)
@@ -771,7 +814,8 @@ int OBEX_ObjectGetNonHdrData(obex_object_t *object, uint8_t **buffer)
  * Some commands (notably SetPath) send data before headers. Use this
  * function to set this data.
  */
-int OBEX_ObjectSetNonHdrData(obex_object_t *object, const uint8_t *buffer, unsigned int len)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectSetNonHdrData(obex_object_t *object, const uint8_t *buffer, unsigned int len)
 {
 	//TODO: Check that we actually can send len bytes without violating MTU
 
@@ -798,7 +842,8 @@ int OBEX_ObjectSetNonHdrData(obex_object_t *object, const uint8_t *buffer, unsig
  * command has data before the headers comes. You do NOT need to use this
  * function on Connect and SetPath, they are handled automatically.
  */
-int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset)
 {
 	obex_return_val_if_fail(object != NULL, -1);
 	object->headeroffset = offset;
@@ -812,7 +857,8 @@ int OBEX_ObjectSetHdrOffset(obex_object_t *object, unsigned int offset)
  *
  * Call this function to get the OBEX command of an object.
  */
-int OBEX_ObjectGetCommand(obex_t *self, obex_object_t *object)
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectGetCommand(obex_t *self, obex_object_t *object)
 {
 	obex_return_val_if_fail(object != NULL || self->object != NULL, -1);
 
@@ -830,7 +876,8 @@ int OBEX_ObjectGetCommand(obex_t *self, obex_object_t *object)
  *
  * Buffers may not overlap. Returns -1 on error.
  */
-int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
+LIB_SYMBOL
+int CALLAPI OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
 {
 	int n;
 	DEBUG(4, "\n");
@@ -857,7 +904,8 @@ int OBEX_UnicodeToChar(uint8_t *c, const uint8_t *uc, int size)
  *
  * Buffers may not overlap. Returns -1 on error.
  */
-int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
+LIB_SYMBOL
+int CALLAPI OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
 {
 	int len, n;
 	DEBUG(4, "\n");
@@ -885,7 +933,8 @@ int OBEX_CharToUnicode(uint8_t *uc, const uint8_t *c, int size)
  *
  * The returned char must not be freed. Returns %NULL on error.
  */
-char *OBEX_ResponseToString(int rsp)
+LIB_SYMBOL
+char * CALLAPI OBEX_ResponseToString(int rsp)
 {
 	DEBUG(4, "\n");
 
@@ -899,7 +948,8 @@ char *OBEX_ResponseToString(int rsp)
  *
  * The returned char must not be freed. Returns %NULL on error.
  */
-char* OBEX_GetResponseMessage(obex_t *self, int rsp)
+LIB_SYMBOL
+char * CALLAPI OBEX_GetResponseMessage(obex_t *self, int rsp)
 {
 	DEBUG(4, "\n");
 
@@ -922,7 +972,8 @@ char* OBEX_GetResponseMessage(obex_t *self, int rsp)
  * multiple connections transparently (i.e. without a lookup table).
  * - Jean II
  */
-void OBEX_SetCustomData(obex_t *self, void * data)
+LIB_SYMBOL
+void CALLAPI OBEX_SetCustomData(obex_t *self, void * data)
 {
 	obex_return_if_fail(self != NULL);
 	self->ctrans.customdata = data;
@@ -934,7 +985,8 @@ void OBEX_SetCustomData(obex_t *self, void * data)
  *
  * Returns Custom Transport data
  */
-void * OBEX_GetCustomData(obex_t *self)
+LIB_SYMBOL
+void * CALLAPI OBEX_GetCustomData(obex_t *self)
 {
 	obex_return_val_if_fail(self != NULL, 0);
 	return self->ctrans.customdata;
@@ -953,7 +1005,8 @@ void * OBEX_GetCustomData(obex_t *self)
  *
  * Returns -1 on error.
  */
-int TcpOBEX_ServerRegister(obex_t *self, struct sockaddr *addr, int addrlen)
+LIB_SYMBOL
+int CALLAPI TcpOBEX_ServerRegister(obex_t *self, struct sockaddr *addr, int addrlen)
 {
 	DEBUG(3, "\n");
 
@@ -975,7 +1028,8 @@ int TcpOBEX_ServerRegister(obex_t *self, struct sockaddr *addr, int addrlen)
  *
  * Returns -1 on error.
  */
-int TcpOBEX_TransportConnect(obex_t *self, struct sockaddr *addr, int addrlen)
+LIB_SYMBOL
+int CALLAPI TcpOBEX_TransportConnect(obex_t *self, struct sockaddr *addr, int addrlen)
 {
      	DEBUG(4, "\n");
 
@@ -1001,7 +1055,8 @@ int TcpOBEX_TransportConnect(obex_t *self, struct sockaddr *addr, int addrlen)
  *
  * Returns -1 on error.
  */
-int InOBEX_ServerRegister(obex_t *self)
+LIB_SYMBOL
+int CALLAPI InOBEX_ServerRegister(obex_t *self)
 {
 	DEBUG(3, "\n");
 
@@ -1020,7 +1075,8 @@ int InOBEX_ServerRegister(obex_t *self)
  *
  * Returns -1 on error.
  */
-int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
+LIB_SYMBOL
+int CALLAPI InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
      	DEBUG(4, "\n");
 
@@ -1048,7 +1104,8 @@ int InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
  *
  * Returns -1 on error.
  */
-int IrOBEX_ServerRegister(obex_t *self, const char *service)
+LIB_SYMBOL
+int CALLAPI IrOBEX_ServerRegister(obex_t *self, const char *service)
 {
 	DEBUG(3, "\n");
 
@@ -1070,7 +1127,8 @@ int IrOBEX_ServerRegister(obex_t *self, const char *service)
  *
  * An easier connect function to use for IrDA (IrOBEX) only.
  */
-int IrOBEX_TransportConnect(obex_t *self, const char *service)
+LIB_SYMBOL
+int CALLAPI IrOBEX_TransportConnect(obex_t *self, const char *service)
 {
      	DEBUG(4, "\n");
 
@@ -1099,7 +1157,8 @@ int IrOBEX_TransportConnect(obex_t *self, const char *service)
  *
  * Returns -1 on error.
  */
-int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
+LIB_SYMBOL
+int CALLAPI BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
 {
 	DEBUG(3, "\n");
 
@@ -1122,7 +1181,8 @@ int BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
  *
  *  An easier connect function to use for Bluetooth (Bluetooth OBEX) only. 
  */
-int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel)
+LIB_SYMBOL
+int CALLAPI BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel)
 {
 	DEBUG(4, "\n");
 
@@ -1153,7 +1213,8 @@ int BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t 
  *  @wfd: descriptor to write
  *  @mtu: transport mtu: 0 - default
  */
-int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
+LIB_SYMBOL
+int CALLAPI FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
 {
 	DEBUG(4, "\n");
 
@@ -1177,7 +1238,8 @@ int FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int mtu)
  *  An easier connect function to connect to a discovered interface (currently
  *  USB OBEX only). 
  */
-int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *intf)
+LIB_SYMBOL
+int CALLAPI OBEX_InterfaceConnect(obex_t *self, obex_interface_t *intf)
 {
 	DEBUG(4, "\n");
 
@@ -1210,7 +1272,8 @@ int OBEX_InterfaceConnect(obex_t *self, obex_interface_t *intf)
  *
  *  Gets a list of OBEX interfaces, or NULL if there are none.
  */
-int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
+LIB_SYMBOL
+int CALLAPI OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
 {
 	DEBUG(4, "\n");
 
@@ -1238,7 +1301,8 @@ int OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
  *  Frees memory allocated to OBEX interface structures after it has been 
  *  allocated by OBEX_FindInterfaces.
  */
-void OBEX_FreeInterfaces(obex_t *self)
+LIB_SYMBOL
+void CALLAPI OBEX_FreeInterfaces(obex_t *self)
 {
 	DEBUG(4, "\n");
 

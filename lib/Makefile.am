@@ -17,6 +17,8 @@ libopenobex_la_SOURCES = \
 	irda.h irda_wrap.h \
 	usbobex.c usbobex.h
 
+libopenobex_la_CFLAGS = @CFLAG_VISIBILITY@
+
 libopenobex_la_LDFLAGS = \
 	-no-undefined \
 	-version-info 4:0:3 \
