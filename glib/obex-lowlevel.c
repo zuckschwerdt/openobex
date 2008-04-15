@@ -30,7 +30,16 @@
 #include <malloc.h>
 #include <string.h>
 #include <time.h>
+
+#ifdef _WIN32
+#include <winsock2.h>
+#warning "Incomplete implementation: no gmtime_r() on win32!"
+#define gmtime_r(time_p,result) NULL
+#define EISCONN WSAEISCONN
+#define ENOTCONN WSAENOTCONN
+#else
 #include <arpa/inet.h>
+#endif
 
 #include <glib.h>
 

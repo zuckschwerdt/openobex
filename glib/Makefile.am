@@ -8,9 +8,9 @@ lib_LTLIBRARIES = libopenobex-glib.la
 
 libopenobex_glib_la_SOURCES = obex-lowlevel.h obex-lowlevel.c obex-client.c obex-debug.h obex-error.c obex-error.h
 
-libopenobex_glib_la_LDFLAGS = -version-info 1:0:0
+libopenobex_glib_la_LDFLAGS = -no-undefined -version-info 1:0:0
 
-libopenobex_glib_la_LIBADD = @GLIB_LIBS@ $(top_builddir)/lib/libopenobex.la
+libopenobex_glib_la_LIBADD = @GLIB_LIBS@ $(top_builddir)/lib/libopenobex.la @EXTRA_LIBS@
 
 BUILT_SOURCES = obex-marshal.h obex-marshal.c
 

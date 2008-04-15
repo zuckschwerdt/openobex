@@ -25,6 +25,12 @@
 #include <config.h>
 #endif
 
+#ifdef _WIN32
+#include <winsock2.h>
+#define EISCONN WSAEISCONN
+#define ENOTCONN WSAENOTCONN
+#endif
+
 #include <errno.h>
 
 #include "obex-debug.h"

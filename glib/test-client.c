@@ -32,9 +32,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include <termios.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#else
+#include <termios.h>
+#endif
 
 #include "obex-client.h"
 
@@ -50,8 +56,26 @@ static void sig_term(int sig)
 
 static int open_device(const char *device)
 {
-	struct termios ti;
 	int fd;
+#ifdef _WIN32
+	HANDLE h;
+	DCB ti;
+
+	h = CreateFile(device,
+			GENERIC_READ|GENERIC_WRITE,
+			0,NULL,OPEN_EXISTING,0,NULL);
+	if (h == INVALID_HANDLE_VALUE)
+		return -1;
+
+	//TODO: tcflush-equivalent function?
+	ti.StopBits = ONESTOPBIT;
+	ti.Parity = NOPARITY;
+	ti.ByteSize = 8;
+	ti.fNull = FALSE;
+	SetCommState(h,&ti);
+	fd = _open_osfhandle((intptr_t)h,0);
+#else
+	struct termios ti;
 
 	fd = open(device, O_RDWR | O_NOCTTY);
 	if (fd < 0)
@@ -61,7 +85,7 @@ static int open_device(const char *device)
 
 	cfmakeraw(&ti);
 	tcsetattr(fd, TCSANOW, &ti);
-
+#endif
 	return fd;
 }
 
@@ -154,8 +178,10 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 int main(int argc, char *argv[])
 {
 	ObexClient *client;
-	struct sigaction sa;
 	int fd, io = -1;
+#ifndef _WIN32
+	struct sigaction sa;
+#endif
 
 	g_type_init();
 
@@ -193,10 +219,12 @@ int main(int argc, char *argv[])
 		obex_client_get_object(client, NULL, "telecom/devinfo.txt", NULL);
 
 
+#ifndef _WIN32
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = sig_term;
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGINT,  &sa, NULL);
+#endif
 
 	g_main_loop_run(mainloop);
 

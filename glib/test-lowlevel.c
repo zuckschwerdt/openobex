@@ -30,14 +30,39 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+#ifdef _WIN32
+#include <io.h>
+#define SOME_TTY "COM4"
+#else
 #include <termios.h>
+#define SOME_TTY "/dev/rfcomm42"
+#endif
 
 #include "obex-lowlevel.h"
 
 static int open_device(const char *device)
 {
-	struct termios ti;
 	int fd;
+#ifdef _WIN32
+	HANDLE h;
+	DCB ti;
+
+	h = CreateFile(device,
+			GENERIC_READ|GENERIC_WRITE,
+			0,NULL,OPEN_EXISTING,0,NULL);
+	if (h == INVALID_HANDLE_VALUE)
+		return -1;
+
+	//TODO: tcflush-equivalent function?
+	ti.StopBits = ONESTOPBIT;
+	ti.Parity = NOPARITY;
+	ti.ByteSize = 8;
+	ti.fNull = FALSE;
+	SetCommState(h,&ti);
+	fd = _open_osfhandle((intptr_t)h,0);
+#else
+	struct termios ti;
 
 	fd = open(device, O_RDWR | O_NOCTTY);
 	if (fd < 0)
@@ -47,7 +72,7 @@ static int open_device(const char *device)
 
 	cfmakeraw(&ti);
 	tcsetattr(fd, TCSANOW, &ti);
-
+#endif
 	return fd;
 }
 
@@ -56,7 +81,7 @@ int main(int argc, char *argv[])
 	obex_t *handle;
 	int fd;
 
-	fd = open_device("/dev/rfcomm42");
+	fd = open_device(SOME_TTY);
 	if (fd < 0) {
 		perror("Can't open device");
 		exit(EXIT_FAILURE);
