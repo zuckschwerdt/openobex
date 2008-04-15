@@ -16,7 +16,7 @@ libopenobex_la_SOURCES = \
 	databuffer.c databuffer.h \
 	irda.h irda_wrap.h \
 	usbobex.c usbobex.h \
-	bluez_compyt.h
+	bluez_compat.h
 
 libopenobex_la_CFLAGS = @CFLAG_VISIBILITY@
 
