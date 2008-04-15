@@ -164,6 +164,17 @@ int inobex_listen(obex_t *self)
 		DEBUG(0, "Cannot create server-socket\n");
 		return -1;
 	}
+#ifdef IPV6_V6ONLY
+	else {
+		/* Needed for some system that set this IPv6 socket option to
+		 * 1 by default (Windows Vista, maybe some BSDs).
+		 * Do not check the return code as it may not matter.
+		 * You will certainly notice later if it failed.
+		 */
+		int v6only = 0;
+		(void)setsockopt(self->serverfd,IPPROTO_IPV6,IPV6_V6ONLY,&v6only,sizeof(v6only));
+	}
+#endif
 
 	//printf("TCP/IP listen %d %X\n", self->trans.self.inet.sin_port,
 	//       self->trans.self.inet.sin_addr.s_addr);
