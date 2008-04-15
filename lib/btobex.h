@@ -30,6 +30,8 @@
 #ifndef BTOBEX_H
 #define BTOBEX_H
 
+#include "bluez_compat.h"
+
 void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel);
 void btobex_prepare_listen(obex_t *self, bdaddr_t *src, uint8_t channel);
 int btobex_listen(obex_t *self);

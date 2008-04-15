@@ -41,18 +41,7 @@
 #include "irda_wrap.h"
 #endif /*HAVE_IRDA*/
 #ifdef HAVE_BLUETOOTH
-#ifdef HAVE_BLUETOOTH_LINUX
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/rfcomm.h>
-#endif
-#ifdef HAVE_BLUETOOTH_FREEBSD
-#include <bluetooth.h>
-#define sockaddr_rc  sockaddr_rfcomm
-#endif
-#ifdef HAVE_BLUETOOTH_NETBSD
-#include <bluetooth.h>
-#include <netbt/rfcomm.h>
-#endif
+#include "bluez_compat.h"
 #endif /*HAVE_BLUETOOTH*/
 #ifdef HAVE_USB
 #include "usbobex.h"
@@ -66,12 +55,7 @@ typedef union {
 #endif /*HAVE_IRDA*/
 	struct sockaddr_in6  inet6;
 #ifdef HAVE_BLUETOOTH
-#ifdef HAVE_BLUETOOTH_LINUX
 	struct sockaddr_rc   rfcomm;
-#endif
-#ifdef HAVE_BLUETOOTH_NETBSD
-	struct sockaddr_bt   rfcomm;
-#endif
 #endif /*HAVE_BLUETOOTH*/
 #ifdef HAVE_USB
 	struct obex_usb_intf_transport_t usb;

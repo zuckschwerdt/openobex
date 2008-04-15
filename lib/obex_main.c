@@ -45,20 +45,11 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-#ifdef HAVE_BLUETOOTH
-#ifdef HAVE_BLUETOOTH_LINUX
-#include <bluetooth/bluetooth.h>
-#endif
-#ifdef HAVE_BLUETOOTH_FREEBSD
-#include <bluetooth.h>
-#define BTPROTO_RFCOMM  BLUETOOTH_PROTO_RFCOMM
-#endif
-#ifdef HAVE_BLUETOOTH_NETBSD
-#include <bluetooth.h>
-#endif
-#endif /*HAVE_BLUETOOTH*/
-
 #endif /* _WIN32 */
+
+#ifdef HAVE_BLUETOOTH
+#include "bluez_compat.h"
+#endif /*HAVE_BLUETOOTH*/
 
 #include "obex_main.h"
 #include "obex_header.h"

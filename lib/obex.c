@@ -31,6 +31,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+static unsigned long wsa_init = 0;
+#define WSA_VER_MAJOR 2
+#define WSA_VER_MINOR 2
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,17 +72,17 @@
 #include "obex_client.h"
 
 #include "inobex.h"
+
 #ifdef HAVE_IRDA
 #include "irobex.h"
 #endif
+
 #ifdef HAVE_USB
 #include "usbobex.h"
 #endif
+
 #ifdef HAVE_BLUETOOTH
 #include "btobex.h"
-#ifdef HAVE_BLUETOOTH_FREEBSD
-#define BDADDR_ANY  NG_HCI_BDADDR_ANY
-#endif
 #else
 // This is to workaround compilation without Bluetooth support. - Jean II
 typedef char *bdaddr_t;
@@ -122,13 +125,21 @@ obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 	obex_return_val_if_fail(eventcb != NULL, NULL);
 
 #ifdef _WIN32
-	{
-		WSADATA WSAData;
-	  	if (WSAStartup (MAKEWORD(2,0), &WSAData) != 0) {
-			DEBUG(4, "WSAStartup failed\n");
-			return NULL;
-		}
-	}
+ 	if (!wsa_init) {
+ 		WORD ver = MAKEWORD(WSA_VER_MAJOR,WSA_VER_MINOR);
+  		WSADATA WSAData;
+ 	  	if (WSAStartup (ver, &WSAData) != 0) {
+ 			DEBUG(4, "WSAStartup failed (%d)\n",WSAGetLastError());
+ 			return NULL;
+ 		}
+ 		if (LOBYTE(WSAData.wVersion) != WSA_VER_MAJOR ||
+ 		    HIBYTE(WSAData.wVersion) != WSA_VER_MINOR) {
+ 			DEBUG(4, "WSA version mismatch\n");
+ 			WSACleanup();
+  			return NULL;
+  		}
+  	}
+ 	++wsa_init;
 #endif
 
 	self = malloc(sizeof(obex_t));

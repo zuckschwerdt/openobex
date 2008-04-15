@@ -59,9 +59,6 @@ typedef void* obex_t;
 typedef void* obex_object_t;
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 // This is to workaround compilation without Bluetooth support. - Jean II
-#ifndef SOL_RFCOMM
-typedef char* bdaddr_t;
-#endif
 
 #include <openobex/obex_const.h>
 
@@ -144,8 +141,13 @@ OPENOBEX_SYMBOL(int) IrOBEX_TransportConnect(obex_t *self, const char *service);
 /*
  * Bluetooth OBEX API
  */
+#ifdef SOL_RFCOMM
+#ifdef _WIN32
+#define bdaddr_t BTH_ADDR
+#endif
 OPENOBEX_SYMBOL(int) BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel);
 OPENOBEX_SYMBOL(int) BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel);
+#endif
 
 /*
  * OBEX File API

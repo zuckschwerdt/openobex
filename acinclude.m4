@@ -64,6 +64,18 @@ AC_DEFUN([AC_PATH_IRDA], [
 	])
 ])
 
+AC_DEFUN([AC_PATH_WINBT], [
+	AC_CACHE_VAL(winbt_found,[
+               AC_CHECK_HEADERS(ws2bth.h, winbt_found=yes, winbt_found=no,
+                                [
+                                  #include <winsock2.h>
+               ])
+	])
+	AC_MSG_CHECKING([for Windows Bluetooth support])
+	AC_MSG_RESULT([$winbt_found])
+])
+
+
 AC_DEFUN([AC_PATH_NETBSDBT], [
 	AC_CACHE_CHECK([for NetBSD Bluetooth support], netbsdbt_found, [
 		AC_TRY_COMPILE([
@@ -85,9 +97,7 @@ AC_DEFUN([AC_PATH_FREEBSDBT], [
 ])
 
 AC_DEFUN([AC_PATH_BLUEZ], [
-	PKG_CHECK_MODULES(BLUEZ, bluez, bluez_found=yes, AC_MSG_RESULT(no))
-	AC_SUBST(BLUEZ_CFLAGS)
-	AC_SUBST(BLUEZ_LIBS)
+	PKG_CHECK_MODULES(BLUETOOTH, bluez, bluez_found=yes, AC_MSG_RESULT(no))
 ])
 
 AC_DEFUN([AC_PATH_BLUETOOTH], [
@@ -101,7 +111,12 @@ AC_DEFUN([AC_PATH_BLUETOOTH], [
 	*-*-netbsd*)
 		AC_PATH_NETBSDBT
 		;;
+	*-*-mingw32*)
+		AC_PATH_WINBT
+		;;
 	esac
+	AC_SUBST(BLUETOOTH_CFLAGS)
+	AC_SUBST(BLUETOOTH_LIBS)
 ])
 
 AC_DEFUN([AC_PATH_USB], [
@@ -199,6 +214,10 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 	if (test "${irda_enable}" = "yes" && test "${irda_found}" = "yes"); then
 		AC_DEFINE(HAVE_IRDA, 1, [Define if system supports IrDA and it's enabled])
 	fi
+
+        if (test "${bluetooth_enable}" = "yes" && test "${winbt_found}" = "yes"); then
+                AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
+        fi
 
 	if (test "${bluetooth_enable}" = "yes" && test "${netbsdbt_found}" = "yes"); then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])

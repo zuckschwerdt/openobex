@@ -45,27 +45,6 @@
 #include <errno.h>		/* errno and EADDRNOTAVAIL */
 #include <netinet/in.h>
 #include <sys/socket.h>
-
-#ifdef HAVE_BLUETOOTH_LINUX
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/rfcomm.h>
-#endif
-#ifdef HAVE_BLUETOOTH_FREEBSD
-#include <bluetooth.h>
-#define sockaddr_rc  sockaddr_rfcomm
-#define rc_family    rfcomm_family
-#define rc_bdaddr    rfcomm_bdaddr
-#define rc_channel   rfcomm_channel
-#endif
-#ifdef HAVE_BLUETOOTH_NETBSD
-#define rc_family    bt_family
-#define rc_bdaddr    bt_bdaddr
-#define rc_channel   bt_channel
-#define sockaddr_rc  sockaddr_bt
-#include <bluetooth.h>
-#include <netbt/rfcomm.h>
-#endif
-
 #endif /* _WIN32 */
 
 #include "obex_main.h"
@@ -79,7 +58,6 @@
  */
 void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel)
 {
-#ifndef _WIN32
 	self->trans.self.rfcomm.rc_family = AF_BLUETOOTH;
 	bacpy(&self->trans.self.rfcomm.rc_bdaddr, src);
 	self->trans.self.rfcomm.rc_channel = 0;
@@ -87,7 +65,6 @@ void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t 
 	self->trans.peer.rfcomm.rc_family = AF_BLUETOOTH;
 	bacpy(&self->trans.peer.rfcomm.rc_bdaddr, dst);
 	self->trans.peer.rfcomm.rc_channel = channel;
-#endif /* _WIN32 */
 }
 
 /*
@@ -98,12 +75,10 @@ void btobex_prepare_connect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t 
  */
 void btobex_prepare_listen(obex_t *self, bdaddr_t *src, uint8_t channel)
 {
-#ifndef _WIN32
 	/* Bind local service */
 	self->trans.self.rfcomm.rc_family = AF_BLUETOOTH;
 	bacpy(&self->trans.self.rfcomm.rc_bdaddr, src);
 	self->trans.self.rfcomm.rc_channel = channel;
-#endif /* _WIN32 */
 }
 
 /*
@@ -114,7 +89,6 @@ void btobex_prepare_listen(obex_t *self, bdaddr_t *src, uint8_t channel)
  */
 int btobex_listen(obex_t *self)
 {
-#ifndef _WIN32
 	DEBUG(3, "\n");
 
 	self->serverfd = obex_create_socket(self, AF_BLUETOOTH);
@@ -142,7 +116,6 @@ int btobex_listen(obex_t *self)
 out_freesock:
 	obex_delete_socket(self, self->serverfd);
 	self->serverfd = INVALID_SOCKET;
-#endif /* _WIN32 */
 	return -1;
 }
 
@@ -156,7 +129,6 @@ out_freesock:
  */
 int btobex_accept(obex_t *self)
 {
-#ifndef _WIN32
 	socklen_t addrlen = sizeof(struct sockaddr_rc);
 	//int mtu;
 	//int len = sizeof(int);
@@ -170,7 +142,6 @@ int btobex_accept(obex_t *self)
 	}
 
 	self->trans.mtu = OBEX_DEFAULT_MTU;
-#endif /* _WIN32 */
 	return 0;
 }
 	
@@ -183,7 +154,6 @@ int btobex_accept(obex_t *self)
 int btobex_connect_request(obex_t *self)
 {
 	int ret;
-#ifndef _WIN32
 	int mtu = 0;
 	//int len = sizeof(int);
 
@@ -220,7 +190,6 @@ int btobex_connect_request(obex_t *self)
 out_freesock:
 	obex_delete_socket(self, self->fd);
 	self->fd = INVALID_SOCKET;
-#endif /* _WIN32 */
 	return ret;	
 }
 
@@ -233,13 +202,11 @@ out_freesock:
 int btobex_disconnect_request(obex_t *self)
 {
 	int ret;
-#ifndef _WIN32
 	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->fd);
 	if(ret < 0)
 		return ret;
 	self->fd = INVALID_SOCKET;
-#endif /* _WIN32 */
 	return ret;	
 }
 
@@ -254,11 +221,9 @@ int btobex_disconnect_request(obex_t *self)
 int btobex_disconnect_server(obex_t *self)
 {
 	int ret;
-#ifndef _WIN32
 	DEBUG(4, "\n");
 	ret = obex_delete_socket(self, self->serverfd);
 	self->serverfd = INVALID_SOCKET;
-#endif /* _WIN32 */
 	return ret;	
 }
 
