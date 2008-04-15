@@ -368,7 +368,8 @@ void obex_transport_disconnect_server(obex_t *self)
 /*
  * does fragmented write
  */
-static int do_write(int fd, buf_t *msg, int mtu)
+static int do_write(int fd, buf_t *msg, int mtu,
+		    ssize_t (*write_func)(int, const void *, size_t))
 {
 	int actual = -1;
 	int size;
@@ -381,7 +382,7 @@ static int do_write(int fd, buf_t *msg, int mtu)
 			size = msg->data_size;
 		DEBUG(1, "sending %d bytes\n", size);
 
-		actual = write(fd, msg->data, size);
+		actual = write_func(fd, msg->data, size);
 		if (actual <= 0)
 			return actual;
 			
@@ -389,6 +390,11 @@ static int do_write(int fd, buf_t *msg, int mtu)
 		buf_remove_begin(msg, actual);
 	}
 	return actual;
+}
+
+static ssize_t send_wrap (int s, const void *buf, size_t len)
+{
+	return send(s,buf,len,0);
 }
 
 /*
@@ -411,10 +417,10 @@ int obex_transport_write(obex_t *self, buf_t *msg)
 	case OBEX_TRANS_BLUETOOTH:
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
-		actual = do_write(self->fd, msg, self->trans.mtu);
+		actual = do_write(self->fd, msg, self->trans.mtu, send_wrap);
 		break;
 	case OBEX_TRANS_FD:
-		actual = do_write(self->writefd, msg, self->trans.mtu);
+		actual = do_write(self->writefd, msg, self->trans.mtu, write);
 		break;
 #ifdef HAVE_USB 
 	case OBEX_TRANS_USB:
@@ -461,6 +467,10 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 	case OBEX_TRANS_BLUETOOTH:
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
+		actual = recv(self->fd, buf_reserve_end(msg, max), max, 0);
+		if (actual > 0)
+			buf_remove_end(msg, max - actual);
+		break;
 	case OBEX_TRANS_FD:
 		actual = read(self->fd, buf_reserve_end(msg, max), max);
 		if (actual > 0)
