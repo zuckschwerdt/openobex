@@ -147,19 +147,32 @@ AC_DEFUN([AC_PATH_BLUETOOTH], [
 ])
 
 AC_DEFUN([AC_PATH_USB], [
+	usb_lib_found=no
 	case $host in
 	*-*-mingw32*)
 		USB_CFLAGS=""
 		USB_LIBS="-lusb"
+		usb_lib_found=yes
 		;;
 	*)
-		PKG_CHECK_MODULES(USB, libusb, usb_found=yes, AC_MSG_RESULT(no))
+		PKG_CHECK_MODULES(USB, libusb, usb_lib_found=yes, AC_MSG_RESULT(no))
+		AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb.pc, REQUIRES="libusb")
 		;;
 	esac
 	AC_SUBST(USB_CFLAGS)
 	AC_SUBST(USB_LIBS)
-	AC_CHECK_LIB(usb, usb_get_busses, dummy=yes, AC_DEFINE(NEED_USB_GET_BUSSES, 1, [Define to 1 if you need the usb_get_busses() function.]))
-	AC_CHECK_LIB(usb, usb_interrupt_read, dummy=yes, AC_DEFINE(NEED_USB_INTERRUPT_READ, 1, [Define to 1 if you need the usb_interrupt_read() function.]))
+
+	usb_get_busses=no
+	AC_CHECK_LIB(usb, usb_get_busses, usb_get_busses=yes, AC_DEFINE(NEED_USB_GET_BUSSES, 1, [Define to 1 if you need the usb_get_busses() function.]))
+
+	usb_interrupt_read=no
+	AC_CHECK_LIB(usb, usb_interrupt_read, usb_interrupt_read=yes, AC_DEFINE(NEED_USB_INTERRUPT_READ, 1, [Define to 1 if you need the usb_interrupt_read() function.]))
+
+	if (test "$usb_lib_found" = "yes" && test "$usb_get_busses" = "yes" && test "$usb_interrupt_read" = "yes"); then
+		usb_found=yes
+	else
+		usb_found=no
+	fi
 ])
 
 AC_DEFUN([AC_PATH_GLIB], [
@@ -263,7 +276,6 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
 		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
-		AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb.pc, REQUIRES="libusb")
 	fi
 
 	AM_CONDITIONAL(GLIB, test "${glib_enable}" = "yes" && test "${glib_found}" = "yes")

@@ -59,12 +59,12 @@ struct obex_usb_intf_transport_t {
 /* "Union Functional Descriptor" from CDC spec 5.2.3.X
  * used to find data/slave OBEX interface */
 struct cdc_union_desc {
-	u_int8_t      bLength;
-	u_int8_t      bDescriptorType;
-	u_int8_t      bDescriptorSubType;
+	uint8_t      bLength;
+	uint8_t      bDescriptorType;
+	uint8_t      bDescriptorSubType;
 
-	u_int8_t      bMasterInterface0;
-	u_int8_t      bSlaveInterface0;
+	uint8_t      bMasterInterface0;
+	uint8_t      bSlaveInterface0;
 } __attribute__ ((packed));
 
 /* CDC class and subclass types */

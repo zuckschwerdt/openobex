@@ -37,8 +37,14 @@
 #include <unistd.h>
 #include <stdio.h>		/* perror */
 #include <errno.h>		/* errno and EADDRNOTAVAIL */
+
+
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <netinet/in.h>
 #include <sys/socket.h>
+#endif
 
 #include <usb.h>
 
