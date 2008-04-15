@@ -1,12 +1,20 @@
+#ifdef _WIN32
+#include <windows.h>
+#include <process.h>
+#include <direct.h>
+#else
+#include <sys/wait.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+
 #ifdef _WIN32
-#include <process.h>
-#else
-#include <sys/wait.h>
+#define putenv(s) _putenv(s)
+#define chdir(s) _chdir(s)
 #endif
 
 /*
@@ -21,10 +29,12 @@ int main(int argc, char *argv[])
 	char **svec;
 	char type[64];
 	int i;
-	int vp=2;
+	int vp=0;
 #ifndef _WIN32
 	pid_t pid;
 #endif
+
+	putenv("TOPDIR=..");
 
 	if(chdir(getenv("TOPDIR")))
 	{
@@ -35,8 +45,9 @@ int main(int argc, char *argv[])
 	/*
 	 *	Build the exec array ahead of time.
 	 */
-	vec[0]="kernel-doc";
-	vec[1]="-docbook";
+        vec[vp++]="--";
+	vec[vp++]="doc/kernel-doc";
+	vec[vp++]="-docbook";
 	for(i=1;vp<8189;i++)
 	{
 		if(argv[i]==NULL)
@@ -92,9 +103,9 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 #ifdef _WIN32
-		if(!_spawnvp(_P_WAIT, "doc/kernel-doc", svec))
+		if(!_spawnvp(_P_WAIT, "perl", svec))
 		{
-	       		perror("exec scripts/kernel-doc");
+	       		perror("exec kernel-doc");
 			exit(1);
 		}
 #else
@@ -104,8 +115,8 @@ int main(int argc, char *argv[])
 			perror("fork");
 			exit(1);
 		case  0:
-			execvp("doc/kernel-doc", svec);
-			perror("exec scripts/kernel-doc");
+			execvp("perl", svec);
+			perror("exec kernel-doc");
 			exit(1);
 		default:
 			waitpid(pid, NULL,0);
