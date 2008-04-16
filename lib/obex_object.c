@@ -321,7 +321,7 @@ static int send_stream(obex_t *self,
 		}
 		
 		if(tx_left < object->s_len) {
-			/* There is more data left in buffer than tx_left */
+			/* There is more data left in buffer than tx_left */
 			DEBUG(4, "More data than tx_left. Buffer will not be empty\n");
 			
 			buf_insert_end(txmsg, (uint8_t*) object->s_buf + object->s_offset, tx_left);
