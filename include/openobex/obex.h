@@ -1,27 +1,30 @@
-/*
- *
- *  OpenOBEX - Free implementation of the Object Exchange protocol
- *
- *  Copyright (C) 1999-2000  Dag Brattli <dagb@cs.uit.no>
- *  Copyright (C) 1999-2000  Pontus Fuchs <pontus.fuchs@tactel.se>
- *  Copyright (C) 2001-2002  Jean Tourrilhes <jt@hpl.hp.com>
- *  Copyright (C) 2002-2006  Marcel Holtmann <marcel@holtmann.org>
- *
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
+/**
+	\file openobex/obex.h
+	OpenOBEX library - Free implementation of the Object Exchange protocol.
+
+	Copyright (C) 1999-2000  Dag Brattli <dagb@cs.uit.no>
+	Copyright (C) 1999-2000  Pontus Fuchs <pontus.fuchs@tactel.se>
+	Copyright (C) 2001-2002  Jean Tourrilhes <jt@hpl.hp.com>
+	Copyright (C) 2002-2006  Marcel Holtmann <marcel@holtmann.org>
+	Copyright (C) 2002-2008  Christian W. Zuckschwerdt <zany@triq.net>
+	Copyright (C) 2002  Dmitry Kasatkin <dmitry.kasatkin@nokia.com>
+	Copyright (C) 2005  Herton Ronaldo Krzesinski <herton@conectiva.com.br>
+	Copyright (C) 2005-2008  Alex Kanavin <ak@sensi.org>
+	Copyright (C) 2006  Johan Hedberg <johan.hedberg@nokia.com>
+	Copyright (C) 2007-2008  Hendrik Sattler <post@hendrik-sattler.de>
+
+	OpenOBEX is free software; you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as
+	published by the Free Software Foundation; either version 2.1 of
+	the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public
+	License along with OpenOBEX. If not, see <http://www.gnu.org/>.
  */
 
 #ifndef OPENOBEX_OBEX_H

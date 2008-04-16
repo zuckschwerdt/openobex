@@ -1,3 +1,10 @@
+/**
+	\file apps/obex_io.h
+	Some useful disk-IO functions.
+	OpenOBEX test applications and sample code.
+
+ */
+
 #ifndef OBEX_IO_H
 #define OBEX_IO_H
 

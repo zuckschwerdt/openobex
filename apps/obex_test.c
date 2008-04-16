@@ -1,28 +1,22 @@
-/*********************************************************************
- *                
- * Filename:      obex_test.c
- * Version:       0.8
- * Description:   Test IrOBEX, TCPOBEX and OBEX over cable to R320s. 
- * Status:        Experimental.
- * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
- * Created at:    Wed Nov 17 22:05:16 1999
- * CVS ID:        $Id$
- *
- *     Copyright (c) 2000, Pontus Fuchs, All Rights Reserved.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+/**
+	\file apps/obex_test.c
+	Test IrOBEX, TCPOBEX and OBEX over cable to R320s.
+	OpenOBEX test applications and sample code.
+
+	Copyright (c) 2000 Pontus Fuchs, All Rights Reserved.
+
+	OpenOBEX is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as
+	published by the Free Software Foundation; either version 2 of
+	the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public
+	License along with OpenOBEX. If not, see <http://www.gnu.org/>.
  */
 
 #ifdef HAVE_CONFIG_H

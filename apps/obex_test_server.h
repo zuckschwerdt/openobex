@@ -1,3 +1,10 @@
+/**
+	\file apps/obex_test_server.h
+	Server OBEX Commands.
+	OpenOBEX test applications and sample code.
+
+ */
+
 #ifndef OBEX_TEST_SERVER_H
 #define OBEX_TEST_SERVER_H
 

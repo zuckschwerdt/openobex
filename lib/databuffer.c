@@ -1,31 +1,23 @@
-/*************************************************************************
- *
- * Filename:      databuffer.c
- * Version:       0.3
- * Description:   Network buffer handling routines.
- * Status:        Experimental.
- * Author:        Herton Ronaldo Krzesinski <herton@conectiva.com.br>
- * Created at:    Tue Jun 21 11:22:44 2005
- * Modified at:   Mon Aug 15 19:12:29 2005
- *
- *     Copyright (c) 2005 Herton Ronaldo Krzesinski, All Rights Reserved.
- *
- *     This library is free software; you can redistribute it and/or
- *     modify it under the terms of the GNU Lesser General Public
- *     License as published by the Free Software Foundation; either
- *     version 2 of the License, or (at your option) any later version.
- *
- *     This library is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *     Lesser General Public License for more details.
- *
- *     You should have received a copy of the GNU Lesser General Public
- *     License along with this library; if not, write to the Free Software
- *     Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- *     MA  02111-1307  USA
- *
- *************************************************************************/
+/**
+	\file databuffer.c
+	Network buffer handling routines.
+	OpenOBEX library - Free implementation of the Object Exchange protocol.
+
+	Copyright (c) 2005 Herton Ronaldo Krzesinski, All Rights Reserved.
+
+	OpenOBEX is free software; you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as
+	published by the Free Software Foundation; either version 2.1 of
+	the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public
+	License along with OpenOBEX. If not, see <http://www.gnu.org/>.
+ */
 
 #include <databuffer.h>
 #include <assert.h>

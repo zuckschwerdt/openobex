@@ -1,38 +1,30 @@
-/*********************************************************************
- *                
- * Filename:      irobex_palm3.c
- * Version:       0.3
- * Description:   Demonstrates use of PUT command
- * Status:        Experimental.
- * Author:        Pontus Fuchs <pontus.fuchs@tactel.se>
- * Created at:    Tue Mar 23 09:44:56 1999
- * Modified at:   Sun Aug 13 09:25:40 PM CEST 2000
- * Modified by:   Pontus Fuchs <pontus.fuchs@tactel.se>
- * 
- *     Copyright (c) 1999, 2000 Ponts Fuchs, All Rights Reserved.
- *     
- *     This program is free software; you can redistribute it and/or 
- *     modify it under the terms of the GNU General Public License as 
- *     published by the Free Software Foundation; either version 2 of 
- *     the License, or (at your option) any later version.
- * 
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *     GNU General Public License for more details.
- * 
- *     You should have received a copy of the GNU General Public License 
- *     along with this program; if not, write to the Free Software 
- *     Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
- *     MA 02111-1307 USA
- *
- *
- *     The Palm 3 always send a HEADER_CREATORID (0xcf).
- *
- *     Start without arguments to receive a file.
- *     Start with filename as argument to send a file. 
- *     
- ********************************************************************/
+/**
+	\file apps/irobex_palm3.c
+ 	Demonstrates use of PUT command.
+	OpenOBEX test applications and sample code.
+
+ 	Copyright (c) 1999, 2000 Pontus Fuchs, All Rights Reserved.
+
+	OpenOBEX is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as
+	published by the Free Software Foundation; either version 2 of
+	the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public
+	License along with OpenOBEX. If not, see <http://www.gnu.org/>.
+ */
+
+/*
+	The Palm 3 always sends a HEADER_CREATORID (0xcf).
+
+	Start without arguments to receive a file.
+	Start with filename as argument to send a file. 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>

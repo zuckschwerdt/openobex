@@ -1,3 +1,10 @@
+/**
+	\file apps/obex_test.h
+	Test IrOBEX, TCPOBEX and OBEX over cable to R320s.
+	OpenOBEX test applications and sample code.
+
+ */
+
 #ifndef OBEX_TEST_H
 #define OBEX_TEST_H
 
