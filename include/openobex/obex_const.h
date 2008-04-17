@@ -51,29 +51,29 @@ typedef struct {
 	void * customdata;
 } obex_ctrans_t;
 
-/* USB-specific OBEX interface information */
+/** USB-specific OBEX interface information */
 typedef struct {
-	/* Manufacturer, e.g. Nokia */
+	/** Manufacturer, e.g. Nokia */
 	char *manufacturer;
-	/* Product, e.g. Nokia 6680 */
+	/** Product, e.g. Nokia 6680 */
 	char *product;
-	/* Product serial number */
+	/** Product serial number */
 	char *serial;
-	/* USB device configuration description */
+	/** USB device configuration description */
 	char *configuration;
-	/* Control interface description */
+	/** Control interface description */
 	char *control_interface;
-	/* Idle data interface description, typically empty */
+	/** Idle data interface description, typically empty */
 	char *data_interface_idle;
-	/* Active data interface description, typically empty */
+	/** Active data interface description, typically empty */
 	char *data_interface_active;
-	/* Internal information for the transport layer in the library */
+	/** Internal information for the transport layer in the library */
 	struct obex_usb_intf_transport_t *intf;
 } obex_usb_intf_t;
 
-/* Generic OBEX interface information */
+/** Generic OBEX interface information */
 typedef union {
-	/* USB-specific OBEX interface information */
+	/** USB-specific OBEX interface information */
 	obex_usb_intf_t usb;
 	//obex_bluetooth_intf_t bt; // to be added
 } obex_interface_t;
@@ -228,7 +228,7 @@ typedef union {
 #define OBEX_MINIMUM_MTU	255
 #define OBEX_MAXIMUM_MTU	65535
 
-/* Optimum MTU for various transport (optimum for throughput).
+/** Optimum MTU for various transport (optimum for throughput).
  * The user/application has to set them via OBEX_SetTransportMTU().
  * If you are worried about safety or latency, stick with the current
  * default... - Jean II */

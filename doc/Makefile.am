@@ -1,43 +1,9 @@
-TOPDIR := ..
-export TOPDIR
-
-pdf:	openobex.pdf
-ps:	openobex.ps
-html:	openobex
-
-openobex.sgml: openobex.tmpl docproc ../lib/obex.c
-	$(top_srcdir)/doc/docproc <$< >$@
-
 clean:
-	-$(RM) openobex.sgml openobex.dvi openobex.ps openobex.tex openobex.log openobex.aux openobex.pdf
-	-$(RM) -rf openobex
+	-$(RM) -rf html man rtf latex
 	
-%.ps : %.sgml
-	@(which docbook2ps > /dev/null 2>&1) || \
-	 (echo "*** You need to install DocBook stylesheets ***"; \
-	  exit 1)
-	docbook2ps $<
+html:
+	doxygen
 
-%.pdf : %.sgml
-	@(which docbook2pdf > /dev/null 2>&1) || \
-	 (echo "*** You need to install DocBook stylesheets ***"; \
-	  exit 1)
-	docbook2pdf $<
-
-%:	%.sgml
-	@(which docbook2html > /dev/null 2>&1) || \
-	 (echo "*** You need to install DocBook stylesheets ***"; \
-	  exit 1)
-	-$(RM) -r $@
-	docbook2html -o $@ $<
-	if [ ! -z "$(JPG-$@)" ]; then cp $(JPG-$@) $@; fi
-
-
-EXTRA_DIST = \
-	kernel-doc \
-	openobex.tmpl
-
-docproc_SOURCES = docproc.c
-noinst_PROGRAMS = docproc
+EXTRA_DIST = Doxyfile openobex.coverpage
 
 MAINTAINERCLEANFILES = Makefile.in
