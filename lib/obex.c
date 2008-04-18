@@ -81,7 +81,7 @@ typedef char *bdaddr_t;
 #endif
 
 LIB_SYMBOL
-void OBEX_FreeInterfaces(obex_t *self);
+void CALLAPI OBEX_FreeInterfaces(obex_t *self);
 
 /**
 	Initialize OBEX.
@@ -101,7 +101,7 @@ void OBEX_FreeInterfaces(obex_t *self);
 	\return an OBEX handle or NULL on error.
  */
 LIB_SYMBOL
-obex_t *OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
+obex_t * CALLAPI OBEX_Init(int transport, obex_event_t eventcb, unsigned int flags)
 {
 	obex_t *self;
 
