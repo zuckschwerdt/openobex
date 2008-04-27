@@ -29,8 +29,14 @@
 #include <fcntl.h>
 #include <string.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
+#include <io.h>
+#define read _read
+#define write _write
+#define open _open
+#if ! defined(_MSC_VER)
 #warning "No implementation for basename() in win32!"
+#endif
 #define basename(x) (x)
 #else
 #include <libgen.h>

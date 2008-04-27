@@ -30,10 +30,14 @@
 #define tty_desc_t struct termios
 #endif
 
-#ifdef CABLE_DEBUG
-#define CDEBUG(format, args...) printf("%s(): " format, __FUNCTION__ , ##args)
+#if defined(_MSC_VER) && _MSC_VER < 1400
+static void CDEBUG(char *format, ...) {}
+
+#elif defined(CABLE_DEBUG)
+#define CDEBUG(format, ...) printf("%s(): " format, __FUNCTION__ , ## __VA_ARGS__)
+
 #else
-#define CDEBUG(format, args...)
+#define CDEBUG(format, ...)
 #endif
 
 struct cobex_context

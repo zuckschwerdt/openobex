@@ -156,7 +156,9 @@ int main (int argc, char *argv[])
 	uint8_t channel = 0;
 #endif
 
+#ifdef HAVE_USB
 	obex_interface_t *obex_intf;
+#endif
 
 	struct context global_context = {0,};
 
@@ -351,11 +353,12 @@ int main (int argc, char *argv[])
 				}
 				if(btobex) {
 #ifdef HAVE_BLUETOOTH
-					if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
+					bdaddr_t bdaddr_any = BDADDR_ANY;
+					if (bacmp(&bdaddr, &bdaddr_any) == 0) {
 						printf("Device address error! (Bluetooth)\n");
 						break;
 					}
-					if(BtOBEX_TransportConnect(handle, BDADDR_ANY, &bdaddr, channel) <0) {
+					if(BtOBEX_TransportConnect(handle, &bdaddr_any, &bdaddr, channel) <0) {
 						printf("Transport connect error! (Bluetooth)\n");
 						break;
 					}
@@ -364,10 +367,14 @@ int main (int argc, char *argv[])
 #endif
 				}
 				if (usbobex) {
+#ifdef HAVE_USB
 					if (OBEX_InterfaceConnect(handle, obex_intf) < 0) {
 						printf("Transport connect error! (USB)\n");
 						break;
 					}
+#else
+					printf("Transport not found! (USB)\n");
+#endif
 				}	
 				if (!tcpobex && !cobex && !btobex && !usbobex) {
 					if(IrOBEX_TransportConnect(handle, IR_SERVICE) < 0) {

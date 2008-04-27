@@ -33,6 +33,9 @@
 #include <unistd.h>
 
 #ifdef _WIN32
+#include <io.h>
+#define read _read
+#define write _write
 #define strcasecmp(a,b) _stricmp(a,b)
 #else
 #include <sys/ioctl.h>
@@ -55,8 +58,10 @@ static void cobex_cleanup(struct cobex_context *gt, int force);
 //
 int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbuflen, int timeout)
 {
-#ifdef _WIN32
+#if defined(_WIN32)
+#if ! defined(_MSC_VER)
 #warning "Implementation for win32 is missing!"
+#endif
 	return -1;
 #else
 	fd_set ttyset;
@@ -159,7 +164,9 @@ int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbu
 static int cobex_init(struct cobex_context *gt)
 {
 #ifdef _WIN32
+#if ! defined(_MSC_VER)
 #warning "Implementation for win32 is missing!"
+#endif
 #else
 	char rspbuf[200];
 
