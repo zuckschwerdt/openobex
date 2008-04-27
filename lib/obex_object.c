@@ -58,7 +58,7 @@ obex_object_t *obex_object_new(void)
  *    Free all headers in a header queue.
  *
  */
-static inline void free_headerq(slist_t **q)
+static void free_headerq(slist_t **q)
 {
 	struct obex_header_element *h;
 	
