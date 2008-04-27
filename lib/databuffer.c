@@ -19,7 +19,7 @@
 	License along with OpenOBEX. If not, see <http://www.gnu.org/>.
  */
 
-#include <databuffer.h>
+#include "databuffer.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -46,9 +46,10 @@ slist_t *slist_append(slist_t *list, void *element)
 
 slist_t *slist_remove(slist_t *list, void *element) 
 {
+	slist_t *prev, *next;
+
 	if (!list)
 		return NULL;
-	slist_t *prev, *next;
 	prev = list;
 	next = list;
 	while (next != NULL) {
@@ -202,9 +203,10 @@ void *buf_reserve_begin(buf_t *p, size_t data_size)
 
 void *buf_reserve_end(buf_t *p, size_t data_size) 
 {
+	void *t;
+
 	if (!p)
 		return NULL;
-	void *t;
 
 	if (p->tail_avail >= data_size)
 		p->tail_avail -= data_size;
@@ -274,9 +276,10 @@ void buf_remove_end(buf_t *p, size_t data_size)
 
 void buf_dump(buf_t *p, const char *label) 
 {
+	int i, n;
+
 	if (!p || !label)
 		return;
-	int i, n;
 
 	n = 0;
 	for (i = 0; i < p->data_size; ++i) {

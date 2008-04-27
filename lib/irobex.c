@@ -29,7 +29,7 @@
 #ifdef _WIN32
 #include <winsock2.h>
 
-#include <irda_wrap.h>
+#include "irda_wrap.h"
 
 #else /* _WIN32 */
 /* Linux case */
@@ -58,7 +58,7 @@
  *    Check if the address is not valid for connection
  *
  */
-static inline int irobex_no_addr(struct sockaddr_irda *addr)
+static int irobex_no_addr(struct sockaddr_irda *addr)
 {
 #ifndef _WIN32
 	return((addr->sir_addr == 0x0) || (addr->sir_addr == 0xFFFFFFFF));
