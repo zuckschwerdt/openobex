@@ -30,62 +30,49 @@
 #define OBEX_BYTE        0x80
 #define OBEX_INT         0xc0
 
-#ifdef _WIN32
-#ifndef PACKED
-#define PACKED
-#endif
-#else
-#define PACKED __attribute__((packed))
-#endif
-
 /* Common header used by all frames */
 
-#ifdef _WIN32
 #pragma pack(1)
-#endif /* _WIN32 */
 struct obex_common_hdr {
 	uint8_t  opcode;
 	uint16_t len;
-} PACKED;
-
+};
+#pragma pack()
 
 typedef struct obex_common_hdr obex_common_hdr_t;
 
 /* Connect header */
-#ifdef _WIN32
 #pragma pack(1)
-#endif /* _WIN32 */
 struct obex_connect_hdr {
 	uint8_t  version;
 	uint8_t  flags;
 	uint16_t mtu;
-} PACKED;
+};
+#pragma pack()
+
 typedef struct obex_connect_hdr obex_connect_hdr_t;
 
-#ifdef _WIN32
 #pragma pack(1)
-#endif /* _WIN32 */
 struct obex_uint_hdr {
 	uint8_t  hi;
 	uint32_t hv;
-} PACKED;
+};
+#pragma pack()
 
-#ifdef _WIN32
 #pragma pack(1)
-#endif /* _WIN32 */
 struct obex_ubyte_hdr {
 	uint8_t hi;
 	uint8_t hv;
-} PACKED;
+};
+#pragma pack()
 
-#ifdef _WIN32
 #pragma pack(1)
-#endif /* _WIN32 */
 struct obex_unicode_hdr {
 	uint8_t  hi;
 	uint16_t hl;
 	uint8_t  hv[0];
-} PACKED;
+};
+#pragma pack()
 
 #define obex_byte_stream_hdr obex_unicode_hdr
 
