@@ -35,8 +35,7 @@
 #define PF_BLUETOOTH   PF_BTH
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define BTPROTO_RFCOMM BTHPROTO_RFCOMM
-static bdaddr_t bdaddr_any = BTH_ADDR_NULL;
-#define BDADDR_ANY     &bdaddr_any
+#define BDADDR_ANY     BTH_ADDR_NULL
 #define bacpy(dst,src) memcpy((dst),(src),sizeof(BTH_ADDR))
 #define bacmp(a,b)     memcmp((a),(b),sizeof(BTH_ADDR))
 

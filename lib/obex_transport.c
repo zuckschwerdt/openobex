@@ -28,6 +28,12 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#if defined(_WIN32)
+#include <io.h>
+#define write _write
+#define read _read
+#endif
+
 #include "obex_main.h"
 #ifdef HAVE_IRDA
 #include "irobex.h"
@@ -361,7 +367,7 @@ void obex_transport_disconnect_server(obex_t *self)
  * does fragmented write
  */
 static int do_write(int fd, buf_t *msg, int mtu,
-		    ssize_t (*write_func)(int, const void *, size_t))
+		            ssize_t (*write_func)(int, const void *, size_t))
 {
 	int actual = -1;
 	int size;
@@ -389,6 +395,11 @@ static ssize_t send_wrap (int s, const void *buf, size_t len)
 	return send(s,buf,len,0);
 }
 
+static ssize_t write_wrap (int s, const void *buf, size_t len)
+{
+	return write(s,buf,len);
+}
+
 /*
  * Function obex_transport_write ()
  *
@@ -409,10 +420,10 @@ int obex_transport_write(obex_t *self, buf_t *msg)
 	case OBEX_TRANS_BLUETOOTH:
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_INET:
-		actual = do_write(self->fd, msg, self->trans.mtu, send_wrap);
+		actual = do_write(self->fd, msg, self->trans.mtu, &send_wrap);
 		break;
 	case OBEX_TRANS_FD:
-		actual = do_write(self->writefd, msg, self->trans.mtu, write);
+		actual = do_write(self->writefd, msg, self->trans.mtu, &write_wrap);
 		break;
 #ifdef HAVE_USB 
 	case OBEX_TRANS_USB:

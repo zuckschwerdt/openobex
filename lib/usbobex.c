@@ -25,20 +25,19 @@
 
 #ifdef HAVE_USB
 
-/* Linux case */
+#ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+
+#else
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif
 
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>		/* perror */
 #include <errno.h>		/* errno and EADDRNOTAVAIL */
-
-
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <netinet/in.h>
-#include <sys/socket.h>
-#endif
 
 #include <usb.h>
 
@@ -327,7 +326,6 @@ void usbobex_free_interfaces(int num, obex_interface_t *intf)
 int usbobex_connect_request(obex_t *self)
 {
 	int ret;
-#ifndef _WIN32
 
 	DEBUG(4, "\n");
 
@@ -374,8 +372,6 @@ err1:
 	usb_close(self->trans.self.usb.dev_data);
 	usb_close(self->trans.self.usb.dev_control);
 	return ret;
-
-#endif /* _WIN32 */
 }
 
 /*
@@ -389,7 +385,7 @@ int usbobex_disconnect_request(obex_t *self)
 	int ret;
 	if (self->trans.connected == FALSE)
 		return 0;
-#ifndef _WIN32
+
 	DEBUG(4, "\n");
 	ret = usb_set_altinterface(self->trans.self.usb.dev_data, self->trans.self.usb.data_idle_setting);
 	if (ret < 0)
@@ -406,7 +402,7 @@ int usbobex_disconnect_request(obex_t *self)
 	ret = usb_close(self->trans.self.usb.dev_control);
 	if (ret < 0)
 		DEBUG(4, "Can't close control interface %d", ret);
-#endif /* _WIN32 */
+
 	return ret;	
 }
 

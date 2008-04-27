@@ -34,17 +34,19 @@
 extern "C" {
 #endif
 
-#include <inttypes.h>
-
 #ifdef _WIN32
 #include <winsock2.h>
-#ifndef OPENOBEX_DLL
+#ifdef OPENOBEX_DLL
 #define OPENOBEX_SYMBOL(retval) __declspec(dllimport) retval WINAPI
+#else
+#define OPENOBEX_SYMBOL(retval) retval WINAPI
 #endif
 
 #else /* _WIN32 */
 #include <sys/socket.h>
 #endif /* _WIN32 */
+
+#include <inttypes.h>
 
 #ifndef OPENOBEX_SYMBOL
 #define OPENOBEX_SYMBOL(retval) retval

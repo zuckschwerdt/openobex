@@ -63,11 +63,12 @@ static void map_ip4to6(struct sockaddr_in *in, struct sockaddr_in6 *out)
 		/* map the IPv4 address to [::FFFF:<ipv4>]
 		 * see RFC2373 and RFC2553 for details
 		 */
-		out->sin6_addr.s6_addr16[10/2] = 0xFFFF;
-		out->sin6_addr.s6_addr[12] = (in->sin_addr.s_addr >>  0) & 0xFF;
-		out->sin6_addr.s6_addr[13] = (in->sin_addr.s_addr >>  8) & 0xFF;
-		out->sin6_addr.s6_addr[14] = (in->sin_addr.s_addr >> 16) & 0xFF;
-		out->sin6_addr.s6_addr[15] = (in->sin_addr.s_addr >> 24) & 0xFF;
+		out->sin6_addr.s6_addr[10] = 0xFF;
+		out->sin6_addr.s6_addr[11] = 0xFF;
+		out->sin6_addr.s6_addr[12] = (unsigned char)((in->sin_addr.s_addr >>  0) & 0xFF);
+		out->sin6_addr.s6_addr[13] = (unsigned char)((in->sin_addr.s_addr >>  8) & 0xFF);
+		out->sin6_addr.s6_addr[14] = (unsigned char)((in->sin_addr.s_addr >> 16) & 0xFF);
+		out->sin6_addr.s6_addr[15] = (unsigned char)((in->sin_addr.s_addr >> 24) & 0xFF);
 		break;
 	}
 }
@@ -80,16 +81,12 @@ static void map_ip4to6(struct sockaddr_in *in, struct sockaddr_in6 *out)
  */
 void inobex_prepare_connect(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	struct sockaddr_in6 addr = {
-		.sin6_family       = AF_INET6,
-		.sin6_port         = htons(OBEX_PORT),
-#ifdef _WIN32
-		.sin6_addr.s6_addr = IN6ADDR_LOOPBACK_INIT,
-#else
-		.sin6_addr         = IN6ADDR_LOOPBACK_INIT,
-#endif
-		.sin6_flowinfo     = 0
-	};
+	struct sockaddr_in6 addr;
+	addr.sin6_family   = AF_INET6;
+	addr.sin6_port     = htons(OBEX_PORT);
+	addr.sin6_flowinfo = 0;
+	memcpy(&addr.sin6_addr, &in6addr_loopback, sizeof(addr.sin6_addr));
+
 	if (saddr == NULL)
 		saddr = (struct sockaddr*)(&addr);
 	else
@@ -114,16 +111,12 @@ void inobex_prepare_connect(obex_t *self, struct sockaddr *saddr, int addrlen)
  */
 void inobex_prepare_listen(obex_t *self, struct sockaddr *saddr, int addrlen)
 {
-	struct sockaddr_in6 addr = {
-		.sin6_family       = AF_INET6,
-		.sin6_port         = htons(OBEX_PORT),
-#ifdef _WIN32
-		.sin6_addr.s6_addr = IN6ADDR_ANY_INIT,
-#else
-		.sin6_addr         = IN6ADDR_ANY_INIT,
-#endif
-		.sin6_flowinfo     = 0
-	};
+	struct sockaddr_in6 addr;
+	addr.sin6_family   = AF_INET6;
+	addr.sin6_port     = htons(OBEX_PORT);
+	addr.sin6_flowinfo = 0;
+	memcpy(&addr.sin6_addr, &in6addr_any, sizeof(addr.sin6_addr));
+
 	/* Bind local service */
 	if (saddr == NULL)
 		saddr = (struct sockaddr *) &addr;
@@ -164,7 +157,7 @@ int inobex_listen(obex_t *self)
 		 * You will certainly notice later if it failed.
 		 */
 		int v6only = 0;
-		(void)setsockopt(self->serverfd,IPPROTO_IPV6,IPV6_V6ONLY,&v6only,sizeof(v6only));
+		(void)setsockopt(self->serverfd, IPPROTO_IPV6, IPV6_V6ONLY, (void*)&v6only, sizeof(v6only));
 	}
 #endif
 

@@ -60,29 +60,36 @@ typedef struct obex obex_t;
 #include "obex_transport.h"
 #include "databuffer.h"
 
+#if defined(_MSC_VER) && _MSC_VER < 1400
+static void log_debug(char *format, ...) {}
+#define log_debug_prefix ""
 
-#if defined(OBEX_SYSLOG) && !defined(_WIN32)
+#elif defined(OBEX_SYSLOG) && !defined(_WIN32)
 #include <syslog.h>
-#define log_debug(format, args...) syslog(LOG_DEBUG, format, ##args)
+#define log_debug(format, ...) syslog(LOG_DEBUG, format, ## __VA_ARGS__)
 #define log_debug_prefix "OpenOBEX: "
+
 #else
 #include <stdio.h>
-#define log_debug(format, args...) fprintf(stderr, format, ##args)
+#define log_debug(format, ...) fprintf(stderr, format, ## __VA_ARGS__)
 #define log_debug_prefix ""
 #endif
-
 
 /* use integer:  0 for production
  *               1 for verification
  *              >2 for debug
  */
-#if OBEX_DEBUG
+#if defined(_MSC_VER) && _MSC_VER < 1400
+static void DEBUG(int n, char *format, ...) {}
+
+#elif OBEX_DEBUG
 extern int obex_debug;
-#define DEBUG(n, format, args...) \
-        if (obex_debug >= (n)) \
-          log_debug("%s%s(): " format, log_debug_prefix, __FUNCTION__, ##args)
+#  define DEBUG(n, format, ...) \
+          if (obex_debug >= (n)) \
+            log_debug("%s%s(): " format, log_debug_prefix, __FUNCTION__, ## __VA_ARGS__)
+
 #else
-#define DEBUG(n, format, args...)
+#  define DEBUG(n, format, ...)
 #endif
 
 
