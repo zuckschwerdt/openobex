@@ -20,12 +20,12 @@
  */
 
 #include "databuffer.h"
+#include "obex_main.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "obex_main.h"
 
 slist_t *slist_append(slist_t *list, void *element) 
 {

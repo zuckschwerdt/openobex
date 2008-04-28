@@ -24,11 +24,11 @@
 #include <config.h>
 #endif
 
-#include <string.h>
-#include <stdio.h>
-
 #include "obex_main.h"
 #include "obex_header.h"
+
+#include <string.h>
+#include <stdio.h>
 
 /*
  * Function insert_uint_header (buf, identifier, value)

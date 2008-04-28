@@ -23,9 +23,6 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
-
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -39,6 +36,9 @@
 #endif /*_WIN32*/
 
 #include "obex_main.h"
+
+#include <stdio.h>
+#include <string.h>
 
 #define OBEX_PORT 650
 

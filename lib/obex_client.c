@@ -23,12 +23,12 @@
 #include <config.h>
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "obex_main.h"
 #include "obex_header.h"
 #include "obex_connect.h"
+
+#include <stdlib.h>
+#include <stdio.h>
 
 /*
  * Function obex_client ()

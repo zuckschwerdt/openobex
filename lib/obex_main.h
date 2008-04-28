@@ -23,8 +23,6 @@
 #ifndef OBEX_MAIN_H
 #define OBEX_MAIN_H
 
-#include <time.h>
-
 #ifdef _WIN32
 #include <winsock2.h>
 #define socket_t SOCKET
@@ -37,6 +35,8 @@
 #define INVALID_SOCKET -1
 
 #endif /* _WIN32 */
+
+#include <time.h>
 
 /* Forward decl */
 typedef struct obex obex_t;

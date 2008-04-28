@@ -24,29 +24,31 @@
 #include <config.h>
 #endif
 
+#include "obex_main.h"
+
+#ifdef HAVE_IRDA
+#include "irobex.h"
+#endif /*HAVE_IRDA*/
+
+#include "inobex.h"
+
+#ifdef HAVE_BLUETOOTH
+#include "btobex.h"
+#endif /*HAVE_BLUETOOTH*/
+
+#ifdef HAVE_USB 
+#include "usbobex.h"
+#endif /*HAVE_USB*/
+
+#include "obex_transport.h"
+
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
 
 #if defined(_WIN32)
 #include <io.h>
-#define write _write
-#define read _read
 #endif
-
-#include "obex_main.h"
-#ifdef HAVE_IRDA
-#include "irobex.h"
-#endif /*HAVE_IRDA*/
-#include "inobex.h"
-#ifdef HAVE_BLUETOOTH
-#include "btobex.h"
-#endif /*HAVE_BLUETOOTH*/
-#ifdef HAVE_USB 
-#include "usbobex.h"
-#endif /*HAVE_USB*/
-
-#include "obex_transport.h"
 
 /*
  * Function obex_transport_handle_input(self, timeout)
@@ -397,7 +399,11 @@ static ssize_t send_wrap (int s, const void *buf, size_t len)
 
 static ssize_t write_wrap (int s, const void *buf, size_t len)
 {
+#ifdef _WIN32
+	return _write(s,buf,len);
+#else
 	return write(s,buf,len);
+#endif
 }
 
 /*
@@ -475,7 +481,11 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 			buf_remove_end(msg, max - actual);
 		break;
 	case OBEX_TRANS_FD:
+#ifdef _WIN32
+		actual = _read(self->fd, buf_reserve_end(msg, max), max);
+#else
 		actual = read(self->fd, buf_reserve_end(msg, max), max);
+#endif
 		if (actual > 0)
 			buf_remove_end(msg, max - actual);
 		break;

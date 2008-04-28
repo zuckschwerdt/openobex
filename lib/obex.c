@@ -23,23 +23,20 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-static unsigned long wsa_init = 0;
-#define WSA_VER_MAJOR 2
-#define WSA_VER_MINOR 2
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
 #include <windows.h>
+#ifndef ESOCKTNOSUPPORT
 #define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
+#endif
 #ifdef OPENOBEX_EXPORTS
 #define LIB_SYMBOL __declspec(dllexport)
 #endif
 #define CALLAPI WINAPI
+static unsigned long wsa_init = 0;
+#define WSA_VER_MAJOR 2
+#define WSA_VER_MINOR 2
 
 #else /* _WIN32 */
 #include <fcntl.h>
@@ -49,6 +46,11 @@ static unsigned long wsa_init = 0;
 #define LIB_SYMBOL __attribute__ ((visibility("default")))
 #endif
 #endif /* _WIN32 */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 #ifndef LIB_SYMBOL
 #define LIB_SYMBOL

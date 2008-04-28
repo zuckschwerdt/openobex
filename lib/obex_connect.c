@@ -24,14 +24,14 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
-
 #include "obex_main.h"
 #include "obex_object.h"
 #include "obex_header.h"
 
 #include "obex_connect.h"
+
+#include <stdio.h>
+#include <string.h>
 
 /*
  * Function obex_insert_connectframe ()
