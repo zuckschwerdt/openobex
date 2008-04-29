@@ -28,8 +28,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if _WIN32
+#ifdef _WIN32
 #include <winsock2.h>
+#define in_addr_t unsigned long
 #else
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -112,7 +113,7 @@ void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int 
 int get_peer_addr(char *name, struct sockaddr_in *peer) 
 {
 	struct hostent *host;
-	u_long inaddr;
+	in_addr_t inaddr;
         
 	/* Is the address in dotted decimal? */
 	if ((inaddr = inet_addr(name)) != INADDR_NONE) {
@@ -403,7 +404,7 @@ int main (int argc, char *argv[])
 					}
 				}
 				if(btobex) {
-#if HAVE_BLUETOOTH
+#ifdef HAVE_BLUETOOTH
 					if(BtOBEX_ServerRegister(handle, BDADDR_ANY, channel) < 0) {
 						printf("Server register error! (Bluetooth)\n");
 						break;

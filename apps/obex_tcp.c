@@ -28,8 +28,9 @@
 
 #include <string.h>
 
-#if _WIN32
+#ifdef _WIN32
 #include <winsock2.h>
+#define in_addr_t unsigned long
 #else
 
 #include <sys/stat.h>
@@ -61,7 +62,7 @@ volatile int finished = FALSE;
 int get_peer_addr(char *name, struct sockaddr_in *peer) 
 {
 	struct hostent *host;
-	u_long inaddr;
+	in_addr_t inaddr;
         
 	/* Is the address in dotted decimal? */
 	if ((inaddr = inet_addr(name)) != INADDR_NONE) {

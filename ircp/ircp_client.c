@@ -6,6 +6,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#define in_addr_t unsigned long
 #include <direct.h>
 #endif
 
@@ -212,7 +213,7 @@ int ircp_cli_connect(ircp_client_t *cli)
 #ifdef DEBUG_TCP
 	{
 		struct sockaddr_in peer;
-		u_long inaddr;
+		in_addr_t inaddr;
 		if ((inaddr = inet_addr("127.0.0.1")) != INADDR_NONE) {
 			memcpy((char *) &peer.sin_addr, (char *) &inaddr,
 			      sizeof(inaddr));  
