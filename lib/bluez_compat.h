@@ -23,7 +23,7 @@
 #include <config.h>
 #endif
 
-#ifdef _WIN32
+#if defined(HAVE_BLUETOOTH_WINDOWS)
 /* you need the headers files from the Platform SDK */
 #include <winsock2.h>
 #include <ws2bth.h>
@@ -39,10 +39,7 @@
 #define bacpy(dst,src) memcpy((dst),(src),sizeof(BTH_ADDR))
 #define bacmp(a,b)     memcmp((a),(b),sizeof(BTH_ADDR))
 
-#else /* _WIN32 */
-/* Linux/FreeBSD/NetBSD case */
-
-#if defined(HAVE_BLUETOOTH_LINUX)
+#elif defined(HAVE_BLUETOOTH_LINUX)
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
 
@@ -63,5 +60,3 @@
 #define BDADDR_ANY  NG_HCI_BDADDR_ANY
 
 #endif /* HAVE_BLUETOOTH_* */
-
-#endif /* _WIN32 */

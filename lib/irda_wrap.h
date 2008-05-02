@@ -1,7 +1,7 @@
 #ifndef IRDA_WRAP_H
 #define IRDA_WRAP_H
 
-#ifdef _WIN32
+#if defined(HAVE_IRDA_WINDOWS)
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 1
@@ -15,10 +15,10 @@
 #define sir_family irdaAddressFamily
 #define sir_name   irdaServiceName
 
-#else /* _WIN32 */
+#elif defined(HAVE_IRDA_LINUX)
 
 #include "irda.h"
 
-#endif /* _WIN32 */
+#endif
 
 #endif /* IRDA_WRAP_H */
