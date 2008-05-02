@@ -31,6 +31,8 @@
 #endif
 
 #include <openobex/obex.h>
+#include "obex_put_common.h"
+#include "obex_io.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -40,9 +42,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-
-#include "obex_put_common.h"
-#include "obex_io.h"
 
 #define TRUE  1
 #define FALSE 0

@@ -23,11 +23,6 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <string.h>
-
 #ifdef _WIN32
 #include <winsock2.h>
 #define in_addr_t unsigned long
@@ -46,6 +41,11 @@
 
 #include "obex_put_common.h"
 #include "obex_io.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <string.h>
 
 #define TRUE  1
 #define FALSE 0

@@ -23,11 +23,11 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
+#include <openobex/obex.h>
+
+#include "obex_io.h"
+#include "obex_test_client.h"
+#include "obex_test.h"
 
 #if defined(_WIN32)
 #include <io.h>
@@ -42,11 +42,11 @@
 #include <libgen.h>
 #endif
 
-#include <openobex/obex.h>
-
-#include "obex_io.h"
-#include "obex_test_client.h"
-#include "obex_test.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
 
 #define TRUE  1
 #define FALSE 0

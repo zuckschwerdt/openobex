@@ -23,17 +23,17 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-
 #include <openobex/obex.h>
-
-#include <stdlib.h>
-#include <fcntl.h>
-#include <string.h>
 
 #include "obex_io.h"
 #include "obex_test.h"
 #include "obex_test_server.h"
+
+#include <stdio.h>
+
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
 
 #define TRUE  1
 #define FALSE 0

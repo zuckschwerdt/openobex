@@ -23,21 +23,6 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <winsock2.h>
-#define in_addr_t unsigned long
-#else
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#endif /* _WIN32 */
-
 #ifdef HAVE_BLUETOOTH
 #include "../lib/bluez_compat.h"
 #endif
@@ -50,6 +35,20 @@
 
 #ifndef _WIN32
 #include "obex_test_cable.h"
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#endif
+
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+
+#ifndef in_addr_t
+#define in_addr_t unsigned long
 #endif
 
 #define TRUE  1
