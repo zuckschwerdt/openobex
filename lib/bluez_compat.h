@@ -23,6 +23,9 @@
 #include <config.h>
 #endif
 
+#ifndef BLUEZ_COMPAT_H
+#define BLUEZ_COMPAT_H
+
 #if defined(HAVE_BLUETOOTH_WINDOWS)
 /* you need the headers files from the Platform SDK */
 #include <winsock2.h>
@@ -35,9 +38,10 @@
 #define PF_BLUETOOTH   PF_BTH
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define BTPROTO_RFCOMM BTHPROTO_RFCOMM
-#define BDADDR_ANY     BTH_ADDR_NULL
-#define bacpy(dst,src) memcpy((dst),(src),sizeof(BTH_ADDR))
-#define bacmp(a,b)     memcmp((a),(b),sizeof(BTH_ADDR))
+static bdaddr_t bluez_compat_bdaddr_any = {BTH_ADDR_NULL};
+#define BDADDR_ANY     &bluez_compat_bdaddr_any
+#define bacpy(dst,src) memcpy((dst),(src),sizeof(bdaddr_t))
+#define bacmp(a,b)     memcmp((a),(b),sizeof(bdaddr_t))
 
 #elif defined(HAVE_BLUETOOTH_LINUX)
 #include <bluetooth/bluetooth.h>
@@ -60,3 +64,5 @@
 #define BDADDR_ANY  NG_HCI_BDADDR_ANY
 
 #endif /* HAVE_BLUETOOTH_* */
+
+#endif /* BLUEZ_COMPAT_H */

@@ -353,12 +353,11 @@ int main (int argc, char *argv[])
 				}
 				if(btobex) {
 #ifdef HAVE_BLUETOOTH
-					bdaddr_t bdaddr_any = BDADDR_ANY;
-					if (bacmp(&bdaddr, &bdaddr_any) == 0) {
+					if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
 						printf("Device address error! (Bluetooth)\n");
 						break;
 					}
-					if(BtOBEX_TransportConnect(handle, &bdaddr_any, &bdaddr, channel) <0) {
+					if(BtOBEX_TransportConnect(handle, BDADDR_ANY, &bdaddr, channel) <0) {
 						printf("Transport connect error! (Bluetooth)\n");
 						break;
 					}

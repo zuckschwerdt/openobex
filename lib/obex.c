@@ -1163,16 +1163,13 @@ int CALLAPI IrOBEX_TransportConnect(obex_t *self, const char *service)
 LIB_SYMBOL
 int CALLAPI BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
 {
-#ifdef HAVE_BLUETOOTH
-	bdaddr_t bdaddr_any = BDADDR_ANY;
-#endif
 	DEBUG(3, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
 
 #ifdef HAVE_BLUETOOTH
 	if(src == NULL)
-		src = &bdaddr_any;
+		src = BDADDR_ANY;
 	btobex_prepare_listen(self, src, channel);
 	return obex_transport_listen(self);
 #else
@@ -1193,9 +1190,6 @@ int CALLAPI BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel)
 LIB_SYMBOL
 int CALLAPI BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel)
 {
-#ifdef HAVE_BLUETOOTH
-	bdaddr_t bdaddr_any = BDADDR_ANY;
-#endif
 	DEBUG(4, "\n");
 
 	obex_return_val_if_fail(self != NULL, -1);
@@ -1209,7 +1203,7 @@ int CALLAPI BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, 
 
 #ifdef HAVE_BLUETOOTH
 	if(src == NULL)
-		src = &bdaddr_any;
+		src = BDADDR_ANY;
 	btobex_prepare_connect(self, src, dst, channel);
 	return obex_transport_connect_request(self);
 #else
