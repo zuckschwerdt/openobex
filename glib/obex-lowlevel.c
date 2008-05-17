@@ -31,8 +31,18 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
-#warning "Incomplete implementation: no gmtime_r() on win32!"
-#define gmtime_r(time_p,result) NULL
+static struct tm * gmtime_r ( time_t *t, struct tm *result)
+{
+	if (result) {
+		const time_t t2 = *t;
+		struct tm *tmp = gmtime(&t2);
+		if (!tmp)
+			return NULL;
+		memcpy(result, &tmp, sizeof(result));
+	}
+	return result;
+}
+#define snprintf _snprintf
 #define EISCONN WSAEISCONN
 #define ENOTCONN WSAENOTCONN
 #else
@@ -62,16 +72,20 @@ enum {
 	OBEX_CLOSED
 };
 
+#pragma pack(1)
 typedef struct obex_setpath_hdr {
     uint8_t  flags;
     uint8_t constants;
-} __attribute__ ((packed)) obex_setpath_hdr_t;
+} obex_setpath_hdr_t;
+#pragma pack()
 
+#pragma pack(1)
 typedef struct obex_connect_hdr {
     uint8_t  version;
     uint8_t  flags;
     uint16_t mtu;
-} __attribute__ ((packed)) obex_connect_hdr_t;
+} obex_connect_hdr_t;
+#pragma pack()
 
 typedef struct {
 	int event;
