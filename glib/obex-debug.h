@@ -21,5 +21,8 @@
 
 #include <stdio.h>
 
-#define debug(fmt, arg...) fprintf(stderr, "== %s: " fmt "\n" , \
-						__FUNCTION__ , ## arg)
+#if defined(_MSC_VER) && _MSC_VER < 1400
+static void debug (char *fmt, ...) {}
+#else
+#define debug(fmt, ...) fprintf(stderr, "== %s: " fmt "\n" , __FUNCTION__ , ## __VA_ARGS__)
+#endif
