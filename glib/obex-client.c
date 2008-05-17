@@ -341,10 +341,10 @@ static void obex_command_ind(obex_t *handle, int event, void *user_data)
 }
 
 static obex_callback_t callback = {
-	.connect_cfm  = obex_connect_cfm,
-	.disconn_ind  = obex_disconn_ind,
-	.progress_ind = obex_progress_ind,
-	.command_ind = obex_command_ind,
+	&obex_connect_cfm,
+	&obex_disconn_ind,
+	&obex_progress_ind,
+	&obex_command_ind,
 };
 
 void obex_client_attach_fd(ObexClient *self, int fd)
