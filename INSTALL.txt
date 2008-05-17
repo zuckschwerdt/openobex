@@ -1,0 +1,59 @@
+How to compile OpenObex
+=======================
+
+
+The compilation of OpenObex is done using CMake.
+The following OBEX transports are available:
+ * Bluetooth (not all systems, see below)
+ * Irda (not all systems, see below)
+ * TCP
+ * Custom transport
+ * File descriptor
+
+
+The following operating systems are supported:
+ * Linux [Bluetooth, Irda]
+ * FreeBSD [Bluetooth]
+ * NetBSD [Bluetooth]
+ * Windows [Bluetooth(MS stack), Irda]
+
+Non-listed operating systems may still be supported. For Windows operating
+system, please see INSTALL_Win32.txt.
+
+
+Requirements
+============
+
+1. a C compiler (e.g. GCC)
+2. LibUSB [1]
+3. CMake (>=2.6) [2]
+
+[1]: at http://libusb.sf.net
+[2]: at http://www.cmake.org
+
+
+Compiling
+=========
+
+It is recommended to not build in the source directory. To build in any other
+directory, just run cmake with the path to the source directory as last argument.
+A mix of this is a 'build' subdirectory in the source tree. The example below uses
+this method.
+
+At the command line, run:
+  $ mkdir build
+  $ cd build
+  $ cmake ..
+  $ make
+
+You can also use a substitute like cmake-gui or ccmake. Different build
+front-ends are also possible, the default are "Unix Makefiles".
+
+
+Installation
+============
+
+You might want to adjust the installation prefix by changing the
+CMAKE_INSTALL_PREFIX variable like, the default is /usr/local.
+Then you can install the files by running the "install" make target.
+The "package" make target will create a compressed tarball with the binaries.

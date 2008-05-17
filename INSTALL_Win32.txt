@@ -1,0 +1,89 @@
+How to compile OpenObex on Windows platform
+===========================================
+
+You should read INSTALL.txt before continuing reading this file.
+
+Requirements
+============
+
+The requirements to compile OpenObex on Windows are fairly low:
+1. install the compiler
+2. install the Platform SDK (now also called Windows SDK)
+3. install LibUSB-Win32[1]
+4. install CMake (>= 2.6)[2]
+
+The supported compilers are:
+ * Microsoft Visual Studio 9 .NET 2008
+ * Microsoft Visual Studio 8 .NET 2005
+ * Microsoft Visual Studio 7.1 .NET 2003
+ * MinGW gcc
+ * Cygwin gcc
+
+[1]: at http://libusb-win32.sf.net (if not compiling for cygwin)
+[2]: at http://www.cmake.org
+
+
+Compilation using Visual Studio
+===============================
+
+Using Visual Studion >= 8 (EXpress versions are sufficient) is the recommended
+way of compiling under Windows.
+You must open the console link that runs the proper vcvars.bat (see Start menu).
+Then, you _MUST_ add the directories of the platform SDK include files, libraries
+and executables to the environment variables INCLUDE, LIB and PATH.
+Now, your build environment is set up. You can now call cmake with the proper
+generator (see "cmake --help"). Using the "NMake Makefiles" generator, OpenObex
+can be compiled directly in the command prompt window:
+  > mkdir build
+  > cd build
+  > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+  > nmake
+
+
+Compiling using MinGW
+=====================
+
+Install MinGW, including core and mingw32-make, to e.g. C:\mingw.
+To get Bluetooth and Irda support, you must copy the following files from the
+Platform SDK include directory to usr/local/include in the MinGW installation
+directory:
+  ws2bth.h
+  bthdef.h
+  bthsdpdef.h
+  af_irda.h
+
+You _MUST_ add the MinGW directories of the include files, libraries
+and executables to the environment variables INCLUDE, LIB and PATH.
+Then, at the command prompt:
+  > set INCLUDE=%INCLUDE%;C:\mingw\include
+  > set LIB=%LIB%;C:\mingw\lib
+  > set PATH=%PATH%;C:\mingw\bin
+  > mkdir build
+  > cd build
+  > cmake -G"MinGW Makefiles" ..
+  > mingw32-make
+
+
+Compiling using Cygwin
+======================
+
+You must not use the Windows version of CMake but a version compiled specially
+for cygwin. You may also install cygwin version of libusb. Copy the same files
+as for the MinGW case to /usr/local/include. Then cou can run in the cygwin
+shell command window:
+  $ mkdir build
+  $ cd build
+  $ cmake -G"Unix Makefiles" ..
+  $ make
+
+
+Installation
+============
+
+You can run the installation directly by calling the "install" make target.
+Additionally, you can create installation packages but a few steps are needed:
+  * install NSIS
+  * install a ZIP program (e.g. info-zip)
+
+
+Now you are ready to run the "pacakge" make target.
