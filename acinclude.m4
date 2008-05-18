@@ -62,6 +62,7 @@ AC_DEFUN([AC_PATH_IRDA_LINUX], [
 				struct irda_device_list l;
 			], irda_found=yes, irda_found=no)
 	])
+	irda_linux=$irda_found
 ])
 
 AC_DEFUN([AC_PATH_IRDA_WIN32], [
@@ -71,6 +72,7 @@ AC_DEFUN([AC_PATH_IRDA_WIN32], [
 				  #include <winsock2.h>
 		])
 	])
+      irda_windows=$irda_found
 	AC_MSG_CHECKING([for IrDA support])
 	AC_MSG_RESULT([$irda_found])
 ])
@@ -253,11 +255,17 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 
 	if (test "${irda_enable}" = "yes" && test "${irda_found}" = "yes"); then
 		AC_DEFINE(HAVE_IRDA, 1, [Define if system supports IrDA and it's enabled])
+            if (test "${irda_windows}" = "yes"); then
+                  AC_DEFINE(HAVE_IRDA_WINDOWS, 1, [Define if system supports IrDA stack for Windows])
+            elif (test "${irda_linux}" = "yes"); then
+		      AC_DEFINE(HAVE_IRDA_LINUX, 1, [Define if system supports IrDA stack for Linux])
+            fi
 	fi
 
-        if (test "${bluetooth_enable}" = "yes" && test "${winbt_found}" = "yes"); then
-                AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
-        fi
+      if (test "${bluetooth_enable}" = "yes" && test "${winbt_found}" = "yes"); then
+            AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
+            AC_DEFINE(HAVE_BLUETOOTH_WINDOWS, 1, [Define if system supports Bluetooth stack for Windows])
+      fi
 
 	if (test "${bluetooth_enable}" = "yes" && test "${netbsdbt_found}" = "yes"); then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Define if system supports Bluetooth and it's enabled])
