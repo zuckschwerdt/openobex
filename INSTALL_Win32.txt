@@ -3,14 +3,14 @@ How to compile OpenObex on Windows platform
 
 You should read INSTALL.txt before continuing reading this file.
 
-Requirements
-============
+1 Requirements
+==============
 
 The requirements to compile OpenObex on Windows are fairly low:
-1. install the compiler
-2. install the Platform SDK (now also called Windows SDK)
-3. install LibUSB-Win32[1]
-4. install CMake (>= 2.6)[2]
+1. a compiler
+2. the Platform SDK (now also called Windows SDK)
+3. LibUSB-Win32[1]
+4. CMake(>= 2.6)[2] or autoconf+automake
 
 The supported compilers are:
  * Microsoft Visual Studio 9 .NET 2008
@@ -23,8 +23,62 @@ The supported compilers are:
 [2]: at http://www.cmake.org
 
 
-Compilation using Visual Studio
-===============================
+2 Compilation
+=============
+
+2a Compilation using autoconf+automake
+======================================
+
+Compiling with autoconf+automake is restricted to a very specific environment,
+an Unix-like one. Under Windows, this can only be provided by MSYS or Cygwin.
+
+MSYS
+----
+
+You need to install the following extra packages from http://www.mingw.org:
+  * MSYS (1.0.10 works)
+  * msysDTK (1.0.1 works)
+
+Additionally, download the following packages from http://www.gtk.org/download-windows.html:
+  * glib
+  * glib-dev
+  * pkg-config
+Unpack them all into the same directory!
+
+You need to prepare the build environment by editing /etc/fstab and mount the
+GLIB installation dir to /glib and the libusb-win32 installation dir to /libusb.
+MinGW should already be present unter /mingw.
+Additionally, you create /pdsk/include and copy the following header files from
+the Platform SDK to there:
+  ws2bth.h
+  bthdef.h
+  bthsdpdef.h
+  af_irda.h
+
+If you check out from VCS and configure does not exist, you can create it with:
+  $ export ACLOCAL="aclocal -I /glib/share/aclocal"
+  $ autoreconf -v -f -i
+
+Now you need some environment variable for configure:
+  $ export CFLAGS="-I/libusb/include -I/glib/include -I/psdk/include"
+  $ export LDFLAGS="-L/libusb/lib/gcc -L/glib/lib"
+  $ export PATH="$PATH:/glib/bin"
+  $ export PKG_CONFIG_PATH="/glib/lib/pkgconfig"
+
+Now you can finally run configure:
+  $ ./configure --prefix=/mingw --disable-shared
+
+This will build a static library. Do to a bug in libtool, you cannot build the
+static and the shared version at the same time. To build the shared version, run:
+  $ ./configure --prefix=/mingw --disable-static
+
+
+
+2b Compilation using CMake
+==========================
+
+Visual Studio
+-------------
 
 Using Visual Studion >= 8 (EXpress versions are sufficient) is the recommended
 way of compiling under Windows.
@@ -40,8 +94,8 @@ can be compiled directly in the command prompt window:
   > nmake
 
 
-Compiling using MinGW
-=====================
+MinGW
+-----
 
 Install MinGW, including core and mingw32-make, to e.g. C:\mingw.
 To get Bluetooth and Irda support, you must copy the following files from the
@@ -63,9 +117,17 @@ Then, at the command prompt:
   > cmake -G"MinGW Makefiles" ..
   > mingw32-make
 
+You can also use MSYS as environment:
+  > export INCLUDE=$INCLUDE;C:\mingw\include
+  > export LIB=$LIB;C:\mingw\lib
+  > mkdir build
+  > cd build
+  > cmake -G"MSYS Makefiles" ..
+  > make
 
-Compiling using Cygwin
-======================
+
+Cygwin
+------
 
 You must not use the Windows version of CMake but a version compiled specially
 for cygwin. You may also install cygwin version of libusb. Copy the same files
@@ -77,13 +139,16 @@ shell command window:
   $ make
 
 
-Installation
-============
 
-You can run the installation directly by calling the "install" make target.
-Additionally, you can create installation packages but a few steps are needed:
+3 Installation
+==============
+
+You can run the installation directly by calling the "install" make target. With
+the DESTDIR variable, you can add an additional prefix:
+  $ make install DESTDIR=/some/directory
+
+Additionally, when you used CMake, you can create installation packages but a few
+steps are needed:
   * install NSIS
   * install a ZIP program (e.g. info-zip)
-
-
 Now you are ready to run the "pacakge" make target.

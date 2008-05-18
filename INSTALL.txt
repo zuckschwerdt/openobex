@@ -21,19 +21,36 @@ Non-listed operating systems may still be supported. For Windows operating
 system, please see INSTALL_Win32.txt.
 
 
-Requirements
-============
+1 Requirements
+==============
 
 1. a C compiler (e.g. GCC)
 2. LibUSB [1]
-3. CMake (>=2.6) [2]
+3. autoconf+automake or CMake(>=2.6)[2]
 
 [1]: at http://libusb.sf.net
 [2]: at http://www.cmake.org
 
 
-Compiling
-=========
+
+2 Compilation
+=============
+
+2a Compilation using autoconf+automake
+======================================
+
+At the command line, run:
+  $ ./configure --prefix=/usr
+  $ make
+
+The --prefix option changes the installation prefix, the default is /usr/local.
+Running
+  $ ./configure --help
+gives you lots of other options.
+
+
+2b Compiling using CMake
+========================
 
 It is recommended to not build in the source directory. To build in any other
 directory, just run cmake with the path to the source directory as last argument.
@@ -48,12 +65,13 @@ At the command line, run:
 
 You can also use a substitute like cmake-gui or ccmake. Different build
 front-ends are also possible, the default are "Unix Makefiles".
-
-
-Installation
-============
-
 You might want to adjust the installation prefix by changing the
 CMAKE_INSTALL_PREFIX variable like, the default is /usr/local.
+
+
+3 Installation
+==============
+
 Then you can install the files by running the "install" make target.
-The "package" make target will create a compressed tarball with the binaries.
+When using CMake, the "package" make target will create a compressed tarball
+with the binaries.
