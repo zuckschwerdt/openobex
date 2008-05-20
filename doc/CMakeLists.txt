@@ -35,7 +35,7 @@ if ( DOXYGEN_FOUND )
 
       add_custom_command ( OUTPUT "${DOC_${type}_OUTPUT_FILE_ABS}"
           COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_${type}"
-          DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_${type}" ${SOURCES}
+          DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in" ${SOURCES}
           VERBATIM
       )
 
