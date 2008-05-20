@@ -26,6 +26,11 @@ The supported compilers are:
 2 Compilation
 =============
 
+There are two ways to compile OpenObex. Step 2a describes building with
+autoconf+automake, step 2b describes building with CMake. The latter is
+recommended as it is a lot easier to setup and supports more environments.
+
+
 2a Compilation using autoconf+automake
 ======================================
 
@@ -38,6 +43,10 @@ MSYS
 You need to install the following extra packages from http://www.mingw.org:
   * MSYS (1.0.10 works)
   * msysDTK (1.0.1 works)
+
+Libtool from msysDTK in incomplete, it needs an additional file utility. You
+can get this from http://gnuwin32.sf.net. Do NOT install it in the MSYS directory
+but somewhere else that is already mounted (e.g. into the mingw directory).
 
 Additionally, download the following packages from http://www.gtk.org/download-windows.html:
   * glib
