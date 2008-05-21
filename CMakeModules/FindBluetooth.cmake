@@ -26,8 +26,6 @@ if ( CMAKE_SYSTEM_NAME STREQUAL "Linux" )
       list ( APPEND Bluetooth_LIBRARIES ${${i}_LIBRARY} )
       mark_as_advanced ( ${i}_LIBRARY )
     endforeach ( i )
-    set ( Bluetooth_LIBRARIES "${Bluetooth_LIBRARIES}" CACHE STRING "" )
-    mark_as_advanced ( Bluetooth_LIBRARIES )
     add_definitions ( -DHAVE_SDPLIB )
   else ( PKGCONFIG_BLUEZ_FOUND )
     find_path ( Bluetooth_INCLUDE_DIRS
@@ -38,14 +36,14 @@ if ( CMAKE_SYSTEM_NAME STREQUAL "Linux" )
     )
     mark_as_advanced ( Bluetooth_INCLUDE_DIRS )
 
-    find_library ( OpenObex_LIBRARY
+    find_library ( bluetooth_LIBRARY
       NAMES
         bluetooth
       PATH_SUFFIXES
         lib
     )
-    set ( Bluetooth_LIBRARIES ${Bluetooth_LIBRARY} CACHE STRING "")
-    mark_as_advanced ( Bluetooth_LIBRARY Bluetooth_LIBRARIES )
+    set ( Bluetooth_LIBRARIES ${bluetooth_LIBRARY} )
+    mark_as_advanced ( bluetooth_LIBRARY )
 
     if ( Bluetooth_INCLUDE_DIRS AND Bluetooth_LIBRARIES )
       set ( Bluetooth_FOUND true )
