@@ -44,9 +44,10 @@ You need to install the following extra packages from http://www.mingw.org:
   * MSYS (1.0.10 works)
   * msysDTK (1.0.1 works)
 
-Libtool from msysDTK in incomplete, it needs an additional file utility. You
+Libtool from msysDTK in incomplete, it needs an additional 'file' utility. You
 can get this from http://gnuwin32.sf.net. Do NOT install it in the MSYS directory
-but somewhere else that is already mounted (e.g. into the mingw directory).
+but somewhere else that is already mounted and in $PATH (e.g. into the mingw
+directory).
 
 Additionally, download the following packages from http://www.gtk.org/download-windows.html:
   * glib
@@ -68,7 +69,7 @@ If you check out from VCS and configure does not exist, you can create it with:
   $ export ACLOCAL="aclocal -I /glib/share/aclocal"
   $ autoreconf -v -f -i
 
-Now you need some environment variable for configure:
+Now you need some environment variables for configure:
   $ export CFLAGS="-I/libusb/include -I/glib/include -I/psdk/include"
   $ export LDFLAGS="-L/libusb/lib/gcc -L/glib/lib"
   $ export PATH="$PATH:/glib/bin"
@@ -77,10 +78,9 @@ Now you need some environment variable for configure:
 Now you can finally run configure:
   $ ./configure --prefix=/mingw --disable-shared
 
-This will build a static library. Do to a bug in libtool, you cannot build the
+This will build a static library. Due to a bug in libtool, you cannot build the
 static and the shared version at the same time. To build the shared version, run:
   $ ./configure --prefix=/mingw --disable-static
-
 
 
 2b Compilation using CMake
@@ -115,11 +115,9 @@ directory:
   bthsdpdef.h
   af_irda.h
 
-You _MUST_ add the MinGW directories of the include files, libraries
-and executables to the environment variables INCLUDE, LIB and PATH.
+Either you add MinGW bin directory to PATH, or you call the mingw32-make with
+full path, both variations work.
 Then, at the command prompt:
-  > set INCLUDE=%INCLUDE%;C:\mingw\include
-  > set LIB=%LIB%;C:\mingw\lib
   > set PATH=%PATH%;C:\mingw\bin
   > mkdir build
   > cd build
@@ -127,8 +125,6 @@ Then, at the command prompt:
   > mingw32-make
 
 You can also use MSYS as environment:
-  > export INCLUDE=$INCLUDE;C:\mingw\include
-  > export LIB=$LIB;C:\mingw\lib
   > mkdir build
   > cd build
   > cmake -G"MSYS Makefiles" ..
