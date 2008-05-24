@@ -30,7 +30,7 @@
 #ifndef ESOCKTNOSUPPORT
 #define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
 #endif
-#ifdef OPENOBEX_EXPORTS
+#if defined(OPENOBEX_EXPORTS) || defined(DLL_EXPORT)
 #define LIB_SYMBOL __declspec(dllexport)
 #endif
 #define CALLAPI WINAPI
