@@ -68,13 +68,9 @@ target_link_libraries ( openobex-glib
 )
 
 if ( WIN32 )
-  find_library ( winsock2_LIBRARY ws2_32 )
-  mark_as_advanced( winsock2_LIBRARY )
-  if ( winsock2_LIBRARY )
-    target_link_libraries ( openobex-glib 
-      ${winsock2_LIBRARY}
-    )
-  endif ( winsock2_LIBRARY )
+  target_link_libraries ( openobex-glib 
+    ws2_32
+  )
 endif ( WIN32 )
 
 install ( TARGETS openobex-glib

@@ -75,7 +75,6 @@ if ( OPENOBEX_USB )
     ${LibUSB_LIBRARIES}
   )
   include_directories ( BEFORE SYSTEM ${LibUSB_INCLUDE_DIRS} )
-  link_directories ( ${LibUSB_LIBRARY_DIRS} )
   list ( APPEND SOURCES
     usbobex.c
   )
@@ -102,9 +101,8 @@ if ( WIN32 )
     )
   endif ( CMAKE_COMPILER_IS_GNUCC )
 
-  find_library ( winsock2_LIBRARY NAMES ws2_32 )
   list ( APPEND ${OPENOBEX_LIB_NAME}_LIBRARIES
-    ${winsock2_LIBRARY}
+    ws2_32
   )
 
   if ( CMAKE_RC_COMPILER )
