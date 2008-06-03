@@ -1,0 +1,4 @@
+
+SUBDIRS = openobex
+
+MAINTAINERCLEANFILES = Makefile.in

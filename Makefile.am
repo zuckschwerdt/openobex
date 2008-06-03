@@ -1,5 +1,5 @@
 
-SUBDIRS = include/openobex lib glib apps ircp doc
+SUBDIRS = include lib glib apps ircp doc
 
 aclocaldir = $(datadir)/aclocal
 
