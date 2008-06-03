@@ -11,6 +11,8 @@
 #if ! defined(_WIN32)
 #include <dirent.h>
 #include <sys/param.h>
+#else
+#define MAXPATHLEN 1024
 #endif
 
 #include "dirtraverse.h"
