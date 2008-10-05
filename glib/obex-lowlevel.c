@@ -507,6 +507,7 @@ obex_t *obex_open(int fd, obex_callback_t *callback, void *data)
 void obex_close(obex_t *handle)
 {
 	obex_context_t *context = OBEX_GetUserData(handle);
+	g_return_if_fail(context != NULL);
 
 	OBEX_SetUserData(handle, NULL);
 
@@ -553,6 +554,7 @@ int obex_connect(obex_t *handle, const unsigned char *target, size_t size)
 	obex_object_t *object;
 	obex_headerdata_t hd;
 	int err, ret;
+	g_return_val_if_fail(context != NULL, -1);
 
 	if (context->state != OBEX_OPEN && context->state != OBEX_CLOSED)
 		return -EISCONN;
@@ -586,6 +588,7 @@ int obex_disconnect(obex_t *handle)
 	obex_context_t *context = OBEX_GetUserData(handle);
 	obex_object_t *object;
 	int ret;
+	g_return_val_if_fail(context != NULL, -1);
 
 	if (context->state != OBEX_CONNECTED)
 		return -ENOTCONN;
@@ -612,6 +615,7 @@ int obex_delete(obex_t *handle, const char *name)
 	obex_object_t *object;
 	obex_headerdata_t hd;
 	int err;
+	g_return_val_if_fail(context != NULL, -1);
 
 	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECT
 					&& context->state != OBEX_CONNECTED)
@@ -663,6 +667,7 @@ int obex_put(obex_t *handle, const char *type, const char *name, int size, time_
 	obex_object_t *object;
 	obex_headerdata_t hd;
 	int err, cmd;
+	g_return_val_if_fail(context != NULL, -1);
 
 	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECT
 					&& context->state != OBEX_CONNECTED)
@@ -768,6 +773,7 @@ int obex_get(obex_t *handle, const char *type, const char *name)
 	obex_object_t *object;
 	obex_headerdata_t hd;
 	int err, cmd;
+	g_return_val_if_fail(context != NULL, -1);
 
 	if (context->state != OBEX_OPEN && context->state != OBEX_CONNECT
 					&& context->state != OBEX_CONNECTED)
@@ -952,6 +958,7 @@ int obex_setpath(obex_t *handle, const char *path, int create)
 	obex_headerdata_t hd;
 	obex_setpath_hdr_t sphdr;
 	int ret;
+	g_return_val_if_fail(context != NULL, -1);
 
 	if (context->state != OBEX_CONNECTED)
 		return -ENOTCONN;
