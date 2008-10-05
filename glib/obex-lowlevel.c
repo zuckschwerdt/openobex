@@ -696,7 +696,7 @@ int obex_put(obex_t *handle, const char *type, const char *name, int size, time_
 	}
 
 	if (type) {
-		int len = strlen(name) + 1;
+		int len = strlen(type) + 1;
 
 		hd.bs = (uint8_t *) type;
 
@@ -802,7 +802,7 @@ int obex_get(obex_t *handle, const char *type, const char *name)
 	}
 
 	if (type) {
-		int len = strlen(name) + 1;
+		int len = strlen(type) + 1;
 
 		hd.bs = (uint8_t *) type;
 
