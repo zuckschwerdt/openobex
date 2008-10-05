@@ -664,13 +664,13 @@ int CALLAPI OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
 }
 
 /**
-	Get available space in object
+	Get available space in object.
 	\param self OBEX handle
-	\param object OBEX object
+	\param object OBEX object to query
 	\param flags OBEX_FL_FIT_ONE_PACKET or 0
 	\return -1 on error
 
-	Get available space in object
+	Returns the available space in a given obex object.
 
 	This can be useful e.g. if the caller wants to check the size of the
 	biggest body header that can be added to the current packet.
