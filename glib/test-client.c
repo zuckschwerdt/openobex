@@ -90,7 +90,7 @@ static int open_device(const char *device)
 static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data)
 {
 	GError *gerr = NULL;
-	int *io = data;
+	int err, *io = data;
 
 	if (cond & OBEX_CLIENT_COND_IN) {
 		gchar buf[1024];
@@ -111,7 +111,7 @@ static void transfer(ObexClient *client, ObexClientCondition cond, gpointer data
 			printf("Data buffer with size %zd available\n", len);
 
 			if (len > 0 && *io >= 0)
-				write(*io, buf, len);	
+				err = write(*io, buf, len);	
 
 		} while (len == sizeof(buf));
 	}
