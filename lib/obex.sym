@@ -20,6 +20,7 @@ OBEX_SuspendRequest
 OBEX_ResumeRequest
 OBEX_ObjectNew
 OBEX_ObjectDelete
+OBEX_ObjectGetSpace
 OBEX_ObjectAddHeader
 OBEX_ObjectGetNextHeader
 OBEX_ObjectReParseHeaders
