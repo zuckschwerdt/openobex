@@ -80,6 +80,7 @@ typedef struct {
 
 obex_object_t *obex_object_new(void);
 int obex_object_delete(obex_object_t *object);
+int obex_object_getspace(obex_t *self, obex_object_t *object, unsigned int flags);
 int obex_object_addheader(obex_t *self, obex_object_t *object, uint8_t hi,
 					obex_headerdata_t hv, uint32_t hv_size,
 					unsigned int flags);
