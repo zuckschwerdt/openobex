@@ -663,6 +663,27 @@ int CALLAPI OBEX_ObjectDelete(obex_t *self, obex_object_t *object)
 	return obex_object_delete(object);
 }
 
+/**
+	Get available space in object
+	\param self OBEX handle
+	\param object OBEX object
+	\param flags OBEX_FL_FIT_ONE_PACKET or 0
+	\return -1 on error
+
+	Get available space in object
+
+	This can be useful e.g. if the caller wants to check the size of the
+	biggest body header that can be added to the current packet.
+
+ */
+LIB_SYMBOL
+int CALLAPI OBEX_ObjectGetSpace(obex_t *self, obex_object_t *object,
+				unsigned int flags)
+{
+	obex_return_val_if_fail(self != NULL, -1);
+	obex_return_val_if_fail(object != NULL, -1);
+	return obex_object_getspace(self, object, flags);
+}
 
 /**
 	Attach a header to an object.

@@ -132,6 +132,14 @@ int obex_object_setrsp(obex_object_t *object, uint8_t rsp, uint8_t lastrsp)
 	return 1;
 }
 
+int obex_object_getspace(obex_t *self, obex_object_t *object, unsigned int flags)
+{
+	if (flags & OBEX_FL_FIT_ONE_PACKET)
+		return self->mtu_tx - object->totallen - sizeof(struct obex_common_hdr);
+	else
+		return self->mtu_tx - sizeof(struct obex_common_hdr);
+}
+
 /*
  * Function int obex_object_addheader(obex_object_t *object, uint8_t hi, 
  *                      obex_headerdata_t hv, uint32_t hv_size, unsigned int flags)
