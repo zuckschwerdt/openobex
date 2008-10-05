@@ -21,6 +21,10 @@
 
 #include <openobex/obex.h>
 
+#ifdef OBEX_CLIENT
+#undef OBEX_CLIENT
+#endif
+
 typedef struct {
 	void (*connect_cfm)(obex_t *handle, void *data);
 	void (*disconn_ind)(obex_t *handle, void *data);
