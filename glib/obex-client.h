@@ -124,7 +124,7 @@ void obex_client_add_watch_full(ObexClient *self,
 			ObexClientCondition condition, ObexClientFunc func,
 					gpointer data, GDestroyNotify notify);
 
-void obex_client_attach_fd(ObexClient *self, int fd);
+gboolean obex_client_attach_fd(ObexClient *self, int fd, GError **error);
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
 						gsize size, GError **error);
