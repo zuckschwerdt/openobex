@@ -30,7 +30,7 @@ list ( APPEND obex_test_SOURCES
 )
 
 list ( APPEND obex_test_LIBS
-  ${BLUETOOTH_LIBRARIES}
+  ${Bluetooth_LIBRARIES}
 )
 
 foreach ( prog ${OPENOBEX_APPS} )
