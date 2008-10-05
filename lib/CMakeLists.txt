@@ -1,11 +1,24 @@
 #
 # Main library version and shared object version
 #
-set ( OPENOBEX_LIB_NAME      "openobex" )
+
+# this defines supported properties that are set from
+# variables of the form openobex_*
+set ( openobex_PROPERTIES
+  VERSION
+  SOVERSION
+  PUBLIC_HEADER
+  COMPILE_DEFINITIONS
+  COMPILE_FLAGS
+  LINK_FLAGS
+)
+
+# the library version always matches the project version
 foreach ( i VERSION VERSION_MAJOR VERSION_MINOR VERSION_PATCH )
-  set ( OPENOBEX_LIB_${i}   "${${i}}" )
+  set ( openobex_${i}   "${${i}}" )
 endforeach ( i )
-set ( OPENOBEX_LIB_SOVERSION "1" )
+# the ABI version, must be increased on incompatible changes
+set ( openobex_SOVERSION "1" )
 
 
 set ( SOURCES
@@ -33,20 +46,25 @@ set ( HEADERS
   inobex.h
 )
 
+set ( openobex_PUBLIC_HEADER
+  ${openobex_INCLUDE_DIRS}/openobex/obex.h
+  ${openobex_INCLUDE_DIRS}/openobex/obex_const.h
+)
+
 option ( ENABLE_DEBUG_MESSAGES "Enables debug messages printed during runtime" )
 if ( ENABLE_DEBUG_MESSAGES )
-  add_definitions ( -DOBEX_DEBUG )
+  list ( APPEND openobex_COMPILE_DEFINITIONS OBEX_DEBUG )
   if ( NOT CMAKE_SYSTEM_NAME STREQUAL "Windows" )
      option ( DEBUG_USE_SYSLOG "Use SysLog facility instead of stderr for debug messages" )
   endif ( NOT CMAKE_SYSTEM_NAME STREQUAL "Windows" )
   if ( DEBUG_USE_SYSLOG )     
-    add_definitions ( -DOBEX_SYSLOG )
+    list ( APPEND openobex_COMPILE_DEFINITIONS OBEX_SYSLOG )
   endif ( DEBUG_USE_SYSLOG )     
 endif ( ENABLE_DEBUG_MESSAGES )
 
 option ( ENABLE_DUMP_MESSAGES "Enables dumping of data" )
 if ( ENABLE_DUMP_MESSAGES )
-  add_definitions ( -DOBEX_DUMP )
+  list ( APPEND openobex_COMPILE_DEFINITIONS OBEX_DUMP )
 endif ( ENABLE_DUMP_MESSAGES )
 
 if ( OPENOBEX_IRDA )
@@ -71,7 +89,7 @@ if ( OPENOBEX_BLUETOOTH )
 endif ( OPENOBEX_BLUETOOTH )
 
 if ( OPENOBEX_USB )
-  list ( APPEND ${OPENOBEX_LIB_NAME}_LIBRARIES
+  list ( APPEND openobex_LIBRARIES
     ${LibUSB_LIBRARIES}
   )
   include_directories ( BEFORE SYSTEM ${LibUSB_INCLUDE_DIRS} )
@@ -84,24 +102,21 @@ if ( OPENOBEX_USB )
 endif ( OPENOBEX_USB )
 
 if ( COMPILER_SUPPORT_VISIBILITY )
-  set ( ${OPENOBEX_LIB_NAME}_DEFINITIONS
-    "${${OPENOBEX_LIB_NAME}_DEFINITIONS} -DHAVE_VISIBILITY ${COMPILER_FLAG_VISIBILITY}"
-  )
+  list ( APPEND openobex_COMPILE_DEFINITIONS HAVE_VISIBILITY )
+  set ( openobex_COMPILE_FLAGS "${openobex_COMPILE_FLAGS} ${COMPILER_FLAG_VISIBILITY}" )
 endif ( COMPILER_SUPPORT_VISIBILITY )
 if ( COMPILER_SUPPORT_NOUNDEFINED )
-  set ( ${OPENOBEX_LIB_NAME}_LDFLAGS
-    "${${OPENOBEX_LIB_NAME}_LDFLAGS} ${LINKER_FLAG_NOUNDEFINED}"
-  )
+  set ( openobex_LINK_FLAGS "${openobex_LINK_FLAGS} ${LINKER_FLAG_NOUNDEFINED}" )
 endif ( COMPILER_SUPPORT_NOUNDEFINED )
 
 if ( WIN32 )
   if ( CMAKE_COMPILER_IS_GNUCC )
-    set ( ${OPENOBEX_LIB_NAME}_LDFLAGS
-      "${${OPENOBEX_LIB_NAME}_LDFLAGS} -Wl,--disable-stdcall-fixup -Wl,--add-stdcall-alias"
+    set ( openobex_LINK_FLAGS
+      "${openobex_LINK_FLAGS} -Wl,--disable-stdcall-fixup -Wl,--add-stdcall-alias"
     )
   endif ( CMAKE_COMPILER_IS_GNUCC )
 
-  list ( APPEND ${OPENOBEX_LIB_NAME}_LIBRARIES
+  list ( APPEND openobex_LIBRARIES
     ws2_32
   )
 
@@ -116,7 +131,7 @@ if ( WIN32 )
 
   if ( MSVC )
     set ( OPENOBEX_DEF_FILE "${CMAKE_CURRENT_BINARY_DIR}/openobex.def" )
-    file ( WRITE "${OPENOBEX_DEF_FILE}" "VERSION ${OPENOBEX_LIB_VERSION_MAJOR}.${OPENOBEX_LIB_VERSION_MINOR}\n" )
+    file ( WRITE "${OPENOBEX_DEF_FILE}" "VERSION ${openobex_VERSION_MAJOR}.${openobex_VERSION_MINOR}\n" )
     file ( APPEND "${OPENOBEX_DEF_FILE}" "EXPORTS\n" )
     file ( READ "${CMAKE_CURRENT_SOURCE_DIR}/obex.sym" OPENOBEX_SYMBOLS )
     file ( APPEND "${OPENOBEX_DEF_FILE}" "${OPENOBEX_SYMBOLS}\n" )
@@ -125,50 +140,56 @@ endif ( WIN32 )
 
 if ( CYGWIN )
   #also define _WIN32 under CygWin
-  add_definitions( -D_WIN32)
+  list ( APPEND openobex_COMPILE_DEFINITIONS _WIN32)
 endif ( CYGWIN )
 
 # Add the openobex library target
-add_library ( ${OPENOBEX_LIB_NAME}
+add_library ( openobex
   ${SOURCES}
   ${HEADERS}
+  ${openobex_PUBLIC_HEADER}
   ${OPENOBEX_RC_FILE}
   ${OPENOBEX_DEF_FILE}
 )
-set_target_properties ( ${OPENOBEX_LIB_NAME} PROPERTIES
-  VERSION       ${OPENOBEX_LIB_VERSION}
-  SOVERSION     ${OPENOBEX_LIB_SOVERSION}
-  DEFINE_SYMBOL OPENOBEX_EXPORTS
-  COMPILE_FLAGS "${${OPENOBEX_LIB_NAME}_DEFINITIONS}"
-  LINK_FLAGS    "${${OPENOBEX_LIB_NAME}_LDFLAGS}"
-)
-target_link_libraries ( ${OPENOBEX_LIB_NAME}
-  ${${OPENOBEX_LIB_NAME}_LIBRARIES}
+
+target_link_libraries ( openobex
+  ${openobex_LIBRARIES}
 )
 
-install ( TARGETS ${OPENOBEX_LIB_NAME}
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+foreach ( i ${openobex_PROPERTIES} )
+  if ( DEFINED openobex_${i} )
+    set_property ( TARGET openobex PROPERTY ${i} ${openobex_${i}} )
+  endif ( DEFINED openobex_${i} )
+endforeach ( i )
+
+set_property ( TARGET openobex PROPERTY
+  DEFINE_SYMBOL OPENOBEX_EXPORTS
+)
+
+install ( TARGETS openobex
+  RUNTIME       DESTINATION bin
+  LIBRARY       DESTINATION lib
+  ARCHIVE       DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/openobex
   COMPONENT library
 )
 
 #
 # Copy the .pc file to install it only if the lib gets installed
 #
-add_custom_command ( TARGET ${OPENOBEX_LIB_NAME}
+add_custom_command ( TARGET openobex
   COMMAND ${CMAKE_COMMAND}
-  ARGS    -E copy_if_different ${PROJECT_BINARY_DIR}/${OPENOBEX_LIB_NAME}.pc
-          ${CMAKE_CURRENT_BINARY_DIR}/${OPENOBEX_LIB_NAME}.pc
+  ARGS    -E copy_if_different ${PROJECT_BINARY_DIR}/openobex.pc
+          ${CMAKE_CURRENT_BINARY_DIR}/openobex.pc
   VERBATIM
 )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${OPENOBEX_LIB_NAME}.pc
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/openobex.pc
   DESTINATION ${PKGCONFIG_INSTALL_DIR}
   OPTIONAL
 )
 
 
 #  include ( GetPrerequisites )
-#  get_prerequisites ( ${OPENOBEX_LIB_NAME} CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS 0 1 )
+#  get_prerequisites ( openobex CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS 0 1 )
 include ( InstallRequiredSystemLibraries )
 

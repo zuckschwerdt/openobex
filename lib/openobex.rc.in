@@ -1,7 +1,7 @@
 #include <winresrc.h>
 
 VS_VERSION_INFO VERSIONINFO
-  FILEVERSION    @OPENOBEX_LIB_VERSION_MAJOR@,@OPENOBEX_LIB_VERSION_MINOR@,@OPENOBEX_LIB_VERSION_PATCH@,0
+  FILEVERSION    @openobex_VERSION_MAJOR@,@openobex_VERSION_MINOR@,@openobex_VERSION_PATCH@,0
   PRODUCTVERSION @VERSION_MAJOR@,@VERSION_MINOR@,@VERSION_PATCH@,0
   FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
 #ifndef NDEBUG
@@ -22,12 +22,12 @@ VS_VERSION_INFO VERSIONINFO
       BLOCK "04090000"
       BEGIN
         VALUE "FileDescription",  "Object Exchange Protocol Implementation"
-        VALUE "FileVersion",      "@OPENOBEX_LIB_VERSION@"
-        VALUE "InternalName",     "@OPENOBEX_LIB_NAME@"
+        VALUE "FileVersion",      "@openobex_VERSION@"
+        VALUE "InternalName",     "openobex"
         VALUE "LegalCopyright",   "Licensed under GPLv2 or any later version"
-        VALUE "OriginalFilename", "@OPENOBEX_LIB_NAME@.dll"
+        VALUE "OriginalFilename", "openobex.dll"
         VALUE "ProductName",      "OpenObex"
-        VALUE "ProductVersion",    "@VERSION@"
+        VALUE "ProductVersion",   "@VERSION@"
       END
     END
     BLOCK "VarFileInfo"

@@ -1,11 +1,14 @@
 
+set ( openobex-glib_VERSION 1.0.0 )
+set ( openobex-glib_SOVERSION 0 )
+
 find_package ( Glib REQUIRED object thread)
 
 set ( GENERATED_SOURCES
   obex-marshal.c
   obex-marshal.h
 )
-set_source_files_properties ( ${GENERATED_SOURCES} PROPERTIES
+set_property ( SOURCE ${GENERATED_SOURCES} PROPERTY
   GENERATED true
 )
 
@@ -40,14 +43,25 @@ set ( SOURCES
   ${GENERATED_SOURCES}
 )
 
+set ( HEADERS
+  obex-client.h
+  obex-debug.h
+  obex-error.h
+  obex-lowlevel.h
+)
+
+set ( openobex-glib_PUBLIC_HEADER
+  obex-client.h
+)
+
 include_directories (
   ${CMAKE_CURRENT_BINARY_DIR}
   ${Glib_INCLUDE_DIRS}
 )
 
 if ( COMPILER_SUPPORT_NOUNDEFINED )
-  set ( openobex-glib_LDFLAGS
-    "${openobex-glib_LDFLAGS} ${LINKER_FLAG_NOUNDEFINED}"
+  set ( openobex-glib_LINK_FLAGS
+    "${openobex-glib_LINK_FLAGS} ${LINKER_FLAG_NOUNDEFINED}"
   )
 endif ( COMPILER_SUPPORT_NOUNDEFINED )
 
@@ -55,16 +69,19 @@ add_library ( openobex-glib
   ${SOURCES}
 )
 
-set_target_properties ( openobex-glib PROPERTIES
-  VERSION       1.0.0
-  SOVERSION     0
-  DEFINE_SYMBOL OPENOBEX_GLIB_EXPORTS
-  LINK_FLAGS    "${openobex-glib_LDFLAGS}"
-)
-
 target_link_libraries ( openobex-glib
   ${Glib_LIBRARIES}
   openobex
+)
+
+foreach ( i VERSION SOVERSION PUBLIC_HEADER LINK_FLAGS )
+  if ( DEFINED openobex-glib_${i} )
+    set_property ( TARGET openobex-glib PROPERTY ${i} ${openobex-glib_${i}} )
+  endif ( DEFINED openobex-glib_${i} )
+endforeach ( i )
+
+set_property ( TARGET openobex-glib PROPERTY
+  DEFINE_SYMBOL OPENOBEX_GLIB_EXPORTS
 )
 
 if ( WIN32 )
@@ -74,9 +91,10 @@ if ( WIN32 )
 endif ( WIN32 )
 
 install ( TARGETS openobex-glib
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  RUNTIME       DESTINATION bin
+  LIBRARY       DESTINATION lib
+  ARCHIVE       DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/openobex
   COMPONENT bindings
 )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/obex-client.h

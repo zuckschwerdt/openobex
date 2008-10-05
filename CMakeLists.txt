@@ -113,7 +113,7 @@ if ( OPENOBEX_USB AND UNIX AND NOT WIN32 )
 endif ( OPENOBEX_USB AND UNIX AND NOT WIN32 )
 foreach ( file openobex openobex-glib )
   configure_file (
-    ${PROJECT_SOURCE_DIR}/${file}.pc.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/${file}.pc.in
     ${CMAKE_CURRENT_BINARY_DIR}/${file}.pc
     @ONLY
   )
@@ -129,10 +129,10 @@ mark_as_advanced ( PKGCONFIG_INSTALL_DIR )
 #
 # process include directory
 #
-add_subdirectory ( include )
-include_directories ( BEFORE SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/include" )
+set ( openobex_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" )
+include_directories ( BEFORE SYSTEM "${openobex_INCLUDE_DIRS}" )
 if ( MSVC )
-  include_directories ( AFTER SYSTEM "${CMAKE_SOURCE_DIR}/include/msvc" )
+  include_directories ( AFTER SYSTEM "${openobex_INCLUDE_DIRS}/msvc" )
 endif ( MSVC )
 
 
