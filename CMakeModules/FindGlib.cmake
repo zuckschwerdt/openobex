@@ -23,7 +23,6 @@ if ( PKG_CONFIG_GLIB_FOUND )
     endif ( ${i}_LIBRARY )
     mark_as_advanced ( ${i}_LIBRARY )
   endforeach ( i )
-  set ( Glib_LIBRARIES "${Glib_LIBRARIES}" CACHE STRING "" )
   mark_as_advanced ( Glib_LIBRARIES )
 
 else ( PKG_CONFIG_GLIB_FOUND )

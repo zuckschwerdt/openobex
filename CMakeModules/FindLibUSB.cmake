@@ -32,8 +32,6 @@ if ( PKGCONFIG_LIBUSB_FOUND )
     endif ( ${i}_LIBRARY )
     mark_as_advanced ( ${i}_LIBRARY )
   endforeach ( i )
-  set ( LibUSB_LIBRARIES "${LibUSB_LIBRARIES}" CACHE STRING "" )
-  mark_as_advanced ( LibUSB_LIBRARIES )
 
 else ( PKGCONFIG_LIBUSB_FOUND )
   find_path ( LibUSB_INCLUDE_DIRS
@@ -64,7 +62,7 @@ else ( PKGCONFIG_LIBUSB_FOUND )
     endif ( MSVC )
   endif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
 
-  find_library ( LibUSB_LIBRARIES
+  find_library ( usb_LIBRARY
     NAMES
       libusb usb
     PATHS
@@ -73,15 +71,14 @@ else ( PKGCONFIG_LIBUSB_FOUND )
     PATH_SUFFIXES
       ${LibUSB_LIBRARY_PATH_SUFFIX}
   )
-  mark_as_advanced ( LibUSB_LIBRARIES )
-  if ( LibUSB_LIBRARIES )
-    get_filename_component ( LibUSB_LIBRARY_DIRS ${LibUSB_LIBRARIES} PATH )
-  endif ( LibUSB_LIBRARIES )
-#  message ( STATUS "LibUSB library: ${LibUSB_LIBRARY_DIRS}" )
+  mark_as_advanced ( usb_LIBRARY )
+  if ( usb_LIBRARY )
+    set ( LibUSB_LIBRARIES ${usb_LIBRARY} )
+  endif ( usb_LIBRARY )
 
-  if ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARY_DIRS )
+  if ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARIES )
     set ( LibUSB_FOUND true )
-  endif ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARY_DIRS )
+  endif ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARIES )
 endif ( PKGCONFIG_LIBUSB_FOUND )
 
 if ( LibUSB_FOUND )
