@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 
 	obex_client_add_watch(client, 0, transfer, &io);
 
-	obex_client_attach_fd(client, fd);
+	obex_client_attach_fd(client, fd, NULL);
 
 	if (argc > 1) {
 		struct stat s;
