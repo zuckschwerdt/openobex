@@ -347,14 +347,16 @@ static obex_callback_t callback = {
 	&obex_command_ind,
 };
 
-void obex_client_attach_fd(ObexClient *self, int fd)
+gboolean obex_client_attach_fd(ObexClient *self, int fd, GError **error)
 {
 	ObexClientPrivate *priv = OBEX_CLIENT_GET_PRIVATE(self);
 	GSource *source;
 
 	priv->handle = obex_open(fd, &callback, self);
-	if (priv->handle == NULL)
-		return;
+	if (priv->handle == NULL) {
+		err2gerror(errno, error);
+		return FALSE;
+	}
 
 	priv->channel = g_io_channel_unix_new(fd);
 
@@ -367,6 +369,8 @@ void obex_client_attach_fd(ObexClient *self, int fd)
 	g_source_attach(source, priv->context);
 
 	g_source_unref(source);
+
+	return TRUE;
 }
 
 gboolean obex_client_connect(ObexClient *self, const guchar *target,
