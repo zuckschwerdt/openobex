@@ -104,6 +104,12 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 	case STATE_START:
 		/* Nothing has been sent yet */
 		DEBUG(4, "STATE_START\n");
+
+		if (!self->object) {
+			DEBUG(4, "Got unexpected data from the server\n");
+			obex_deliver_event(self, OBEX_EV_PARSEERR, rsp, 0, TRUE);
+			return -1;
+		}
 		
 		ret = obex_object_send(self, self->object, TRUE, FALSE);
 		if(ret < 0) {
