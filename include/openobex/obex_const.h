@@ -130,7 +130,7 @@ typedef union {
 #define OBEX_HDR_ID_COUNT	 0x00	/* Number of objects (used by connect) */
 #define OBEX_HDR_ID_NAME	 0x01	/* Name of the object */
 #define OBEX_HDR_ID_TYPE	 0x02	/* Type of the object */
-#define OBEX_HDR_ID_LENGTH	 0x03	/* Total lenght of object */
+#define OBEX_HDR_ID_LENGTH	 0x03	/* Total length of object */
 #define OBEX_HDR_ID_TIME	 0x04	/* Last modification time of (ISO8601) */
 #define OBEX_HDR_ID_DESCRIPTION	 0x05	/* Description of object */
 #define OBEX_HDR_ID_TARGET	 0x06	/* Identifies the target for the object */
