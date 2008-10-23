@@ -46,10 +46,10 @@ int obex_insert_connectframe(obex_t *self, obex_object_t *object)
 	DEBUG(4, "\n");
 
 	object->tx_nonhdr_data = buf_new(4);
-	if(!object->tx_nonhdr_data) 
+	if (!object->tx_nonhdr_data)
 		return -1;
 	conn_hdr = (obex_connect_hdr_t *) buf_reserve_end(object->tx_nonhdr_data, 4);
-	conn_hdr->version = OBEX_VERSION; 
+	conn_hdr->version = OBEX_VERSION;
 	conn_hdr->flags = 0x00;              /* Flags */
 	conn_hdr->mtu = htons(self->mtu_rx); /* Max packet size */
 	return 0;
@@ -65,7 +65,6 @@ int obex_parse_connect_header(obex_t *self, buf_t *msg)
 {
 	obex_connect_hdr_t *conn_hdr;
 	obex_common_hdr_t *common_hdr;
-		
 	uint8_t version;
 	int flags;
 	uint16_t mtu;  /* Maximum send data unit */
@@ -80,11 +79,12 @@ int obex_parse_connect_header(obex_t *self, buf_t *msg)
 	length = ntohs(common_hdr->len);
 
 	/* Parse beyond 3 bytes only if response is success */
-	if( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) && (opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
+	if ( (opcode != (OBEX_RSP_SUCCESS | OBEX_FINAL)) &&
+			(opcode != (OBEX_CMD_CONNECT | OBEX_FINAL)))
 		return 1;
 
 	DEBUG(4, "Len: %d\n", msg->data_size);
-	if(msg->data_size >= 7) {
+	if (msg->data_size >= 7) {
 		/* Get what we need */
 		conn_hdr = (obex_connect_hdr_t *) ((msg->data) + 3);
 		version = conn_hdr->version;
@@ -94,7 +94,7 @@ int obex_parse_connect_header(obex_t *self, buf_t *msg)
 		DEBUG(1, "version=%02x\n", version);
 
 		/* Limit to some reasonable value (usually OBEX_DEFAULT_MTU) */
-		if(mtu < self->mtu_tx_max)
+		if (mtu < self->mtu_tx_max)
 			self->mtu_tx = mtu;
 		else
 			self->mtu_tx = self->mtu_tx_max;

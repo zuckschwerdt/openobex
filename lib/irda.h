@@ -158,7 +158,7 @@ struct irda_ias_set {
 #define SIOCGQOS       (SIOCDEVPRIVATE + 9)
 
 /* No reason to include <linux/if.h> just because of this one ;-) */
-#define IRNAMSIZ 16 
+#define IRNAMSIZ 16
 
 /* IrDA quality of service information (must not exceed 16 bytes) */
 struct if_irda_qos {
@@ -182,7 +182,7 @@ struct if_irda_req {
 	union {
 		char ifrn_name[IRNAMSIZ];  /* if name, e.g. "irda0" */
 	} ifr_ifrn;
-	
+
 	/* Data part */
 	union {
 		struct if_irda_line ifru_line;
@@ -195,7 +195,7 @@ struct if_irda_req {
 };
 
 #define ifr_baudrate  ifr_ifru.ifru_qos.baudrate
-#define ifr_receiving ifr_ifru.ifru_receiving 
+#define ifr_receiving ifr_ifru.ifru_receiving
 #define ifr_dongle    ifr_ifru.ifru_dongle
 #define ifr_mode      ifr_ifru.ifru_mode
 #define ifr_dtr       ifr_ifru.ifru_line.dtr

@@ -48,7 +48,7 @@ int insert_uint_header(buf_t *msg, uint8_t identifier, uint32_t value)
 
 	hdr->hi = identifier;
 	hdr->hv = htonl(value);
-	
+
 	return sizeof(struct obex_uint_hdr);
 }
 
@@ -68,7 +68,7 @@ int insert_ubyte_header(buf_t *msg, uint8_t identifier, uint8_t value)
 
 	hdr->hi = identifier;
 	hdr->hv = value;
-	
+
 	return sizeof(struct obex_ubyte_hdr);
 }
 
@@ -78,8 +78,8 @@ int insert_ubyte_header(buf_t *msg, uint8_t identifier, uint8_t value)
  *    Insert a char string into the buffer
  *
  */
-int insert_unicode_header(buf_t *msg, uint8_t opcode, 
-			const uint8_t *text, int size)
+int insert_unicode_header(buf_t *msg, uint8_t opcode, const uint8_t *text,
+				int size)
 {
 	struct obex_unicode_hdr *hdr;
 
@@ -103,14 +103,14 @@ int insert_unicode_header(buf_t *msg, uint8_t opcode,
  *
  */
 int insert_byte_stream_header(buf_t *msg, uint8_t opcode,
-			const uint8_t *stream, int size)
+				const uint8_t *stream, int size)
 {
 	struct obex_byte_stream_hdr *hdr;
 
 	DEBUG(4, "\n");
 	obex_return_val_if_fail(msg != NULL, -1);
 	obex_return_val_if_fail(stream != NULL || size == 0, -1);
-	
+
 	hdr = (struct obex_byte_stream_hdr *) buf_reserve_end(msg, size + sizeof(struct obex_byte_stream_hdr));
 	if (hdr == 0) {
 		DEBUG(4, "put failed!\n");

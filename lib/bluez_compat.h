@@ -3,7 +3,7 @@
 	Provides the Bluez API on other platforms.
 	OpenOBEX library - Free implementation of the Object Exchange protocol.
 
- 	Copyright (c) 2007 Hendrik Sattler, All Rights Reserved.
+	Copyright (c) 2007 Hendrik Sattler, All Rights Reserved.
 
 	OpenOBEX is free software; you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as

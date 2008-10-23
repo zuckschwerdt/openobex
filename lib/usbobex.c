@@ -58,7 +58,7 @@ void usbobex_prepare_connect(obex_t *self, struct obex_usb_intf_transport_t *int
 }
 
 /*
- * Helper function to usbobex_find_interfaces 
+ * Helper function to usbobex_find_interfaces
  */
 static void find_eps(struct obex_usb_intf_transport_t *intf, struct usb_interface_descriptor data_intf, int *found_active, int *found_idle)
 {
@@ -67,9 +67,9 @@ static void find_eps(struct obex_usb_intf_transport_t *intf, struct usb_interfac
 	if (data_intf.bNumEndpoints == 2) {
 		ep0 = data_intf.endpoint;
 		ep1 = data_intf.endpoint + 1;
-		if ((ep0->bEndpointAddress & USB_ENDPOINT_IN) && 
-		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) && 
-		    !(ep1->bEndpointAddress & USB_ENDPOINT_IN) && 
+		if ((ep0->bEndpointAddress & USB_ENDPOINT_IN) &&
+		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) &&
+		    !(ep1->bEndpointAddress & USB_ENDPOINT_IN) &&
 		    ((ep1->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK)) {
 			*found_active = 1;
 			intf->data_active_setting = data_intf.bAlternateSetting;
@@ -77,9 +77,9 @@ static void find_eps(struct obex_usb_intf_transport_t *intf, struct usb_interfac
 			intf->data_endpoint_read = ep0->bEndpointAddress;
 			intf->data_endpoint_write = ep1->bEndpointAddress;
 		}
-		if (!(ep0->bEndpointAddress & USB_ENDPOINT_IN) && 
-		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) && 
-		    (ep1->bEndpointAddress & USB_ENDPOINT_IN) && 
+		if (!(ep0->bEndpointAddress & USB_ENDPOINT_IN) &&
+		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) &&
+		    (ep1->bEndpointAddress & USB_ENDPOINT_IN) &&
 		    ((ep1->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK)) {
 			*found_active = 1;
 			intf->data_active_setting = data_intf.bAlternateSetting;
@@ -96,7 +96,7 @@ static void find_eps(struct obex_usb_intf_transport_t *intf, struct usb_interfac
 }
 
 /*
- * Helper function to usbobex_find_interfaces 
+ * Helper function to usbobex_find_interfaces
  */
 static int find_obex_data_interface(unsigned char *buffer, int buflen, struct usb_config_descriptor config, struct obex_usb_intf_transport_t *intf)
 {
@@ -109,6 +109,7 @@ static int find_obex_data_interface(unsigned char *buffer, int buflen, struct us
 		DEBUG(2,"Weird descriptor references");
 		return -EINVAL;
 	}
+
 	while (buflen > 0) {
 		if (buffer [1] != USB_DT_CS_INTERFACE) {
 			DEBUG(2,"skipping garbage");
@@ -133,6 +134,7 @@ next_desc:
 		buflen -= buffer[0];
 		buffer += buffer[0];
 	}
+
 	if (!union_header) {
 		DEBUG(2,"No union descriptor, giving up\n");
 		return -ENODEV;
@@ -145,9 +147,8 @@ next_desc:
 		for (a = 0; a < config.interface[i].num_altsetting; a++) {
 			/* Check if this interface is OBEX data interface*/
 			/* and find endpoints */
-			if (config.interface[i].altsetting[a].bInterfaceNumber == intf->data_interface) {
+			if (config.interface[i].altsetting[a].bInterfaceNumber == intf->data_interface)
 				find_eps(intf, config.interface[i].altsetting[a], &found_active, &found_idle);
-			}
 		}
 	}
 	if (!found_idle) {
@@ -158,6 +159,7 @@ next_desc:
 		DEBUG(2,"No active setting\n");
 		return -ENODEV;
 	}
+
 	return 0;
 }
 
@@ -172,18 +174,21 @@ static int get_intf_string(struct usb_dev_handle *usb_handle, char **string, int
 		*string[0] = '\0';
 		return usb_get_string_simple(usb_handle, id, *string, USB_MAX_STRING_SIZE);
 	}
+
 	return 0;
 }
 
 /*
- * Helper function to usbobex_find_interfaces 
+ * Helper function to usbobex_find_interfaces
  */
-static struct obex_usb_intf_transport_t *check_intf(struct usb_device *dev, int c, int i, int a, struct obex_usb_intf_transport_t *current)
+static struct obex_usb_intf_transport_t *check_intf(struct usb_device *dev,
+					int c, int i, int a,
+					struct obex_usb_intf_transport_t *current)
 {
 	struct obex_usb_intf_transport_t *next = NULL;
 
-	if ((dev->config[c].interface[i].altsetting[a].bInterfaceClass == USB_CDC_CLASS) 
-	    && (dev->config[c].interface[i].altsetting[a].bInterfaceSubClass == USB_CDC_OBEX_SUBCLASS)) { 
+	if ((dev->config[c].interface[i].altsetting[a].bInterfaceClass == USB_CDC_CLASS)
+	    && (dev->config[c].interface[i].altsetting[a].bInterfaceSubClass == USB_CDC_OBEX_SUBCLASS)) {
 		int err;
 		unsigned char *buffer = dev->config[c].interface[i].altsetting[a].extra;
 		int buflen = dev->config[c].interface[i].altsetting[a].extralen;
@@ -209,6 +214,7 @@ static struct obex_usb_intf_transport_t *check_intf(struct usb_device *dev, int 
 			current = next;
 		}
 	}
+
 	return current;
 }
 
@@ -225,9 +231,9 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 	int c, i, a, num;
 	struct obex_usb_intf_transport_t *current = NULL;
 	struct obex_usb_intf_transport_t *tmp = NULL;
-	obex_interface_t *intf_array = NULL; 	
+	obex_interface_t *intf_array = NULL;
 	struct usb_dev_handle *usb_handle;
-	
+
 	usb_init();
 	usb_find_busses();
 	usb_find_devices();
@@ -251,7 +257,7 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 		}
 	}
 	num = 0;
-	if (current) 
+	if (current)
 		num++;
 	while (current && current->prev) {
 		current = current->prev;
@@ -265,20 +271,20 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 	while (current) {
 		intf_array[num].usb.intf = current;
 		usb_handle = usb_open(current->device);
-		get_intf_string(usb_handle, &intf_array[num].usb.manufacturer, 
-			current->device->descriptor.iManufacturer);
-		get_intf_string(usb_handle, &intf_array[num].usb.product, 
-			current->device->descriptor.iProduct);
-		get_intf_string(usb_handle, &intf_array[num].usb.serial, 
-			current->device->descriptor.iSerialNumber);
-		get_intf_string(usb_handle, &intf_array[num].usb.configuration, 
-			current->configuration_description);
-		get_intf_string(usb_handle, &intf_array[num].usb.control_interface, 
-			current->control_interface_description);
-		get_intf_string(usb_handle, &intf_array[num].usb.data_interface_idle, 
-			current->data_interface_idle_description);
-		get_intf_string(usb_handle, &intf_array[num].usb.data_interface_active, 
-			current->data_interface_active_description);
+		get_intf_string(usb_handle, &intf_array[num].usb.manufacturer,
+				current->device->descriptor.iManufacturer);
+		get_intf_string(usb_handle, &intf_array[num].usb.product,
+				current->device->descriptor.iProduct);
+		get_intf_string(usb_handle, &intf_array[num].usb.serial,
+				current->device->descriptor.iSerialNumber);
+		get_intf_string(usb_handle, &intf_array[num].usb.configuration,
+				current->configuration_description);
+		get_intf_string(usb_handle, &intf_array[num].usb.control_interface,
+				current->control_interface_description);
+		get_intf_string(usb_handle, &intf_array[num].usb.data_interface_idle,
+				current->data_interface_idle_description);
+		get_intf_string(usb_handle, &intf_array[num].usb.data_interface_active,
+				current->data_interface_active_description);
 		usb_close(usb_handle);
 		current = current->next; num++;
 	}
@@ -302,8 +308,10 @@ cleanup_list:
 void usbobex_free_interfaces(int num, obex_interface_t *intf)
 {
 	int i;
+
 	if (intf == NULL)
 		return;
+
 	for (i = 0; i < num; i++) {
 		free(intf[i].usb.manufacturer);
 		free(intf[i].usb.product);
@@ -314,6 +322,7 @@ void usbobex_free_interfaces(int num, obex_interface_t *intf)
 		free(intf[i].usb.data_interface_active);
 		free(intf[i].usb.intf);
 	}
+
 	free(intf);
 }
 
@@ -333,9 +342,8 @@ int usbobex_connect_request(obex_t *self)
 	self->trans.self.usb.dev_data = usb_open(self->trans.self.usb.device);
 
 	ret = usb_set_configuration(self->trans.self.usb.dev_control, self->trans.self.usb.configuration);
-	if (ret < 0) {
+	if (ret < 0)
 		DEBUG(4, "Can't set configuration %d", ret);
-	}
 
 	ret = usb_claim_interface(self->trans.self.usb.dev_control, self->trans.self.usb.control_interface);
 	if (ret < 0) {
@@ -360,12 +368,13 @@ int usbobex_connect_request(obex_t *self)
 		DEBUG(4, "Can't set data active setting %d", ret);
 		goto err3;
 	}
+
 	self->trans.mtu = OBEX_MAXIMUM_MTU;
 	DEBUG(2, "transport mtu=%d\n", self->trans.mtu);
 	return 1;
 
 err3:
-	usb_release_interface(self->trans.self.usb.dev_data, self->trans.self.usb.data_interface);	
+	usb_release_interface(self->trans.self.usb.dev_data, self->trans.self.usb.data_interface);
 err2:
 	usb_release_interface(self->trans.self.usb.dev_control, self->trans.self.usb.control_interface);
 err1:
@@ -391,10 +400,10 @@ int usbobex_disconnect_request(obex_t *self)
 	if (ret < 0)
 		DEBUG(4, "Can't set data idle setting %d", ret);
 	ret = usb_release_interface(self->trans.self.usb.dev_data, self->trans.self.usb.data_interface);
-	if (ret < 0) 
+	if (ret < 0)
 		DEBUG(4, "Can't release data interface %d", ret);
 	ret = usb_release_interface(self->trans.self.usb.dev_control, self->trans.self.usb.control_interface);
-	if (ret < 0) 
+	if (ret < 0)
 		DEBUG(4, "Can't release control interface %d", ret);
 	ret = usb_close(self->trans.self.usb.dev_data);
 	if (ret < 0)
@@ -403,7 +412,7 @@ int usbobex_disconnect_request(obex_t *self)
 	if (ret < 0)
 		DEBUG(4, "Can't close control interface %d", ret);
 
-	return ret;	
+	return ret;
 }
 
 #endif /* HAVE_USB */

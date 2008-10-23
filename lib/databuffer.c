@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-slist_t *slist_append(slist_t *list, void *element) 
+slist_t *slist_append(slist_t *list, void *element)
 {
 	slist_t *node, *p;
 
@@ -44,7 +44,7 @@ slist_t *slist_append(slist_t *list, void *element)
 	return list;
 }
 
-slist_t *slist_remove(slist_t *list, void *element) 
+slist_t *slist_remove(slist_t *list, void *element)
 {
 	slist_t *prev, *next;
 
@@ -73,7 +73,7 @@ slist_t *slist_remove(slist_t *list, void *element)
 	return list;
 }
 
-buf_t *buf_new(size_t default_size) 
+buf_t *buf_new(size_t default_size)
 {
 	buf_t *p;
 
@@ -93,14 +93,14 @@ buf_t *buf_new(size_t default_size)
 	return p;
 }
 
-size_t buf_total_size(buf_t *p) 
+size_t buf_total_size(buf_t *p)
 {
 	if (!p)
 		return 0;
 	return p->head_avail + p->data_avail + p->tail_avail + p->data_size;
 }
 
-void buf_resize(buf_t *p, size_t new_size) 
+void buf_resize(buf_t *p, size_t new_size)
 {
 	uint8_t *tmp;
 	int bSize;
@@ -161,7 +161,7 @@ void buf_resize(buf_t *p, size_t new_size)
 	p->data = p->buffer + p->head_avail;
 }
 
-buf_t *buf_reuse(buf_t *p) 
+buf_t *buf_reuse(buf_t *p)
 {
 	if (!p)
 		return NULL;
@@ -173,7 +173,7 @@ buf_t *buf_reuse(buf_t *p)
 	return p;
 }
 
-void *buf_reserve_begin(buf_t *p, size_t data_size) 
+void *buf_reserve_begin(buf_t *p, size_t data_size)
 {
 	if (!p)
 		return NULL;
@@ -201,7 +201,7 @@ void *buf_reserve_begin(buf_t *p, size_t data_size)
 	}
 }
 
-void *buf_reserve_end(buf_t *p, size_t data_size) 
+void *buf_reserve_end(buf_t *p, size_t data_size)
 {
 	void *t;
 
@@ -229,7 +229,7 @@ void *buf_reserve_end(buf_t *p, size_t data_size)
 	return t;
 }
 
-void buf_insert_begin(buf_t *p, uint8_t *data, size_t data_size) 
+void buf_insert_begin(buf_t *p, uint8_t *data, size_t data_size)
 {
 	uint8_t *dest;
 
@@ -238,7 +238,7 @@ void buf_insert_begin(buf_t *p, uint8_t *data, size_t data_size)
 	memcpy(dest, data, data_size);
 }
 
-void buf_insert_end(buf_t *p, uint8_t *data, size_t data_size) 
+void buf_insert_end(buf_t *p, uint8_t *data, size_t data_size)
 {
 	uint8_t *dest;
 
@@ -247,7 +247,7 @@ void buf_insert_end(buf_t *p, uint8_t *data, size_t data_size)
 	memcpy(dest, data, data_size);
 }
 
-void buf_remove_begin(buf_t *p, size_t data_size) 
+void buf_remove_begin(buf_t *p, size_t data_size)
 {
 	if (!p)
 		return;
@@ -261,7 +261,7 @@ void buf_remove_begin(buf_t *p, size_t data_size)
 	p->data = p->buffer + p->head_avail;
 }
 
-void buf_remove_end(buf_t *p, size_t data_size) 
+void buf_remove_end(buf_t *p, size_t data_size)
 {
 	if (!p)
 		return;
@@ -274,7 +274,7 @@ void buf_remove_end(buf_t *p, size_t data_size)
 	}
 }
 
-void buf_dump(buf_t *p, const char *label) 
+void buf_dump(buf_t *p, const char *label)
 {
 	int i, n;
 
@@ -294,7 +294,7 @@ void buf_dump(buf_t *p, const char *label)
 	}
 }
 
-void buf_free(buf_t *p) 
+void buf_free(buf_t *p)
 {
 	if (!p)
 		return;

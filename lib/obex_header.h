@@ -18,10 +18,10 @@
 	You should have received a copy of the GNU Lesser General Public
 	License along with OpenOBEX. If not, see <http://www.gnu.org/>.
  */
-   
+
 #ifndef OBEX_HEADERS_H
 #define OBEX_HEADERS_H
- 
+
 #include "obex_main.h"
 
 #define OBEX_HI_MASK     0xc0
@@ -93,8 +93,8 @@ int insert_ubyte_header(buf_t *msg, uint8_t identifier, uint8_t value);
 int insert_unicode_header(buf_t *msg, uint8_t opcode, const uint8_t *text,
 				int size);
 
-int insert_byte_stream_header(buf_t *msg, uint8_t opcode, 
-			const uint8_t *stream, int size);
+int insert_byte_stream_header(buf_t *msg, uint8_t opcode,
+				const uint8_t *stream, int size);
 
 int obex_extract_header(buf_t *msg, obex_header_t *header);
 

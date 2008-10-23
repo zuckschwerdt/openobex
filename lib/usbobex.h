@@ -3,7 +3,7 @@
 	USB OBEX, USB transport for OBEX.
 	OpenOBEX library - Free implementation of the Object Exchange protocol.
 
- 	Copyright (c) 2005 Alex Kanavin, All Rights Reserved.
+	Copyright (c) 2005 Alex Kanavin, All Rights Reserved.
 
 	OpenOBEX is free software; you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as

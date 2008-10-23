@@ -130,7 +130,7 @@ struct obex {
 	socket_t serverfd;
 	socket_t writefd;	/* write descriptor - only OBEX_TRANS_FD */
 	unsigned int state;
-	
+
 	int keepserver;		/* Keep server alive */
 	int filterhint;		/* Filter devices based on hint bits */
 	int filterias;		/* Filter devices based on IAS entry */
@@ -138,7 +138,7 @@ struct obex {
 	buf_t *tx_msg;		/* Reusable transmit message */
 	buf_t *rx_msg;		/* Reusable receive message */
 
-	obex_object_t	*object;	/* Current object being transfered */      
+	obex_object_t	*object;	/* Current object being transfered */
 	obex_event_t	eventcb;	/* Event-callback */
 
 	obex_transport_t trans;		/* Transport being used */

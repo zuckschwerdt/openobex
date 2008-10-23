@@ -26,8 +26,8 @@
 #include "obex_main.h"
 #include "databuffer.h"
 
-/* If an object has no expected length we have to 
-reallocated every OBEX_OBJECT_ALLOCATIONTRESHOLD bytes */
+/* If an object has no expected length we have to reallocated every
+ * OBEX_OBJECT_ALLOCATIONTRESHOLD bytes */
 #define OBEX_OBJECT_ALLOCATIONTRESHOLD 10240
 
 struct obex_header_element {
@@ -69,7 +69,7 @@ typedef struct {
 	int suspend;			/* Temporarily stop transfering object */
 	int continue_received;		/* CONTINUE received after sending last command */
 	int first_packet_sent;		/* Whether we've sent the first packet */
-	
+
 	const uint8_t *s_buf;		/* Pointer to streaming data */
 	unsigned int s_len;		/* Length of stream-data */
 	unsigned int s_offset;		/* Current offset in buf */

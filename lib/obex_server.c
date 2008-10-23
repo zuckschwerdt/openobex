@@ -43,20 +43,18 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 	int cmd, ret, deny = 0;
 	unsigned int len;
 
-	
 	DEBUG(4, "\n");
 
 	request = (obex_common_hdr_t *) msg->data;
 	cmd = request->opcode & ~OBEX_FINAL;
 	len = ntohs(request->len);
-	
-	switch(self->state & ~MODE_SRV)
-	{
+
+	switch (self->state & ~MODE_SRV) {
 	case STATE_IDLE:
 		/* Nothing has been recieved yet, so this is probably a new request */
 		DEBUG(4, "STATE_IDLE\n");
-		
-		if(self->object) {
+
+		if (self->object) {
 			/* What shall we do here? I don't know!*/
 			DEBUG(0, "Got a new server-request while already having one!\n");
 			obex_response_request(self, OBEX_RSP_INTERNAL_SERVER_ERROR);
@@ -65,7 +63,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 
 		self->object = obex_object_new();
 
-		if(self->object == NULL) {
+		if (self->object == NULL) {
 			DEBUG(1, "Allocation of object failed!\n");
 			obex_response_request(self, OBEX_RSP_INTERNAL_SERVER_ERROR);
 			return -1;
@@ -77,13 +75,13 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 		   the app can deny a PUT-like request early, or
 		   set the header-offset */
 		obex_deliver_event(self, OBEX_EV_REQHINT, cmd, 0, FALSE);
-						
+
 		/* Some commands needs special treatment (data outside headers) */
-		switch(cmd)	{
+		switch (cmd) {
 		case OBEX_CMD_CONNECT:
 			DEBUG(4, "Got CMD_CONNECT\n");
 			/* Connect needs some extra special treatment */
-			if(obex_parse_connect_header(self, msg) < 0) {
+			if (obex_parse_connect_header(self, msg) < 0) {
 				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
 				return -1;
@@ -96,14 +94,14 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 		}
 
 		self->state = MODE_SRV | STATE_REC;
-		// no break! Fallthrough */
-	
+		/* no break! Fallthrough */
+
 	case STATE_REC:
 		DEBUG(4, "STATE_REC\n");
 		/* In progress of receiving a request */
-		
+
 		/* Abort? */
-		if(cmd == OBEX_CMD_ABORT) {
+		if (cmd == OBEX_CMD_ABORT) {
 			DEBUG(1, "Got OBEX_ABORT request!\n");
 			obex_response_request(self, OBEX_RSP_SUCCESS);
 			self->state = MODE_SRV | STATE_IDLE;
@@ -112,9 +110,9 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			 * aborted the request, so return 0 - Jean II */
 			return 0;
 		}
-		
+
 		/* Sanity check */
-		if(cmd != self->object->cmd) {
+		if (cmd != self->object->cmd) {
 			/* The cmd-field of this packet is not the
 			   same as int the first fragment. Bail out! */
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
@@ -122,9 +120,9 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, cmd, TRUE);
 			return -1;
 		}
-		
+
 		/* Get the headers... */
-		if(obex_object_receive(self, msg) < 0)	{
+		if (obex_object_receive(self, msg) < 0) {
 			obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 			self->state = MODE_SRV | STATE_IDLE;
 			obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
@@ -136,7 +134,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			 * request by examining all headers in the first packet */
 			if (!self->object->checked) {
 				obex_deliver_event(self, OBEX_EV_REQCHECK, cmd, 0, FALSE);
-				self->object->checked = 1;                       
+				self->object->checked = 1;
 			}
 
 			/* Everything except 0x1X and 0x2X means that the user callback
@@ -153,21 +151,18 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			}
 		}
 
-		if(!final) {
+		if (!final) {
 			/* As a server, the final bit is always SET- Jean II */
-			if(obex_object_send(self, self->object, FALSE, TRUE) < 0) {
+			if (obex_object_send(self, self->object, FALSE, TRUE) < 0) {
 				obex_deliver_event(self, OBEX_EV_LINKERR, cmd, 0, TRUE);
 				return -1;
-			}			
-			else {
+			} else
 				obex_deliver_event(self, OBEX_EV_PROGRESS, cmd, 0, FALSE);
-			}
 			break; /* Stay in this state if not final */
-		}
-		else {
+		} else {
 			DEBUG(4, "We got a request!\n");
 			/* More connect-magic woodoo stuff */
-			if(cmd == OBEX_CMD_CONNECT)
+			if (cmd == OBEX_CMD_CONNECT)
 				obex_insert_connectframe(self, self->object);
 
 			/* Tell the app that a whole request has arrived. While
@@ -179,23 +174,23 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			len = 3; /* Otherwise sanitycheck later will fail */
 		}
 		/* Note the conditional fallthrough! */
-	
+
 	case STATE_SEND:
 		/* Send back response */
 		DEBUG(4, "STATE_SEND\n");
-		
+
 		/* Abort? */
-		if(cmd == OBEX_CMD_ABORT) {
+		if (cmd == OBEX_CMD_ABORT) {
 			DEBUG(1, "Got OBEX_ABORT request!\n");
 			obex_response_request(self, OBEX_RSP_SUCCESS);
 			self->state = MODE_SRV | STATE_IDLE;
 			obex_deliver_event(self, OBEX_EV_ABORT, self->object->opcode, cmd, TRUE);
 			/* This is not an Obex error, it is just that the peer
 			 * aborted the request, so return 0 - Jean II */
-			return 0;		
+			return 0;
 		}
-		
-		if(len > 3) {
+
+		if (len > 3) {
 			DEBUG(1, "STATE_SEND Didn't expect data from peer (%d)\n", len);
 			DUMPBUFFER(4, "unexpected data", msg);
 			/* At this point, we are in the middle of sending
@@ -218,8 +213,8 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			 * No headeroffset needed because 'connect' is
 			 * single packet (or we deny it).
 			 * Jean II */
-			if((cmd == OBEX_CMD_CONNECT) ||
-			   (obex_object_receive(self, msg) < 0))	{
+			if (cmd == OBEX_CMD_CONNECT ||
+					obex_object_receive(self, msg) < 0) {
 				obex_response_request(self, OBEX_RSP_BAD_REQUEST);
 				self->state = MODE_SRV | STATE_IDLE;
 				obex_deliver_event(self, OBEX_EV_PARSEERR, self->object->opcode, 0, TRUE);
@@ -231,7 +226,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			 * and the user may expect to consult them later.
 			 * So, leave them here (== overhead). Jean II */
 		}
-				
+
 		/* As a server, the final bit is always SET, and the
 		 * "real final" packet is distinguish by beeing SUCCESS
 		 * instead of CONTINUE.
@@ -240,18 +235,16 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 		 * See also example on chapter 7.3, page 47.
 		 * So, force the final bit here. - Jean II */
 		ret = obex_object_send(self, self->object, TRUE, TRUE);
-		if(ret == 0) {
+		if (ret == 0) {
 			/* Made some progress */
 			obex_deliver_event(self, OBEX_EV_PROGRESS, cmd, 0, FALSE);
-		}
-		else if(ret < 0) {
+		} else if (ret < 0) {
 			/* Error sending response */
 			obex_deliver_event(self, OBEX_EV_LINKERR, cmd, 0, TRUE);
 			return -1;
-		}
-		else {
+		} else {
 			/* Response sent! */
-			if(cmd == OBEX_CMD_DISCONNECT)	{
+			if (cmd == OBEX_CMD_DISCONNECT) {
 				DEBUG(2, "CMD_DISCONNECT done. Resetting MTU!\n");
 				self->mtu_tx = OBEX_MINIMUM_MTU;
 			}
@@ -259,7 +252,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			obex_deliver_event(self, OBEX_EV_REQDONE, cmd, 0, TRUE);
 		}
 		break;
-	
+
 	default:
 		DEBUG(0, "Unknown state\n");
 		obex_response_request(self, OBEX_RSP_BAD_REQUEST);
