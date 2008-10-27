@@ -29,7 +29,7 @@ AM_CFLAGS = @GLIB_CFLAGS@
 
 INCLUDES = -I$(top_srcdir)/include
 
-EXTRA_DIST = obex-marshal.list
+EXTRA_DIST = obex-marshal.list CMakeLists.txt
 
 MAINTAINERCLEANFILES = Makefile.in
 

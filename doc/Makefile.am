@@ -4,6 +4,6 @@ clean:
 html:
 	doxygen
 
-EXTRA_DIST = Doxyfile openobex.coverpage
+EXTRA_DIST = Doxyfile openobex.coverpage CMakeLists.txt Doxyfile.in
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -13,7 +13,7 @@ else
 pkgconfig_DATA = openobex.pc
 endif
 
-EXTRA_DIST = $(aclocal_DATA)
+EXTRA_DIST = $(aclocal_DATA) CMakeLists.txt CMakeModules/*.cmake
 
 DISTCLEANFILES = $(pkgconfig_DATA)
 

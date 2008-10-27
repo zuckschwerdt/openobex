@@ -18,4 +18,6 @@ LDADD = libircp.a $(top_builddir)/lib/libopenobex.la
 INCLUDES = -I$(top_srcdir)/include
 endif
 
+EXTRA_DIST = CMakeLists.txt
+
 MAINTAINERCLEANFILES = Makefile.in
