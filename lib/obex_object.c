@@ -916,10 +916,12 @@ int obex_object_resume(obex_t *self, obex_object_t *object)
 	if (object->first_packet_sent && !object->continue_received)
 		return 0;
 
-	if (obex_object_send(self, object, TRUE, FALSE) < 0)
+	if (obex_object_send(self, object, TRUE, FALSE) < 0) {
 		obex_deliver_event(self, OBEX_EV_LINKERR, object->opcode, 0, TRUE);
-	else
-		obex_deliver_event(self, OBEX_EV_PROGRESS, object->opcode, 0, FALSE);
+		return -1;
+	}
+
+	obex_deliver_event(self, OBEX_EV_PROGRESS, object->opcode, 0, FALSE);
 
 	self->state = MODE_CLI | STATE_REC;
 	object->first_packet_sent = 1;
