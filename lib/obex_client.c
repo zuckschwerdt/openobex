@@ -115,16 +115,21 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 			/* Error while sending */
 			self->state = MODE_CLI | STATE_IDLE;
 			obex_deliver_event(self, OBEX_EV_LINKERR, self->object->opcode, 0, TRUE);
-		} else if (ret == 0) {
+			break;
+		}
+
+		self->object->first_packet_sent = 1;
+
+		if (ret == 0) {
 			/* Some progress made */
 			obex_deliver_event(self, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);
 			self->state = MODE_CLI | STATE_SEND;
 		} else {
 			/* Sending of object finished.. */
 			self->state = MODE_CLI | STATE_REC;
-			self->object->first_packet_sent = 1;
 			/* Should we deliver a EV_PROGRESS here ? Jean II */
                 }
+
 		break;
 
 	case STATE_REC:
