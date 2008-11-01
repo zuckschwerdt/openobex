@@ -1,10 +1,6 @@
 
 SUBDIRS = include lib glib apps ircp doc
 
-aclocaldir = $(datadir)/aclocal
-
-aclocal_DATA = openobex.m4
-
 pkgconfigdir = $(libdir)/pkgconfig
 
 if GLIB
@@ -13,9 +9,9 @@ else
 pkgconfig_DATA = openobex.pc
 endif
 
-EXTRA_DIST = $(aclocal_DATA) CMakeLists.txt \
-			CMakeModules/FindBluetooth.cmake CMakeModules/FindGlib.cmake \
-			CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake
+EXTRA_DIST = openobex.m4 CMakeLists.txt \
+		CMakeModules/FindBluetooth.cmake CMakeModules/FindGlib.cmake \
+		CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake
 
 DISTCLEANFILES = $(pkgconfig_DATA)
 
