@@ -13,7 +13,9 @@ else
 pkgconfig_DATA = openobex.pc
 endif
 
-EXTRA_DIST = $(aclocal_DATA) CMakeLists.txt CMakeModules/*.cmake
+EXTRA_DIST = $(aclocal_DATA) CMakeLists.txt \
+			CMakeModules/FindBluetooth.cmake CMakeModules/FindGlib.cmake \
+			CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake
 
 DISTCLEANFILES = $(pkgconfig_DATA)
 
