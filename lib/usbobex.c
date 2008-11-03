@@ -242,10 +242,11 @@ static void find_obex_service_descriptor(unsigned char *buffer, int buflen, obex
 			else if (*service == NULL) {
 				*service = malloc(sizeof(obex_usb_intf_service_t));
 				if (*service != NULL) {
+					const uint8_t default_uuid[16] = WMC_DEFAULT_OBEX_SERVER_UUID;
 					(*service)->role = buffer[3];
 					memcpy((*service)->uuid, buffer+4, 16);
 					(*service)->version = (buffer[20]<<8)|(buffer[21]);
-					if (memcmp((*service)->uuid, WMC_DEFAULT_OBEX_SERVER_UUID, 16) == 0 )
+					if (memcmp((*service)->uuid, default_uuid, 16) == 0 )
 						(*service)->is_default_uuid = 1;
 					else
 						(*service)->is_default_uuid = 0;
