@@ -177,13 +177,13 @@ AC_DEFUN([AC_PATH_USB], [
 	fi
 ])
 
-AC_DEFUN([AC_PATH_GLIB], [
-	PKG_CHECK_MODULES(GLIB, glib-2.0 gobject-2.0 gthread-2.0, glib_found=yes, AC_MSG_RESULT(no))
-	AC_SUBST(GLIB_CFLAGS)
-	AC_SUBST(GLIB_LIBS)
-	GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
-	AC_SUBST(GLIB_GENMARSHAL)
-])
+dnl AC_DEFUN([AC_PATH_GLIB], [
+dnl 	PKG_CHECK_MODULES(GLIB, glib-2.0 gobject-2.0 gthread-2.0, glib_found=yes, AC_MSG_RESULT(no))
+dnl 	AC_SUBST(GLIB_CFLAGS)
+dnl 	AC_SUBST(GLIB_LIBS)
+dnl 	GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
+dnl 	AC_SUBST(GLIB_GENMARSHAL)
+dnl ])
 
 AC_DEFUN([AC_VISIBILITY], [
 	case $host in
@@ -227,9 +227,9 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		usb_enable=${enableval}
 	])
 
-	AC_ARG_ENABLE(glib, AC_HELP_STRING([--enable-glib], [enable GLib bindings]), [
-		glib_enable=${enableval}
-	])
+	dnl AC_ARG_ENABLE(glib, AC_HELP_STRING([--enable-glib], [enable GLib bindings]), [
+	dnl 	glib_enable=${enableval}
+	dnl ])
 
 	AC_ARG_ENABLE(apps, AC_HELP_STRING([--enable-apps], [enable test applications]), [
 		apps_enable=${enableval}
