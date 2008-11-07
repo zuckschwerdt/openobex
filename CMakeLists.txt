@@ -6,7 +6,7 @@ project ( openobex C )
 # The project version
 #
 set ( VERSION_MAJOR 1 )
-set ( VERSION_MINOR 3 )
+set ( VERSION_MINOR 4 )
 set ( VERSION_PATCH 0 )
 
 set ( SHORT_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}" )
@@ -164,10 +164,10 @@ add_subdirectory ( ircp )
 # build the glib binding library
 # not enabled by default because it requires an additional dependency
 #
-option ( BUILD_GLIB_BINDING "Build the glib binding library")
-if ( BUILD_GLIB_BINDING )
-  add_subdirectory ( glib )
-endif ( BUILD_GLIB_BINDING )
+#option ( BUILD_GLIB_BINDING "Build the glib binding library")
+#if ( BUILD_GLIB_BINDING )
+#  add_subdirectory ( glib )
+#endif ( BUILD_GLIB_BINDING )
 
 
 #
