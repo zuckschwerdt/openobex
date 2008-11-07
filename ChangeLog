@@ -1,3 +1,16 @@
+ver 1.4:
+	Add OBEX_ObjectGetSpace function.
+	Add OBEX_ObjectGetCommand function.
+	Add Bluetooth support for FreeBSD and NetBSD.
+	Add support for using OBEX over IPv6.
+	Add support for Win32 platform.
+	Fix support for document generation.
+	Fix public visible symbols of the libraries.
+	Fix handling of unexpected data from the server.
+	Fix return value interpretation of obex_object_send.
+	Fix obex_object_resume handling if sending fails.
+	Allow suspending before the first packet has been sent.
+
 ver 1.3:
 	Add support for setting the creation-ID.
 	Updated constants to match IrOBEX 1.3.
