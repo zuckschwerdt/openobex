@@ -29,6 +29,6 @@ libopenobex_la_LIBADD = @USB_LIBS@ @EXTRA_LIBS@
 
 INCLUDES = -I$(top_srcdir)/include
 
-EXTRA_DIST = obex.sym win32compat.c CMakeLists.txt
+EXTRA_DIST = obex.sym win32compat.c CMakeLists.txt openobex.rc.in
 
 MAINTAINERCLEANFILES = Makefile.in
