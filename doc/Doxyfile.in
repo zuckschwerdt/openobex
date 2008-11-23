@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = ASCII
 PROJECT_NAME           = OpenOBEX
-PROJECT_NUMBER         = @SHORT_VERSION@
+PROJECT_NUMBER         = @DOC_VERSION@
 OUTPUT_DIRECTORY       = @DOC_BINARY_DIR@
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English

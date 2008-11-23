@@ -11,6 +11,7 @@ set ( SOURCES
 find_package( Doxygen )
 if ( DOXYGEN_FOUND )
   string ( REPLACE ";" " " DOC_SOURCE_FILES "${SOURCES}" )
+  set ( DOC_VERSION ${SHORT_VERSION} )
   set ( DOC_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} )
   set ( DOC_OUTPUT_TYPES
     HTML
