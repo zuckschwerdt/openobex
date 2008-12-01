@@ -17,16 +17,20 @@ if ( CMAKE_SYSTEM_NAME STREQUAL "Linux" )
     pkg_check_modules ( PKGCONFIG_BLUEZ bluez )
   endif ( PKG_CONFIG_FOUND )
   if ( PKGCONFIG_BLUEZ_FOUND )
-    set ( Bluetooth_FOUND ${PKGCONFIG_BLUEZ_FOUND} )
     foreach ( i ${PKGCONFIG_BLUEZ_LIBRARIES} )
       find_library ( ${i}_LIBRARY
-                     NAMES ${i}
-                     PATHS ${PKGCONFIG_BLUEZ_LIBRARY_DIRS}
-                   )
-      list ( APPEND Bluetooth_LIBRARIES ${${i}_LIBRARY} )
+        NAMES
+	  ${i}
+        PATHS
+	  ${PKGCONFIG_BLUEZ_LIBRARY_DIRS}
+      )
       mark_as_advanced ( ${i}_LIBRARY )
+      if ( ${i}_LIBRARY )
+	list ( APPEND Bluetooth_LIBRARIES ${${i}_LIBRARY} )
+      endif ( ${i}_LIBRARY )
     endforeach ( i )
     add_definitions ( -DHAVE_SDPLIB )
+
   else ( PKGCONFIG_BLUEZ_FOUND )
     find_path ( Bluetooth_INCLUDE_DIRS
       NAMES
@@ -42,13 +46,14 @@ if ( CMAKE_SYSTEM_NAME STREQUAL "Linux" )
       PATH_SUFFIXES
         lib
     )
-    set ( Bluetooth_LIBRARIES ${bluetooth_LIBRARY} )
     mark_as_advanced ( bluetooth_LIBRARY )
-
-    if ( Bluetooth_INCLUDE_DIRS AND Bluetooth_LIBRARIES )
-      set ( Bluetooth_FOUND true )
-    endif ( Bluetooth_INCLUDE_DIRS AND Bluetooth_LIBRARIES )
+    if ( bluetooth_LIBRARY )
+      set ( Bluetooth_LIBRARIES ${bluetooth_LIBRARY} )
+    endif ( bluetooth_LIBRARY )
   endif ( PKGCONFIG_BLUEZ_FOUND )
+  if ( Bluetooth_INCLUDE_DIRS AND Bluetooth_LIBRARIES )
+    set ( Bluetooth_FOUND true )
+  endif ( Bluetooth_INCLUDE_DIRS AND Bluetooth_LIBRARIES )
 
 elseif ( CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" )
   find_path ( Bluetooth_INCLUDE_DIRS
