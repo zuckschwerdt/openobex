@@ -147,17 +147,32 @@ endif ( BUILD_SHARED_LIBS )
 
 
 #
-# build the documentation
-#
-add_subdirectory ( doc )
-
-
-#
 # build the applications
 #
 add_custom_target ( openobex-apps )
 add_subdirectory ( apps )
 add_subdirectory ( ircp )
+
+
+#
+# build the documentation
+#
+option ( BUILD_DOCUMENTATION "Build library and application documentation" ON)
+if ( BUILD_DOCUMENTATION )
+  if ( NOT DOCUMENTATION_INSTALL_DIR )
+    set ( DOCUMENTATION_INSTALL_DIR share/doc/openobex
+      CACHE PATH "Where to install generic documentation files to" FORCE )
+  endif ( NOT DOCUMENTATION_INSTALL_DIR )
+  mark_as_advanced ( DOCUMENTATION_INSTALL_DIR )
+
+  if ( NOT MANPAGE_INSTALL_DIR )
+    set ( MANPAGE_INSTALL_DIR share/man
+      CACHE PATH "Where to install manpage files to" FORCE )
+  endif ( NOT MANPAGE_INSTALL_DIR )
+  mark_as_advanced ( MANPAGE_INSTALL_DIR )
+
+  add_subdirectory ( doc )
+endif ( BUILD_DOCUMENTATION )
 
 
 #
