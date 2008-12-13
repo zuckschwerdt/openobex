@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook XML V4.2//DE" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
-<reference>
+<reference id="openobex-apps">
   <referenceinfo>
     <date>2008-11-23</date>
     <productname>openobex</productname>
@@ -17,7 +17,7 @@
 
   <title>openobex</title>
 
-  <refentry>
+  <refentry id="ircp">
     <refmeta>
       <refentrytitle>ircp</refentrytitle>
       <manvolnum>1</manvolnum>
@@ -73,7 +73,7 @@
   </refentry>
 
 
-  <refentry>
+  <refentry id="irobex_palm3">
     <refmeta>
       <refentrytitle>irobex_palm3</refentrytitle>
       <manvolnum>1</manvolnum>
@@ -124,7 +124,7 @@
   </refentry>
 
 
-  <refentry>
+  <refentry id="irxfer">
     <refmeta>
       <refentrytitle>irxfer</refentrytitle>
       <manvolnum>1</manvolnum>
@@ -159,7 +159,7 @@
   </refentry>
 
 
-  <refentry>
+  <refentry id="obex_tcp">
     <refmeta>
       <refentrytitle>obex_tcp</refentrytitle>
       <manvolnum>1</manvolnum>
@@ -192,7 +192,7 @@
   </refentry>
 
 
-  <refentry>
+  <refentry id="obex_test">
     <refmeta>
       <refentrytitle>obex_test</refentrytitle>
       <manvolnum>1</manvolnum>
