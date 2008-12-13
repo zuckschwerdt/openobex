@@ -145,9 +145,16 @@ if ( XSLT_PROCESSOR )
   endif ( BUILD_APPS_HELP_MAN )
 
   if ( BUILD_APPS_HELP_HTML )
-    foreach ( file  ${XSLT_FILES} )
-      list ( APPEND XSLT_FILES_HTML ${file}.html )
-    endforeach ( file )
+    # Until we figure out how to give them more sensible
+    # output names, this must do.
+    set ( XSLT_FILES_HTML
+      ${CMAKE_CURRENT_BINARY_DIR}/rn01re01.html
+      ${CMAKE_CURRENT_BINARY_DIR}/rn01re02.html
+      ${CMAKE_CURRENT_BINARY_DIR}/rn01re03.html
+      ${CMAKE_CURRENT_BINARY_DIR}/rn01re04.html
+      ${CMAKE_CURRENT_BINARY_DIR}/rn01re05.html
+      ${CMAKE_CURRENT_BINARY_DIR}/index.html
+    )
     xsl_transform (
       "${DOCBOOK_XSL_PREFIX}/xhtml/chunk.xsl"
       "${CMAKE_CURRENT_SOURCE_DIR}/openobex-apps.xml"
