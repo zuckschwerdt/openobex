@@ -149,7 +149,7 @@ if ( XSLT_PROCESSOR )
       list ( APPEND XSLT_FILES_HTML ${file}.html )
     endforeach ( file )
     xsl_transform (
-      "${DOCBOOK_XSL_PREFIX}/xhtml/docbook.xsl"
+      "${DOCBOOK_XSL_PREFIX}/xhtml/chunk.xsl"
       "${CMAKE_CURRENT_SOURCE_DIR}/openobex-apps.xml"
       ${XSLT_FILES_HTML}
     )
