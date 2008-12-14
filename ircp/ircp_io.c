@@ -143,13 +143,20 @@ int ircp_open_safe(const char *path, const char *name)
 	if(ircp_nameok(name) == FALSE)
 		return -1;
 
-	//TODO! Rename file if already exist.
+	if (path == NULL || strnlen(path,sizeof(diskname)) == 0)
+	        path = ".";
+	if (snprintf(diskname, sizeof(diskname), "%s/%s", path, name) >= sizeof(diskname))
+	        return -1;
 
-	snprintf(diskname, MAXPATHLEN, "%s/%s", path, name);
+	/* never overwrite an existing file */
+	fd = open(diskname, O_RDWR | O_CREAT | O_EXCL, DEFFILEMODE);
+	if (fd < 0 &&
+	    snprintf(diskname, sizeof(diskname), "%s/%s_XXXXXX", path, name) < sizeof(diskname))
+	        fd = mkstemp(diskname);
 
-	DEBUG(4, "Creating file %s\n", diskname);
+	if (fd >= 0)
+	        DEBUG(4, "Creating file %s\n", diskname);
 
-	fd = open(diskname, O_RDWR | O_CREAT | O_TRUNC, DEFFILEMODE);
 	return fd;
 }
 
@@ -167,7 +174,10 @@ int ircp_checkdir(const char *path, const char *dir, cd_flags flags)
 			return -1;
 	}
 
-	snprintf(newpath, MAXPATHLEN, "%s/%s", path, dir);
+	if (strnlen(path,sizeof(newpath)) != 0)
+		snprintf(newpath, sizeof(newpath), "%s/%s", path, dir);
+	else
+		strncpy(newpath, dir, sizeof(newpath));
 
 	DEBUG(4, "path = %s dir = %s, flags = %d\n", path, dir, flags);
 	if(stat(newpath, &statbuf) == 0) {
