@@ -81,12 +81,22 @@ mark_as_advanced ( XSLT_PROCESSOR )
 # call as XSLT_TRANSFORM(<.xsl file URL> <input file> <output file...>)
 #
 macro ( XSL_TRANSFORM xslurl infile )
+  string ( REPLACE " " ";" XSL_TRANSFORM_COMMAND ${XSLT_PROCESSOR} )
   if ( XSLT_PROCESSOR MATCHES ".*xsltproc.*" )
-    set ( XSL_TRANSFORM_COMMAND ${XSLT_PROCESSOR} ${xslurl} ${infile} )
+    list ( APPEND XSL_TRANSFORM_COMMAND
+      --param use.id.as.filename 1
+      ${xslurl} ${infile}
+    )
   elseif ( XSLT_PROCESSOR MATCHES ".*xalan2.*" )
-    set ( XSL_TRANSFORM_COMMAND ${XSLT_PROCESSOR} -in ${infile} -xsl ${xslurl} )
+    list ( APPEND XSL_TRANSFORM_COMMAND
+      -param use.id.as.filename 1
+      -in ${infile} -xsl ${xslurl}
+    )
   elseif ( XSLT_PROCESSOR MATCHES ".*saxon.*" )
-    set ( XSL_TRANSFORM_COMMAND ${XSLT_PROCESSOR} ${infile} ${xslurl} )
+    list ( APPEND XSL_TRANSFORM_COMMAND
+      ${infile} ${xslurl}
+      use.id.as.filename=1
+    )
   else ( XSLT_PROCESSOR MATCHES ".*xsltproc.*" )
     message ( FATAL_ERROR "Unsupported XSLT processor" )
   endif ( XSLT_PROCESSOR MATCHES ".*xsltproc.*" )
@@ -145,14 +155,10 @@ if ( XSLT_PROCESSOR )
   endif ( BUILD_APPS_HELP_MAN )
 
   if ( BUILD_APPS_HELP_HTML )
-    # Until we figure out how to give them more sensible
-    # output names, this must do.
-    set ( XSLT_FILES_HTML
-      ${CMAKE_CURRENT_BINARY_DIR}/rn01re01.html
-      ${CMAKE_CURRENT_BINARY_DIR}/rn01re02.html
-      ${CMAKE_CURRENT_BINARY_DIR}/rn01re03.html
-      ${CMAKE_CURRENT_BINARY_DIR}/rn01re04.html
-      ${CMAKE_CURRENT_BINARY_DIR}/rn01re05.html
+    foreach ( file  ${XSLT_FILES} )
+      list ( APPEND XSLT_FILES_HTML ${file}.html )
+    endforeach ( file )
+    list ( APPEND XSLT_FILES_HTML
       ${CMAKE_CURRENT_BINARY_DIR}/index.html
     )
     xsl_transform (
