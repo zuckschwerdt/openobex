@@ -159,7 +159,7 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 			} else
 				obex_deliver_event(self, OBEX_EV_PROGRESS, cmd, 0, FALSE);
 			break; /* Stay in this state if not final */
-		} else {
+		} else if (!self->object->first_packet_sent) {
 			DEBUG(4, "We got a request!\n");
 			/* More connect-magic woodoo stuff */
 			if (cmd == OBEX_CMD_CONNECT)
@@ -234,10 +234,17 @@ int obex_server(obex_t *self, buf_t *msg, int final)
 		 * See Obex spec v1.2, chapter 3.2, page 21 and 22.
 		 * See also example on chapter 7.3, page 47.
 		 * So, force the final bit here. - Jean II */
+		self->object->continue_received = 1;
+
+		if (self->object->suspend)
+			break;
+
 		ret = obex_object_send(self, self->object, TRUE, TRUE);
 		if (ret == 0) {
 			/* Made some progress */
 			obex_deliver_event(self, OBEX_EV_PROGRESS, cmd, 0, FALSE);
+			self->object->first_packet_sent = 1;
+			self->object->continue_received = 0;
 		} else if (ret < 0) {
 			/* Error sending response */
 			obex_deliver_event(self, OBEX_EV_LINKERR, cmd, 0, TRUE);
