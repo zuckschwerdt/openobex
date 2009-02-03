@@ -128,7 +128,7 @@ char *obex_response_to_string(int rsp)
 	case OBEX_RSP_BAD_REQUEST:
 		return "Bad Request";
 	case OBEX_RSP_UNAUTHORIZED:
-		return "Unautorized";
+		return "Unauthorized";
 	case OBEX_RSP_PAYMENT_REQUIRED:
 		return "Payment required";
 	case OBEX_RSP_FORBIDDEN:
