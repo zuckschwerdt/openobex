@@ -51,22 +51,6 @@ typedef struct {
 	void * customdata;
 } obex_ctrans_t;
 
-/** USB-specific OBEX service information
- * provided by optional Service Identification Functional Descriptor
- * (CDC WMC specification section 6.5.2.5)
- */
-typedef struct {
-	/** Role bit mask: bit 0 is set if client, unset if server */
-	uint8_t role;
-	/** Service UUID */
-	uint8_t uuid[16];
-	/** Service version */
-	uint16_t version;
-	/** Set if the service provides/expects
-	 *  an OBEX Default Server (spec section 6.5.2.5.2) */
-	int is_default_uuid;
-} obex_usb_intf_service_t;
-
 /** USB-specific OBEX interface information */
 typedef struct {
 	/** Manufacturer, e.g. Nokia */
@@ -83,8 +67,6 @@ typedef struct {
 	char *data_interface_idle;
 	/** Active data interface description, typically empty */
 	char *data_interface_active;
-	/** Service information descriptor, may be NULL if absent */
-	obex_usb_intf_service_t *service;
 	/** Internal information for the transport layer in the library */
 	struct obex_usb_intf_transport_t *intf;
 } obex_usb_intf_t;

@@ -124,7 +124,6 @@ static int find_obex_data_interface(unsigned char *buffer, int buflen, struct us
 			union_header = (struct cdc_union_desc *)buffer;
 			break;
 		case CDC_OBEX_TYPE: /* maybe check version */
-		case CDC_OBEX_SERVICE_ID_TYPE: /* This one is handled later */
 		case CDC_HEADER_TYPE:
 			break; /* for now we ignore it */
 		default:
@@ -203,8 +202,6 @@ static struct obex_usb_intf_transport_t *check_intf(struct usb_device *dev,
 		next->control_interface = dev->config[c].interface[i].altsetting[a].bInterfaceNumber;
 		next->control_interface_description = dev->config[c].interface[i].altsetting[a].iInterface;
 		next->control_setting = dev->config[c].interface[i].altsetting[a].bAlternateSetting;
-		next->extra_descriptors = buffer;
-		next->extra_descriptors_len = buflen;
 
 		err = find_obex_data_interface(buffer, buflen, dev->config[c], next);
 		if (err)
@@ -220,52 +217,6 @@ static struct obex_usb_intf_transport_t *check_intf(struct usb_device *dev,
 
 	return current;
 }
-
-/*
- * Helper function to usbobex_find_interfaces
- */
-static void find_obex_service_descriptor(unsigned char *buffer, int buflen, obex_usb_intf_service_t **service)
-{
-	if (!buffer) {
-		DEBUG(2, "Weird descriptor references");
-		return ;
-	}
-	while (buflen > 0) {
-		if (buffer[1] != USB_DT_CS_INTERFACE) {
-			DEBUG(2, "skipping garbage");
-			goto next_desc;
-		}
-		switch (buffer[2]) {
-		case CDC_OBEX_SERVICE_ID_TYPE: /* we've found it */
-			if (buflen < 22) /* Check descriptor size */
-				DEBUG(2, "Invalid service id descriptor");
-			else if (*service == NULL) {
-				*service = malloc(sizeof(obex_usb_intf_service_t));
-				if (*service != NULL) {
-					(*service)->role = buffer[3];
-					memcpy((*service)->uuid, buffer+4, 16);
-					(*service)->version = (buffer[20]<<8)|(buffer[21]);
-					if (memcmp((*service)->uuid, WMC_DEFAULT_OBEX_SERVER_UUID, 16) == 0 )
-						(*service)->is_default_uuid = 1;
-					else
-						(*service)->is_default_uuid = 0;
-				}
-			}
-			break;
-		case CDC_OBEX_TYPE: /* maybe check version */
-		case CDC_UNION_TYPE:
-		case CDC_HEADER_TYPE:
-			break;
-		default:
-			DEBUG(2, "Ignoring extra header, type %d, length %d", buffer[2], buffer[0]);
-			break;
-		}
-next_desc:
-		buflen -= buffer[0];
-		buffer += buffer[0];
-	}
-}
-
 
 /*
  * Function usbobex_find_interfaces ()
@@ -334,9 +285,6 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 				current->data_interface_idle_description);
 		get_intf_string(usb_handle, &intf_array[num].usb.data_interface_active,
 				current->data_interface_active_description);
-		find_obex_service_descriptor(current->extra_descriptors,
-					current->extra_descriptors_len,
-					&intf_array[num].usb.service);
 		usb_close(usb_handle);
 		current = current->next; num++;
 	}
@@ -372,7 +320,6 @@ void usbobex_free_interfaces(int num, obex_interface_t *intf)
 		free(intf[i].usb.control_interface);
 		free(intf[i].usb.data_interface_idle);
 		free(intf[i].usb.data_interface_active);
-		free(intf[i].usb.service);
 		free(intf[i].usb.intf);
 	}
 
