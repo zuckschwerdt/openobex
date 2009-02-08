@@ -9,6 +9,8 @@ else
 pkgconfig_DATA = openobex.pc
 endif
 
+DISTCHECK_CONFIGURE_FLAGS = --enable-apps
+
 EXTRA_DIST = openobex.m4 CMakeLists.txt \
 		CMakeModules/FindBluetooth.cmake CMakeModules/FindGlib.cmake \
 		CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake
