@@ -2,6 +2,10 @@
 #include <config.h>
 #endif
 
+#ifndef _WIN32
+#define _GNU_SOURCE
+#endif
+
 #include <openobex/obex.h>
 
 #ifdef _WIN32
