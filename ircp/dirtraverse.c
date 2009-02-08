@@ -59,7 +59,8 @@ int visit_dir(char *path, visit_cb cb, void *userdata)
 				if( ret < 0)
 					goto out;
 				len = strlen(path);
-				sprintf(path, "%s%s/", path, dirent->d_name);
+				strcat(path, "/");
+				strcat(path, dirent->d_name);
 				ret = visit_dir(t, cb, userdata);
 				if(ret < 0)
 					goto out;
