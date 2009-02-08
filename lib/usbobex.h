@@ -82,11 +82,11 @@ struct cdc_union_desc {
 #define USB_DT_CS_INTERFACE		0x24
 #define CDC_DATA_INTERFACE_TYPE		0x0a
 
-#define WMC_DEFAULT_OBEX_SERVER_UUID \
+#define WMC_DEFAULT_OBEX_SERVER_UUID ((const uint8_t []) \
 { 0x02, 0xae, 0xb3, 0x20, \
 0xf6, 0x49, 0x11, 0xda, \
 0x97, 0x4d, 0x08, 0x00, \
-0x20, 0x0c, 0x9a, 0x66 }
+0x20, 0x0c, 0x9a, 0x66 } )
 
 #define USB_MAX_STRING_SIZE		256
 #define USB_OBEX_TIMEOUT		10000 /* 10 seconds */
