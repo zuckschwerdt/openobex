@@ -22,7 +22,7 @@ libopenobex_la_CFLAGS = @CFLAG_VISIBILITY@
 
 libopenobex_la_LDFLAGS = \
 	-no-undefined \
-	-version-info 5:0:4 \
+	-version-info 5:1:4 \
 	-export-symbols $(top_srcdir)/lib/obex.sym
 
 libopenobex_la_LIBADD = @USB_LIBS@ @EXTRA_LIBS@
