@@ -159,7 +159,7 @@ if ( XSLT_PROCESSOR )
       list ( APPEND XSLT_FILES_HTML ${file}.html )
     endforeach ( file )
     list ( APPEND XSLT_FILES_HTML
-      ${CMAKE_CURRENT_BINARY_DIR}/index.html
+      index.html
     )
     xsl_transform (
       "${DOCBOOK_XSL_PREFIX}/xhtml/chunk.xsl"
@@ -169,7 +169,7 @@ if ( XSLT_PROCESSOR )
     foreach ( file ${XSLT_FILES_HTML} )
       list ( APPEND OPENOBEX_HELP_FILES ${file} )
       INSTALL (
-	FILES ${file}
+	FILES ${CMAKE_CURRENT_BINARY_DIR}/${file}
         DESTINATION ${DOCUMENTATION_INSTALL_DIR}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ
