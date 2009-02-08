@@ -14,7 +14,6 @@
 #include <direct.h>
 #define snprintf _snprintf
 #define open _open
-#define mkdir(dir,mode) _mkdir(dir)
 #define S_ISDIR(m) ((m & _S_IFDIR) != 0)
 #endif
 
@@ -147,16 +146,18 @@ int ircp_open_safe(const char *path, const char *name)
 	if(ircp_nameok(name) == FALSE)
 		return -1;
 
-	if (path == NULL || strnlen(path,sizeof(diskname)) == 0)
+	if (path == NULL || path[0] == 0)
 	        path = ".";
 	if (snprintf(diskname, sizeof(diskname), "%s/%s", path, name) >= sizeof(diskname))
 	        return -1;
 
 	/* never overwrite an existing file */
 	fd = open(diskname, O_RDWR | O_CREAT | O_EXCL, DEFFILEMODE);
+#ifndef _WIN32
 	if (fd < 0 &&
 	    snprintf(diskname, sizeof(diskname), "%s/%s_XXXXXX", path, name) < sizeof(diskname))
 	        fd = mkstemp(diskname);
+#endif
 
 	if (fd >= 0)
 	        DEBUG(4, "Creating file %s\n", diskname);
@@ -178,7 +179,7 @@ int ircp_checkdir(const char *path, const char *dir, cd_flags flags)
 			return -1;
 	}
 
-	if (strnlen(path,sizeof(newpath)) != 0)
+	if (path[0] != 0)
 		snprintf(newpath, sizeof(newpath), "%s/%s", path, dir);
 	else
 		strncpy(newpath, dir, sizeof(newpath));
