@@ -85,6 +85,16 @@ typedef struct {
 	char *data_interface_active;
 	/** Service information descriptor, may be NULL if absent */
 	obex_usb_intf_service_t *service;
+	/** USB-IF vendor ID */
+	unsigned int idVendor;
+	/** USB-IF product ID */
+	unsigned int idProduct;
+	/** Bus number that a USB device is connected to */
+	unsigned int bus_number;
+	/** Device address on the bus */
+	unsigned int device_address;
+	/** USB device interface number */
+	unsigned int interface_number;
 	/** Internal information for the transport layer in the library */
 	struct obex_usb_intf_transport_t *intf;
 } obex_usb_intf_t;

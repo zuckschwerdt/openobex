@@ -289,6 +289,11 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 				current->data_interface_idle_description);
 		get_intf_string(usb_handle, &intf_array[num].usb.data_interface_active,
 				current->data_interface_active_description);
+		intf_array[num].usb.idVendor = current->device->descriptor.idVendor;
+		intf_array[num].usb.idProduct = current->device->descriptor.idProduct;
+		intf_array[num].usb.bus_number = atoi(current->device->bus->dirname);
+		intf_array[num].usb.device_address = atoi(current->device->filename);
+		intf_array[num].usb.interface_number = current->control_interface;
 		find_obex_service_descriptor(current->extra_descriptors,
 					current->extra_descriptors_len,
 					&intf_array[num].usb.service);

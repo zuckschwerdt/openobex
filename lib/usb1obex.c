@@ -280,6 +280,11 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 					current->data_interface_idle_description);
 				get_intf_string(usb_handle, &intf_array[num].usb.data_interface_active,
 					current->data_interface_active_description);
+				intf_array[num].usb.idVendor = dev_desc.idVendor;
+				intf_array[num].usb.idProduct = dev_desc.idProduct;
+				intf_array[num].usb.bus_number = libusb_get_bus_number(current->device);
+				intf_array[num].usb.device_address = libusb_get_device_address(current->device);
+				intf_array[num].usb.interface_number = current->control_interface;
 			}
 			find_obex_service_descriptor(current->extra_descriptors,
 					current->extra_descriptors_len,

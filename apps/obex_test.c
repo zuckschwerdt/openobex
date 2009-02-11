@@ -274,7 +274,12 @@ int main (int argc, char *argv[])
 			interfaces_number = OBEX_EnumerateInterfaces(handle);
 			for (i=0; i < interfaces_number; i++) {
 				obex_intf = OBEX_GetInterfaceByIndex(handle, i);
-				printf("Interface %d: %s %s %s\n", i, 
+				printf("Interface %d: idVendor: %#x, idProduct: %#x, bus %d, dev %d, intf %d, %s %s %s\n", i,
+					obex_intf->usb.idVendor,
+					obex_intf->usb.idProduct,
+					obex_intf->usb.bus_number,
+					obex_intf->usb.device_address,
+					obex_intf->usb.interface_number,
 					obex_intf->usb.manufacturer,
 					obex_intf->usb.product,
 					obex_intf->usb.control_interface);
