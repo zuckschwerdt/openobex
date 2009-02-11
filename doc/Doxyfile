@@ -198,7 +198,7 @@ EXPAND_ONLY_PREDEF     = YES
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 
 INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = "LIB_SYMBOL=" "CALLAPI=" "OPENOBEX_SYMBOL(retval)=retval" HAVE_IRDA HAVE_USB HAVE_BLUETOOTH
+PREDEFINED             = "LIB_SYMBOL=" "CALLAPI=" "OPENOBEX_SYMBOL(retval)=retval" HAVE_IRDA HAVE_USB HAVE_USB1 HAVE_BLUETOOTH
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------

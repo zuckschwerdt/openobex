@@ -15,17 +15,18 @@ libopenobex_la_SOURCES = \
 	btobex.c btobex.h \
 	databuffer.c databuffer.h \
 	irda.h irda_wrap.h \
-	usbobex.c usbobex.h \
+	usbutils.c usbutils.h \
+	usbobex.c usb1obex.c usbobex.h \
 	bluez_compat.h
 
-libopenobex_la_CFLAGS = @CFLAG_VISIBILITY@
+libopenobex_la_CFLAGS = @CFLAG_VISIBILITY@ @USB1_CFLAGS@
 
 libopenobex_la_LDFLAGS = \
 	-no-undefined \
 	-version-info 6:0:0 \
 	-export-symbols $(top_srcdir)/lib/obex.sym
 
-libopenobex_la_LIBADD = @USB_LIBS@ @EXTRA_LIBS@
+libopenobex_la_LIBADD = @USB_LIBS@ @USB1_LIBS@ @EXTRA_LIBS@
 
 INCLUDES = -I$(top_srcdir)/include
 

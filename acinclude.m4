@@ -188,6 +188,23 @@ AC_DEFUN([AC_PATH_USB], [
 	fi
 ])
 
+AC_DEFUN([AC_PATH_USB1], [
+	usb1_lib_found=no
+	PKG_CHECK_MODULES(USB1, libusb-1.0, usb1_lib_found=yes, AC_MSG_RESULT(no))
+	AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb-1.0.pc, REQUIRES="libusb1")
+	AC_SUBST(USB1_CFLAGS)
+	AC_SUBST(USB1_LIBS)
+
+	usb1_get_device_list=no
+	AC_CHECK_LIB(usb-1.0, libusb_get_device_list, usb1_get_device_list=yes, AC_DEFINE(NEED_USB1_GET_DEVICE_LIST, 1, [Define to 1 if you need the libusb_get_device_list() function.]))
+
+	if (test "$usb1_lib_found" = "yes" && test "$usb1_get_device_list" = "yes"); then
+		usb1_found=yes
+	else
+		usb1_found=no
+	fi
+])
+
 dnl AC_DEFUN([AC_PATH_GLIB], [
 dnl 	PKG_CHECK_MODULES(GLIB, glib-2.0 gobject-2.0 gthread-2.0, glib_found=yes, AC_MSG_RESULT(no))
 dnl 	AC_SUBST(GLIB_CFLAGS)
@@ -293,8 +310,12 @@ AC_DEFUN([AC_ARG_OPENOBEX], [
 		AC_DEFINE(HAVE_BLUETOOTH_LINUX, 1, [Define if system supports Bluetooth stack for Linux])
 	fi
 
-	if (test "${usb_enable}" = "yes" && test "${usb_found}" = "yes"); then
-		AC_DEFINE(HAVE_USB, 1, [Define if system supports USB and it's enabled])
+	if (test "${usb_enable}" = "yes" && (test "${usb_found}" = "yes" || test "${usb1_found}" = "yes")); then
+		AC_DEFINE(HAVE_USB, 1, [Define if system has libusb 0.x or libusb 1.0 and it's enabled])
+	fi
+
+	if (test "${usb_enable}" = "yes" && test "${usb1_found}" = "yes"); then
+		AC_DEFINE(HAVE_USB1, 1, [Define if system has libusb 1.0 and it's enabled])
 	fi
 
 	AM_CONDITIONAL(GLIB, test "${glib_enable}" = "yes" && test "${glib_found}" = "yes")

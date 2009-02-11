@@ -23,12 +23,16 @@
 #define USBOBEX_H
 
 #include <openobex/obex_const.h>
+
+#ifdef HAVE_USB1
+#include <libusb.h>
+#else
 #include <usb.h>
+#endif
 
 /* Information about a USB OBEX interface present on the system */
 struct obex_usb_intf_transport_t {
 	struct obex_usb_intf_transport_t *prev, *next;	/* Next and previous interfaces in the list */
-	struct usb_device *device;		/* USB device that has the interface */
 	int configuration;			/* Device configuration */
 	int configuration_description;		/* Configuration string descriptor number */
 	int control_interface;			/* OBEX master interface */
@@ -37,7 +41,7 @@ struct obex_usb_intf_transport_t {
 						 * If non-zero, use usb_get_string_simple() from 
 						 * libusb to retrieve human-readable description
 						 */
-	unsigned char *extra_descriptors;		/* Extra master interface descriptors */
+	char *extra_descriptors;		/* Extra master interface descriptors */
 	int extra_descriptors_len;		/* Length of extra descriptors */
 	int data_interface;			/* OBEX data/slave interface */
 	int data_idle_setting;			/* OBEX data/slave idle setting */
@@ -48,7 +52,13 @@ struct obex_usb_intf_transport_t {
 						 * in active setting */
 	int data_endpoint_read;			/* OBEX data/slave interface read endpoint */
 	int data_endpoint_write;		/* OBEX data/slave interface write endpoint */
-	usb_dev_handle *dev;			/* libusb handler */
+#ifdef HAVE_USB1
+	struct libusb_device *device;		/* libusb 1.x device */
+	struct libusb_device_handle *dev;	/* libusb 1.x device handle */
+#else
+	struct usb_device *device;		/* libusb 0.x device */
+	usb_dev_handle *dev;			/* libusb 0.x device handle */
+#endif
 };
 
 /* "Union Functional Descriptor" from CDC spec 5.2.3.X
