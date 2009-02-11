@@ -162,7 +162,8 @@ OPENOBEX_SYMBOL(int) FdOBEX_TransportSetup(obex_t *self, int rfd, int wfd, int m
 /*  
  * OBEX interface discovery API 
  */
-OPENOBEX_SYMBOL(int)  OBEX_FindInterfaces(obex_t *self, obex_interface_t **intf);
+OPENOBEX_SYMBOL(int)  OBEX_EnumerateInterfaces(obex_t *self);
+OPENOBEX_SYMBOL(obex_interface_t *)  OBEX_GetInterfaceByIndex(obex_t *self, int i);
 OPENOBEX_SYMBOL(int)  OBEX_InterfaceConnect(obex_t *self, obex_interface_t *intf);
 OPENOBEX_SYMBOL(void) OBEX_FreeInterfaces(obex_t *self);
 

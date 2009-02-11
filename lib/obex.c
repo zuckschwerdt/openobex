@@ -1292,13 +1292,12 @@ int CALLAPI OBEX_InterfaceConnect(obex_t *self, obex_interface_t *intf)
 }
 
 /**
-	Get a list of OBEX interfaces on the system.
+	Find OBEX interfaces on the system.
 	\param self OBEX handle
-	\param interfaces A list of OBEX interfaces
-	\return a list of OBEX interfaces, or NULL if there are none.
+	\return the number of OBEX interfaces.
  */
 LIB_SYMBOL
-int CALLAPI OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
+int CALLAPI OBEX_EnumerateInterfaces(obex_t *self)
 {
 	DEBUG(4, "\n");
 
@@ -1315,10 +1314,25 @@ int CALLAPI OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
 		break;
 	}
 
-	if (interfaces)
-		*interfaces = self->interfaces;
-
 	return self->interfaces_number;
+}
+
+/**
+	Get OBEX interface information.
+	\param self OBEX handle
+	\param i interface number
+	\return OBEX interface information.
+ */
+LIB_SYMBOL
+obex_interface_t * CALLAPI OBEX_GetInterfaceByIndex(obex_t *self, int i)
+{
+	DEBUG(4, "\n");
+
+	obex_return_val_if_fail(self != NULL, NULL);
+
+	if (i >= self->interfaces_number || i < 0)
+		return NULL;
+	return &self->interfaces[i];
 }
 
 /**
@@ -1326,7 +1340,7 @@ int CALLAPI OBEX_FindInterfaces(obex_t *self, obex_interface_t **interfaces)
 	\param self OBEX handle
 
 	Frees memory allocated to OBEX interface structures after it has been
-	allocated by OBEX_FindInterfaces.
+	allocated by OBEX_EnumerateInterfaces.
  */
 LIB_SYMBOL
 void CALLAPI OBEX_FreeInterfaces(obex_t *self)

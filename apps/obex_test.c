@@ -157,7 +157,7 @@ int main (int argc, char *argv[])
 #endif
 
 #ifdef HAVE_USB
-	obex_interface_t *obex_intf;
+	obex_interface_t *obex_intf = NULL;
 #endif
 
 	struct context global_context = {0,};
@@ -271,12 +271,14 @@ int main (int argc, char *argv[])
 				perror( "OBEX_Init failed");
 				exit(0);
 			}
-			interfaces_number = OBEX_FindInterfaces(handle, &obex_intf);
-			for (i=0; i < interfaces_number; i++)
+			interfaces_number = OBEX_EnumerateInterfaces(handle);
+			for (i=0; i < interfaces_number; i++) {
+				obex_intf = OBEX_GetInterfaceByIndex(handle, i);
 				printf("Interface %d: %s %s %s\n", i, 
-					obex_intf[i].usb.manufacturer, 
-					obex_intf[i].usb.product, 
-					obex_intf[i].usb.control_interface);
+					obex_intf->usb.manufacturer,
+					obex_intf->usb.product,
+					obex_intf->usb.control_interface);
+			}
 			printf("Use '%s -u interface_number' to run interactive OBEX test client\n", argv[0]);
 			OBEX_Cleanup(handle);
 			exit(0);
@@ -289,12 +291,12 @@ int main (int argc, char *argv[])
 				exit(0);
 			}
 
-			interfaces_number = OBEX_FindInterfaces(handle, &obex_intf);
+			interfaces_number = OBEX_EnumerateInterfaces(handle);
 			if (intf_num >= interfaces_number) {
 				printf( "Invalid interface number\n");
 				exit(0);
 			}
-			obex_intf += intf_num;	
+			obex_intf = OBEX_GetInterfaceByIndex(handle, intf_num);
 
 			break;
 		default:
