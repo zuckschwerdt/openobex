@@ -433,7 +433,7 @@ int obex_transport_write(obex_t *self, buf_t *msg)
 		if (self->trans.connected != TRUE)
 			break;
 		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_write);
-		actual = usb_bulk_write(self->trans.self.usb.dev_data,
+		actual = usb_bulk_write(self->trans.self.usb.dev,
 					self->trans.self.usb.data_endpoint_write,
 					(char *) msg->data, msg->data_size,
 					USB_OBEX_TIMEOUT);
@@ -493,7 +493,7 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 		if (self->trans.connected != TRUE)
 			break;
 		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_read);
-		actual = usb_bulk_read(self->trans.self.usb.dev_data,
+		actual = usb_bulk_read(self->trans.self.usb.dev,
 					self->trans.self.usb.data_endpoint_read,
 					buf_reserve_end(msg, self->mtu_rx),
 					self->mtu_rx, USB_OBEX_TIMEOUT);

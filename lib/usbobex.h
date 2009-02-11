@@ -48,8 +48,7 @@ struct obex_usb_intf_transport_t {
 						 * in active setting */
 	int data_endpoint_read;			/* OBEX data/slave interface read endpoint */
 	int data_endpoint_write;		/* OBEX data/slave interface write endpoint */
-	usb_dev_handle *dev_control;		/* libusb handler for control interace */
-	usb_dev_handle *dev_data;		/* libusb handler for data interface */
+	usb_dev_handle *dev;			/* libusb handler */
 };
 
 /* "Union Functional Descriptor" from CDC spec 5.2.3.X
