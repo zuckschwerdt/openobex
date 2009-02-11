@@ -137,7 +137,7 @@ AC_DEFUN([AC_PATH_FREEBSDBT], [
 ])
 
 AC_DEFUN([AC_PATH_BLUEZ], [
-	PKG_CHECK_MODULES(BLUETOOTH, bluez, bluez_found=yes, AC_MSG_RESULT(no))
+	PKG_CHECK_MODULES(BLUETOOTH, bluez, bluez_found=yes, bluez_found=no)
 ])
 
 AC_DEFUN([AC_PATH_BLUETOOTH], [
@@ -168,7 +168,7 @@ AC_DEFUN([AC_PATH_USB], [
 		usb_lib_found=yes
 		;;
 	*)
-		PKG_CHECK_MODULES(USB, libusb, usb_lib_found=yes, AC_MSG_RESULT(no))
+		PKG_CHECK_MODULES(USB, libusb, usb_lib_found=yes, usb_lib_found=no)
 		AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb.pc, REQUIRES="libusb")
 		;;
 	esac
@@ -190,7 +190,7 @@ AC_DEFUN([AC_PATH_USB], [
 
 AC_DEFUN([AC_PATH_USB1], [
 	usb1_lib_found=no
-	PKG_CHECK_MODULES(USB1, libusb-1.0, usb1_lib_found=yes, AC_MSG_RESULT(no))
+	PKG_CHECK_MODULES(USB1, libusb-1.0, usb1_lib_found=yes, usb1_lib_found=no)
 	AC_CHECK_FILE(${prefix}/lib/pkgconfig/libusb-1.0.pc, REQUIRES="libusb1")
 	AC_SUBST(USB1_CFLAGS)
 	AC_SUBST(USB1_LIBS)
@@ -206,7 +206,7 @@ AC_DEFUN([AC_PATH_USB1], [
 ])
 
 dnl AC_DEFUN([AC_PATH_GLIB], [
-dnl 	PKG_CHECK_MODULES(GLIB, glib-2.0 gobject-2.0 gthread-2.0, glib_found=yes, AC_MSG_RESULT(no))
+dnl 	PKG_CHECK_MODULES(GLIB, glib-2.0 gobject-2.0 gthread-2.0, glib_found=yes, glib_found=no)
 dnl 	AC_SUBST(GLIB_CFLAGS)
 dnl 	AC_SUBST(GLIB_LIBS)
 dnl 	GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
