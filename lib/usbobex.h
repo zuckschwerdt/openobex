@@ -37,6 +37,8 @@ struct obex_usb_intf_transport_t {
 						 * If non-zero, use usb_get_string_simple() from 
 						 * libusb to retrieve human-readable description
 						 */
+	unsigned char *extra_descriptors;		/* Extra master interface descriptors */
+	int extra_descriptors_len;		/* Length of extra descriptors */
 	int data_interface;			/* OBEX data/slave interface */
 	int data_idle_setting;			/* OBEX data/slave idle setting */
 	int data_interface_idle_description;	/* OBEX data/slave interface string descriptor number
@@ -74,10 +76,17 @@ struct cdc_union_desc {
 #define CDC_UNION_TYPE			0x06
 #define CDC_COUNTRY_TYPE		0x07
 #define CDC_OBEX_TYPE			0x15
+#define CDC_OBEX_SERVICE_ID_TYPE	0x19
 
 /* Interface descriptor */
 #define USB_DT_CS_INTERFACE		0x24
 #define CDC_DATA_INTERFACE_TYPE		0x0a
+
+#define WMC_DEFAULT_OBEX_SERVER_UUID \
+{ 0x02, 0xae, 0xb3, 0x20, \
+0xf6, 0x49, 0x11, 0xda, \
+0x97, 0x4d, 0x08, 0x00, \
+0x20, 0x0c, 0x9a, 0x66 }
 
 #define USB_MAX_STRING_SIZE		256
 #define USB_OBEX_TIMEOUT		10000 /* 10 seconds */
