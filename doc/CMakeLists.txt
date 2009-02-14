@@ -150,6 +150,7 @@ if ( XSLT_PROCESSOR )
                     GROUP_READ
                     WORLD_READ
         COMPONENT documentation
+        OPTIONAL
       )
     endforeach ( file )
   endif ( BUILD_APPS_HELP_MAN )
@@ -175,6 +176,7 @@ if ( XSLT_PROCESSOR )
                     GROUP_READ
                     WORLD_READ
         COMPONENT documentation
+        OPTIONAL
       )
     endforeach ( file )
   endif ( BUILD_APPS_HELP_HTML )
