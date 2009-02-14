@@ -1,4 +1,4 @@
-AC_PREREQ(2.50)
+AC_PREREQ(2.60)
 AC_INIT()
 
 AM_INIT_AUTOMAKE(openobex, 1.5)
@@ -7,6 +7,8 @@ AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
 AC_INIT_OPENOBEX
+
+COMPILER_FLAGS
 
 AC_LANG_C
 
@@ -31,4 +33,6 @@ AC_PATH_USB
 
 AC_ARG_OPENOBEX
 
-AC_OUTPUT(Makefile include/Makefile include/openobex/Makefile lib/Makefile glib/Makefile apps/Makefile ircp/Makefile doc/Makefile openobex.pc openobex-glib.pc)
+AC_OUTPUT(Makefile include/Makefile include/openobex/Makefile lib/Makefile
+				glib/Makefile apps/Makefile ircp/Makefile
+				doc/Makefile openobex.pc openobex-glib.pc)

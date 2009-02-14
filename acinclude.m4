@@ -10,12 +10,23 @@ AC_DEFUN([AC_PROG_CC_PIE], [
 	])
 ])
 
+AC_DEFUN([COMPILER_FLAGS], [
+	if (test "${CFLAGS}" = ""); then
+		CFLAGS="-Wall -O2 -D_FORTIFY_SOURCE=2"
+	fi
+	if (test "$USE_MAINTAINER_MODE" = "yes"); then
+		CFLAGS+=" -Wextra"
+		CFLAGS+=" -Wno-unused-parameter"
+		CFLAGS+=" -Wno-missing-field-initializers"
+		CFLAGS+=" -Wdeclaration-after-statement"
+		CFLAGS+=" -Wmissing-declarations"
+		CFLAGS+=" -Wredundant-decls"
+		CFLAGS+=" -Wcast-align"
+	fi
+])
+
 AC_DEFUN([AC_INIT_OPENOBEX], [
 	AC_PREFIX_DEFAULT(/usr/local)
-
-	if (test "${CFLAGS}" = ""); then
-		CFLAGS="-Wall -O2"
-	fi
 
 	if (test "${prefix}" = "NONE"); then
 		dnl no prefix and no sysconfdir, so default to /etc
