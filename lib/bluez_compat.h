@@ -53,6 +53,8 @@ static bdaddr_t bluez_compat_bdaddr_any = {BTH_ADDR_NULL};
 #define rc_family   rfcomm_family
 #define rc_bdaddr   rfcomm_bdaddr
 #define rc_channel  rfcomm_channel
+#define BDADDR_ANY  NG_HCI_BDADDR_ANY
+#define BTPROTO_RFCOMM BLUETOOTH_PROTO_RFCOMM
 
 #elif defined(HAVE_BLUETOOTH_NETBSD)
 #include <bluetooth.h>
