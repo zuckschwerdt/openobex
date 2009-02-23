@@ -52,9 +52,7 @@
  */
 void usbobex_prepare_connect(obex_t *self, struct obex_usb_intf_transport_t *intf)
 {
-#ifndef _WIN32
 	self->trans.self.usb = *intf;
-#endif /* _WIN32 */
 }
 
 /*
