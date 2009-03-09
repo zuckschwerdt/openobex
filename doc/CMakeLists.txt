@@ -56,57 +56,19 @@ if ( DOXYGEN_FOUND )
   )
 endif ( DOXYGEN_FOUND )
 
-#
-# xsltproc is preferred because it creates better output and is faster.
-#
-# xalan2 can also be used by adding xalan2.jar, xml-apis.jar, xercesImpl.jar
-# and maybe docbook saxon extension jar file to the classpath, then runinng
-# org.apache.xalan.xslt.Process
-# There is also a xalan (1.10) binary of that name that did not work.
-#
-# Saxon-6.5.5 can also be used by adding saxon.jar to classpath, then running
-# com.icl.saxon.StyleSheet
-# Debian has wrapper shell scripts for saxon-6.5.5, called saxon-xslt.
-# Saxon-B 9.1 did not work, Saxon-SA was not tested.
-#
-# Sablotron (1.0.3) does not work.
-#
-find_program ( XSLT_PROCESSOR
-  NAMES xsltproc saxon-xslt
-  DOC   "XSLT processor command (xsltproc, xalan2 or saxon are usable)"
-)
-mark_as_advanced ( XSLT_PROCESSOR )
-
-#
-# call as XSLT_TRANSFORM(<.xsl file URL> <input file> <output file...>)
-#
-macro ( XSL_TRANSFORM xslurl infile )
-  string ( REPLACE " " ";" XSL_TRANSFORM_COMMAND ${XSLT_PROCESSOR} )
-  if ( XSLT_PROCESSOR MATCHES ".*xsltproc.*" )
-    list ( APPEND XSL_TRANSFORM_COMMAND
-      --param use.id.as.filename 1
-      ${xslurl} ${infile}
-    )
-  elseif ( XSLT_PROCESSOR MATCHES ".*xalan2.*" )
-    list ( APPEND XSL_TRANSFORM_COMMAND
-      -param use.id.as.filename 1
-      -in ${infile} -xsl ${xslurl}
-    )
-  elseif ( XSLT_PROCESSOR MATCHES ".*saxon.*" )
-    list ( APPEND XSL_TRANSFORM_COMMAND
-      ${infile} ${xslurl}
-      use.id.as.filename=1
-    )
-  else ( XSLT_PROCESSOR MATCHES ".*xsltproc.*" )
-    message ( FATAL_ERROR "Unsupported XSLT processor" )
-  endif ( XSLT_PROCESSOR MATCHES ".*xsltproc.*" )
-  add_custom_command(
-    OUTPUT ${ARGN}
-    COMMAND ${XSL_TRANSFORM_COMMAND}
-    DEPENDS openobex-apps.xml
-    VERBATIM
-  )
-endmacro ( XSL_TRANSFORM )
+find_package ( Xslt )
+if ( NOT XSLT_PROCESSOR )
+  if ( XSLTPROC )
+    set ( XSLT_PROCESSOR "xsltproc" )
+  elseif ( SAXON_COMMAND )
+    set ( XSLT_PROCESSOR "saxon" )
+  elseif ( XALAN2_COMMAND )
+    set ( XSLT_PROCESSOR "xalan2" )
+  endif ( XSLTPROC )
+endif ( NOT XSLT_PROCESSOR )
+set ( XSLT_PROCESSOR "${XSLT_PROCESSOR}"
+      CACHE STRING "XSLT processor select (xsltproc, xalan2 or saxon)" )
+include ( ${Xslt_USE_FILE} )
 
 if ( XSLT_PROCESSOR )
   if ( UNIX )
