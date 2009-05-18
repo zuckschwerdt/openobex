@@ -175,7 +175,8 @@ int obex_client(obex_t *self, buf_t *msg, int final)
 			else
 				obex_deliver_event(self, OBEX_EV_PROGRESS, self->object->opcode, 0, FALSE);
 
-			self->object->continue_received = 0;
+			if (self->object)
+				self->object->continue_received = 0;
 		} else {
 			/* Notify app that client-operation is done! */
 			DEBUG(3, "Done! Rsp=%02x!\n", rsp);
