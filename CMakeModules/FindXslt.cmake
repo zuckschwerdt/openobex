@@ -1,18 +1,13 @@
+# - Find XSLT processors.
 #
-# xsltproc is preferred because it creates better output and is faster.
+# Currently xsltproc, Saxon 6.5.[345] and Xalan 2.x are supported. Only those
+# can be used for docbook.
 #
-# xalan2 can also be used by adding xalan2.jar, xml-apis.jar and xercesImpl.jar
-# to the classpath, then runinng
-#   org.apache.xalan.xslt.Process
-# There is also a xalan (1.10) binary of that name that did not work.
-#
-# Saxon-6.5.5 can also be used by adding saxon.jar and maybe docbook saxon
-# extension jar fileto classpath, then running
-#   com.icl.saxon.StyleSheet
-# Debian has wrapper shell scripts for saxon-6.5.5, called saxon-xslt.
-# Saxon-B 9.1 did not work, Saxon-SA was not tested.
-#
-# Sablotron (1.0.3) does not work.
+# The following important variables are created:
+# SAXON_COMMAND
+# XALAN2_COMMAND
+# XSLTPROC
+# Xslt_FOUND
 #
 find_package ( Java )
 if ( JAVA_RUNTIME )
@@ -43,6 +38,7 @@ if ( JAVA_RUNTIME )
     DOC "location of the catalog manager properties file from the XML commons resolver"
     CMAKE_FIND_ROOT_PATH_BOTH
   )
+  mark_as_advanced ( JAVA_PROPERTIES_CATALOGMANAGER )
   if ( JAVA_PROPERTIES_CATALOGMANAGER )
     if ( CLASSPATH )
       set ( CLASSPATH "${CLASSPATH}:${JAVA_PROPERTIES_CATALOGMANAGER}" )
@@ -93,7 +89,7 @@ if ( JAVA_RUNTIME )
   # Find Saxon 6.5.x
   #
   find_file ( SAXON
-    NAMES saxon.jar saxon-6.5.5.jar
+    NAMES saxon.jar saxon-6.5.5.jar saxon-6.5.4.jar saxon-6.5.3.jar
     PATH_SUFFIXES share/java
     DOC "location of saxon 6.5.x JAR file"
     CMAKE_FIND_ROOT_PATH_BOTH
@@ -135,9 +131,9 @@ mark_as_advanced ( XSLTPROC )
 
 set ( Xslt_USE_FILE UseXslt )
 
-if ( XSLTPROC OR SAXON OR XALAN2 )
+if ( XSLTPROC OR SAXON_COMMAND OR XALAN2_COMMAND )
   set ( Xslt_FOUND true )
-endif ( XSLTPROC OR SAXON OR XALAN2 )
+endif ( XSLTPROC OR SAXON_COMMAND OR XALAN2_COMMAND )
 
 if ( NOT Xslt_FOUND )
   if ( NOT Xslt_FIND_QUIETLY )

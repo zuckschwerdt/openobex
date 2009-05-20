@@ -36,7 +36,7 @@ if ( DOXYGEN_FOUND )
 
       add_custom_command ( OUTPUT "${DOC_${type}_OUTPUT_FILE_ABS}"
           COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_${type}"
-          DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in" ${SOURCES}
+          DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_${type}" ${SOURCES}
           VERBATIM
       )
 
@@ -56,94 +56,52 @@ if ( DOXYGEN_FOUND )
   )
 endif ( DOXYGEN_FOUND )
 
-find_package ( Xslt )
-if ( NOT XSLT_PROCESSOR )
-  if ( XSLTPROC )
-    set ( XSLT_PROCESSOR "xsltproc" )
-  elseif ( SAXON_COMMAND )
-    set ( XSLT_PROCESSOR "saxon" )
-  elseif ( XALAN2_COMMAND )
-    set ( XSLT_PROCESSOR "xalan2" )
-  endif ( XSLTPROC )
-endif ( NOT XSLT_PROCESSOR )
-set ( XSLT_PROCESSOR "${XSLT_PROCESSOR}"
-      CACHE STRING "XSLT processor select (xsltproc, xalan2 or saxon)" )
-include ( ${Xslt_USE_FILE} )
+if ( UNIX )
+  option (BUILD_APPS_HELP_MAN "Build manpage application help files" ON)
+  option (BUILD_APPS_HELP_HTML "Build HTML application help files" OFF)
+else ( UNIX )
+  option (BUILD_APPS_HELP_HTML "Build HTML application help files" ON)
+endif ( UNIX )
 
-if ( XSLT_PROCESSOR )
-  if ( UNIX )
-    option (BUILD_APPS_HELP_MAN "Build manpage application help files" ON)
-    option (BUILD_APPS_HELP_HTML "Build HTML application help files" OFF)
-  else ( UNIX )
-    option (BUILD_APPS_HELP_HTML "Build HTML application help files" ON)
-  endif ( UNIX )
-
-  SET ( DOCBOOK_XSL_PREFIX "http://docbook.sourceforge.net/release/xsl/current"
-        CACHE STRING "prefix to locate the docbook-XSL release files" )
-  mark_as_advanced ( DOCBOOK_XSL_PREFIX )
-
-  file ( READ "${CMAKE_CURRENT_SOURCE_DIR}/openobex-apps.xml" XML_FILE_CONTENTS )
-  string ( REGEX MATCHALL "<refentrytitle>[^<]*" XML_REFENTRYTITLE "${XML_FILE_CONTENTS}" )
-  foreach ( file ${XML_REFENTRYTITLE} )
-    string ( REGEX REPLACE "^<refentrytitle>" "" file "${file}" )
-    string ( REGEX REPLACE "[[:space:]]" "" file "${file}" )
-    list ( APPEND XSLT_FILES ${file} )
+set ( OPENOBEX_APP_XML_FILE "${CMAKE_CURRENT_SOURCE_DIR}/openobex-apps.xml" )
+if ( BUILD_APPS_HELP_MAN )
+  include ( UseDocbook )
+  docbook_generate ( manpage "${OPENOBEX_APP_XML_FILE}" XSLT_FILES_MAN )
+  foreach ( file ${XSLT_FILES_MAN} )
+    list ( APPEND OPENOBEX_HELP_FILES ${file} )
+    get_filename_component ( fileExt ${file} EXT )
+    string ( REGEX REPLACE "^[.]" "" fileExt ${fileExt} )
+    install (
+      FILES ${CMAKE_CURRENT_BINARY_DIR}/${file}
+      DESTINATION ${MANPAGE_INSTALL_DIR}/man${fileExt}
+      PERMISSIONS OWNER_READ OWNER_WRITE
+                  GROUP_READ
+                  WORLD_READ
+      COMPONENT documentation
+      OPTIONAL
+    )
   endforeach ( file )
-  set ( XML_FILE_CONTENTS )
-  set ( XML_REFENTRYTITLE )
+endif ( BUILD_APPS_HELP_MAN )
 
-  if ( BUILD_APPS_HELP_MAN )
-    foreach ( file  ${XSLT_FILES} )
-      list ( APPEND XSLT_FILES_MAN ${file}.1 )
-    endforeach ( file )
-    xsl_transform (
-      "${DOCBOOK_XSL_PREFIX}/manpages/docbook.xsl"
-      "${CMAKE_CURRENT_SOURCE_DIR}/openobex-apps.xml"
-      ${XSLT_FILES_MAN}
+if ( BUILD_APPS_HELP_HTML )
+  include ( UseDocbook )
+  docbook_generate ( html "${OPENOBEX_APP_XML_FILE}" XSLT_FILES_HTML )
+  foreach ( file ${XSLT_FILES_HTML} )
+    list ( APPEND OPENOBEX_HELP_FILES ${file} )
+    install (
+      FILES ${CMAKE_CURRENT_BINARY_DIR}/${file}
+      DESTINATION ${DOCUMENTATION_INSTALL_DIR}
+      PERMISSIONS OWNER_READ OWNER_WRITE
+                  GROUP_READ
+                  WORLD_READ
+      COMPONENT documentation
+      OPTIONAL
     )
-    foreach ( file ${XSLT_FILES_MAN} )
-      list ( APPEND OPENOBEX_HELP_FILES ${file} )
-      get_filename_component ( fileExt ${file} EXT )
-      string ( REGEX REPLACE "^[.]" "" fileExt ${fileExt} )
-      install (
-	FILES ${CMAKE_CURRENT_BINARY_DIR}/${file}
-	DESTINATION ${MANPAGE_INSTALL_DIR}/man${fileExt}
-	PERMISSIONS OWNER_READ OWNER_WRITE
-                    GROUP_READ
-                    WORLD_READ
-        COMPONENT documentation
-        OPTIONAL
-      )
-    endforeach ( file )
-  endif ( BUILD_APPS_HELP_MAN )
+  endforeach ( file )
+endif ( BUILD_APPS_HELP_HTML )
 
-  if ( BUILD_APPS_HELP_HTML )
-    foreach ( file  ${XSLT_FILES} )
-      list ( APPEND XSLT_FILES_HTML ${file}.html )
-    endforeach ( file )
-    list ( APPEND XSLT_FILES_HTML
-      index.html
-    )
-    xsl_transform (
-      "${DOCBOOK_XSL_PREFIX}/xhtml/chunk.xsl"
-      "${CMAKE_CURRENT_SOURCE_DIR}/openobex-apps.xml"
-      ${XSLT_FILES_HTML}
-    )
-    foreach ( file ${XSLT_FILES_HTML} )
-      list ( APPEND OPENOBEX_HELP_FILES ${file} )
-      INSTALL (
-	FILES ${CMAKE_CURRENT_BINARY_DIR}/${file}
-        DESTINATION ${DOCUMENTATION_INSTALL_DIR}
-        PERMISSIONS OWNER_READ OWNER_WRITE
-                    GROUP_READ
-                    WORLD_READ
-        COMPONENT documentation
-        OPTIONAL
-      )
-    endforeach ( file )
-  endif ( BUILD_APPS_HELP_HTML )
-
+if ( OPENOBEX_HELP_FILES )
   add_custom_target ( openobex-apps-doc DEPENDS ${OPENOBEX_HELP_FILES} )
   add_dependencies ( openobex-apps openobex-apps-doc )
   add_dependencies ( doc openobex-apps-doc )
-endif ( XSLT_PROCESSOR )
+endif ( OPENOBEX_HELP_FILES )

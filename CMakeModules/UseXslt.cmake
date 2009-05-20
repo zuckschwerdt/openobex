@@ -7,7 +7,7 @@ function ( XSL_TRANSFORM xslurl infile )
       set ( XSL_TRANSFORM_COMMAND
 	${XSLTPROC}
 	--param use.id.as.filename 1
-	${xslurl} ${infile}
+	"${xslurl}" "${infile}"
       )
     else ( XSLTPROC )
       message ( FATAL_ERROR "xsltproc not found" )
@@ -17,7 +17,7 @@ function ( XSL_TRANSFORM xslurl infile )
     if ( SAXON_COMMAND )
       set ( XSL_TRANSFORM_COMMAND
 	${SAXON_COMMAND}
-	${infile} ${xslurl}
+	"${infile}" "${xslurl}"
 	use.id.as.filename=1
       )
     else ( SAXON_COMMAND )
@@ -38,7 +38,7 @@ function ( XSL_TRANSFORM xslurl infile )
       set ( XSL_TRANSFORM_COMMAND
 	${XALAN2_COMMAND}
 	-param use.id.as.filename 1
-	-in ${infile} -xsl ${xslurl}
+	-in "${infile}" -xsl "${xslurl}"
       )
     else ( XALAN2_COMMAND )
       message ( FATAL_ERROR " Xalan 2.x not found" )
@@ -51,7 +51,7 @@ function ( XSL_TRANSFORM xslurl infile )
   add_custom_command (
     OUTPUT ${ARGN}
     COMMAND ${XSL_TRANSFORM_COMMAND}
-    DEPENDS ${infile}
+    DEPENDS "${infile}"
     VERBATIM
   )
   set ( XSL_TRANSFORM_COMMAND )
