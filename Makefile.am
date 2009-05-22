@@ -15,7 +15,8 @@ EXTRA_DIST = openobex.m4 CMakeLists.txt \
 		CMakeModules/FindBluetooth.cmake CMakeModules/FindGlib.cmake \
 		CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake \
 		CMakeModules/FindXslt.cmake CMakeModules/UseXslt.cmake \
-		CMakeModules/FindDocbook.cmake CMakeModules/UseDocbook.cmake
+		CMakeModules/FindDocbook.cmake CMakeModules/UseDocbook.cmake \
+		CMakeModules/MaintainerMode.cmake
 
 DISTCLEANFILES = $(pkgconfig_DATA)
 
