@@ -32,6 +32,8 @@ if ( NOT CMAKE_BUILD_TYPE )
         CACHE STRING "Build type" FORCE )
 endif ( NOT CMAKE_BUILD_TYPE )
 
+include ( MaintainerMode )
+
 #
 # define how to build libraries
 #
