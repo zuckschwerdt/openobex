@@ -1,21 +1,10 @@
 
-find_package ( Xslt )
-if ( NOT DOCBOOK_XSLT_PROCESSOR )
-  if ( XSLTPROC )
-    set ( DOCBOOK_XSLT_PROCESSOR "xsltproc" )
-  elseif ( SAXON_COMMAND )
-    set ( DOCBOOK_XSLT_PROCESSOR "saxon" )
-  elseif ( XALAN2_COMMAND )
-    set ( DOCBOOK_XSLT_PROCESSOR "xalan2" )
-  endif ( XSLTPROC )
-endif ( NOT DOCBOOK_XSLT_PROCESSOR )
-
-set ( DOCBOOK_XSLT_PROCESSOR "${DOCBOOK_XSLT_PROCESSOR}"
-      CACHE STRING "Docbook XSLT processor select (xsltproc, xalan2 or saxon)" )
-set ( XSLT_PROCESSOR  "${DOCBOOK_XSLT_PROCESSOR}" )
 include ( ${Xslt_USE_FILE} )
 
-set ( DOCBOOK_XSL_PREFIX "http://docbook.sourceforge.net/release/xsl/current"
+if ( NOT DOCBOOK_XSL_VERSION )
+  set ( DOCBOOK_XSL_VERSION current )
+endif ( NOT DOCBOOK_XSL_VERSION )
+set ( DOCBOOK_XSL_PREFIX "http://docbook.sourceforge.net/release/xsl/${DOCBOOK_XSL_VERSION}"
       CACHE STRING "prefix to locate the docbook-XSL release files" )
 mark_as_advanced ( DOCBOOK_XSL_PREFIX )
 
@@ -36,19 +25,19 @@ function ( _DOCBOOK_GET_MANPAGE_IDS inFile outNameList )
   string ( REGEX MATCHALL "<refentry[ ]+.*</refentry>" ENTRIES "${XML_FILE_CONTENTS}" )
   string ( REPLACE "</refentry>" ";" ENTRIES "${ENTRIES}" )
   list ( LENGTH ENTRIES COUNT )
+  math ( EXPR COUNT "${COUNT} - 1" )
   foreach ( index RANGE ${COUNT} )
-    if ( index LESS COUNT )
-      list ( GET ENTRIES ${index} entry )
-      string ( REGEX MATCH "<refentry[ ]+[^>]*" MANPAGE_NAME "${entry}" )
-      string ( REGEX REPLACE ".*id=\"([^\"]*)\".*" "\\1" MANPAGE_NAME "${MANPAGE_NAME}" )
+    list ( GET ENTRIES ${index} entry )
+    string ( REGEX MATCH "<refname>[^<]*" MANPAGE_NAME "${entry}" )
+    string ( REGEX REPLACE "^<refname>" "" MANPAGE_NAME "${MANPAGE_NAME}" )
+    string ( REGEX REPLACE "[[:space:]]" "" MANPAGE_NAME "${MANPAGE_NAME}" )
 
-      string ( REGEX MATCH "<manvolnum>[^<]*" MANPAGE_VOLUME "${entry}" )
-      string ( REGEX REPLACE "^<manvolnum>" "" MANPAGE_VOLUME "${MANPAGE_VOLUME}" )
-      string ( REGEX REPLACE "[[:space:]]" "" MANPAGE_VOLUME "${MANPAGE_VOLUME}" )
-      if ( MANPAGE_NAME AND MANPAGE_VOLUME )
-        list ( APPEND FILES "${MANPAGE_NAME}.${MANPAGE_VOLUME}" )
-      endif ( MANPAGE_NAME AND MANPAGE_VOLUME )
-    endif ( index LESS COUNT )
+    string ( REGEX MATCH "<manvolnum>[^<]*" MANPAGE_VOLUME "${entry}" )
+    string ( REGEX REPLACE "^<manvolnum>" "" MANPAGE_VOLUME "${MANPAGE_VOLUME}" )
+    string ( REGEX REPLACE "[[:space:]]" "" MANPAGE_VOLUME "${MANPAGE_VOLUME}" )
+    if ( MANPAGE_NAME AND MANPAGE_VOLUME )
+      list ( APPEND FILES "${MANPAGE_NAME}.${MANPAGE_VOLUME}" )
+    endif ( MANPAGE_NAME AND MANPAGE_VOLUME )
   endforeach ( index )
   set ( ${outNameList} ${FILES} PARENT_SCOPE )
 endfunction ( )
@@ -74,6 +63,9 @@ function ( _DOCBOOK_HTML inFile outList )
   # one or more refentries.
   list ( APPEND FILES index.html )
 
+  set ( XSLT_PARAMS
+    "use.id.as.filename=1"
+  )
   xsl_transform (
     "${DOCBOOK_XSL_PREFIX}/xhtml/chunk.xsl"
     "${inFile}"

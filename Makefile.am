@@ -13,7 +13,9 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-apps
 
 EXTRA_DIST = openobex.m4 CMakeLists.txt \
 		CMakeModules/FindBluetooth.cmake CMakeModules/FindGlib.cmake \
-		CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake
+		CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake \
+		CMakeModules/FindXslt.cmake CMakeModules/UseXslt.cmake \
+		CMakeModules/FindDocbook.cmake CMakeModules/UseDocbook.cmake
 
 DISTCLEANFILES = $(pkgconfig_DATA)
 

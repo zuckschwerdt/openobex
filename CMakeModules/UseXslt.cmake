@@ -1,28 +1,50 @@
 #
 # call as XSLT_TRANSFORM(<.xsl file URL> <input file> <output files...>)
 #
+# The following variables are supported:
+# XSLT_PROCESSOR (mandatory):
+#      select the xslt processor to use (xsltproc, xalan2, saxon)
+# XSLT_PARAMS (optional):
+#      a list which may contain param=value entries.
+# XSLT_(XSLTPROC|XALAN2|SAXON)_OPTIONS (optional):
+#      a list with extra options for those xslt processors.
+#
 function ( XSL_TRANSFORM xslurl infile )
+  if ( XSLT_PARAMS )
+    foreach ( param ${XSLT_PARAMS} )
+      set ( param_name )
+      string ( REGEX MATCH "[^=]+" param_name "${param}" )
+      if ( param_name )
+	set ( param_value )
+	string ( REGEX REPLACE "[^=]+=(.*)" "\\1" param_value "${param}" )
+	set ( XSLT_XSLTPROC_OPTIONS ${XSLT_XSLTPROC_OPTIONS} --param ${param_name} ${param_value} )
+	set ( XSLT_XALAN2_OPTIONS ${XSLT_XALAN2_OPTIONS} -param ${param_name} ${param_value} )
+      endif ( param_name )
+    endforeach ( param )
+  endif ( XSLT_PARAMS )
+
   if ( XSLT_PROCESSOR STREQUAL "xsltproc" )
-    if ( XSLTPROC )
+    if ( XSLT_XSLTPROC_EXECUTABLE )
       set ( XSL_TRANSFORM_COMMAND
-	${XSLTPROC}
-	--param use.id.as.filename 1
+	${XSLT_XSLTPROC_EXECUTABLE}
+	${XSLT_XSLTPROC_OPTIONS}
 	"${xslurl}" "${infile}"
       )
-    else ( XSLTPROC )
+    else ( XSLT_XSLTPROC_EXECUTABLE )
       message ( FATAL_ERROR "xsltproc not found" )
-    endif ( XSLTPROC )
+    endif ( XSLT_XSLTPROC_EXECUTABLE )
 
   elseif ( XSLT_PROCESSOR STREQUAL "saxon" )
-    if ( SAXON_COMMAND )
+    if ( XSLT_SAXON_COMMAND )
       set ( XSL_TRANSFORM_COMMAND
-	${SAXON_COMMAND}
+	${XSLT_SAXON_COMMAND}
+	${XSLT_SAXON_OPTIONS}
 	"${infile}" "${xslurl}"
-	use.id.as.filename=1
+	${Xslt_PARAMS}
       )
-    else ( SAXON_COMMAND )
+    else ( XSLT_SAXON_COMMAND )
       message ( FATAL_ERROR "Saxon-6.5.x not found" )
-    endif ( SAXON_COMMAND )
+    endif ( XSLT_SAXON_COMMAND )
 
   elseif ( XSLT_PROCESSOR STREQUAL "xalan2" )
     # Xalan places the output in the source file's directory :-(
@@ -34,15 +56,15 @@ function ( XSL_TRANSFORM xslurl infile )
       VERBATIM
     )
     set ( infile "${CMAKE_CURRENT_BINARY_DIR}/${infile_name}" )
-    if ( XALAN2_COMMAND )
+    if ( XSLT_XALAN2_COMMAND )
       set ( XSL_TRANSFORM_COMMAND
-	${XALAN2_COMMAND}
-	-param use.id.as.filename 1
+	${XSLT_XALAN2_COMMAND}
+	${XSLT_XALAN2_OPTIONS}
 	-in "${infile}" -xsl "${xslurl}"
       )
-    else ( XALAN2_COMMAND )
+    else ( XSLT_XALAN2_COMMAND )
       message ( FATAL_ERROR " Xalan 2.x not found" )
-    endif ( XALAN2_COMMAND )
+    endif ( XSLT_XALAN2_COMMAND )
 
   else ( XSLT_PROCESSOR STREQUAL "xsltproc" )
     message ( FATAL_ERROR "Unsupported XSLT processor" )
