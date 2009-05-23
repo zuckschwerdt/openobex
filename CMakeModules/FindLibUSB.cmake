@@ -8,6 +8,7 @@
 # is defined, it will be used as base path.
 # The following standard variables get defined:
 #  LibUSB_FOUND:        true if LibUSB was found
+#  LibUSB_HEADER_FILE:  the location of the C header file
 #  LibUSB_INCLUDE_DIRS: the directory that contains the include file
 #  LibUSB_LIBRARIES:    the library
 
@@ -16,7 +17,10 @@ include ( CheckIncludeFile )
 
 find_package ( PkgConfig )
 if ( PKG_CONFIG_FOUND )
-  pkg_check_modules ( PKGCONFIG_LIBUSB libusb )
+  pkg_check_modules ( PKGCONFIG_LIBUSB libusb-1.0 )
+  if ( NOT PKGCONFIG_LIBUSB_FOUND )
+    pkg_check_modules ( PKGCONFIG_LIBUSB libusb )
+  endif ( NOT PKGCONFIG_LIBUSB_FOUND )
 endif ( PKG_CONFIG_FOUND )
 
 if ( PKGCONFIG_LIBUSB_FOUND )
@@ -34,16 +38,17 @@ if ( PKGCONFIG_LIBUSB_FOUND )
   endforeach ( i )
 
 else ( PKGCONFIG_LIBUSB_FOUND )
-  find_path ( LibUSB_INCLUDE_DIRS
+  find_file ( LibUSB_HEADER_FILE
     NAMES
-      usb.h
+      libusb.h usb.h
     PATHS
       $ENV{ProgramFiles}/LibUSB-Win32
       $ENV{LibUSB_ROOT_DIR}
     PATH_SUFFIXES
       include
   )
-  mark_as_advanced ( LibUSB_INCLUDE_DIRS )
+  mark_as_advanced ( LibUSB_HEADER_FILE )
+  get_filename_component ( LibUSB_INCLUDE_DIRS "${LibUSB_HEADER_FILE}" PATH )
 #  message ( STATUS "LibUSB include dir: ${LibUSB_INCLUDE_DIRS}" )
 
   if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
@@ -83,11 +88,12 @@ endif ( PKGCONFIG_LIBUSB_FOUND )
 
 if ( LibUSB_FOUND )
   set ( CMAKE_REQUIRED_INCLUDES "${LibUSB_INCLUDE_DIRS}" )
-  check_include_file ( usb.h LibUSB_FOUND )
+  check_include_file ( "{LibUSB_HEADER_FILE}" LibUSB_FOUND )
 #    message ( STATUS "LibUSB: usb.h is usable: ${LibUSB_FOUND}" )
 endif ( LibUSB_FOUND )
 if ( LibUSB_FOUND )
-  check_library_exists ( "${LibUSB_LIBRARIES}" usb_open "" LibUSB_FOUND )
+  check_library_exists ( "${usb_LIBRARY}" usb_open "" LibUSB_FOUND )
+  check_library_exists ( "${usb_LIBRARY}" libusb_get_device_list "" LibUSB_VERSION_1.0 )
 #    message ( STATUS "LibUSB: library is usable: ${LibUSB_FOUND}" )
 endif ( LibUSB_FOUND )
 
