@@ -93,11 +93,20 @@ if ( OPENOBEX_USB )
     ${LibUSB_LIBRARIES}
   )
   include_directories ( BEFORE SYSTEM ${LibUSB_INCLUDE_DIRS} )
-  list ( APPEND SOURCES
-    usbobex.c
-  )
+  if ( LibUSB_VERSION_1.0 )
+    list ( APPEND SOURCES
+      usb1obex.c
+      usbutils.c
+    )
+  else ( LibUSB_VERSION_1.0 )
+    list ( APPEND SOURCES
+      usbobex.c
+      usbutils.c
+    )
+  endif ( LibUSB_VERSION_1.0 )
   list ( APPEND HEADERS
     usbobex.h
+    usbutils.h
   )
 endif ( OPENOBEX_USB )
 
