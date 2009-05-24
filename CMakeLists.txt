@@ -1,4 +1,4 @@
-cmake_minimum_required ( VERSION 2.6 FATAL_ERROR )
+cmake_minimum_required ( VERSION 2.6.3 FATAL_ERROR )
 
 project ( openobex C )
 
@@ -6,7 +6,7 @@ project ( openobex C )
 # The project version
 #
 set ( VERSION_MAJOR 1 )
-set ( VERSION_MINOR 5 )
+set ( VERSION_MINOR 6 )
 set ( VERSION_PATCH 0 )
 
 set ( SHORT_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}" )
