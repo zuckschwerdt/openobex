@@ -27,14 +27,15 @@ if ( PKGCONFIG_LIBUSB_FOUND )
   set ( LibUSB_FOUND ${PKGCONFIG_LIBUSB_FOUND} )
   set ( LibUSB_INCLUDE_DIRS ${PKGCONFIG_LIBUSB_INCLUDE_DIRS} )
   foreach ( i ${PKGCONFIG_LIBUSB_LIBRARIES} )
-    find_library ( ${i}_LIBRARY
+    string ( REGEX MATCH "[^-]*" ibase "${i}" )
+    find_library ( ${ibase}_LIBRARY
       NAMES ${i}
       PATHS ${PKGCONFIG_LIBUSB_LIBRARY_DIRS}
     )
-    if ( ${i}_LIBRARY )
-      list ( APPEND LibUSB_LIBRARIES ${${i}_LIBRARY} )
-    endif ( ${i}_LIBRARY )
-    mark_as_advanced ( ${i}_LIBRARY )
+    if ( ${ibase}_LIBRARY )
+      list ( APPEND LibUSB_LIBRARIES ${${ibase}_LIBRARY} )
+    endif ( ${ibase}_LIBRARY )
+    mark_as_advanced ( ${ibase}_LIBRARY )
   endforeach ( i )
 
 else ( PKGCONFIG_LIBUSB_FOUND )
@@ -49,7 +50,6 @@ else ( PKGCONFIG_LIBUSB_FOUND )
   )
   mark_as_advanced ( LibUSB_HEADER_FILE )
   get_filename_component ( LibUSB_INCLUDE_DIRS "${LibUSB_HEADER_FILE}" PATH )
-#  message ( STATUS "LibUSB include dir: ${LibUSB_INCLUDE_DIRS}" )
 
   if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
     # LibUSB-Win32 binary distribution contains several libs.
@@ -69,7 +69,7 @@ else ( PKGCONFIG_LIBUSB_FOUND )
 
   find_library ( usb_LIBRARY
     NAMES
-      libusb usb
+      usb-1.0 usb
     PATHS
       $ENV{ProgramFiles}/LibUSB-Win32
       $ENV{LibUSB_ROOT_DIR}
@@ -89,12 +89,10 @@ endif ( PKGCONFIG_LIBUSB_FOUND )
 if ( LibUSB_FOUND )
   set ( CMAKE_REQUIRED_INCLUDES "${LibUSB_INCLUDE_DIRS}" )
   check_include_file ( "{LibUSB_HEADER_FILE}" LibUSB_FOUND )
-#    message ( STATUS "LibUSB: usb.h is usable: ${LibUSB_FOUND}" )
 endif ( LibUSB_FOUND )
 if ( LibUSB_FOUND )
   check_library_exists ( "${usb_LIBRARY}" usb_open "" LibUSB_FOUND )
   check_library_exists ( "${usb_LIBRARY}" libusb_get_device_list "" LibUSB_VERSION_1.0 )
-#    message ( STATUS "LibUSB: library is usable: ${LibUSB_FOUND}" )
 endif ( LibUSB_FOUND )
 
 if ( NOT LibUSB_FOUND )
@@ -105,4 +103,3 @@ if ( NOT LibUSB_FOUND )
     message ( FATAL_ERROR "" )
   endif ( LibUSB_FIND_REQUIRED )
 endif ( NOT LibUSB_FOUND )
-#message ( STATUS "LibUSB: ${LibUSB_FOUND}" )
