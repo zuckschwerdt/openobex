@@ -26,6 +26,8 @@
 #include "obex_main.h"
 #include "databuffer.h"
 
+#include <openobex/obex.h>
+
 /* If an object has no expected length we have to reallocated every
  * OBEX_OBJECT_ALLOCATIONTRESHOLD bytes */
 #define OBEX_OBJECT_ALLOCATIONTRESHOLD 10240
@@ -40,7 +42,7 @@ struct obex_header_element {
 	int stream;
 };
 
-typedef struct {
+struct obex_object {
 	time_t time;
 
 	slist_t *tx_headerq;		/* List of headers to transmit*/
@@ -75,8 +77,7 @@ typedef struct {
 	unsigned int s_offset;		/* Current offset in buf */
 	int s_stop;			/* End of stream */
 	int s_srv;			/* Deliver body as stream when server */
-
-} obex_object_t;
+};
 
 obex_object_t *obex_object_new(void);
 int obex_object_delete(obex_object_t *object);

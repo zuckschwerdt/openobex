@@ -60,8 +60,12 @@ extern "C" {
 // They are defined here otherwise any app including it
 // would require obex_main.h which includes a lot of other 
 // unnecessary stuff.
-typedef void* obex_t;
-typedef void* obex_object_t;
+struct obex;
+struct obex_object;
+
+typedef struct obex obex_t;
+typedef struct obex_object obex_object_t;
+
 typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 // This is to workaround compilation without Bluetooth support. - Jean II
 

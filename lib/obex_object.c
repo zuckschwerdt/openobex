@@ -33,6 +33,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <openobex/obex.h>
+
 /*
  * Function obex_object_new ()
  *

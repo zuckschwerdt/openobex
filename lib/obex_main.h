@@ -38,9 +38,6 @@
 
 #include <time.h>
 
-/* Forward decl */
-typedef struct obex obex_t;
-
 #ifdef TRUE
 #undef TRUE
 #endif
@@ -54,7 +51,7 @@ typedef struct obex obex_t;
 #define obex_return_if_fail(test)	do { if (!(test)) return; } while(0);
 #define obex_return_val_if_fail(test, val)	do { if (!(test)) return val; } while(0);
 
-#include <openobex/obex_const.h>
+#include <openobex/obex.h>
 
 #include "obex_object.h"
 #include "obex_transport.h"
@@ -106,9 +103,6 @@ extern int obex_dump;
 
 
 #define OBEX_VERSION		0x10      /* OBEX Protocol Version 1.1 */
-
-// Note that this one is also defined in obex.h
-typedef void (*obex_event_t)(obex_t *handle, obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp);
 
 #define MODE_SRV	0x80
 #define MODE_CLI	0x00
