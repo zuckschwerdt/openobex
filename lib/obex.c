@@ -82,8 +82,7 @@ static unsigned long wsa_init = 0;
 typedef char *bdaddr_t;
 #endif
 
-LIB_SYMBOL
-void CALLAPI OBEX_FreeInterfaces(obex_t *self);
+#include <openobex/obex.h>
 
 /**
 	Initialize OBEX.
