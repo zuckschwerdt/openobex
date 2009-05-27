@@ -26,6 +26,7 @@
 #include "obex_main.h"
 #include "obex_header.h"
 #include "obex_connect.h"
+#include "obex_server.h"
 
 #include <stdlib.h>
 #include <stdio.h>

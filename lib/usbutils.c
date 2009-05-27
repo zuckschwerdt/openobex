@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include "obex_main.h"
 #include "usbobex.h"
+#include "usbutils.h"
 
 /*
  * Helper function to usbobex_find_interfaces

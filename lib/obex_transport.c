@@ -202,8 +202,9 @@ int obex_transport_connect_request(obex_t *self)
 		DEBUG(4, "Custom connect\n");
 		if (self->ctrans.connect)
 			ret = self->ctrans.connect(self, self->ctrans.customdata);
-		else
+		else {
 			DEBUG(4, "No connect-callback exist!\n");
+		}
 		DEBUG(4, "ret=%d\n", ret);
 		break;
 #ifdef HAVE_BLUETOOTH
@@ -254,8 +255,9 @@ void obex_transport_disconnect_request(obex_t *self)
 		DEBUG(4, "Custom disconnect\n");
 		if (self->ctrans.disconnect)
 			self->ctrans.disconnect(self, self->ctrans.customdata);
-		else
+		else {
 			DEBUG(4, "No disconnect-callback exist!\n");
+		}
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -301,8 +303,9 @@ int obex_transport_listen(obex_t *self)
 		DEBUG(4, "Custom listen\n");
 		if (self->ctrans.listen)
 			ret = self->ctrans.listen(self, self->ctrans.customdata);
-		else
+		else {
 			DEBUG(4, "No listen-callback exist!\n");
+		}
 		break;
 #ifdef HAVE_BLUETOOTH
 	case OBEX_TRANS_BLUETOOTH:
@@ -412,6 +415,7 @@ static ssize_t write_wrap (int s, const void *buf, size_t len)
 int obex_transport_write(obex_t *self, buf_t *msg)
 {
 	int actual = -1;
+	int usberror;
 
 	DEBUG(4, "\n");
 
@@ -434,7 +438,7 @@ int obex_transport_write(obex_t *self, buf_t *msg)
 			break;
 		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_write);
 #ifdef HAVE_USB1
-		int usberror = libusb_bulk_transfer(self->trans.self.usb.dev,
+		usberror = libusb_bulk_transfer(self->trans.self.usb.dev,
 					self->trans.self.usb.data_endpoint_write,
 					(unsigned char *) msg->data, msg->data_size,
 					&actual, USB_OBEX_TIMEOUT);
@@ -452,8 +456,9 @@ int obex_transport_write(obex_t *self, buf_t *msg)
 		DEBUG(4, "Custom write\n");
 		if (self->ctrans.write)
 			actual = self->ctrans.write(self, self->ctrans.customdata, msg->data, msg->data_size);
-		else
+		else {
 			DEBUG(4, "No write-callback exist!\n");
+		}
 		break;
 	default:
 		DEBUG(4, "Transport not implemented!\n");
@@ -473,6 +478,7 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 {
 	int actual = -1;
 	buf_t *msg = self->rx_msg;
+	int usberror;
 
 	DEBUG(4, "Request to read max %d bytes\n", max);
 
@@ -503,7 +509,7 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 			break;
 		DEBUG(4, "Endpoint %d\n", self->trans.self.usb.data_endpoint_read);
 #ifdef HAVE_USB1
-		int usberror = libusb_bulk_transfer(self->trans.self.usb.dev,
+		usberror = libusb_bulk_transfer(self->trans.self.usb.dev,
 					self->trans.self.usb.data_endpoint_read,
 					buf_reserve_end(msg, self->mtu_rx),
 					self->mtu_rx, &actual,

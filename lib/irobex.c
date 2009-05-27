@@ -286,16 +286,18 @@ static int irobex_discover_devices(obex_t *self)
 			if (err != 0) {
 				if (errno != EADDRNOTAVAIL)
 					DEBUG(1, " <can't query IAS>\n");
-				else
+				else {
 					DEBUG(1, ", doesn't have %s\n",
 					      self->trans.peer.irda.sir_name);
+				}
 				/* Go back to for(;;) */
 				continue;
 			}
 			DEBUG(1, ", has service %s\n",
 			      self->trans.peer.irda.sir_name);
-		} else
+		} else {
 			DEBUG(1, "\n");
+		}
 
 		/* Pick this device */
 		self->trans.peer.irda.sir_addr = list->dev[i].daddr;
@@ -316,8 +318,9 @@ static int irobex_discover_devices(obex_t *self)
 	}
 #endif /* _WIN32 */
 
-	if (ret <  0)
+	if (ret <  0) {
 		DEBUG(1, "didn't find any OBEX devices!\n");
+	}
 
 	return ret;
 }

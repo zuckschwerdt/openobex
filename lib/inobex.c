@@ -36,6 +36,7 @@
 #endif /*_WIN32*/
 
 #include "obex_main.h"
+#include "inobex.h"
 
 #include <stdio.h>
 #include <string.h>

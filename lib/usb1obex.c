@@ -261,8 +261,9 @@ int usbobex_find_interfaces(obex_interface_t **interfaces)
 	memset(intf_array, 0, sizeof(obex_interface_t) * num);
 	num = 0;
 	while (current) {
-		intf_array[num].usb.intf = current;
 		struct libusb_device_handle *usb_handle;
+
+		intf_array[num].usb.intf = current;
 		if (libusb_open(current->device, &usb_handle) == 0) {
 			struct libusb_device_descriptor dev_desc;
 			if (libusb_get_device_descriptor(current->device, &dev_desc) == 0) {
@@ -408,14 +409,17 @@ int usbobex_disconnect_request(obex_t *self)
 	libusb_clear_halt(self->trans.self.usb.dev, self->trans.self.usb.data_endpoint_write);
 
 	ret = libusb_set_interface_alt_setting(self->trans.self.usb.dev, self->trans.self.usb.data_interface, self->trans.self.usb.data_idle_setting);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't set data idle setting %d", ret);
+	}
 	ret = libusb_release_interface(self->trans.self.usb.dev, self->trans.self.usb.data_interface);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't release data interface %d", ret);
+	}
 	ret = libusb_release_interface(self->trans.self.usb.dev, self->trans.self.usb.control_interface);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't release control interface %d", ret);
+	}
 	libusb_close(self->trans.self.usb.dev);
 	return 1;
 }

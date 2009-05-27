@@ -725,8 +725,9 @@ static int obex_object_receive_body(obex_object_t *object, buf_t *msg, uint8_t h
 			buf_free(object->rx_body);
 
 		object->rx_body = NULL;
-	} else
+	} else {
 		DEBUG(4, "Normal body fragment...\n");
+	}
 
 	return 1;
 }
