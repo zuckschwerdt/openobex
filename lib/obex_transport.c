@@ -415,7 +415,9 @@ static ssize_t write_wrap (int s, const void *buf, size_t len)
 int obex_transport_write(obex_t *self, buf_t *msg)
 {
 	int actual = -1;
+#if defined(HAVE_USB) && defined(HAVE_USB1)
 	int usberror;
+#endif
 
 	DEBUG(4, "\n");
 
@@ -478,7 +480,9 @@ int obex_transport_read(obex_t *self, int max, uint8_t *buf, int buflen)
 {
 	int actual = -1;
 	buf_t *msg = self->rx_msg;
+#if defined(HAVE_USB) && defined(HAVE_USB1)
 	int usberror;
+#endif
 
 	DEBUG(4, "Request to read max %d bytes\n", max);
 
