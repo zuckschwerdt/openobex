@@ -69,7 +69,7 @@ else ( PKGCONFIG_LIBUSB_FOUND )
 
   find_library ( usb_LIBRARY
     NAMES
-      usb-1.0 usb
+      usb-1.0 libusb usb
     PATHS
       $ENV{ProgramFiles}/LibUSB-Win32
       $ENV{LibUSB_ROOT_DIR}
