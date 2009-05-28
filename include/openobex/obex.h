@@ -36,11 +36,13 @@ extern "C" {
 
 #ifdef _WIN32
 #include <winsock2.h>
+#ifndef OPENOBEX_SYMBOL
 #ifdef OPENOBEX_DLL
 #define OPENOBEX_SYMBOL(retval) __declspec(dllimport) retval WINAPI
-#else
+#else /* OPENOBEX_DLL */
 #define OPENOBEX_SYMBOL(retval) retval WINAPI
-#endif
+#endif /* OPENOBEX_DLL */
+#endif /* OPENOBEX_SYMBOL */
 
 #else /* _WIN32 */
 #include <sys/socket.h>

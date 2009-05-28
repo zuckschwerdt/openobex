@@ -60,6 +60,8 @@ static unsigned long wsa_init = 0;
 #define CALLAPI
 #endif
 
+#define OPENOBEX_SYMBOL(retval) LIB_SYMBOL retval CALLAPI
+
 #include "obex_main.h"
 #include "obex_object.h"
 #include "obex_connect.h"
