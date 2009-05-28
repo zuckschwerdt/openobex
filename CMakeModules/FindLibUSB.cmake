@@ -24,7 +24,6 @@ if ( PKG_CONFIG_FOUND )
 endif ( PKG_CONFIG_FOUND )
 
 if ( PKGCONFIG_LIBUSB_FOUND )
-  set ( LibUSB_FOUND ${PKGCONFIG_LIBUSB_FOUND} )
   set ( LibUSB_INCLUDE_DIRS ${PKGCONFIG_LIBUSB_INCLUDE_DIRS} )
   foreach ( i ${PKGCONFIG_LIBUSB_LIBRARIES} )
     string ( REGEX MATCH "[^-]*" ibase "${i}" )
@@ -81,15 +80,17 @@ else ( PKGCONFIG_LIBUSB_FOUND )
     set ( LibUSB_LIBRARIES ${usb_LIBRARY} )
   endif ( usb_LIBRARY )
 
-  if ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARIES )
-    set ( LibUSB_FOUND true )
-  endif ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARIES )
 endif ( PKGCONFIG_LIBUSB_FOUND )
+
+if ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARIES )
+  set ( LibUSB_FOUND true )
+endif ( LibUSB_INCLUDE_DIRS AND LibUSB_LIBRARIES )
 
 if ( LibUSB_FOUND )
   set ( CMAKE_REQUIRED_INCLUDES "${LibUSB_INCLUDE_DIRS}" )
   check_include_file ( "{LibUSB_HEADER_FILE}" LibUSB_FOUND )
 endif ( LibUSB_FOUND )
+
 if ( LibUSB_FOUND )
   check_library_exists ( "${usb_LIBRARY}" usb_open "" LibUSB_FOUND )
   check_library_exists ( "${usb_LIBRARY}" libusb_get_device_list "" LibUSB_VERSION_1.0 )
