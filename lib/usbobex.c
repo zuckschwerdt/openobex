@@ -355,8 +355,9 @@ int usbobex_connect_request(obex_t *self)
 	self->trans.self.usb.dev = usb_open(self->trans.self.usb.device);
 
 	ret = usb_set_configuration(self->trans.self.usb.dev, self->trans.self.usb.configuration);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't set configuration %d", ret);
+	}
 
 	ret = usb_claim_interface(self->trans.self.usb.dev, self->trans.self.usb.control_interface);
 	if (ret < 0) {
@@ -413,17 +414,21 @@ int usbobex_disconnect_request(obex_t *self)
 	usb_clear_halt(self->trans.self.usb.dev, self->trans.self.usb.data_endpoint_write);
 
 	ret = usb_set_altinterface(self->trans.self.usb.dev, self->trans.self.usb.data_idle_setting);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't set data idle setting %d", ret);
+	}
 	ret = usb_release_interface(self->trans.self.usb.dev, self->trans.self.usb.data_interface);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't release data interface %d", ret);
+	}
 	ret = usb_release_interface(self->trans.self.usb.dev, self->trans.self.usb.control_interface);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't release control interface %d", ret);
+	}
 	ret = usb_close(self->trans.self.usb.dev);
-	if (ret < 0)
+	if (ret < 0) {
 		DEBUG(4, "Can't close interface %d", ret);
+	}
 
 	return ret;
 }
