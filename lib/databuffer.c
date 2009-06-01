@@ -103,13 +103,13 @@ size_t buf_total_size(buf_t *p)
 void buf_resize(buf_t *p, size_t new_size)
 {
 	uint8_t *tmp;
-	int bSize;
+	size_t bSize;
 
 	if (!p)
 		return;
 	bSize = buf_total_size(p);
 	if (new_size < bSize) {
-		int itRem = bSize - new_size;
+		size_t itRem = bSize - new_size;
 		if (itRem > p->data_avail) {
 			itRem -= p->data_avail;
 			p->data_avail = 0;
@@ -184,7 +184,7 @@ void *buf_reserve_begin(buf_t *p, size_t data_size)
 		return p->buffer + p->head_avail;
 	} else {
 		if (data_size > p->head_avail + p->data_avail) {
-			int tmp;
+			size_t tmp;
 			tmp = p->data_avail;
 			buf_resize(p, buf_total_size(p) + data_size -
 			                    p->head_avail - p->data_avail);
@@ -212,7 +212,7 @@ void *buf_reserve_end(buf_t *p, size_t data_size)
 		p->tail_avail -= data_size;
 	else {
 		if (data_size > p->tail_avail + p->data_avail) {
-			int tmp;
+			size_t tmp;
 			tmp = p->data_avail;
 			buf_resize(p, buf_total_size(p) + data_size -
 			                    p->tail_avail - p->data_avail);
@@ -276,7 +276,7 @@ void buf_remove_end(buf_t *p, size_t data_size)
 
 void buf_dump(buf_t *p, const char *label)
 {
-	int i, n;
+	unsigned int i, n;
 
 	if (!p || !label)
 		return;
