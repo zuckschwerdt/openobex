@@ -26,7 +26,8 @@
 //
 // Incoming event from OpenOBEX
 //
-void srv_obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp)
+static void srv_obex_event(obex_t *handle, obex_object_t *object, int mode,
+					int event, int obex_cmd, int obex_rsp)
 {
 	ircp_server_t *srv;
 	int ret;
@@ -119,7 +120,7 @@ void srv_obex_event(obex_t *handle, obex_object_t *object, int mode, int event, 
 //
 //
 //
-int ircp_srv_sync_wait(ircp_server_t *srv)
+static int ircp_srv_sync_wait(ircp_server_t *srv)
 {
 	int ret;
 	while(srv->finished == FALSE) {

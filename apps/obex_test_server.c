@@ -41,7 +41,7 @@
 //
 //
 //
-void put_server(obex_t *handle, obex_object_t *object)
+static void put_server(obex_t *handle, obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
@@ -89,7 +89,7 @@ void put_server(obex_t *handle, obex_object_t *object)
 //
 //
 //
-void get_server(obex_t *handle, obex_object_t *object)
+static void get_server(obex_t *handle, obex_object_t *object)
 {
 	uint8_t *buf;
 
@@ -144,7 +144,7 @@ void get_server(obex_t *handle, obex_object_t *object)
 //
 //
 //
-void connect_server(obex_t *handle, obex_object_t *object)
+static void connect_server(obex_t *handle, obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;

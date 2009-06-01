@@ -45,7 +45,7 @@ volatile int last_rsp = OBEX_RSP_BAD_REQUEST;
  *    Parse what we got from a PUT
  *
  */
-void put_done(obex_object_t *object)
+static void put_done(obex_object_t *object)
 {
 	obex_headerdata_t hv;
 	uint8_t hi;
@@ -101,7 +101,7 @@ void put_done(obex_object_t *object)
  * Called when a request is about to come or has come.
  *
  */
-void server_request(obex_object_t *object, int event, int cmd)
+static void server_request(obex_object_t *object, int event, int cmd)
 {
 	switch(cmd)	{
 	case OBEX_CMD_SETPATH:
@@ -132,7 +132,7 @@ void server_request(obex_object_t *object, int event, int cmd)
  * Called when a server-operation has finished
  *
  */
-void server_done(obex_object_t *object, int obex_cmd)
+static void server_done(obex_object_t *object, int obex_cmd)
 {
 	/* Quit if DISCONNECT has finished */
 	if(obex_cmd == OBEX_CMD_DISCONNECT)
@@ -146,7 +146,7 @@ void server_done(obex_object_t *object, int obex_cmd)
  * Called when a client-operation has finished
  *
  */
-void client_done(obex_object_t *object, int obex_cmd, int obex_rsp)
+static void client_done(obex_object_t *object, int obex_cmd, int obex_rsp)
 {
 	last_rsp = obex_rsp;
 	finished = TRUE;
@@ -206,7 +206,7 @@ void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int 
  *
  * Timeout set to 10s. Should be more than good enough for most transport.
  */
-int wait_for_rsp()
+static int wait_for_rsp()
 {
 	int ret;
 

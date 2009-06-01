@@ -70,7 +70,7 @@ int cobex_do_at_cmd(struct cobex_context *gt, char *cmd, char *rspbuf, int rspbu
 	
 	char *answer = NULL;
 	char *answer_end = NULL;
-	unsigned int answer_size;
+	int answer_size;
 
 	char tmpbuf[100] = {0,};
 	int actual;

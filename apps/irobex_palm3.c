@@ -52,7 +52,7 @@ extern int last_rsp;
 /*
  * Function usage (void)
  */
-int usage(char *argv[]) {
+static int usage(char *argv[]) {
 	printf ("Usage: %s [-h id] [name]\n", argv[0]);
 	printf ("       where id is the header_creator_id (default: memo)\n");
 	return -1;

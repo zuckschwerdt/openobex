@@ -24,7 +24,7 @@
 //
 // Read all files in a directory. Continue recusively down in directories.
 //
-int visit_dir(char *path, visit_cb cb, void *userdata)
+static int visit_dir(char *path, visit_cb cb, void *userdata)
 {
 #if ! defined(_WIN32)
 	struct stat statbuf;

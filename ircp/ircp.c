@@ -16,7 +16,7 @@
 //
 //
 //
-void ircp_info_cb(int event, char *param)
+static void ircp_info_cb(int event, char *param)
 {
 	DEBUG(4, "\n");
 	switch (event) {

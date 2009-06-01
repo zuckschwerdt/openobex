@@ -60,7 +60,8 @@
 //
 // Called by the obex-layer when some event occurs.
 //
-void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int obex_cmd, int obex_rsp)
+static void obex_event(obex_t *handle, obex_object_t *object, int mode,
+					int event, int obex_cmd, int obex_rsp)
 {
 	switch (event)	{
 	case OBEX_EV_PROGRESS:
@@ -103,13 +104,14 @@ void obex_event(obex_t *handle, obex_object_t *object, int mode, int event, int 
 	}
 }
 
+#if 0
 /*
  * Function get_peer_addr (name, peer)
  *
  *    
  *
  */
-int get_peer_addr(char *name, struct sockaddr_in *peer) 
+static int get_peer_addr(char *name, struct sockaddr_in *peer) 
 {
 	struct hostent *host;
 	in_addr_t inaddr;
@@ -133,7 +135,7 @@ int get_peer_addr(char *name, struct sockaddr_in *peer)
 //
 //
 //
-int inet_connect(obex_t *handle)
+static int inet_connect(obex_t *handle)
 {
 	struct sockaddr_in peer;
 
@@ -141,6 +143,7 @@ int inet_connect(obex_t *handle)
 	return OBEX_TransportConnect(handle, (struct sockaddr *) &peer,
 				  sizeof(struct sockaddr_in));
 }
+#endif
 	
 //
 //

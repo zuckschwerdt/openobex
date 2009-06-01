@@ -148,19 +148,20 @@ int ircp_open_safe(const char *path, const char *name)
 
 	if (path == NULL || path[0] == 0)
 	        path = ".";
-	if (snprintf(diskname, sizeof(diskname), "%s/%s", path, name) >= sizeof(diskname))
+	if (snprintf(diskname, sizeof(diskname), "%s/%s", path, name) >= (ssize_t) sizeof(diskname))
 	        return -1;
 
 	/* never overwrite an existing file */
 	fd = open(diskname, O_RDWR | O_CREAT | O_EXCL, DEFFILEMODE);
 #ifndef _WIN32
 	if (fd < 0 &&
-	    snprintf(diskname, sizeof(diskname), "%s/%s_XXXXXX", path, name) < sizeof(diskname))
+	    snprintf(diskname, sizeof(diskname), "%s/%s_XXXXXX", path, name) < (ssize_t) sizeof(diskname))
 	        fd = mkstemp(diskname);
 #endif
 
-	if (fd >= 0)
+	if (fd >= 0) {
 	        DEBUG(4, "Creating file %s\n", diskname);
+	}
 
 	return fd;
 }

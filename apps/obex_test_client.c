@@ -62,7 +62,7 @@ int fileDesc;
 //
 // Wait for an obex command to finish.
 //
-void syncwait(obex_t *handle)
+static void syncwait(obex_t *handle)
 {
 	struct context *gt;
 	int ret;

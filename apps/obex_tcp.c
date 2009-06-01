@@ -59,7 +59,7 @@ volatile int finished = FALSE;
  *    
  *
  */
-int get_peer_addr(char *name, struct sockaddr_in *peer) 
+static int get_peer_addr(char *name, struct sockaddr_in *peer) 
 {
 	struct hostent *host;
 	in_addr_t inaddr;
