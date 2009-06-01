@@ -696,7 +696,7 @@ static int obex_object_receive_body(obex_object_t *object, buf_t *msg, uint8_t h
 	}
 
 	/* Reallocate body buffer if needed */
-	if (object->rx_body->data_avail + object->rx_body->tail_avail < (int) len) {
+	if (object->rx_body->data_avail + object->rx_body->tail_avail < (unsigned int) len) {
 		int t;
 		DEBUG(4, "Buffer too small. Go realloc\n");
 		t = buf_total_size(object->rx_body);

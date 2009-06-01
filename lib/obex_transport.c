@@ -368,7 +368,7 @@ void obex_transport_disconnect_server(obex_t *self)
 /*
  * does fragmented write
  */
-static int do_write(int fd, buf_t *msg, int mtu,
+static int do_write(int fd, buf_t *msg, unsigned int mtu,
 		            ssize_t (*write_func)(int, const void *, size_t))
 {
 	int actual = -1;
