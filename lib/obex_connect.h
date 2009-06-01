@@ -22,10 +22,12 @@
 #ifndef OBEX_CONNECT_H
 #define OBEX_CONNECT_H
 
-#include "obex_main.h"
+struct obex;
+struct obex_object;
+struct databuffer;
 
-int obex_insert_connectframe(obex_t *self, obex_object_t *object);
-int obex_parse_connect_header(obex_t *self, buf_t *msg);
+int obex_insert_connectframe(struct obex *self, struct obex_object *object);
+int obex_parse_connect_header(struct obex *self, struct databuffer *msg);
 
 #endif
 

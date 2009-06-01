@@ -9,6 +9,7 @@ if ( USE_MAINTAINER_MODE )
       missing-declarations
       redundant-decls
       cast-align
+      no-sign-compare
     )
     foreach ( flag ${MAINTAINER_MODE_WARN_FLAGS} )
       set ( cflag "-W${flag}" )

@@ -28,12 +28,11 @@
 #include "obex_object.h"
 #include "obex_header.h"
 #include "obex_connect.h"
+#include "databuffer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <openobex/obex.h>
 
 /*
  * Function obex_object_new ()

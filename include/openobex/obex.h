@@ -153,13 +153,19 @@ OPENOBEX_SYMBOL(int) IrOBEX_TransportConnect(obex_t *self, const char *service);
 /*
  * Bluetooth OBEX API
  */
-#ifdef SOL_RFCOMM
-#ifdef _WIN32
-#define bdaddr_t BTH_ADDR
+#if !defined(bt_addr_t)
+#  if defined(SOL_RFCOMM)
+#    if defined(_WIN32) /* Windows */
+#      define bt_addr_t BTH_ADDR
+#    else /* Linux, FreeBSD, NetBSD */
+#      define bt_addr_t bdaddr_t
+#    endif
+#  else /* no bluetooth stack available */
+#    define bt_addr_t unsigned long
+#  endif
 #endif
-OPENOBEX_SYMBOL(int) BtOBEX_ServerRegister(obex_t *self, bdaddr_t *src, uint8_t channel);
-OPENOBEX_SYMBOL(int) BtOBEX_TransportConnect(obex_t *self, bdaddr_t *src, bdaddr_t *dst, uint8_t channel);
-#endif
+OPENOBEX_SYMBOL(int) BtOBEX_ServerRegister(obex_t *self, bt_addr_t *src, uint8_t channel);
+OPENOBEX_SYMBOL(int) BtOBEX_TransportConnect(obex_t *self, bt_addr_t *src, bt_addr_t *dst, uint8_t channel);
 
 /*
  * OBEX File API

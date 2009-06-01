@@ -23,97 +23,27 @@
 #ifndef OBEX_MAIN_H
 #define OBEX_MAIN_H
 
-#ifdef _WIN32
-#include <winsock2.h>
-#define socket_t SOCKET
+#include "obex_incl.h"
 
-#else /* _WIN32 */
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#define socket_t int
-#define INVALID_SOCKET -1
-
-#endif /* _WIN32 */
-
+#if defined(_WIN32)
+#  include <winsock2.h>
+#  define socket_t SOCKET
+#else
+#  include <sys/socket.h>
+#  include <sys/types.h>
+#  include <sys/time.h>
+#  define socket_t int
+#  define INVALID_SOCKET -1
+#endif
 #include <time.h>
+#include <inttypes.h>
 
-#ifdef TRUE
-#undef TRUE
-#endif
-#ifdef FALSE
-#undef FALSE
-#endif
+struct databuffer;
+struct obex_object;
 
-#define	TRUE		1
-#define FALSE		0
-
-#define obex_return_if_fail(test)	do { if (!(test)) return; } while(0);
-#define obex_return_val_if_fail(test, val)	do { if (!(test)) return val; } while(0);
-
-#include <openobex/obex.h>
-
-#include "obex_object.h"
 #include "obex_transport.h"
-#include "databuffer.h"
-
-#if defined(_MSC_VER) && _MSC_VER < 1400
-static void log_debug(char *format, ...) {}
-#define log_debug_prefix ""
-
-#elif defined(OBEX_SYSLOG) && !defined(_WIN32)
-#include <syslog.h>
-#define log_debug(format, ...) syslog(LOG_DEBUG, format, ## __VA_ARGS__)
-#define log_debug_prefix "OpenOBEX: "
-
-#else
-#include <stdio.h>
-#define log_debug(format, ...) fprintf(stderr, format, ## __VA_ARGS__)
-#define log_debug_prefix ""
-#endif
-
-/* use integer:  0 for production
- *               1 for verification
- *              >2 for debug
- */
-#if defined(_MSC_VER) && _MSC_VER < 1400
-static void DEBUG(int n, char *format, ...) {}
-
-#elif OBEX_DEBUG
-extern int obex_debug;
-#  define DEBUG(n, format, ...) \
-          if (obex_debug >= (n)) \
-            log_debug("%s%s(): " format, log_debug_prefix, __FUNCTION__, ## __VA_ARGS__)
-
-#else
-#  define DEBUG(n, format, ...)
-#endif
-
-
-/* use bitmask: 0x1 for sendbuff
- *              0x2 for receivebuff
- */
-#if OBEX_DUMP
-extern int obex_dump;
-#define DUMPBUFFER(n, label, msg) \
-        if ((obex_dump & 0x3) & (n)) buf_dump(msg, label);
-#else
-#define DUMPBUFFER(n, label, msg)
-#endif
-
-
-#define OBEX_VERSION		0x10      /* OBEX Protocol Version 1.1 */
-
-#define MODE_SRV	0x80
-#define MODE_CLI	0x00
-
-enum
-{
-	STATE_IDLE,
-	STATE_START,
-	STATE_SEND,
-	STATE_REC,
-};
+#include "defines.h"
+#include "debug.h"
 
 struct obex {
 	uint16_t mtu_tx;			/* Maximum OBEX TX packet size */
@@ -129,11 +59,11 @@ struct obex {
 	int filterhint;		/* Filter devices based on hint bits */
 	int filterias;		/* Filter devices based on IAS entry */
 
-	buf_t *tx_msg;		/* Reusable transmit message */
-	buf_t *rx_msg;		/* Reusable receive message */
+	struct databuffer *tx_msg;	/* Reusable transmit message */
+	struct databuffer *rx_msg;	/* Reusable receive message */
 
-	obex_object_t	*object;	/* Current object being transfered */
-	obex_event_t	eventcb;	/* Event-callback */
+	struct obex_object *object;	/* Current object being transfered */
+	obex_event_t eventcb;		/* Event-callback */
 
 	obex_transport_t trans;		/* Transport being used */
 	obex_ctrans_t ctrans;
@@ -144,16 +74,15 @@ struct obex {
 	void * userdata;		/* For user */
 };
 
+socket_t obex_create_socket(struct obex *self, int domain);
+int obex_delete_socket(struct obex *self, socket_t fd);
 
-socket_t obex_create_socket(obex_t *self, int domain);
-int obex_delete_socket(obex_t *self, socket_t fd);
+void obex_deliver_event(struct obex *self, int event, int cmd, int rsp, int del);
+int obex_data_indication(struct obex *self, uint8_t *buf, int buflen);
 
-void obex_deliver_event(obex_t *self, int event, int cmd, int rsp, int del);
-int obex_data_indication(obex_t *self, uint8_t *buf, int buflen);
-
-void obex_response_request(obex_t *self, uint8_t opcode);
-int obex_data_request(obex_t *self, buf_t *msg, int opcode);
-int obex_cancelrequest(obex_t *self, int nice);
+void obex_response_request(struct obex *self, uint8_t opcode);
+int obex_data_request(struct obex *self, struct databuffer *msg, int opcode);
+int obex_cancelrequest(struct obex *self, int nice);
 
 char *obex_response_to_string(int rsp);
 

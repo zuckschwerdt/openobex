@@ -39,7 +39,10 @@
 #include "usbobex.h"
 #endif /*HAVE_USB*/
 
-#include "obex_main.h"
+#include <inttypes.h>
+
+struct obex;
+struct databuffer;
 
 typedef union {
 #ifdef HAVE_IRDA
@@ -63,14 +66,14 @@ typedef struct obex_transport {
 
 } obex_transport_t;
 
-int obex_transport_accept(obex_t *self);
+int obex_transport_accept(struct obex *self);
 
-int obex_transport_handle_input(obex_t *self, int timeout);
-int obex_transport_connect_request(obex_t *self);
-void obex_transport_disconnect_request(obex_t *self);
-int obex_transport_listen(obex_t *self);
-void obex_transport_disconnect_server(obex_t *self);
-int obex_transport_write(obex_t *self, buf_t *msg);
-int obex_transport_read(obex_t *self, int count, uint8_t *buf, int buflen);
+int obex_transport_handle_input(struct obex *self, int timeout);
+int obex_transport_connect_request(struct obex *self);
+void obex_transport_disconnect_request(struct obex *self);
+int obex_transport_listen(struct obex *self);
+void obex_transport_disconnect_server(struct obex *self);
+int obex_transport_write(struct obex *self, struct databuffer *msg);
+int obex_transport_read(struct obex *self, int count, uint8_t *buf, int buflen);
 
 #endif /* OBEX_TRANSPORT_H */

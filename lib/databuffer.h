@@ -29,19 +29,21 @@
 /*
  * Implements a single linked list
  */
-typedef struct _slist_t {
+struct databuffer_list {
         void *data;
-        struct _slist_t *next;
-} slist_t;
+        struct databuffer_list *next;
+};
+typedef struct databuffer_list slist_t;
 
-typedef struct {
+struct databuffer {
 	uint8_t *buffer; // buffer containing the allocated space
 	uint8_t *data; // pointer to the location of *buffer where there is valid data
 	size_t head_avail; // number of allocated space available in front of buffer
 	size_t data_avail; // allocated space available not specific for head or tail
 	size_t tail_avail; // number of allocated space available at end of buffer
 	size_t data_size; // number of allocated space used
-} buf_t;
+};
+typedef struct databuffer buf_t;
 
 buf_t *buf_new(size_t default_size);
 size_t buf_total_size(buf_t *p);

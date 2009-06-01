@@ -30,10 +30,6 @@
 #ifndef ESOCKTNOSUPPORT
 #define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
 #endif
-#if defined(OPENOBEX_EXPORTS) || defined(DLL_EXPORT)
-#define LIB_SYMBOL __declspec(dllexport)
-#endif
-#define CALLAPI WINAPI
 static unsigned long wsa_init = 0;
 #define WSA_VER_MAJOR 2
 #define WSA_VER_MINOR 2
@@ -42,9 +38,6 @@ static unsigned long wsa_init = 0;
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
-#ifdef HAVE_VISIBILITY
-#define LIB_SYMBOL __attribute__ ((visibility("default")))
-#endif
 #endif /* _WIN32 */
 
 #include <stdio.h>
@@ -52,20 +45,11 @@ static unsigned long wsa_init = 0;
 #include <string.h>
 #include <errno.h>
 
-#ifndef LIB_SYMBOL
-#define LIB_SYMBOL
-#endif
-
-#ifndef CALLAPI
-#define CALLAPI
-#endif
-
-#define OPENOBEX_SYMBOL(retval) LIB_SYMBOL retval CALLAPI
-
 #include "obex_main.h"
 #include "obex_object.h"
 #include "obex_connect.h"
 #include "obex_client.h"
+#include "databuffer.h"
 
 #include "inobex.h"
 
@@ -79,12 +63,9 @@ static unsigned long wsa_init = 0;
 
 #ifdef HAVE_BLUETOOTH
 #include "btobex.h"
-#else
-// This is to workaround compilation without Bluetooth support. - Jean II
-typedef char *bdaddr_t;
 #endif
 
-#include <openobex/obex.h>
+#include "obex_incl.h"
 
 /**
 	Initialize OBEX.

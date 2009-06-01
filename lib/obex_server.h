@@ -22,6 +22,9 @@
 #ifndef OBEX_SERVER_H
 #define OBEX_SERVER_H
 
-int obex_server(obex_t *self, buf_t *msg, int final);
+struct obex;
+struct databuffer;
+
+int obex_server(struct obex *self, struct databuffer *msg, int final);
 
 #endif

@@ -44,9 +44,11 @@
 #endif /*HAVE_BLUETOOTH*/
 
 #include "obex_main.h"
+#include "obex_object.h"
 #include "obex_header.h"
 #include "obex_server.h"
 #include "obex_client.h"
+#include "databuffer.h"
 
 #include <openobex/obex_const.h>
 

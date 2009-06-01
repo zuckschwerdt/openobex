@@ -22,7 +22,8 @@
 #ifndef OBEX_HEADERS_H
 #define OBEX_HEADERS_H
 
-#include "obex_main.h"
+struct databuffer;
+#include <inttypes.h>
 
 #define OBEX_HI_MASK     0xc0
 #define OBEX_UNICODE     0x00
@@ -88,14 +89,14 @@ typedef struct {
 	} t;
 } obex_header_t;
 
-int insert_uint_header(buf_t *msg, uint8_t identifier, uint32_t value);
-int insert_ubyte_header(buf_t *msg, uint8_t identifier, uint8_t value);
-int insert_unicode_header(buf_t *msg, uint8_t opcode, const uint8_t *text,
-				int size);
+int insert_uint_header(struct databuffer *msg, uint8_t identifier, uint32_t value);
+int insert_ubyte_header(struct databuffer *msg, uint8_t identifier, uint8_t value);
+int insert_unicode_header(struct databuffer *msg, uint8_t opcode, const uint8_t *text,
+			  int size);
 
-int insert_byte_stream_header(buf_t *msg, uint8_t opcode,
-				const uint8_t *stream, int size);
+int insert_byte_stream_header(struct databuffer *msg, uint8_t opcode,
+			      const uint8_t *stream, int size);
 
-int obex_extract_header(buf_t *msg, obex_header_t *header);
+int obex_extract_header(struct databuffer *msg, obex_header_t *header);
 
 #endif

@@ -25,6 +25,7 @@
 #endif
 
 #include "obex_main.h"
+#include "databuffer.h"
 
 #ifdef HAVE_IRDA
 #include "irobex.h"
