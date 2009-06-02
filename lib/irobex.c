@@ -180,8 +180,6 @@ out_freesock:
 int irobex_accept(obex_t *self)
 {
 	socklen_t addrlen = sizeof(struct sockaddr_irda);
-	int mtu;
-	socklen_t len = sizeof(int);
 
 	// First accept the connection and get the new client socket.
 	self->fd = accept(self->serverfd,
@@ -191,17 +189,29 @@ int irobex_accept(obex_t *self)
 	if (self->fd == INVALID_SOCKET)
 		return -1;
 
+	{
 #ifndef _WIN32
-	/* Check what the IrLAP data size is */
-	if (getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE, (void *) &mtu,
-			 &len))
-		return -1;
+		int mtu;
+		socklen_t len = sizeof(mtu);
 
-	self->trans.mtu = mtu;
-	DEBUG(3, "transport mtu=%d\n", mtu);
+		/* Check what the IrLAP data size is */
+		if (getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE,
+			       (void *) &mtu, &len))
+			return -1;
+		self->trans.mtu = mtu;
 #else
-	self->trans.mtu = OBEX_DEFAULT_MTU;
+		DWORD mtu;
+		int len = sizeof(mtu);
+
+		if (getsockopt(self->fd, SOL_IRLMP, IRLMP_SEND_PDU_LEN,
+			       (char *) &mtu, &len))
+			return -1;
+		self->trans.mtu = mtu;
 #endif /* _WIN32 */
+	}
+
+	DEBUG(3, "transport mtu=%d\n", mtu);
+
 	return 1;
 }
 
@@ -224,7 +234,6 @@ static int irobex_discover_devices(obex_t *self)
 	struct irda_device_list *list;
 	unsigned char buf[DISC_BUF_LEN];
 	int ret = -1;
-	int err;
 	socklen_t len;
 	uint32_t i;
 
@@ -272,6 +281,7 @@ static int irobex_discover_devices(obex_t *self)
 
 		/* Do we want to filter devices based on IAS ? */
 		if (self->filterias) {
+			int err;
 			struct irda_ias_set ias_query;
 			/* Ask if the requested service exist on this device */
 			len = sizeof(ias_query);
