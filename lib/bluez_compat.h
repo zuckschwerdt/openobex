@@ -65,6 +65,9 @@ static bdaddr_t bluez_compat_bdaddr_any = {BTH_ADDR_NULL};
 #define rc_channel  bt_channel
 #define BDADDR_ANY  NG_HCI_BDADDR_ANY
 
+#else
+#define bdaddr_t unsigned long
+
 #endif /* HAVE_BLUETOOTH_* */
 
 #endif /* BLUEZ_COMPAT_H */

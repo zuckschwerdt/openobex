@@ -199,6 +199,7 @@ int irobex_accept(obex_t *self)
 			       (void *) &mtu, &len))
 			return -1;
 		self->trans.mtu = mtu;
+		DEBUG(3, "transport mtu=%d\n", mtu);
 #else
 		DWORD mtu;
 		int len = sizeof(mtu);
@@ -207,10 +208,10 @@ int irobex_accept(obex_t *self)
 			       (char *) &mtu, &len))
 			return -1;
 		self->trans.mtu = mtu;
+		DEBUG(3, "transport mtu=%d\n", mtu);
 #endif /* _WIN32 */
 	}
 
-	DEBUG(3, "transport mtu=%d\n", mtu);
 
 	return 1;
 }

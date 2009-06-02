@@ -1,7 +1,13 @@
 //#define DEBUG_TCP 1
 
-#if IRCP_DEBUG
-#define DEBUG(n, format, ...) if(n <= IRCP_DEBUG) printf("%s(): " format, __FUNCTION__ , ## __VA_ARGS__)
+#if defined(_MSC_VER) && _MSC_VER < 1400
+static void DEBUG(int n, char *format, ...) {}
+
+#elif IRCP_DEBUG
+#  define DEBUG(n, format, ...)						\
+	if(n <= IRCP_DEBUG)						\
+		fprintf(stderr, "%s(): " format, __FUNCTION__ , ## __VA_ARGS__)
+
 #else
-#define DEBUG(n, format, ...)
-#endif //IRCP_DEBUG
+#  define DEBUG(n, format, ...)
+#endif
