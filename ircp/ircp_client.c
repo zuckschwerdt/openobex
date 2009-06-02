@@ -8,6 +8,7 @@
 #include <windows.h>
 #define in_addr_t unsigned long
 #include <direct.h>
+#include <io.h>
 #endif
 
 #include <stdio.h>
@@ -51,9 +52,9 @@ static int cli_fillstream(ircp_client_t *cli, obex_object_t *object)
 	obex_headerdata_t hdd;
 		
 	DEBUG(4, "\n");
-	
+
 	actual = read(cli->fd, cli->buf, STREAM_CHUNK);
-	
+
 	DEBUG(4, "Read %d bytes\n", actual);
 	
 	if(actual > 0) {

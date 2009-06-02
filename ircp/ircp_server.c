@@ -7,6 +7,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <direct.h>
+#include <io.h>
 #define chdir(s) _chdir(s)
 #endif
 
