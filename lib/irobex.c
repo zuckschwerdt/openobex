@@ -226,7 +226,7 @@ static int irobex_discover_devices(obex_t *self)
 	int ret = -1;
 	int err;
 	socklen_t len;
-	int i;
+	uint32_t i;
 
 #ifndef _WIN32
 	/* Hint bit filtering. Linux case */
@@ -309,7 +309,7 @@ static int irobex_discover_devices(obex_t *self)
 	if (len > 0) {
 		DEBUG(1, "Discovered: (list len=%d)\n", list->numDevice);
 
-		for (i=0; i<(int)list->numDevice; i++) {
+		for (i = 0; i < (uint32_t)list->numDevice; ++i) {
 			DEBUG(1, "  name:  %s\n", list->Device[i].irdaDeviceName);
 			DEBUG(1, "  daddr: %08x\n", list->Device[i].irdaDeviceID);
 			memcpy(&self->trans.peer.irda.irdaDeviceID[0], &list->Device[i].irdaDeviceID[0], 4);
