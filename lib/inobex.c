@@ -209,8 +209,10 @@ int inobex_accept(obex_t *self)
  */
 int inobex_connect_request(obex_t *self)
 {
-	char addr[INET6_ADDRSTRLEN];
 	int ret;
+#ifndef _WIN32
+	char addr[INET6_ADDRSTRLEN];
+#endif
 
 	self->fd = obex_create_socket(self, AF_INET6);
 	if (self->fd == INVALID_SOCKET)
