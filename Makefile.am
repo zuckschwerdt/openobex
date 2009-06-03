@@ -11,7 +11,9 @@ endif
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-apps
 
-EXTRA_DIST = openobex.m4 CMakeLists.txt \
+EXTRA_DIST = openobex.m4 \
+		INSTALL.txt INSTALL_Win32.txt \
+		CMakeLists.txt \
 		CMakeModules/FindBluetooth.cmake CMakeModules/FindGlib.cmake \
 		CMakeModules/FindIrda.cmake CMakeModules/FindLibUSB.cmake \
 		CMakeModules/FindXslt.cmake CMakeModules/UseXslt.cmake \

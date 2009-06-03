@@ -43,6 +43,10 @@ set ( HEADERS
   obex_server.h
   obex_transport.h
   databuffer.h
+  debug.h
+  defines.h
+  obex_incl.h
+  visibility.h
   inobex.h
 )
 
