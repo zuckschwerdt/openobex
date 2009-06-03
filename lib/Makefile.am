@@ -2,7 +2,7 @@
 lib_LTLIBRARIES = libopenobex.la
 
 libopenobex_la_SOURCES = \
-	obex.c \
+	obex.c obex_incl.h \
 	obex_main.c obex_main.h \
 	obex_connect.c obex_connect.h \
 	obex_header.c obex_header.h \
@@ -17,7 +17,8 @@ libopenobex_la_SOURCES = \
 	irda.h irda_wrap.h \
 	usbutils.c usbutils.h \
 	usbobex.c usb1obex.c usbobex.h \
-	bluez_compat.h
+	bluez_compat.h \
+	visibility.h defines.h debug.h
 
 libopenobex_la_CFLAGS = @CFLAG_VISIBILITY@ @USB1_CFLAGS@
 
