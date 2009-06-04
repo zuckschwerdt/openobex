@@ -235,7 +235,7 @@ int inobex_connect_request(obex_t *self)
 
 	ret = connect(self->fd, (struct sockaddr *) &self->trans.peer.inet6,
 		      sizeof(struct sockaddr_in6));
-	if (ret == INVALID_SOCKET) {
+	if (ret == -1) {
 		DEBUG(4, "Connect failed\n");
 		obex_delete_socket(self, self->fd);
 		self->fd = INVALID_SOCKET;

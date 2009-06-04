@@ -109,10 +109,10 @@ int obex_transport_handle_input(obex_t *self, int timeout)
 		if (ret < 1)
 			return ret;
 
-		if (self->fd >= 0 && FD_ISSET(self->fd, &fdset)) {
+		if (self->fd != INVALID_SOCKET && FD_ISSET(self->fd, &fdset)) {
 			DEBUG(4, "Data available on client socket\n");
 			ret = obex_data_indication(self, NULL, 0);
-		} else if (self->serverfd >= 0 && FD_ISSET(self->serverfd, &fdset)) {
+		} else if (self->serverfd != INVALID_SOCKET && FD_ISSET(self->serverfd, &fdset)) {
 			DEBUG(4, "Data available on server socket\n");
 			/* Accept : create the connected socket */
 			ret = obex_transport_accept(self);
@@ -215,7 +215,7 @@ int obex_transport_connect_request(obex_t *self)
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_FD:
 		/* no real connect on the file */
-		if (self->fd >= 0 && self->writefd >= 0)
+		if (self->fd != INVALID_SOCKET && self->writefd != INVALID_SOCKET)
 			ret = 0;
 		break;
 #ifdef HAVE_USB

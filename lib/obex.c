@@ -362,7 +362,7 @@ obex_t * CALLAPI OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * 
 
 	/* We can accept only if both the server and the connection socket
 	 * are active */
-	if ((server->fd < 0) || (server->serverfd < 0))
+	if ((server->fd == INVALID_SOCKET) || (server->serverfd == INVALID_SOCKET))
 		return(NULL);
 
 	/* If we have started receiving something, it's too late... */
@@ -524,7 +524,7 @@ LIB_SYMBOL
 int CALLAPI OBEX_GetFD(obex_t *self)
 {
 	obex_return_val_if_fail(self != NULL, -1);
-	if(self->fd == -1)
+	if(self->fd == INVALID_SOCKET)
 		return self->serverfd;
 	return self->fd;
 }

@@ -198,8 +198,6 @@ int irobex_accept(obex_t *self)
 		if (getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE,
 			       (void *) &mtu, &len))
 			return -1;
-		self->trans.mtu = mtu;
-		DEBUG(3, "transport mtu=%d\n", mtu);
 #else
 		DWORD mtu;
 		int len = sizeof(mtu);
@@ -207,9 +205,9 @@ int irobex_accept(obex_t *self)
 		if (getsockopt(self->fd, SOL_IRLMP, IRLMP_SEND_PDU_LEN,
 			       (char *) &mtu, &len))
 			return -1;
+#endif /* _WIN32 */
 		self->trans.mtu = mtu;
 		DEBUG(3, "transport mtu=%d\n", mtu);
-#endif /* _WIN32 */
 	}
 
 
@@ -261,7 +259,7 @@ static int irobex_discover_devices(obex_t *self)
 	len = DISC_BUF_LEN;
 
 	/* Perform a discovery and get device list */
-	if (getsockopt(self->fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &len)) {
+	if (getsockopt(self->fd, SOL_IRLMP, IRLMP_ENUMDEVICES, (char *)buf, &len)) {
 		DEBUG(1, "Didn't find any devices!\n");
 		return -1;
 	}
@@ -344,8 +342,6 @@ static int irobex_discover_devices(obex_t *self)
  */
 int irobex_connect_request(obex_t *self)
 {
-	int mtu = 0;
-	socklen_t len = sizeof(int);
 	int ret;
 
 	DEBUG(4, "\n");
@@ -374,18 +370,26 @@ int irobex_connect_request(obex_t *self)
 		goto out_freesock;
 	}
 
+	{
 #ifndef _WIN32
-	/* Check what the IrLAP data size is */
-	ret = getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE,
-			 (void *) &mtu, &len);
-	if (ret < 0)
-		goto out_freesock;
+		int mtu = 0;
+		socklen_t len = sizeof(int);
+		/* Check what the IrLAP data size is */
+		ret = getsockopt(self->fd, SOL_IRLMP, IRTTP_MAX_SDU_SIZE,
+				 (void *) &mtu, &len);
+		if (ret < 0)
+			goto out_freesock;
 #else
-	mtu = 512;
-#endif
-	self->trans.mtu = mtu;
+		DWORD mtu;
+		int len = sizeof(mtu);
 
-	DEBUG(2, "transport mtu=%d\n", mtu);
+		if (getsockopt(self->fd, SOL_IRLMP, IRLMP_SEND_PDU_LEN,
+			       (char *) &mtu, &len))
+			return -1;
+#endif
+		self->trans.mtu = mtu;
+		DEBUG(3, "transport mtu=%d\n", mtu);
+	}
 
 	return 1;
 

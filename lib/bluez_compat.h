@@ -38,7 +38,8 @@
 #define PF_BLUETOOTH   PF_BTH
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define BTPROTO_RFCOMM BTHPROTO_RFCOMM
-static bdaddr_t bluez_compat_bdaddr_any = {BTH_ADDR_NULL};
+/* TODO: should be const */
+extern bdaddr_t bluez_compat_bdaddr_any;
 #define BDADDR_ANY     &bluez_compat_bdaddr_any
 #define bacpy(dst,src) memcpy((dst),(src),sizeof(bdaddr_t))
 #define bacmp(a,b)     memcmp((a),(b),sizeof(bdaddr_t))

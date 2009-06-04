@@ -94,7 +94,7 @@ int obex_delete_socket(obex_t *self, socket_t fd)
 
 	DEBUG(4, "\n");
 
-	if(fd < 0)
+	if(fd == INVALID_SOCKET)
 		return fd;
 
 #ifdef _WIN32

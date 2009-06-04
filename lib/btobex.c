@@ -42,6 +42,9 @@
 #include "obex_main.h"
 #include "btobex.h"
 
+#ifdef _WIN32
+bdaddr_t bluez_compat_bdaddr_any = { BTH_ADDR_NULL };
+#endif
 /*
  * Function btobex_prepare_connect (self, service)
  *
@@ -167,7 +170,7 @@ int btobex_connect_request(obex_t *self)
 
 	ret = connect(self->fd, (struct sockaddr*) &self->trans.peer.rfcomm,
 		      sizeof(struct sockaddr_rc));
-	if (ret  == INVALID_SOCKET) {
+	if (ret == -1) {
 		DEBUG(4, "ret=%d\n", ret);
 		goto out_freesock;
 	}
