@@ -126,9 +126,9 @@ obex_t * CALLAPI OBEX_Init(int transport, obex_event_t eventcb, unsigned int fla
 	self->keepserver = (flags & OBEX_FL_KEEPSERVER) ? TRUE : FALSE;
 	self->filterhint = (flags & OBEX_FL_FILTERHINT) ? TRUE : FALSE;
 	self->filterias  = (flags & OBEX_FL_FILTERIAS ) ? TRUE : FALSE;
-	self->fd = -1;
-	self->serverfd = -1;
-	self->writefd = -1;
+	self->fd = INVALID_SOCKET;
+	self->serverfd = INVALID_SOCKET;
+	self->writefd = INVALID_SOCKET;
         self->state = MODE_SRV | STATE_IDLE;
 
 	/* Init transport */
@@ -410,9 +410,9 @@ obex_t * CALLAPI OBEX_ServerAccept(obex_t *server, obex_event_t eventcb, void * 
 	/* Now, that's the interesting bit !
 	 * We split the sockets apart, one for each instance */
 	self->fd = server->fd;
-	self->serverfd = -1;
-	self->writefd = -1;
-	server->fd = -1;
+	self->serverfd = INVALID_SOCKET;
+	self->writefd = INVALID_SOCKET;
+	server->fd = INVALID_SOCKET;
         self->state = MODE_SRV | STATE_IDLE;
 
 	return self;

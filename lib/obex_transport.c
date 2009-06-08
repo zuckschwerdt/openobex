@@ -267,7 +267,7 @@ void obex_transport_disconnect_request(obex_t *self)
 #endif /*HAVE_BLUETOOTH*/
 	case OBEX_TRANS_FD:
 		/* no real disconnect on a file */
-		self->fd = self->writefd = -1;
+		self->fd = self->writefd = INVALID_SOCKET;
 		break;
 #ifdef HAVE_USB
 	case OBEX_TRANS_USB:
