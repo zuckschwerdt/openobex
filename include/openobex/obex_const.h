@@ -109,10 +109,6 @@ typedef union {
 #define OBEX_MODE_CLIENT	0
 #define OBEX_MODE_SERVER	1
 
-/* compatibility definitions */
-#define OBEX_CLIENT OBEX_MODE_CLIENT
-#define OBEX_SERVER OBEX_MODE_SERVER
-
 /* Possible events */
 #define OBEX_EV_PROGRESS	0	/* Progress has been made */
 #define OBEX_EV_REQHINT		1	/* An incoming request is about to come */
@@ -142,7 +138,6 @@ typedef union {
 /* Transports */
 #define OBEX_TRANS_IRDA		1
 #define OBEX_TRANS_INET		2
-#define OBEX_TRANS_CUST		3	/* Fixme: This will go away in future */
 #define OBEX_TRANS_CUSTOM	3
 #define OBEX_TRANS_BLUETOOTH	4
 #define OBEX_TRANS_FD		5

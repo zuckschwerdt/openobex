@@ -948,22 +948,6 @@ char * CALLAPI OBEX_ResponseToString(int rsp)
 }
 
 /**
-	Return a human understandable string from a response-code.
-	\param self OBEX handle
-	\param rsp Response code.
-	\return static response code string, NULL on error
-
-	The returned char must not be freed. Returns NULL on error.
- */
-LIB_SYMBOL
-char * CALLAPI OBEX_GetResponseMessage(obex_t *self, int rsp)
-{
-	DEBUG(4, "\n");
-
-	return obex_response_to_string(rsp);
-}
-
-/**
 	Set customdata of an OBEX handle.
 	\param self OBEX handle
 	\param data Custom Transport data
