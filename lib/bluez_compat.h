@@ -64,7 +64,8 @@ extern bdaddr_t bluez_compat_bdaddr_any;
 #define rc_family   bt_family
 #define rc_bdaddr   bt_bdaddr
 #define rc_channel  bt_channel
-#define BDADDR_ANY  NG_HCI_BDADDR_ANY
+#define bacpy(dst,src) memcpy((dst),(src),sizeof(bdaddr_t))
+#define bacmp(a,b)     memcmp((a),(b),sizeof(bdaddr_t))
 
 #else
 #define bdaddr_t unsigned long
