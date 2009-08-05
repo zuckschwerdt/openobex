@@ -33,11 +33,8 @@ OBEX_ObjectGetCommand
 OBEX_UnicodeToChar
 OBEX_CharToUnicode
 OBEX_ResponseToString
-OBEX_GetResponseMessage
 TcpOBEX_ServerRegister
 TcpOBEX_TransportConnect
-InOBEX_ServerRegister
-InOBEX_TransportConnect
 IrOBEX_ServerRegister
 IrOBEX_TransportConnect
 BtOBEX_ServerRegister
