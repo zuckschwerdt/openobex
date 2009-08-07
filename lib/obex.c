@@ -1037,54 +1037,6 @@ int CALLAPI TcpOBEX_TransportConnect(obex_t *self, struct sockaddr *addr, int ad
 /**
 	Start listening for incoming connections.
 	\param self OBEX handle
-	\return -1 on error
-
-	An easier server function to use for TCP/IP (InOBEX) only.
-
-	This function is deprecated, use TcpOBEX_ServerRegister() instead.
- */
-LIB_SYMBOL
-int CALLAPI InOBEX_ServerRegister(obex_t *self)
-{
-	DEBUG(3, "\n");
-
-	return TcpOBEX_ServerRegister(self, NULL, 0);
-}
-
-/**
-	Connect Inet transport (deprecated).
-	\param self OBEX handle
-	\param saddr Address to connect to
-	\param addrlen Length of address
-	\return -1 on error
-
-	An easier connect function to use for TCP/IP (InOBEX) only.
-
-	This function is deprecated, use TcpOBEX_TransportConnect() instead.
- */
-LIB_SYMBOL
-int CALLAPI InOBEX_TransportConnect(obex_t *self, struct sockaddr *saddr, int addrlen)
-{
-	DEBUG(4, "\n");
-
-	errno = EINVAL;
-	obex_return_val_if_fail(self != NULL, -1);
-
-	if (self->object) {
-		DEBUG(1, "We are busy.\n");
-		errno = EBUSY;
-		return -1;
-	}
-
-	errno = EINVAL;
-	obex_return_val_if_fail(saddr != NULL, -1);
-
-	return TcpOBEX_TransportConnect(self, saddr, addrlen);
-}
-
-/**
-	Start listening for incoming connections.
-	\param self OBEX handle
 	\param service Service to bind to.
 	\return -1 or negative error code on error
 
