@@ -138,7 +138,7 @@ mark_as_advanced ( PKGCONFIG_INSTALL_DIR )
 # process include directory
 #
 set ( openobex_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" )
-include_directories ( BEFORE SYSTEM "${openobex_INCLUDE_DIRS}" )
+include_directories ( "${openobex_INCLUDE_DIRS}" )
 if ( MSVC )
   include_directories ( AFTER SYSTEM "${openobex_INCLUDE_DIRS}/msvc" )
 endif ( MSVC )
