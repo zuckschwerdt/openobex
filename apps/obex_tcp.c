@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -53,30 +54,22 @@
 obex_t *handle = NULL;
 volatile int finished = FALSE;
 
-/*
- * Function get_peer_addr (name, peer)
- *
- *    
- *
- */
-static int get_peer_addr(char *name, struct sockaddr_in *peer) 
+static int get_peer_addr(char *name, struct sockaddr_storage *peer) 
 {
-	struct hostent *host;
-	in_addr_t inaddr;
-        
-	/* Is the address in dotted decimal? */
-	if ((inaddr = inet_addr(name)) != INADDR_NONE) {
-		memcpy((char *) &peer->sin_addr, (char *) &inaddr,
-		      sizeof(inaddr));  
-	}
-	else {
-		if ((host = gethostbyname(name)) == NULL) {
-			printf( "Bad host name: ");
-			exit(-1);
-                }
-		memcpy((char *) &peer->sin_addr, host->h_addr,
-				host->h_length);
-        }
+	struct addrinfo hint = {
+		.ai_family = AF_UNSPEC,
+		.ai_socktype = SOCK_STREAM,
+		.ai_protocol = 0,
+		.ai_flags = AI_ADDRCONFIG
+
+	};
+	struct addrinfo *info;
+
+	int err = getaddrinfo(name, NULL, &hint, &info);
+	if (err)
+		return err;
+	memcpy(peer, info->ai_addr, info->ai_addrlen);
+	freeaddrinfo(info);
 	return 0;
 }
 
@@ -88,7 +81,7 @@ static int get_peer_addr(char *name, struct sockaddr_in *peer)
  */
 int main(int argc, char *argv[])
 {
-	struct sockaddr_in peer;
+	struct sockaddr_storage peer;
 
 	obex_object_t *object;
 	int ret;
@@ -103,7 +96,7 @@ int main(int argc, char *argv[])
 
 	if (argc == 1)	{
 		printf("Waiting for files\n");
-		ret = InOBEX_ServerRegister(handle);
+		ret = TcpOBEX_ServerRegister(handle, NULL, 0);
 		if(ret < 0) {
                         printf("Cannot listen to socket\n");
 			exit(ret);
@@ -123,13 +116,17 @@ int main(int argc, char *argv[])
 	else {
 		/* We are a client */
 
-		get_peer_addr(argv[2], &peer);
-		ret = OBEX_TransportConnect(handle, (struct sockaddr *) &peer,
-					  sizeof(struct sockaddr_in));
+		ret = get_peer_addr(argv[2], &peer);
+		if (ret) {
+			perror("Bad name");
+			exit(1);
+		}
+		ret = TcpOBEX_TransportConnect(handle, (struct sockaddr *) &peer,
+					  sizeof(peer));
 
 		if (ret < 0) {
 			printf("Sorry, unable to connect!\n");
-			exit(ret);
+			exit(1);
 		}
 
 		object = OBEX_ObjectNew(handle, OBEX_CMD_CONNECT);
